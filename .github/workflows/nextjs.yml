@@ -28,7 +28,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_BASE_PATH: /javadbat.github.io/
+      # NEXT_PUBLIC_BASE_PATH: /javadbat.github.io/
     steps:
       - name: Checkout
         uses: actions/checkout@v3
