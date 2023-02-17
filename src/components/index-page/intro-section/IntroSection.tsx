@@ -1,10 +1,16 @@
 import React from 'react'
-import { PageTitle } from './styles'
+import { Family, IntroWrapper, Name, PageTitle } from './styles'
 
 function IntroSection() {
-  return (
-    <PageTitle>Seyed Mohammad Javad Bathaei</PageTitle>
-  )
+    return (
+        <IntroWrapper>
+            <PageTitle>
+                <Name>Seyed Mohammad Javad</Name>
+                <Family>Bathaei</Family>
+            </PageTitle>
+        </IntroWrapper>
+
+    )
 }
 
 export default IntroSection

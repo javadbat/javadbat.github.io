@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'GTSuperDisplay';
+  font-style:  normal;
+  font-weight: 700;
+  src: url('GT-Super-Display-Bold.eot?') format('eot'),
+       url('GT-Super-Display-Bold.woff2') format('woff2'),
+       url('GT-Super-Display-Bold.woff') format('woff'),
+       url('GT-Super-Display-Bold.otf')  format('opentype'),
+       url('GT-Super-Display-Bold.ttf')  format('truetype');
+}
+
+@font-face {
+  font-family: 'GTSuperDisplay';
+  font-style:  normal;
+  font-weight: 400;
+  src: url('GT-Super-Display-Regular.eot?') format('eot'),
+       url('GT-Super-Display-Regular.woff2') format('woff2'),
+       url('GT-Super-Display-Regular.woff') format('woff'),
+       url('GT-Super-Display-Regular.otf')  format('opentype'),
+       url('GT-Super-Display-Regular.ttf')  format('truetype');
+}
