@@ -8,9 +8,14 @@ export const IntroWrapper = styled.section`
 `
 
 export const PageTitle = styled.h1`
-  font-size: 5rem;
+  font-size: 9.6rem;
   text-align: center;
   font-family: "title-font";
+  color:var(--p-color);
+  transition: all 0.2s 0s ease;
+  &:hover{
+    color:var(--p-color-light);
+  }
 `
 export const Name = styled.span`
     font-size: 3rem;
