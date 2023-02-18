@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import {down} from 'styled-breakpoints';
 export const IntroWrapper = styled.section`
   width: 100%;
@@ -7,8 +7,12 @@ export const IntroWrapper = styled.section`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 `
-
+export const IntroContent = styled.div`
+  display: grid;
+  grid-template-rows: auto auto auto;
+`;
 export const PageTitle = styled.h1`
 
   text-align: center;
@@ -43,8 +47,40 @@ export const Family = styled.span`
 export const Subtitle = styled.h2`
     font-size:1.5rem;
     font-weight: 400;
+    text-align: center;
     color:var(--p-color-light);
     ${down("lg")}{
       font-size:1rem;
     }
 `;
+export const MouseIconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  position: absolute;
+  bottom:64px;
+  left: calc(50% - 73px);
+`;
+export const MouseIcon = styled.svg`
+  width: 24px;
+  height: 24px;
+  fill:var(--p-color);
+`
+const wheelAnimation = keyframes`
+  0% {
+    transform: translateY(0px);
+  }
+  50%{
+    transform: translateY(3px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+`;
+export const MouseWheel = styled.path`
+  animation: ${wheelAnimation} 1s linear infinite;
+`
+export const ScrollText = styled.div`
+  color:var(--p-color);
+`
