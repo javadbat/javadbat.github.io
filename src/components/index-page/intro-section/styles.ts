@@ -2,7 +2,7 @@ import styled, { keyframes } from 'styled-components';
 import {down} from 'styled-breakpoints';
 export const IntroWrapper = styled.section`
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -1,7 +1,12 @@
 import IntroSection from '@/components/index-page/intro-section/IntroSection'
+import { fixMobileHeightVH } from '@/utils/helpers/layout-helper'
 import Head from 'next/head'
+import { useEffect } from 'react'
 
 export default function Home() {
+  useEffect(()=>{
+    fixMobileHeightVH();
+  },[])
   return (
     <>
       <Head>
