@@ -1,4 +1,5 @@
 import IntroSection from '@/components/index-page/intro-section/IntroSection'
+import SkillsSection from '@/components/index-page/skills-section/SkillsSection'
 import { fixMobileHeightVH } from '@/utils/helpers/layout-helper'
 import Head from 'next/head'
 import { useEffect } from 'react'
@@ -17,6 +18,7 @@ export default function Home() {
       </Head>
       <main>
         <IntroSection></IntroSection>
+        <SkillsSection></SkillsSection>
       </main>
     </>
   )
