@@ -1,3 +1,4 @@
+import ExperiencesSection from '@/components/index-page/experiences-section/ExperiencesSection'
 import IntroSection from '@/components/index-page/intro-section/IntroSection'
 import SkillsSection from '@/components/index-page/skills-section/SkillsSection'
 import { fixMobileHeightVH } from '@/utils/helpers/layout-helper'
@@ -19,6 +20,7 @@ export default function Home() {
       <main>
         <IntroSection></IntroSection>
         <SkillsSection></SkillsSection>
+        <ExperiencesSection></ExperiencesSection>
       </main>
     </>
   )
