@@ -27,7 +27,7 @@ export const Title = styled.h2`
 
     ${down("lg")}{
       font-size:1.7rem;
-      letter-spacing: -0.5rem;
+      letter-spacing: -0.05rem;
     }
 `;
 export const ExperienceList = styled.div`
@@ -35,6 +35,14 @@ export const ExperienceList = styled.div`
     display: grid;
     grid-template-columns:1fr 1fr 1fr;
     gap:32px;
+    ${down("xl")}{
+      margin-inline:32px;
+      grid-template-columns: 1fr 1fr ;
+    }
+    ${down("md")}{
+      margin-inline:32px;
+      grid-template-columns: 1fr ;
+    }
   `;
 //
 export const ExperienceWrapper = styled.div`
@@ -50,6 +58,9 @@ export const CompanyName = styled.div`
   color:var(--p-color);
   font-size: 1.5rem;
   font-weight:600;
+  ${down("lg")}{
+      font-size:1.2rem;
+    }
 `
 export const ExperienceDate = styled.div`
   grid-area: date;

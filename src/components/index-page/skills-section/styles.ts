@@ -1,6 +1,5 @@
 import { down } from "styled-breakpoints";
 import styled from "styled-components";
-
 export const SkillsSectionWrapper = styled.section`
     width: 100%;
     height: 100%;
@@ -26,7 +25,7 @@ export const Title = styled.h2`
 
     ${down("lg")}{
       font-size:1.7rem;
-      letter-spacing: -0.5rem;
+      letter-spacing: -0.05rem;
     }
 
 `;
@@ -36,6 +35,11 @@ export const SkillGroups = styled.div`
   max-width: 1200px;
   margin: 64px auto;
   gap:32px;
+  ${down("lg")}{
+    margin: 32px 32px;
+    grid-template-columns: 1fr ;
+    grid-template-rows: auto auto auto ;
+  }
 `;
 export const SkillGroup = styled.div``;
 export const SkillGroupTitle = styled.div`
@@ -43,7 +47,9 @@ export const SkillGroupTitle = styled.div`
   text-align: center;
   text-align: center;
   font-weight: 600;
-
+  ${down("lg")}{
+      font-size:1.2rem;
+    }
 `;
 export const SkillItems = styled.div`
   display: flex;

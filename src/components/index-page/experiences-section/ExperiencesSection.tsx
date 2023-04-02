@@ -30,7 +30,7 @@ function ExperiencesSection() {
             <Experience name="Snapp Trip" fromDate={"2019-09-01"} ToDate={"2020-06-01"} Logo={SnappTripLogo} desc="Travel & Hotel Service Retail App"></Experience>
             <Experience name="Bidopin" fromDate={"2017-10-01"} ToDate={"2020-08-30"} Logo={BidopinLogo} desc="Distributed Online Shop"></Experience>
             <Experience name="Gaj" fromDate={"2016-10-01"} ToDate={"2017-10-01"} Logo={GajLogo} desc="International Publication"></Experience>
-            <Experience name="IRIB" fromDate={"2015-08-01"} ToDate={"2015-10-30"} Logo={IRIBLogo} desc="Iran Govermental TV Organization"></Experience>
+            <Experience name="IRIB" fromDate={"2015-08-01"} ToDate={"2015-10-30"} Logo={IRIBLogo} desc="Iran TV Broadcasting"></Experience>
             <Experience name="Paya Soft" fromDate={"2011-02-01"} ToDate={"2015-07-30"} Logo={PayaLogo} desc="ERP & Office Automation"></Experience>
         </ExperienceList>
     </ExperiencesSectionWrapper>
