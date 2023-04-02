@@ -30,9 +30,12 @@ export const Title = styled.h2`
       letter-spacing: -0.5rem;
     }
 `;
-export const ExperienceList = styled.div`
-margin-block:64px;
-`;
+  export const ExperienceList = styled.div`
+    margin-block:64px;
+    display: grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:32px;
+  `;
 //
 export const ExperienceWrapper = styled.div`
   display: grid;
