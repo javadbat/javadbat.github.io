@@ -30,7 +30,7 @@ export const Title = styled.h2`
       letter-spacing: -0.5rem;
     }
 `;
-  export const ExperienceList = styled.div`
+export const ExperienceList = styled.div`
     margin-block:64px;
     display: grid;
     grid-template-columns:1fr 1fr 1fr;
@@ -40,7 +40,7 @@ export const Title = styled.h2`
 export const ExperienceWrapper = styled.div`
   display: grid;
   grid-template-columns: 80px 1fr;
-  grid-template-rows: auto 40px 1fr;
+  grid-template-rows: auto 18px 1fr;
   grid-template-areas: "logo co-name" "logo date" "logo desc" ;
   gap:4px 16px;
   
@@ -60,4 +60,10 @@ export const ExperienceDate = styled.div`
 export const CompanyLogo = styled(Image)`
   grid-area: logo;
   object-fit: contain;
+`;
+export const CompanyDESC = styled.div`
+  grid-area: desc;
+  /* color:var(--p-color); */
+  font-size: 1.0rem;
+  font-weight:400;
 `;
