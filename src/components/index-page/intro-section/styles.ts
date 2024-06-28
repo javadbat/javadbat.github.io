@@ -62,7 +62,12 @@ export const MouseIconWrapper = styled.div`
   bottom:64px;
   left: calc(50% - 73px);
 `;
-export const MouseIcon = styled.svg`
+type MouseIconProp = {
+  children: React.ReactNode;
+  viewBox:string,
+  fill:string
+};
+export const MouseIcon = styled.svg<MouseIconProp>`
   width: 24px;
   height: 24px;
   fill:var(--p-color);
@@ -78,7 +83,7 @@ const wheelAnimation = keyframes`
     transform: translateY(0px);
   }
 `;
-export const MouseWheel = styled.path`
+export const MouseWheel = styled.path<{d:string}>`
   animation: ${wheelAnimation} 1s linear infinite;
 `
 export const ScrollText = styled.div`
