@@ -1,0 +1,10 @@
+---
+import { IndexPage } from "../components/react/indexPage/IndexPage";
+import Layout from "../layouts/Layout.astro";
+// const styles = sheet.collectStyles(IndexPage);
+---
+
+<Layout>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <IndexPage client:load />
+</Layout>

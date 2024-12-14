@@ -1,0 +1,18 @@
+@font-face {
+  font-family: "title-font";
+  font-weight: 100 400;
+  src: url("/fontsGTSuperDisplay/GT-Super-Display-Regular.woff2") format('woff2'),
+    url("/fontsGTSuperDisplay/GT-Super-Display-Regular.woff") format('woff');
+}
+
+@font-face {
+  font-family: "title-font";
+  font-weight: 401 900;
+  src: url("/fonts/GTSuperDisplay/GT-Super-Display-Bold.woff2") format('woff2'),
+    url("/fonts/GTSuperDisplay/GT-Super-Display-Bold.woff") format('woff');
+}
+
+@font-face {
+  font-family: "text-font";
+  src: url("/fonts/Quicksand/Quicksand-VariableFont_wght.ttf") format('truetype');
+}
