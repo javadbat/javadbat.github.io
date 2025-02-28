@@ -25,5 +25,6 @@ export default defineConfig({
     ssr: {
       noExternal: ['styled-components']
     }
-  }
+  },
+  site: 'https://javadbat.github.io',
 });
