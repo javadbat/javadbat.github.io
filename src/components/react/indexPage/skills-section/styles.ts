@@ -7,6 +7,8 @@ export const SkillsSectionWrapper = styled.section`
     flex-direction: column;
     position: relative;
     display: flex;
+    scroll-snap-align: start;
+    scroll-snap-stop:always;
 `;
 export const Title = styled.h2`
       text-align: center;

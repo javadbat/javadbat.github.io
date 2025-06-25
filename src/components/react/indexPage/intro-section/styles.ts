@@ -7,6 +7,9 @@ export const IntroWrapper = styled.section`
   align-items: center;
   flex-direction: column;
   position: relative;
+  scroll-snap-align: start;
+  scroll-snap-stop:always;
+
 `
 export const IntroContent = styled.div`
   display: grid;
@@ -30,7 +33,7 @@ export const Name = styled.span`
     display: block;
     letter-spacing: 0.1rem;
     word-spacing: 0.3rem;
-    ${({theme})=>theme.breakpoints.down("lg")}{
+    ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1.4rem;
       word-spacing: 0.2rem;
     }
@@ -39,7 +42,7 @@ export const Family = styled.span`
     display: block;
     letter-spacing: -0.5rem;
     font-size: 9.6rem;
-    ${({theme})=>theme.breakpoints.down("lg")}{
+    ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:6rem;
     }
 `;
@@ -48,7 +51,7 @@ export const Subtitle = styled.h2`
     font-weight: 400;
     text-align: center;
     color:var(--p-color-light);
-    ${({theme})=>theme.breakpoints.down("lg")}{
+    ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1rem;
     }
 `;
@@ -63,8 +66,8 @@ export const MouseIconWrapper = styled.div`
 `;
 type MouseIconProp = {
   children: React.ReactNode;
-  viewBox:string,
-  fill:string
+  viewBox: string,
+  fill: string
 };
 export const MouseIcon = styled.svg<MouseIconProp>`
   width: 24px;
@@ -82,7 +85,7 @@ const wheelAnimation = keyframes`
     transform: translateY(0px);
   }
 `;
-export const MouseWheel = styled.path<{d:string}>`
+export const MouseWheel = styled.path<{ d: string }>`
   animation: ${wheelAnimation} 1s linear infinite;
 `
 export const ScrollText = styled.div`

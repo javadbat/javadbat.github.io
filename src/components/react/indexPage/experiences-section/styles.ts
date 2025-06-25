@@ -9,6 +9,9 @@ export const ExperiencesSectionWrapper = styled.section`
     position: relative;
     display: flex;
     box-sizing: border-box;
+    scroll-snap-align: start;
+    scroll-snap-stop:always;
+
 `;
 export const Title = styled.h2`
       text-align: center;
@@ -24,7 +27,7 @@ export const Title = styled.h2`
       color:var(--p-color-light);
       }
 
-    ${({theme})=>theme.breakpoints.down("lg")}{
+    ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1.7rem;
       letter-spacing: -0.05rem;
     }
@@ -34,11 +37,11 @@ export const ExperienceList = styled.div`
     display: grid;
     grid-template-columns:1fr 1fr 1fr;
     gap:32px;
-    ${({theme})=>theme.breakpoints.down("xl")}{
+    ${({ theme }) => theme.breakpoints.down("xl")}{
       margin-inline:32px;
       grid-template-columns: 1fr 1fr ;
     }
-    ${({theme})=>theme.breakpoints.down("md")}{
+    ${({ theme }) => theme.breakpoints.down("md")}{
       margin-inline:32px;
       grid-template-columns: 1fr ;
     }
@@ -57,7 +60,7 @@ export const CompanyName = styled.div`
   color:var(--p-color);
   font-size: 1.5rem;
   font-weight:600;
-  ${({theme})=>theme.breakpoints.down("lg")}{
+  ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1.2rem;
     }
 `

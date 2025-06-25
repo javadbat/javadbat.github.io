@@ -6,6 +6,7 @@ import IntroSection from './intro-section/IntroSection'
 import SkillsSection from './skills-section/SkillsSection'
 import { useEffect } from 'react'
 import { ThemeProvider } from 'styled-components'
+import { MainSectionsWrapper } from './styles'
 
 
 const theme = createStyledBreakpointsTheme();
@@ -20,13 +21,13 @@ export function IndexPage() {
     fixMobileHeightVH();
   }, [])
   return (
-    <main>
+    <MainSectionsWrapper>
       <ThemeProvider theme={theme}>
         <IntroSection></IntroSection>
         <SkillsSection></SkillsSection>
         <ExperiencesSection></ExperiencesSection>
         <FeedbackSection ></FeedbackSection>
       </ThemeProvider>
-    </main>
+    </MainSectionsWrapper>
   )
 }

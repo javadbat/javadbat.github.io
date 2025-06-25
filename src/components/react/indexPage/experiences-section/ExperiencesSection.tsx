@@ -1,4 +1,3 @@
-import React from 'react'
 import Experience from './Experience'
 import { CompanyLogo, ExperienceList, ExperiencesSectionWrapper, Title } from './styles'
 import hamiLogoSrc from '../company-logo/hami.svg'

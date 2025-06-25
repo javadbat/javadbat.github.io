@@ -1,4 +1,3 @@
-import React from 'react'
 import BackendSkillItems from './BackendSkillItems'
 import FrontendSkillItems from './FrontendSkillItems'
 import NonTechnicalSkills from './NonTechnicalSkills'

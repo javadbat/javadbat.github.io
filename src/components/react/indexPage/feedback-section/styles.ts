@@ -9,7 +9,10 @@ export const FeedbackSectionWrapper = styled.section`
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    ${({theme})=>theme.breakpoints.down('xl')}{
+    scroll-snap-align: start;
+    scroll-snap-stop:always;
+
+    ${({ theme }) => theme.breakpoints.down('xl')}{
       padding: 2rem ;
     }
 
@@ -19,7 +22,7 @@ export const FeedbackGrid = styled.div`
     grid-template-columns: 1fr 1fr;
     max-width: 1200px;
     gap:2rem;
-    ${({theme})=>theme.breakpoints.down('md')}{
+    ${({ theme }) => theme.breakpoints.down('md')}{
       grid-template-columns:1fr;
       width: 100%;
       grid-template-rows: min-content min-content;
@@ -33,7 +36,7 @@ export const FormWrapper = styled.div`
 `;
 export const ContentWrapper = styled.div`
   font-size: 1.5rem;
-  ${({theme})=>theme.breakpoints.down("lg")}{
+  ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1rem;
     }
 `;
@@ -51,7 +54,7 @@ export const Title = styled.h2`
       color:var(--p-color-light);
       }
 
-    ${({theme})=>theme.breakpoints.down("lg")}{
+    ${({ theme }) => theme.breakpoints.down("lg")}{
       font-size:1.7rem;
       letter-spacing: -0.05rem;
     }
