@@ -14,12 +14,14 @@
     "@swc/plugin-styled-components": "^6.0.2",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "@types/three": "^0.177.0",
     "agileverse-feedback": "^0.0.8",
     "astro": "^5.10.1",
     "babel-plugin-styled-components": "^2.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "styled-breakpoints": "^14.1.4",
-    "styled-components": "^6.1.13"
+    "styled-components": "^6.1.13",
+    "three": "^0.177.0"
   }
 }

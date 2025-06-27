@@ -12,7 +12,7 @@ function BackendSkillItems() {
         <SkillItem>Express</SkillItem>
         <SkillItem>SqlServer</SkillItem>
         <SkillItem>PostgreSQL</SkillItem>
-        <SkillItem>Go</SkillItem>
+        <SkillItem>Rust</SkillItem>
         <SkillItem>Docker</SkillItem>
     </>
   )
