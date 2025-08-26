@@ -9,7 +9,13 @@ export const IntroWrapper = styled.section`
   position: relative;
   scroll-snap-align: start;
   scroll-snap-stop:always;
-
+  //background styles
+  background: 
+    radial-gradient(hsl(from var(--mid-grey) h s l/ 0.3) 1px, transparent 0px),
+    linear-gradient(160deg, lch(94.54 12.09 266.82 / 1), transparent 60%, transparent),
+    linear-gradient(192deg, lch(94.54 12.09 266.82 / 1), transparent 60%, transparent);
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-size: 2rem 2rem, cover, cover;
 `
 export const IntroContent = styled.div`
   display: grid;

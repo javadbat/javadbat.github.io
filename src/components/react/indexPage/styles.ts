@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const MainSectionsWrapper =  styled.main`
+export const MainSectionsWrapper = styled.main`
   width: 100vw;
   height: 100dvh;
   overflow: auto;
