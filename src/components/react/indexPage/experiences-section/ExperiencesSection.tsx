@@ -8,6 +8,7 @@ import gajLogoSrc from '../company-logo/Gaj-logo.svg'
 import iribLogoSrc from '../company-logo/IRIB_Logo.svg'
 import kitLogoSrc from '../company-logo/kit-logo.jpeg'
 import payaLogoSrc from '../company-logo/payasoft.svg'
+import akkaLogoSrc from '../company-logo/akka.svg'
 
 const HamiLogo = ()=><CompanyLogo src={hamiLogoSrc.src} alt='hami logo' width={80} height={80}></CompanyLogo>
 const BedaanLogo = ()=><CompanyLogo src={bedaanLogoSrc.src} alt='bedaan logo' width={80} height={80}></CompanyLogo>
@@ -17,12 +18,14 @@ const GajLogo = ()=><CompanyLogo src={gajLogoSrc.src} alt='Gaj logo' width={80} 
 const IRIBLogo = ()=><CompanyLogo src={iribLogoSrc.src} alt='iIRIB logo' width={80} height={80}></CompanyLogo>
 const KitLogo = ()=><CompanyLogo src={kitLogoSrc.src} alt='KIT logo' width={80} height={80}></CompanyLogo>
 const PayaLogo = ()=><CompanyLogo src={payaLogoSrc.src} alt='paya logo' width={80} height={80}></CompanyLogo>
+const AkkaLogo = ()=><CompanyLogo src={akkaLogoSrc.src} alt='akka logo' width={80} height={80}></CompanyLogo>
 // const NoLogo = ()=><></>
 function ExperiencesSection() {
   return (
     <ExperiencesSectionWrapper>
         <Title>Experiences</Title>
         <ExperienceList>
+            <Experience name="Akka" fromDate={"2021-09-01"} ToDate={"2023-02-30"} Logo={AkkaLogo} desc="Web3 Dex & Logistic platform"></Experience>
             <Experience name="Hami" fromDate={"2021-09-01"} ToDate={"2023-02-30"} Logo={HamiLogo} desc="Cryptocurrency Exchange Platform"></Experience>
             <Experience name="Bedaan" fromDate={"2020-11-01"} ToDate={"2023-03-31"} Logo={BedaanLogo} desc="Stock Market Analyser Tool"></Experience>
             <Experience name="KIT" fromDate={"2020-06-01"} ToDate={"2021-04-30"} Logo={KitLogo} desc="Legal Service Apps"></Experience>

@@ -5,4 +5,5 @@ export const MainSectionsWrapper = styled.main`
   height: 100dvh;
   overflow: auto;
   scroll-snap-type: y proximity;
+  scrollbar-color:var(--p-color) transparent;
 `;
