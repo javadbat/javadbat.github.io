@@ -25,7 +25,7 @@ function ExperiencesSection() {
     <ExperiencesSectionWrapper>
         <Title>Experiences</Title>
         <ExperienceList>
-            <Experience name="Akka" fromDate={"2021-09-01"} ToDate={"2023-02-30"} Logo={AkkaLogo} desc="Web3 Dex & Logistic platform"></Experience>
+            <Experience name="Akka" fromDate={"2023-05-01"} ToDate={"2025-04-30"} Logo={AkkaLogo} desc="Web3 Dex & Logistic platform"></Experience>
             <Experience name="Hami" fromDate={"2021-09-01"} ToDate={"2023-02-30"} Logo={HamiLogo} desc="Cryptocurrency Exchange Platform"></Experience>
             <Experience name="Bedaan" fromDate={"2020-11-01"} ToDate={"2023-03-31"} Logo={BedaanLogo} desc="Stock Market Analyser Tool"></Experience>
             <Experience name="KIT" fromDate={"2020-06-01"} ToDate={"2021-04-30"} Logo={KitLogo} desc="Legal Service Apps"></Experience>
