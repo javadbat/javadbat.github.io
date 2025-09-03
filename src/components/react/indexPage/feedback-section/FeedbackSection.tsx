@@ -1,6 +1,7 @@
-import React, { lazy } from 'react'
-import { ContentWrapper, DescWrapper, FeedbackSectionWrapper, FormWrapper, Title, Desc, FeedbackGrid } from './styles'
-declare global {
+import React from 'react'
+import { ContentWrapper, DescWrapper, FeedbackSectionWrapper, FormWrapper, Title, Desc, FeedbackGrid } from './styles';
+
+declare module "react" {
     namespace JSX {
         interface IntrinsicElements {
             "agileverse-feedback": any;
@@ -15,7 +16,8 @@ function FeedbackSection() {
             feedbackForm.key = "a45dc156a66f344f8e4e9c2649da2785"
         })
     }
-    , [])
+    , []);
+    
     return (
         <FeedbackSectionWrapper>
             <FeedbackGrid>
