@@ -7,6 +7,7 @@ import SkillsSection from './skills-section/SkillsSection'
 import { useEffect } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { MainSectionsWrapper } from './styles'
+import ProductsSection from './products-section/ProductsSection'
 
 
 const theme = createStyledBreakpointsTheme();
@@ -26,6 +27,7 @@ export function IndexPage() {
         <IntroSection></IntroSection>
         <SkillsSection></SkillsSection>
         <ExperiencesSection></ExperiencesSection>
+        <ProductsSection></ProductsSection>
         <FeedbackSection ></FeedbackSection>
       </ThemeProvider>
     </MainSectionsWrapper>

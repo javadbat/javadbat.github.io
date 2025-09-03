@@ -7,8 +7,13 @@
   "exclude": [
     "dist"
   ],
+  
   "compilerOptions": {
+    "baseUrl": ".",
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "paths": {
+      "@react-components/*":["src/components/react/components/*"]
+    }
   }
 }

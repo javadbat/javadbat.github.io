@@ -1,5 +1,5 @@
 import Experience from './Experience'
-import { CompanyLogo, ExperienceList, ExperiencesSectionWrapper, Title } from './styles'
+import { CompanyLogo, ExperienceList, ExperiencesSectionWrapper } from './styles'
 import hamiLogoSrc from '../company-logo/hami.svg'
 import bedaanLogoSrc from '../company-logo/bedaan.svg'
 import bidopinLogoSrc from '../company-logo/bidopin.svg'
@@ -9,6 +9,7 @@ import iribLogoSrc from '../company-logo/IRIB_Logo.svg'
 import kitLogoSrc from '../company-logo/kit-logo.jpeg'
 import payaLogoSrc from '../company-logo/payasoft.svg'
 import akkaLogoSrc from '../company-logo/akka.svg'
+import { Title } from '@react-components/title/Title'
 
 const HamiLogo = ()=><CompanyLogo src={hamiLogoSrc.src} alt='hami logo' width={80} height={80}></CompanyLogo>
 const BedaanLogo = ()=><CompanyLogo src={bedaanLogoSrc.src} alt='bedaan logo' width={80} height={80}></CompanyLogo>
