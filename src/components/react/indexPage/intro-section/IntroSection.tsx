@@ -1,5 +1,6 @@
 import React from 'react'
-import { Family, IntroContent, IntroWrapper, MouseIcon, MouseIconWrapper, MouseWheel, Name, PageTitle, ScrollText, Subtitle } from './styles'
+import {Family, IntroContent, IntroWrapper, MouseIcon, MouseIconWrapper, MouseWheel, Name, PageTitle, ScrollText, Subtitle } from './styles'
+import { CTAButton } from './cta-button/CTAButton'
 
 function IntroSection() {
     return (
@@ -10,6 +11,7 @@ function IntroSection() {
                     <Family>Bathaei</Family>
                 </PageTitle>
                 <Subtitle >Creative Front-end Web Developer</Subtitle>
+                <CTAButton>Contact Me</CTAButton>
             </IntroContent>
             <MouseIconWrapper>
                 <MouseIcon viewBox="0 0 24 24" fill="none" >
