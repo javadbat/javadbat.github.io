@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react";
-import styled from "styled-components";
+import {styled} from "styled-components";
 
 export function CTAButton(props: PropsWithChildren<{}>) {
   return (

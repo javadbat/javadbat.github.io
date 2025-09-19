@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'styled-components';
+import { keyframes,styled } from 'styled-components';
 export const IntroWrapper = styled.section`
   width: 100%;
   height: 100%;

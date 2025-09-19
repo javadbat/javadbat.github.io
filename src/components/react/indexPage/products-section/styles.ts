@@ -1,5 +1,5 @@
 import { RoundCard } from "@react-components/card/RoundCard";
-import styled from "styled-components";
+import {styled} from "styled-components";
 
 export const ProductsSectionWrapper = styled.div`
       width: 100%;

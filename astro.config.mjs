@@ -23,7 +23,7 @@ export default defineConfig({
   },
   vite: {
     ssr: {
-      noExternal: ['styled-components']
+      // noExternal: ['styled-components']
     }
   },
   site: 'https://javadbat.github.io',
