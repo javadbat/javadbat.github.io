@@ -22,9 +22,6 @@ export default defineConfig({
     port:8080,
   },
   vite: {
-    ssr: {
-      // noExternal: ['styled-components']
-    }
   },
   site: 'https://javadbat.github.io',
 });
