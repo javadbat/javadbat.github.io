@@ -248,7 +248,7 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
 
-        <div class="detail-item">
+        <a class="detail-item" href="https://neshan.org/maps/share/_bvr_GYxMBRG" target="_blank">
           <svg class="detail-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="currentColor" stroke-width="2"/>
             <circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -258,7 +258,7 @@ import Layout from "../layouts/Layout.astro";
             <div class="detail-value">Hoveizeh Wedding Hall</div>
             <div class="detail-subvalue">Baghestan avenue, Poonak, Tehran, Iran</div>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Decorative Bottom Border -->
@@ -744,6 +744,10 @@ import Layout from "../layouts/Layout.astro";
     animation: fadeIn 2.5s ease-out;
   }
 
+  a.detail-item{
+    text-decoration: none;
+    color: inherit;
+  }
   .detail-item {
     display: flex;
     align-items: center;
