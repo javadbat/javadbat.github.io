@@ -1,8 +1,9 @@
 @font-face {
   font-family: "title-font";
   font-weight: 100 400;
-  src: url("/fontsGTSuperDisplay/GT-Super-Display-Regular.woff2") format('woff2'),
-    url("/fontsGTSuperDisplay/GT-Super-Display-Regular.woff") format('woff');
+  src: url("/fonts/GTSuperDisplay/GT-Super-Display-Regular.woff2") format('woff2'),
+    url("/fonts/GTSuperDisplay/GT-Super-Display-Regular.woff") format('woff');
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+0180-024F, U+1E00-1EFF;
 }
 
 @font-face {
@@ -10,9 +11,26 @@
   font-weight: 401 900;
   src: url("/fonts/GTSuperDisplay/GT-Super-Display-Bold.woff2") format('woff2'),
     url("/fonts/GTSuperDisplay/GT-Super-Display-Bold.woff") format('woff');
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+0180-024F, U+1E00-1EFF;
 }
 
 @font-face {
   font-family: "text-font";
   src: url("/fonts/Quicksand/Quicksand-VariableFont_wght.ttf") format('truetype');
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+0180-024F, U+1E00-1EFF;
+}
+
+/* Persian/Arabic Unicode Support */
+@font-face {
+  font-family: "persian-font";
+  font-weight: 400;
+  src: local("Tahoma"), local("Arial"), local("Segoe UI");
+  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+25CC, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: "persian-font";
+  font-weight: 700;
+  src: local("Tahoma Bold"), local("Arial Bold"), local("Segoe UI Bold");
+  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+25CC, U+FB50-FDFF, U+FE70-FEFF;
 }
