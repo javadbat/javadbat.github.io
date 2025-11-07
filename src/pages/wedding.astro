@@ -4,256 +4,192 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <link rel="stylesheet" href="/styles/fonts.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <main class="wedding-invitation" dir="rtl" lang="fa">
-    <!-- Decorative SVG Background Elements -->
-    <div class="background-elements">
-      <!-- Floating Hearts -->
-      <svg class="heart heart-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-      </svg>
-      <svg class="heart heart-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-      </svg>
-      <svg class="heart heart-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-      </svg>
-      
-      <!-- Decorative Flowers -->
-      <svg class="flower flower-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="8" fill="currentColor" opacity="0.6"/>
-        <path d="M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4"/>
-        <circle cx="50" cy="30" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="50" cy="70" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="30" cy="50" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="70" cy="50" r="3" fill="currentColor" opacity="0.5"/>
-      </svg>
-      
-      <svg class="flower flower-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="8" fill="currentColor" opacity="0.6"/>
-        <path d="M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4"/>
-        <circle cx="50" cy="30" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="50" cy="70" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="30" cy="50" r="3" fill="currentColor" opacity="0.5"/>
-        <circle cx="70" cy="50" r="3" fill="currentColor" opacity="0.5"/>
-      </svg>
-
-      <!-- Sparkles/Stars -->
-      <div class="sparkles">
-        <svg class="sparkle sparkle-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-        <svg class="sparkle sparkle-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-        <svg class="sparkle sparkle-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-        <svg class="sparkle sparkle-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-        <svg class="sparkle sparkle-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-        <svg class="sparkle sparkle-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-        </svg>
-      </div>
+    <!-- Elegant Background Pattern -->
+    <div class="background-pattern"></div>
+    <div class="lavender-elements">
+      <div class="lavender-flower flower-1">✿</div>
+      <div class="lavender-flower flower-2">✿</div>
+      <div class="lavender-flower flower-3">✿</div>
+      <div class="lavender-dot dot-1"></div>
+      <div class="lavender-dot dot-2"></div>
+      <div class="lavender-dot dot-3"></div>
     </div>
 
-    <!-- Main Content -->
-    <div class="invitation-container">
-      <!-- Glowing Ornamental Frame -->
-      <div class="ornamental-frame">
-        <svg class="frame-corner frame-top-left" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,0 L0,40 Q0,50 10,50 L40,50 Q50,50 50,60 L50,100" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="25" cy="25" r="3" fill="currentColor"/>
-          <circle cx="35" cy="35" r="2" fill="currentColor"/>
-        </svg>
-        <svg class="frame-corner frame-top-right" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100,0 L100,40 Q100,50 90,50 L60,50 Q50,50 50,60 L50,100" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="75" cy="25" r="3" fill="currentColor"/>
-          <circle cx="65" cy="35" r="2" fill="currentColor"/>
-        </svg>
-        <svg class="frame-corner frame-bottom-left" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,100 L0,60 Q0,50 10,50 L40,50 Q50,50 50,40 L50,0" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="25" cy="75" r="3" fill="currentColor"/>
-          <circle cx="35" cy="65" r="2" fill="currentColor"/>
-        </svg>
-        <svg class="frame-corner frame-bottom-right" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100,100 L100,60 Q100,50 90,50 L60,50 Q50,50 50,40 L50,0" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="75" cy="75" r="3" fill="currentColor"/>
-          <circle cx="65" cy="65" r="2" fill="currentColor"/>
-        </svg>
-      </div>
-
-      <!-- Top Decorative Border -->
-      <svg class="border-top" viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg">
+    <!-- Animated Butterflies -->
+    <div class="butterflies-container">
+      <svg class="butterfly butterfly-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:currentColor;stop-opacity:0.3" />
-            <stop offset="50%" style="stop-color:currentColor;stop-opacity:0.6" />
-            <stop offset="100%" style="stop-color:currentColor;stop-opacity:0.3" />
+          <linearGradient id="butterflyGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.8" />
+            <stop offset="50%" style="stop-color:#d4c4e8;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.8" />
           </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
-        <path d="M0,60 Q100,20 200,60 T400,60 T600,60 T800,60" fill="none" stroke="url(#goldGradient)" stroke-width="2" filter="url(#glow)"/>
-        <path d="M0,60 Q100,30 200,60 T400,60 T600,60 T800,60" fill="none" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-        <circle cx="100" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="200" cy="60" r="4" fill="currentColor" opacity="0.4">
-          <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="300" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="400" cy="60" r="6" fill="currentColor" opacity="0.6">
-          <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="500" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="600" cy="60" r="4" fill="currentColor" opacity="0.4">
-          <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="700" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <!-- Decorative flourishes -->
-        <path d="M50,60 Q60,50 70,60 Q80,70 90,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-        <path d="M710,60 Q720,50 730,60 Q740,70 750,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+        <!-- Left wing -->
+        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad1)" opacity="0.7"/>
+        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.5"/>
+        <!-- Right wing -->
+        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad1)" opacity="0.7"/>
+        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.5"/>
+        <!-- Body -->
+        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.8"/>
+        <!-- Antennae -->
+        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.6"/>
+        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.6"/>
+        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.6"/>
       </svg>
 
-      <!-- Names Section -->
+      <svg class="butterfly butterfly-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="butterflyGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#d4c4e8;stop-opacity:0.7" />
+            <stop offset="50%" style="stop-color:#b19cd9;stop-opacity:0.5" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.7" />
+          </linearGradient>
+        </defs>
+        <!-- Left wing -->
+        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad2)" opacity="0.6"/>
+        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.4"/>
+        <!-- Right wing -->
+        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad2)" opacity="0.6"/>
+        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.4"/>
+        <!-- Body -->
+        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.7"/>
+        <!-- Antennae -->
+        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.5"/>
+        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.5"/>
+        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.5"/>
+      </svg>
+
+      <svg class="butterfly butterfly-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="butterflyGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#8b7ba8;stop-opacity:0.6" />
+            <stop offset="50%" style="stop-color:#b19cd9;stop-opacity:0.4" />
+            <stop offset="100%" style="stop-color:#d4c4e8;stop-opacity:0.6" />
+          </linearGradient>
+        </defs>
+        <!-- Left wing -->
+        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad3)" opacity="0.5"/>
+        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.3"/>
+        <!-- Right wing -->
+        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad3)" opacity="0.5"/>
+        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.3"/>
+        <!-- Body -->
+        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.6"/>
+        <!-- Antennae -->
+        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.4"/>
+        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.4"/>
+        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.4"/>
+        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.4"/>
+      </svg>
+
+      <svg class="butterfly butterfly-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="butterflyGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.65" />
+            <stop offset="50%" style="stop-color:#d4c4e8;stop-opacity:0.45" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.65" />
+          </linearGradient>
+        </defs>
+        <!-- Left wing -->
+        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad4)" opacity="0.55"/>
+        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.35"/>
+        <!-- Right wing -->
+        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad4)" opacity="0.55"/>
+        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.35"/>
+        <!-- Body -->
+        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.65"/>
+        <!-- Antennae -->
+        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.45"/>
+        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.45"/>
+        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.45"/>
+        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.45"/>
+      </svg>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="invitation-container">
+      <!-- Header Section with Elegant Divider -->
+      <div class="header-section">
+        <div class="elegant-divider">
+          <div class="divider-line"></div>
+          <div class="divider-ornament">✦</div>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Names Section - Elegant Typography -->
       <div class="names-section">
-        <div class="name-wrapper name-wrapper-1">
-          <div class="name-full">
-            <span class="name-prefix"></span>
-            <span class="name-main">سید محمد جواد</span>
-            <span class="name-suffix">بطحایی</span>
+        <div class="name-block name-block-1">
+          <div class="name-main">سید محمد جواد</div>
+          <div class="name-surname">بطحایی</div>
           </div>
-          <div class="name-glow"></div>
-          <!-- Sparkles around name -->
-          <svg class="name-sparkle sparkle-left" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-          </svg>
-          <svg class="name-sparkle sparkle-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-          </svg>
+        
+        <div class="names-connector">
+          <div class="connector-line"></div>
+          <div class="connector-heart">♥</div>
+          <div class="connector-line"></div>
         </div>
-        <svg class="connecting-hearts" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color:currentColor;stop-opacity:0.3" />
-              <stop offset="50%" style="stop-color:currentColor;stop-opacity:0.8" />
-              <stop offset="100%" style="stop-color:currentColor;stop-opacity:0.3" />
-            </linearGradient>
-            <filter id="heartGlow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <path d="M100,40 Q110,25 120,40 Q130,25 140,40 Q150,25 160,40 Q170,25 180,40" fill="none" stroke="url(#heartGradient)" stroke-width="2.5" filter="url(#heartGlow)"/>
-          <path d="M20,40 Q30,25 40,40 Q50,25 60,40 Q70,25 80,40 Q90,25 100,40" fill="none" stroke="url(#heartGradient)" stroke-width="2.5" filter="url(#heartGlow)"/>
-          <circle cx="100" cy="40" r="10" fill="currentColor" opacity="0.7" filter="url(#heartGlow)">
-            <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-          </circle>
-          <path d="M95,40 Q95,28 100,33 Q105,28 105,40 Q105,52 100,47 Q95,52 95,40" fill="currentColor" opacity="0.8" filter="url(#heartGlow)">
-            <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
-          </path>
-          <!-- Small hearts along the path -->
-          <path d="M50,40 Q50,30 55,35 Q60,30 60,40 Q60,50 55,45 Q50,50 50,40" fill="currentColor" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" repeatCount="indefinite"/>
-          </path>
-          <path d="M150,40 Q150,30 155,35 Q160,30 160,40 Q160,50 155,45 Q150,50 150,40" fill="currentColor" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" repeatCount="indefinite" begin="1s"/>
-          </path>
-        </svg>
-        <div class="name-wrapper name-wrapper-2">
-          <div class="name-full">
-            <span class="name-main">شقایق</span>
-            <span class="name-suffix">دوالقدری</span>
-          </div>
-          <div class="name-glow"></div>
-          <!-- Sparkles around name -->
-          <svg class="name-sparkle sparkle-left" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-          </svg>
-          <svg class="name-sparkle sparkle-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L13.09 8.26L19 7L14.91 12.74L20 14L13.09 15.74L12 22L10.91 15.74L4 14L9.09 12.74L4 7L10.91 8.26L12 2Z" fill="currentColor"/>
-          </svg>
+        
+        <div class="name-block name-block-2">
+          <div class="name-main">شقایق</div>
+          <div class="name-surname">دوالقدری</div>
         </div>
       </div>
 
-      <!-- Divider with Decorative Elements -->
-      <svg class="divider" viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,40 Q150,20 300,40 T600,40" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-        <path d="M0,40 Q150,60 300,40 T600,40" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-        <circle cx="150" cy="40" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="300" cy="40" r="6" fill="currentColor" opacity="0.6">
-          <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="450" cy="40" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
-        </circle>
-      </svg>
-
-      <!-- Invitation Text -->
+      <!-- Invitation Text - Elegant Calligraphy Style -->
       <div class="invitation-text">
-        <p class="intro-text">با کمال مسرت و خوشحالی،</p>
-        <p class="main-text">شما را به جشن</p>
-        <p class="main-text">روز خاص ما دعوت می‌کنیم</p>
+        <p class="invitation-line-1">با کمال مسرت و خوشحالی</p>
+        <p class="invitation-line-2">شما را به جشن ازدواج خود دعوت می‌کنیم</p>
       </div>
 
-      <!-- Date and Time Section -->
+      <!-- Details Section - Minimalist Cards -->
       <div class="details-section">
-        <div class="detail-item">
-          <svg class="detail-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-            <circle cx="12" cy="15" r="1" fill="currentColor"/>
-            <circle cx="16" cy="15" r="1" fill="currentColor"/>
-            <circle cx="12" cy="19" r="1" fill="currentColor"/>
+        <div class="detail-card">
+          <div class="detail-icon-wrapper">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
-          <div class="detail-content">
-            <div class="detail-label">تاریخ</div>
+          </div>
+          <div class="detail-info">
+            <div class="detail-label">تاریخ</div>عحیشفث صثییهدل حشلث
             <div class="detail-value">جمعه، ۷ آذر ۱۴۰۴</div>
           </div>
         </div>
 
-        <div class="detail-item">
-          <svg class="detail-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-            <line x1="12" y1="12" x2="12" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <line x1="12" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <div class="detail-card">
+          <div class="detail-icon-wrapper">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="12" x2="12" y2="6"/>
+              <line x1="12" y1="12" x2="16" y2="12"/>
           </svg>
-          <div class="detail-content">
+          </div>
+          <div class="detail-info">
             <div class="detail-label">ساعت</div>
-            <div class="detail-value">۲۰:۰۰ تا ۲۳:۰۰</div>
+            <div class="detail-value">19:00 تا 22:00</div>
           </div>
         </div>
 
-        <a class="detail-item" href="https://neshan.org/maps/share/_bvr_GYxMBRG" target="_blank">
-          <svg class="detail-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="currentColor" stroke-width="2"/>
-            <circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+        <a class="detail-card detail-card-link" href="https://neshan.org/maps/share/_bvr_GYxMBRG" target="_blank">
+          <div class="detail-icon-wrapper">
+            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
           </svg>
-          <div class="detail-content">
+          </div>
+          <div class="detail-info">
             <div class="detail-label">مکان</div>
             <div class="detail-value">تالار عروسی هویزه</div>
             <div class="detail-subvalue">خیابان باغستان، پونک، تهران</div>
@@ -261,71 +197,21 @@ import Layout from "../layouts/Layout.astro";
         </a>
       </div>
 
-      <!-- Decorative Bottom Border -->
-      <svg class="border-bottom" viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="goldGradientBottom" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:currentColor;stop-opacity:0.3" />
-            <stop offset="50%" style="stop-color:currentColor;stop-opacity:0.6" />
-            <stop offset="100%" style="stop-color:currentColor;stop-opacity:0.3" />
-          </linearGradient>
-          <filter id="glowBottom">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <path d="M0,60 Q100,90 200,60 T400,60 T600,60 T800,60" fill="none" stroke="url(#goldGradientBottom)" stroke-width="2" filter="url(#glowBottom)"/>
-        <path d="M0,60 Q100,80 200,60 T400,60 T600,60 T800,60" fill="none" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-        <circle cx="100" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="200" cy="60" r="4" fill="currentColor" opacity="0.4">
-          <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="300" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="400" cy="60" r="6" fill="currentColor" opacity="0.6">
-          <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="500" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="600" cy="60" r="4" fill="currentColor" opacity="0.4">
-          <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="700" cy="60" r="5" fill="currentColor" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <!-- Decorative flourishes -->
-        <path d="M50,60 Q60,70 70,60 Q80,50 90,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-        <path d="M710,60 Q720,70 730,60 Q740,50 750,60" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-      </svg>
-
-      <!-- Closing Message -->
+      <!-- Elegant Footer -->
+      <div class="footer-section">
+        <div class="elegant-divider">
+          <div class="divider-line"></div>
+          <div class="divider-ornament">✦</div>
+          <div class="divider-line"></div>
+        </div>
+        
       <div class="closing-message">
-        <p>ما مشتاقیم که</p>
-        <p>این لحظه زیبا را با شما سهیم شویم</p>
+          <p class="closing-text">ما مشتاقیم که این لحظه زیبا را با شما سهیم شویم</p>
         <div class="signature">
-          <p>با عشق،</p>
-          <p class="signature-names">محمد جواد و شقایق</p>
+            <p class="signature-text">با عشق</p>
+            <p class="signature-names">محمد جواد و شقایق</p>
         </div>
       </div>
-
-      <!-- Bottom Decorative Hearts -->
-      <div class="bottom-hearts">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
-        </svg>
       </div>
     </div>
   </main>
@@ -333,595 +219,650 @@ import Layout from "../layouts/Layout.astro";
 
 <style>
   :root {
-    /* OKLCH Color Palette - Elegant Wedding Colors */
-    --color-gold: oklch(75% 0.15 85);
-    --color-gold-light: oklch(82% 0.12 85);
-    --color-gold-dark: oklch(68% 0.18 85);
-    
-    --color-rose: oklch(50% 0.08 330);
-    --color-rose-light: oklch(60% 0.06 330);
-    --color-rose-dark: oklch(42% 0.10 330);
-    
-    --color-purple: oklch(55% 0.06 300);
-    --color-purple-light: oklch(65% 0.05 300);
-    
-    --color-pink-bg: oklch(96% 0.02 330);
-    --color-lavender-bg: oklch(95% 0.02 280);
-    --color-mint-bg: oklch(96% 0.02 150);
-    
-    --color-white: oklch(100% 0 0);
-    --color-white-soft: oklch(98% 0.005 0);
-    
-    --color-shadow: oklch(0% 0 0 / 0.1);
-    --color-shadow-gold: oklch(68% 0.18 85 / 0.2);
+    /* Elegant Color Palette */
+    --color-primary: #2c2c2c;
+    --color-secondary: #8b7355;
+    --color-accent: #d4af37;
+    --color-lavender: #b19cd9;
+    --color-lavender-light: #d4c4e8;
+    --color-lavender-dark: #8b7ba8;
+    --color-lavender-bg: #f5f2f9;
+    --color-text: #3a3a3a;
+    --color-text-light: #6b6b6b;
+    --color-bg: #faf9f7;
+    --color-bg-pattern: #f5f3f0;
+    --color-border: #e8e6e3;
+    --color-shadow: rgba(0, 0, 0, 0.05);
+    --color-shadow-hover: rgba(0, 0, 0, 0.1);
+    --color-lavender-shadow: rgba(177, 156, 217, 0.2);
   }
 
   .wedding-invitation {
     min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
-    background: linear-gradient(
-      135deg,
-      oklch(96% 0.02 330) 0%,
-      oklch(97% 0.015 15) 25%,
-      oklch(97% 0.015 25) 50%,
-      oklch(96% 0.02 280) 75%,
-      oklch(96% 0.02 150) 100%
-    );
+    min-height: 100dvh;
+    background: var(--color-bg);
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(1rem, 3vw, 2rem);
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
-    font-feature-settings: "kern" 1, "liga" 1;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    font-family: "Vazir", "Tanha", "Shabnam", "Tahoma", "Arial", "Segoe UI", serif;
+    font-feature-settings: "kern" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Background Floating Elements */
-  .background-elements {
-    position: absolute;
+  /* Elegant Background Pattern */
+  .background-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(139, 115, 85, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(177, 156, 217, 0.04) 0%, transparent 60%);
+    background-size: 100% 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Lavender Decorative Elements */
+  .lavender-elements {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
     z-index: 0;
+    overflow: hidden;
   }
 
-  .heart {
+  .lavender-flower {
     position: absolute;
-    color: var(--color-gold);
-    opacity: 0.25;
-    width: clamp(40px, 5vw, 60px);
-    height: clamp(40px, 5vw, 60px);
+    color: var(--color-lavender);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    opacity: 0.15;
+    animation: floatGentle 15s ease-in-out infinite;
   }
 
-  .heart-1 {
-    top: 10%;
-    left: 10%;
-    animation: float1 8s ease-in-out infinite;
-  }
-
-  .heart-2 {
-    top: 60%;
-    right: 15%;
-    width: clamp(50px, 6vw, 80px);
-    height: clamp(50px, 6vw, 80px);
-    animation: float2 10s ease-in-out infinite;
-  }
-
-  .heart-3 {
-    bottom: 20%;
-    left: 20%;
-    width: clamp(35px, 4vw, 50px);
-    height: clamp(35px, 4vw, 50px);
-    animation: float3 12s ease-in-out infinite;
-  }
-
-  .flower {
-    position: absolute;
-    color: var(--color-rose-light);
-    width: clamp(60px, 8vw, 100px);
-    height: clamp(60px, 8vw, 100px);
-    opacity: 0.18;
-  }
-
-  .flower-1 {
-    top: 30%;
-    right: 10%;
-    animation: rotate 20s linear infinite;
-  }
-
-  .flower-2 {
-    bottom: 30%;
-    left: 10%;
-    animation: rotate 25s linear infinite reverse;
-  }
-
-  /* Sparkles Background */
-  .sparkles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .sparkle {
-    position: absolute;
-    color: var(--color-gold);
-    opacity: 0;
-    width: clamp(20px, 3vw, 30px);
-    height: clamp(20px, 3vw, 30px);
-    animation: sparkleTwinkle 4s ease-in-out infinite;
-  }
-
-  .sparkle-1 {
+  .lavender-flower.flower-1 {
     top: 15%;
-    left: 20%;
+    right: 10%;
     animation-delay: 0s;
   }
 
-  .sparkle-2 {
-    top: 40%;
-    right: 25%;
-    animation-delay: 1s;
+  .lavender-flower.flower-2 {
+    top: 60%;
+    left: 8%;
+    animation-delay: 5s;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
   }
 
-  .sparkle-3 {
-    bottom: 30%;
-    left: 30%;
+  .lavender-flower.flower-3 {
+    bottom: 20%;
+    right: 15%;
+    animation-delay: 10s;
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+  }
+
+  .lavender-dot {
+    position: absolute;
+    width: clamp(8px, 1.5vw, 12px);
+    height: clamp(8px, 1.5vw, 12px);
+    background: var(--color-lavender);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: floatGentle 12s ease-in-out infinite;
+  }
+
+  .lavender-dot.dot-1 {
+    top: 25%;
+    left: 20%;
     animation-delay: 2s;
   }
 
-  .sparkle-4 {
+  .lavender-dot.dot-2 {
     top: 70%;
-    right: 20%;
-    animation-delay: 0.5s;
+    right: 25%;
+    animation-delay: 7s;
   }
 
-  .sparkle-5 {
-    top: 25%;
-    right: 40%;
-    animation-delay: 1.5s;
+  .lavender-dot.dot-3 {
+    bottom: 30%;
+    left: 15%;
+    animation-delay: 4s;
   }
 
-  .sparkle-6 {
-    bottom: 50%;
-    left: 50%;
-    animation-delay: 2.5s;
-  }
-
-  /* Ornamental Frame */
-  .ornamental-frame {
-    position: absolute;
+  /* Butterflies Container */
+  .butterflies-container {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 2;
+    z-index: 0;
+    overflow: hidden;
   }
 
-  .frame-corner {
+  .butterfly {
     position: absolute;
-    width: clamp(60px, 8vw, 100px);
-    height: clamp(60px, 8vw, 100px);
-    color: var(--color-gold);
-    opacity: 0.4;
-    animation: frameGlow 3s ease-in-out infinite;
+    width: clamp(40px, 5vw, 60px);
+    height: clamp(40px, 5vw, 60px);
+    opacity: 0.6;
+    filter: drop-shadow(0 2px 4px rgba(177, 156, 217, 0.3));
   }
 
-  .frame-top-left {
-    top: clamp(1rem, 2vw, 1.5rem);
-    left: clamp(1rem, 2vw, 1.5rem);
+  /* Butterfly 1 - Diagonal path from top-left to bottom-right */
+  .butterfly-1 {
+    top: -10%;
+    left: -5%;
+    animation: butterflyPath1 25s ease-in-out infinite;
     animation-delay: 0s;
   }
 
-  .frame-top-right {
-    top: clamp(1rem, 2vw, 1.5rem);
-    right: clamp(1rem, 2vw, 1.5rem);
-    animation-delay: 0.5s;
+  @keyframes butterflyPath1 {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(0.8);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(30vw, 25vh) rotate(15deg) scale(1);
+    }
+    50% {
+      transform: translate(60vw, 50vh) rotate(-10deg) scale(0.9);
+    }
+    75% {
+      transform: translate(90vw, 75vh) rotate(20deg) scale(1.1);
+    }
+    90% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(110vw, 110vh) rotate(0deg) scale(0.8);
+      opacity: 0;
+    }
   }
 
-  .frame-bottom-left {
-    bottom: clamp(1rem, 2vw, 1.5rem);
-    left: clamp(1rem, 2vw, 1.5rem);
-    animation-delay: 1s;
+  /* Butterfly 2 - Curved path from top-right to bottom-left */
+  .butterfly-2 {
+    top: -10%;
+    right: -5%;
+    animation: butterflyPath2 30s ease-in-out infinite;
+    animation-delay: 5s;
   }
 
-  .frame-bottom-right {
-    bottom: clamp(1rem, 2vw, 1.5rem);
-    right: clamp(1rem, 2vw, 1.5rem);
-    animation-delay: 1.5s;
+  @keyframes butterflyPath2 {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(0.9);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.5;
+    }
+    20% {
+      transform: translate(-20vw, 30vh) rotate(-20deg) scale(1);
+    }
+    40% {
+      transform: translate(-40vw, 45vh) rotate(25deg) scale(1.1);
+    }
+    60% {
+      transform: translate(-60vw, 60vh) rotate(-15deg) scale(0.95);
+    }
+    80% {
+      transform: translate(-85vw, 80vh) rotate(30deg) scale(1.05);
+    }
+    90% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(-110vw, 110vh) rotate(0deg) scale(0.9);
+      opacity: 0;
+    }
+  }
+
+  /* Butterfly 3 - Zigzag path from left to right */
+  .butterfly-3 {
+    top: 40%;
+    left: -10%;
+    animation: butterflyPath3 28s ease-in-out infinite;
+    animation-delay: 10s;
+  }
+
+  @keyframes butterflyPath3 {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(0.85);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.55;
+    }
+    20% {
+      transform: translate(25vw, -15vh) rotate(18deg) scale(1);
+    }
+    35% {
+      transform: translate(45vw, 10vh) rotate(-22deg) scale(1.05);
+    }
+    50% {
+      transform: translate(65vw, -8vh) rotate(15deg) scale(0.95);
+    }
+    65% {
+      transform: translate(80vw, 5vh) rotate(-18deg) scale(1.1);
+    }
+    80% {
+      transform: translate(95vw, -3vh) rotate(12deg) scale(1);
+    }
+    90% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translate(115vw, 0vh) rotate(0deg) scale(0.85);
+      opacity: 0;
+    }
+  }
+
+  /* Butterfly 4 - Wave path from bottom-left to top-right */
+  .butterfly-4 {
+    bottom: -10%;
+    left: -5%;
+    animation: butterflyPath4 32s ease-in-out infinite;
+    animation-delay: 15s;
+  }
+
+  @keyframes butterflyPath4 {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(0.9);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.5;
+    }
+    25% {
+      transform: translate(30vw, -20vh) rotate(-25deg) scale(1.05);
+    }
+    40% {
+      transform: translate(50vw, -35vh) rotate(20deg) scale(0.95);
+    }
+    55% {
+      transform: translate(70vw, -50vh) rotate(-18deg) scale(1.1);
+    }
+    70% {
+      transform: translate(85vw, -65vh) rotate(22deg) scale(1);
+    }
+    85% {
+      transform: translate(100vw, -80vh) rotate(-15deg) scale(0.9);
+    }
+    90% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(115vw, -110vh) rotate(0deg) scale(0.9);
+      opacity: 0;
+    }
+  }
+
+  /* Wing flapping animation */
+  .butterfly svg {
+    animation: wingFlap 0.3s ease-in-out infinite;
+  }
+
+  .butterfly-1 svg {
+    animation-duration: 0.25s;
+  }
+
+  .butterfly-2 svg {
+    animation-duration: 0.28s;
+    animation-delay: 0.05s;
+  }
+
+  .butterfly-3 svg {
+    animation-duration: 0.32s;
+    animation-delay: 0.1s;
+  }
+
+  .butterfly-4 svg {
+    animation-duration: 0.27s;
+    animation-delay: 0.08s;
+  }
+
+  @keyframes wingFlap {
+    0%, 100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(0.85);
+    }
   }
 
   /* Main Container */
   .invitation-container {
-    max-width: min(800px, 95vw);
+    max-width: min(700px, 95vw);
     width: 100%;
-    background: oklch(100% 0 0 / 0.96);
-    backdrop-filter: blur(10px);
-    border-radius: clamp(15px, 2vw, 20px);
-    padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+    background: #ffffff;
+    padding: clamp(3rem, 8vw, 5rem) clamp(2rem, 5vw, 4rem);
     box-shadow: 
-      0 20px 60px oklch(0% 0 0 / 0.08),
-      0 0 0 1px oklch(95% 0.01 0 / 0.5);
+      0 10px 40px var(--color-shadow),
+      0 0 0 1px var(--color-border);
     position: relative;
     z-index: 1;
-    animation: fadeInUp 1s ease-out;
-    margin: auto;
+    animation: fadeInUp 0.8s ease-out;
   }
 
-  /* Borders */
-  .border-top,
-  .border-bottom {
-    width: 100%;
-    height: clamp(80px, 10vw, 120px);
-    color: var(--color-gold);
-    margin: clamp(1.5rem, 3vw, 2rem) 0;
-    animation: shimmer 3s ease-in-out infinite;
-    filter: drop-shadow(0 2px 8px oklch(75% 0.15 85 / 0.2));
+  /* Elegant Divider */
+  .elegant-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: clamp(2rem, 5vw, 3rem) 0;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      to left,
+      transparent,
+      var(--color-lavender) 15%,
+      var(--color-secondary) 50%,
+      var(--color-lavender) 85%,
+      transparent
+    );
+    opacity: 0.4;
+  }
+
+  .divider-ornament {
+    color: var(--color-lavender);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    opacity: 0.6;
+    font-weight: 300;
+    letter-spacing: 0;
+    text-shadow: 0 0 10px var(--color-lavender-shadow);
+  }
+
+  /* Header Section */
+  .header-section {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
   }
 
   /* Names Section */
   .names-section {
     text-align: center;
-    margin: clamp(2rem, 4vw, 3rem) 0;
-    animation: fadeIn 1.5s ease-out;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(1rem, 2vw, 1.5rem);
+    margin: clamp(2.5rem, 6vw, 4rem) 0;
+    animation: fadeIn 1s ease-out 0.2s both;
   }
 
-  .name-wrapper {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin: 0;
-    text-align: center;
-  }
-
-  .name-full {
-    position: relative;
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: clamp(0.3rem, 1vw, 0.5rem);
-    z-index: 2;
-    line-height: 1.2;
+  .name-block {
+    margin: clamp(1.5rem, 4vw, 2.5rem) 0;
   }
 
   .name-main {
-    font-size: clamp(2rem, 8vw, 4rem);
-    font-weight: 700;
-    color: var(--color-rose);
+    font-size: clamp(2.2rem, 7vw, 3.5rem);
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-lavender-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
     letter-spacing: 0;
-    text-shadow: 
-      2px 2px 4px var(--color-shadow),
-      0 0 20px oklch(75% 0.15 85 / 0.2),
-      0 0 40px oklch(75% 0.15 85 / 0.1);
-    animation: nameGlow 3s ease-in-out infinite;
-    white-space: nowrap;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    font-family: "Vazir", "Tanha", "Shabnam", "Tahoma", "Arial", serif;
   }
 
-  .name-prefix,
-  .name-suffix {
-    font-size: clamp(0.9rem, 2.5vw, 1.4rem);
-    font-weight: 500;
-    color: var(--color-rose);
-    opacity: 0.75;
+  .name-surname {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 400;
+    color: var(--color-text-light);
+    line-height: 1.4;
     letter-spacing: 0;
-    text-shadow: 
-      1px 1px 2px var(--color-shadow),
-      0 0 10px oklch(75% 0.15 85 / 0.15);
-    white-space: nowrap;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    margin-top: 0.3rem;
+    font-family: "Vazir", "Tanha", "Shabnam", "Tahoma", "Arial", serif;
   }
 
-  .name-prefix {
-    margin-left: clamp(0.2rem, 0.5vw, 0.4rem);
+  .name-block-1 {
+    animation: fadeInLeft 0.8s ease-out 0.4s both;
   }
 
-  .name-suffix {
-    margin-right: clamp(0.2rem, 0.5vw, 0.4rem);
+  .name-block-2 {
+    animation: fadeInRight 0.8s ease-out 0.6s both;
   }
 
-  .name-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 150%;
-    height: 150%;
-    background: radial-gradient(
-      ellipse at center,
-      oklch(75% 0.15 85 / 0.3) 0%,
-      oklch(75% 0.15 85 / 0.1) 40%,
-      transparent 70%
+  /* Names Connector */
+  .names-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: clamp(1.5rem, 4vw, 2.5rem) 0;
+    animation: fadeIn 1s ease-out 0.5s both;
+  }
+
+  .connector-line {
+    width: clamp(60px, 15vw, 100px);
+    height: 1px;
+    background: linear-gradient(
+      to left,
+      transparent,
+      var(--color-lavender) 30%,
+      var(--color-secondary) 50%,
+      var(--color-lavender) 70%,
+      transparent
     );
-    border-radius: 50%;
-    z-index: 1;
-    animation: glowPulse 3s ease-in-out infinite;
-    pointer-events: none;
+    opacity: 0.5;
   }
 
-  .name-sparkle {
-    position: absolute;
-    width: clamp(20px, 3vw, 30px);
-    height: clamp(20px, 3vw, 30px);
-    color: var(--color-gold);
-    opacity: 0;
-    z-index: 3;
-    animation: nameSparkleTwinkle 3s ease-in-out infinite;
-  }
-
-  .name-wrapper-1 .sparkle-left {
-    right: clamp(-5%, -2vw, -2%);
-    top: 50%;
-    transform: translateY(-50%);
-    animation-delay: 0s;
-  }
-
-  .name-wrapper-1 .sparkle-right {
-    left: clamp(-5%, -2vw, -2%);
-    top: 50%;
-    transform: translateY(-50%);
-    animation-delay: 1s;
-  }
-
-  .name-wrapper-2 .sparkle-left {
-    right: clamp(-5%, -2vw, -2%);
-    top: 50%;
-    transform: translateY(-50%);
-    animation-delay: 1.5s;
-  }
-
-  .name-wrapper-2 .sparkle-right {
-    left: clamp(-5%, -2vw, -2%);
-    top: 50%;
-    transform: translateY(-50%);
-    animation-delay: 0.5s;
-  }
-
-  .name-wrapper-1 {
-    animation: fadeInLeft 1s ease-out 0.5s both;
-  }
-
-  .name-wrapper-2 {
-    animation: fadeInRight 1s ease-out 0.7s both;
-  }
-
-  .connecting-hearts {
-    width: clamp(180px, 30vw, 250px);
-    height: clamp(60px, 10vw, 80px);
-    margin: clamp(0.75rem, 2vw, 1rem) auto;
-    color: var(--color-gold);
-    animation: pulse 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px oklch(75% 0.15 85 / 0.4));
-  }
-
-  /* Divider */
-  .divider {
-    width: 100%;
-    height: clamp(60px, 8vw, 80px);
-    color: var(--color-gold);
-    margin: clamp(2rem, 4vw, 3rem) 0;
+  .connector-heart {
+    color: var(--color-lavender);
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    opacity: 0.7;
+    animation: heartPulse 2s ease-in-out infinite;
+    text-shadow: 0 0 8px var(--color-lavender-shadow);
   }
 
   /* Invitation Text */
   .invitation-text {
     text-align: center;
-    margin: clamp(2rem, 4vw, 3rem) 0;
-    color: var(--color-purple);
-    animation: fadeIn 2s ease-out;
+    margin: clamp(2.5rem, 6vw, 4rem) 0;
+    color: var(--color-text);
+    animation: fadeIn 1.2s ease-out 0.8s both;
   }
 
-  .intro-text {
-    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-    font-style: italic;
-    margin-bottom: clamp(0.75rem, 2vw, 1rem);
-    color: var(--color-rose);
-    line-height: 1.6;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
-  }
-
-  .main-text {
-    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
-    margin: clamp(0.4rem, 1vw, 0.5rem) 0;
-    letter-spacing: 0;
+  .invitation-line-1 {
+    font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+    font-weight: 400;
+    color: var(--color-text-light);
+    margin-bottom: 0.8rem;
     line-height: 1.8;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    font-style: normal;
+    letter-spacing: 0;
+  }
+
+  .invitation-line-2 {
+    font-size: clamp(1.3rem, 3.5vw, 1.7rem);
+    font-weight: 500;
+    color: var(--color-primary);
+    line-height: 1.8;
+    letter-spacing: 0;
+    position: relative;
+  }
+
+  .invitation-line-2::before {
+    content: '✿';
+    color: var(--color-lavender);
+    opacity: 0.4;
+    margin-left: 0.5rem;
+    font-size: 0.8em;
+  }
+
+  .invitation-line-2::after {
+    content: '✿';
+    color: var(--color-lavender);
+    opacity: 0.4;
+    margin-right: 0.5rem;
+    font-size: 0.8em;
   }
 
   /* Details Section */
   .details-section {
-    margin: clamp(2rem, 4vw, 3rem) 0;
+    margin: clamp(2.5rem, 6vw, 4rem) 0;
     display: flex;
     flex-direction: column;
-    gap: clamp(1.25rem, 3vw, 2rem);
-    animation: fadeIn 2.5s ease-out;
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+    animation: fadeIn 1.4s ease-out 1s both;
   }
 
-  a.detail-item{
+  .detail-card {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.2rem, 3vw, 1.8rem);
+    padding: clamp(1.5rem, 3.5vw, 2rem);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
   }
-  .detail-item {
+
+  .detail-card:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 4px 20px var(--color-lavender-shadow), 0 2px 8px var(--color-shadow-hover);
+    border-color: var(--color-lavender);
+    background: linear-gradient(135deg, #ffffff 0%, var(--color-lavender-bg) 100%);
+  }
+
+  .detail-card-link:hover {
+    cursor: pointer;
+  }
+
+  .detail-icon-wrapper {
+    flex-shrink: 0;
+    width: clamp(45px, 6vw, 55px);
+    height: clamp(45px, 6vw, 55px);
     display: flex;
     align-items: center;
-    gap: clamp(1rem, 2.5vw, 1.5rem);
-    padding: clamp(1.25rem, 2.5vw, 1.5rem);
-    background: linear-gradient(
-      135deg,
-      oklch(100% 0 0 / 0.85) 0%,
-      oklch(98% 0.005 330 / 0.85) 100%
-    );
-    border-radius: clamp(12px, 2vw, 15px);
-    border-right: clamp(3px, 0.5vw, 4px) solid var(--color-gold);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  }
-
-  .detail-item:hover {
-    transform: translateX(-10px);
-    box-shadow: 
-      0 5px 20px var(--color-shadow-gold),
-      0 0 30px oklch(75% 0.15 85 / 0.15);
-    background: linear-gradient(
-      135deg,
-      oklch(100% 0 0 / 0.95) 0%,
-      oklch(98% 0.005 330 / 0.95) 100%
-    );
-    border-right-color: var(--color-gold-light);
-  }
-
-  .detail-item:active {
-    transform: translateX(-5px);
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(177, 156, 217, 0.12) 0%, rgba(139, 115, 85, 0.08) 100%);
+    border-radius: 50%;
+    color: var(--color-lavender-dark);
+    border: 1px solid rgba(177, 156, 217, 0.2);
+    transition: all 0.3s ease;
   }
 
   .detail-icon {
-    width: clamp(35px, 5vw, 40px);
-    height: clamp(35px, 5vw, 40px);
-    color: var(--color-gold);
-    flex-shrink: 0;
-    filter: drop-shadow(0 0 4px oklch(75% 0.15 85 / 0.3));
-    transition: transform 0.3s ease, filter 0.3s ease;
+    width: clamp(22px, 3vw, 26px);
+    height: clamp(22px, 3vw, 26px);
+    stroke: currentColor;
   }
 
-  .detail-item:hover .detail-icon {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 8px oklch(75% 0.15 85 / 0.5));
+  .detail-card:hover .detail-icon-wrapper {
+    background: linear-gradient(135deg, rgba(177, 156, 217, 0.25) 0%, rgba(139, 115, 85, 0.15) 100%);
+    transform: scale(1.05);
+    border-color: var(--color-lavender);
+    box-shadow: 0 0 15px var(--color-lavender-shadow);
   }
 
-  .detail-content {
+  .detail-info {
     flex: 1;
-    min-width: 0; /* Allows text to wrap properly */
+    min-width: 0;
   }
 
   .detail-label {
-    font-size: clamp(0.8rem, 2vw, 0.9rem);
-    color: var(--color-rose);
-    text-transform: none;
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+    color: var(--color-text-light);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
     letter-spacing: 0;
-    margin-bottom: clamp(0.2rem, 0.5vw, 0.3rem);
-    font-weight: 600;
-    line-height: 1.6;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    text-transform: none;
   }
 
   .detail-value {
-    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-    color: var(--color-purple);
+    font-size: clamp(1.1rem, 2.8vw, 1.3rem);
+    color: var(--color-primary);
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1.5;
     word-wrap: break-word;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    letter-spacing: 0;
   }
 
   .detail-subvalue {
-    font-size: clamp(0.9rem, 2vw, 1rem);
-    color: var(--color-rose);
-    margin-top: clamp(0.2rem, 0.5vw, 0.3rem);
-    opacity: 0.85;
-    line-height: 1.4;
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
+    color: var(--color-text-light);
+    margin-top: 0.3rem;
+    line-height: 1.5;
     word-wrap: break-word;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    letter-spacing: 0;
   }
 
-  /* Closing Message */
+  /* Footer Section */
+  .footer-section {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    animation: fadeIn 1.6s ease-out 1.2s both;
+  }
+
   .closing-message {
     text-align: center;
-    margin: clamp(2rem, 4vw, 3rem) 0;
-    color: var(--color-purple);
-    animation: fadeIn 3s ease-out;
+    margin-top: clamp(2rem, 5vw, 3rem);
   }
 
-  .closing-message p {
+  .closing-text {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
-    margin: clamp(0.4rem, 1vw, 0.5rem) 0;
-    font-style: italic;
-    line-height: 1.6;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
+    color: var(--color-text);
+    line-height: 1.8;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    letter-spacing: 0;
+    font-style: normal;
   }
 
   .signature {
-    margin-top: clamp(1.5rem, 3vw, 2rem);
-    padding-top: clamp(1.5rem, 3vw, 2rem);
-    border-top: 1px solid oklch(75% 0.15 85 / 0.25);
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
+    padding-top: clamp(1.5rem, 4vw, 2.5rem);
+    border-top: 1px solid var(--color-border);
+    position: relative;
   }
 
-  .signature p {
-    margin: clamp(0.4rem, 1vw, 0.5rem) 0;
-    font-size: clamp(1rem, 2.2vw, 1.1rem);
+  .signature::before {
+    content: '✿';
+    position: absolute;
+    top: -0.5rem;
+    right: 50%;
+    transform: translateX(50%);
+    color: var(--color-lavender);
+    opacity: 0.5;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    background: #ffffff;
+    padding: 0 0.5rem;
+  }
+
+  .signature-text {
+    font-size: clamp(0.95rem, 2.3vw, 1.1rem);
+    color: var(--color-text-light);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0;
+    font-style: normal;
   }
 
   .signature-names {
-    font-size: clamp(1.2rem, 3vw, 1.5rem) !important;
-    font-weight: 700;
-    color: var(--color-rose);
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-lavender-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: 0;
-    margin-top: clamp(0.75rem, 2vw, 1rem) !important;
-    font-family: "persian-font", "Tahoma", "Arial", "Segoe UI", "Vazir", "Tanha", "Shabnam", "title-font", serif;
-  }
-
-  /* Bottom Hearts */
-  .bottom-hearts {
-    display: flex;
-    justify-content: center;
-    gap: clamp(1.25rem, 3vw, 2rem);
-    margin-top: clamp(2rem, 4vw, 3rem);
-    animation: fadeIn 3.5s ease-out;
-    flex-wrap: wrap;
-  }
-
-  .bottom-hearts svg {
-    width: clamp(25px, 4vw, 30px);
-    height: clamp(25px, 4vw, 30px);
-    color: var(--color-gold);
-    opacity: 0.6;
-    animation: heartBeat 2s ease-in-out infinite;
-  }
-
-  .bottom-hearts svg:nth-child(2) {
-    animation-delay: 0.3s;
-  }
-
-  .bottom-hearts svg:nth-child(3) {
-    animation-delay: 0.6s;
+    margin-top: 0.5rem;
   }
 
   /* Animations */
-  @keyframes float1 {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(5deg); }
-    66% { transform: translate(-20px, 20px) rotate(-5deg); }
-  }
-
-  @keyframes float2 {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(-40px, 40px) rotate(-5deg); }
-    66% { transform: translate(30px, -30px) rotate(5deg); }
-  }
-
-  @keyframes float3 {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    50% { transform: translate(20px, -20px) rotate(3deg); }
-  }
-
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -934,7 +875,7 @@ import Layout from "../layouts/Layout.astro";
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
@@ -945,7 +886,7 @@ import Layout from "../layouts/Layout.astro";
   @keyframes fadeInLeft {
     from {
       opacity: 0;
-      transform: translateX(50px);
+      transform: translateX(30px);
     }
     to {
       opacity: 1;
@@ -956,7 +897,7 @@ import Layout from "../layouts/Layout.astro";
   @keyframes fadeInRight {
     from {
       opacity: 0;
-      transform: translateX(-50px);
+      transform: translateX(-30px);
     }
     to {
       opacity: 1;
@@ -964,246 +905,257 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
-  @keyframes nameGlow {
-    0%, 100% {
-      text-shadow: 
-        2px 2px 4px var(--color-shadow),
-        0 0 20px oklch(75% 0.15 85 / 0.3);
-    }
-    50% {
-      text-shadow: 
-        2px 2px 4px var(--color-shadow),
-        0 0 30px oklch(75% 0.15 85 / 0.5);
-    }
-  }
-
-  @keyframes pulse {
+  @keyframes heartPulse {
     0%, 100% {
       transform: scale(1);
-      opacity: 0.8;
+      opacity: 0.7;
     }
     50% {
-      transform: scale(1.1);
-      opacity: 1;
-    }
-  }
-
-  @keyframes shimmer {
-    0%, 100% {
-      opacity: 0.3;
-    }
-    50% {
-      opacity: 0.6;
-    }
-  }
-
-  @keyframes heartBeat {
-    0%, 100% {
-      transform: scale(1);
-    }
-    25% {
-      transform: scale(1.2);
-    }
-    50% {
-      transform: scale(1);
-    }
-    75% {
       transform: scale(1.15);
+      opacity: 0.9;
     }
   }
 
-  @keyframes sparkleTwinkle {
+  @keyframes floatGentle {
     0%, 100% {
-      opacity: 0;
-      transform: scale(0.5) rotate(0deg);
+      transform: translate(0, 0) rotate(0deg);
     }
-    50% {
-      opacity: 0.8;
-      transform: scale(1.2) rotate(180deg);
+    33% {
+      transform: translate(15px, -15px) rotate(5deg);
     }
-  }
-
-  @keyframes frameGlow {
-    0%, 100% {
-      opacity: 0.3;
-      filter: drop-shadow(0 0 5px oklch(75% 0.15 85 / 0.3));
-    }
-    50% {
-      opacity: 0.6;
-      filter: drop-shadow(0 0 15px oklch(75% 0.15 85 / 0.6));
+    66% {
+      transform: translate(-10px, 10px) rotate(-5deg);
     }
   }
 
-  @keyframes glowPulse {
-    0%, 100% {
-      opacity: 0.5;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: translate(-50%, -50%) scale(1.1);
-    }
-  }
-
-  @keyframes nameSparkleTwinkle {
-    0%, 100% {
-      opacity: 0;
-      transform: translateY(-50%) scale(0.3) rotate(0deg);
-    }
-    50% {
-      opacity: 1;
-      transform: translateY(-50%) scale(1.2) rotate(180deg);
-    }
-  }
-
-  /* Responsive Design - Mobile First Approach */
-  @media (max-width: 640px) {
-    .wedding-invitation {
-      padding: clamp(0.75rem, 2vw, 1rem);
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .elegant-divider {
+      gap: 0.75rem;
+      margin: clamp(1.5rem, 4vw, 2.5rem) 0;
     }
 
-    .invitation-container {
-      padding: clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 3vw, 1.5rem);
-      border-radius: clamp(12px, 2vw, 15px);
+    .divider-ornament {
+      font-size: clamp(0.9rem, 2.2vw, 1.1rem);
     }
 
-    .names-section {
-      margin: clamp(1.5rem, 3vw, 2rem) 0;
+    .names-connector {
+      gap: 0.75rem;
     }
 
-    .invitation-text {
-      margin: clamp(1.5rem, 3vw, 2rem) 0;
+    .connector-line {
+      width: clamp(50px, 12vw, 80px);
     }
 
-    .details-section {
-      margin: clamp(1.5rem, 3vw, 2rem) 0;
-      gap: clamp(1rem, 2.5vw, 1.25rem);
+    .lavender-flower {
+      opacity: 0.1;
     }
 
-    .detail-item {
-      flex-direction: column;
-      text-align: center;
-      gap: clamp(0.75rem, 2vw, 1rem);
-      padding: clamp(1rem, 2.5vw, 1.25rem);
-    }
-
-    .detail-item:hover {
-      transform: translateY(-5px);
-    }
-
-    .detail-item:active {
-      transform: translateY(-2px);
-    }
-
-    .detail-icon {
-      margin-bottom: 0.5rem;
-    }
-
-    .closing-message {
-      margin: clamp(1.5rem, 3vw, 2rem) 0;
-    }
-
-    .heart-1,
-    .heart-2,
-    .heart-3 {
+    .lavender-dot {
       opacity: 0.15;
     }
 
-    .flower-1,
-    .flower-2 {
-      opacity: 0.12;
+    .butterfly {
+      width: clamp(30px, 4vw, 50px);
+      height: clamp(30px, 4vw, 50px);
+      opacity: 0.4;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .wedding-invitation {
+      padding: clamp(1rem, 3vw, 1.5rem);
     }
 
-    .sparkle {
-      opacity: 0;
+    .invitation-container {
+      padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2rem);
     }
 
-    .frame-corner {
-      width: clamp(40px, 6vw, 60px);
-      height: clamp(40px, 6vw, 60px);
-      opacity: 0.2;
+    .names-section {
+      margin: clamp(2rem, 5vw, 3rem) 0;
     }
 
-    .name-sparkle {
-      width: clamp(15px, 2.5vw, 20px);
-      height: clamp(15px, 2.5vw, 20px);
-    }
-
-    .name-full {
-      gap: clamp(0.2rem, 0.8vw, 0.4rem);
+    .name-block {
+      margin: clamp(1rem, 3vw, 2rem) 0;
     }
 
     .name-main {
-      font-size: clamp(1.8rem, 7vw, 3.5rem);
+      font-size: clamp(1.9rem, 6.5vw, 3rem);
     }
 
-    .name-prefix,
-    .name-suffix {
-      font-size: clamp(0.8rem, 2vw, 1.2rem);
+    .name-surname {
+      font-size: clamp(1.3rem, 3.8vw, 1.8rem);
+    }
+
+    .invitation-text {
+      margin: clamp(2rem, 5vw, 3rem) 0;
+    }
+
+    .invitation-line-1 {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+    }
+
+    .invitation-line-2 {
+      font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+    }
+
+    .details-section {
+      margin: clamp(2rem, 5vw, 3rem) 0;
+      gap: clamp(0.9rem, 2vw, 1.2rem);
+    }
+
+    .detail-card {
+      flex-direction: column;
+      text-align: center;
+      gap: clamp(1rem, 2.5vw, 1.3rem);
+      padding: clamp(1.3rem, 3vw, 1.8rem);
+    }
+
+    .detail-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .detail-icon-wrapper {
+      margin-bottom: 0.5rem;
+      width: clamp(50px, 7vw, 60px);
+      height: clamp(50px, 7vw, 60px);
+    }
+
+    .detail-icon {
+      width: clamp(24px, 3.5vw, 28px);
+      height: clamp(24px, 3.5vw, 28px);
+    }
+
+    .footer-section {
+      margin-top: clamp(2rem, 5vw, 3rem);
+    }
+
+    .closing-text {
+      font-size: clamp(0.95rem, 2.3vw, 1.1rem);
+    }
+
+    .signature-names {
+      font-size: clamp(1.1rem, 2.8vw, 1.4rem);
     }
   }
 
   @media (max-width: 480px) {
-    .wedding-invitation {
-      padding: 0.5rem;
-    }
-
     .invitation-container {
-      padding: 1.25rem 1rem;
-    }
-
-    .border-top,
-    .border-bottom {
-      height: clamp(40px, 6vw, 60px);
-      margin: clamp(1rem, 2vw, 1.5rem) 0;
-    }
-
-    .divider {
-      height: clamp(40px, 6vw, 60px);
-      margin: clamp(1.5rem, 3vw, 2rem) 0;
-    }
-
-    .connecting-hearts {
-      width: clamp(120px, 20vw, 150px);
-      height: clamp(35px, 6vw, 45px);
-    }
-
-    .name-full {
-      flex-direction: column;
-      gap: 0.2rem;
+      padding: 1.5rem 1.25rem;
     }
 
     .name-main {
-      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-size: clamp(1.8rem, 6vw, 2.5rem);
     }
 
-    .name-prefix,
-    .name-suffix {
-      font-size: clamp(0.7rem, 1.8vw, 1rem);
+    .name-surname {
+      font-size: clamp(1.2rem, 3.5vw, 1.6rem);
     }
 
-    .name-prefix {
-      margin-left: 0;
-      margin-bottom: 0.1rem;
+    .connector-line {
+      width: clamp(40px, 12vw, 70px);
     }
 
-    .name-suffix {
-      margin-right: 0;
-      margin-top: 0.1rem;
+    .elegant-divider {
+      gap: 0.5rem;
+      margin: clamp(1.25rem, 3.5vw, 2rem) 0;
+    }
+
+    .divider-line {
+      opacity: 0.3;
+    }
+
+    .divider-ornament {
+      font-size: clamp(0.85rem, 2vw, 1rem);
+      opacity: 0.5;
+    }
+
+    .invitation-line-2::before,
+    .invitation-line-2::after {
+      font-size: 0.7em;
+      margin: 0 0.3rem;
+    }
+
+    .detail-label {
+      font-size: clamp(0.7rem, 1.6vw, 0.8rem);
+    }
+
+    .detail-value {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+    }
+
+    .detail-subvalue {
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+    }
+
+    .lavender-flower {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      opacity: 0.08;
+    }
+
+    .lavender-dot {
+      width: clamp(6px, 1.2vw, 10px);
+      height: clamp(6px, 1.2vw, 10px);
+      opacity: 0.12;
+    }
+
+    .butterfly {
+      width: clamp(25px, 3.5vw, 40px);
+      height: clamp(25px, 3.5vw, 40px);
+      opacity: 0.3;
     }
   }
 
   /* Tablet and Medium Screens */
   @media (min-width: 641px) and (max-width: 1024px) {
     .invitation-container {
-      max-width: min(700px, 90vw);
+      max-width: min(650px, 90vw);
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(2rem, 5vw, 3.5rem);
+    }
+
+    .name-main {
+      font-size: clamp(2.5rem, 6.5vw, 3.2rem);
+    }
+
+    .name-surname {
+      font-size: clamp(1.5rem, 4.2vw, 1.9rem);
+    }
+
+    .detail-card {
+      padding: clamp(1.4rem, 3.2vw, 1.9rem);
     }
   }
 
   /* Large Screens */
   @media (min-width: 1025px) {
     .invitation-container {
-      max-width: 800px;
+      max-width: 700px;
+      padding: clamp(3.5rem, 7vw, 5rem) clamp(2.5rem, 5vw, 4rem);
+    }
+
+    .lavender-flower {
+      opacity: 0.18;
+    }
+
+    .lavender-dot {
+      opacity: 0.25;
+    }
+
+    .butterfly {
+      opacity: 0.7;
+      width: clamp(50px, 6vw, 70px);
+      height: clamp(50px, 6vw, 70px);
+    }
+  }
+
+  /* Extra Large Screens */
+  @media (min-width: 1440px) {
+    .invitation-container {
+      max-width: 750px;
+    }
+
+    .name-main {
+      font-size: clamp(3.2rem, 6vw, 3.8rem);
     }
   }
 
@@ -1215,25 +1167,15 @@ import Layout from "../layouts/Layout.astro";
     }
 
     .invitation-container {
-      padding: clamp(1.5rem, 3vh, 2.5rem) clamp(1.5rem, 4vw, 2.5rem);
+      padding: clamp(2rem, 4vh, 3rem) clamp(2rem, 5vw, 3rem);
       margin: 1rem auto;
     }
 
-    .names-section {
-      margin: clamp(1rem, 2vh, 2rem) 0;
-    }
-
+    .names-section,
     .invitation-text,
     .details-section,
-    .closing-message {
-      margin: clamp(1rem, 2vh, 1.5rem) 0;
-    }
-
-    .border-top,
-    .border-bottom,
-    .divider {
-      margin: clamp(1rem, 2vh, 1.5rem) 0;
-      height: clamp(40px, 6vh, 60px);
+    .footer-section {
+      margin: clamp(1.5rem, 3vh, 2rem) 0;
     }
   }
 
@@ -1251,38 +1193,39 @@ import Layout from "../layouts/Layout.astro";
   /* High Contrast Mode Support */
   @media (prefers-contrast: high) {
     .invitation-container {
-      background: oklch(100% 0 0);
-      border: 2px solid var(--color-gold);
+      border: 2px solid var(--color-primary);
     }
 
-    .name {
-      text-shadow: 2px 2px 4px var(--color-shadow);
-    }
-
-    .detail-item {
-      border-right-width: 5px;
+    .detail-card {
+      border-width: 2px;
     }
   }
 
   /* Print Styles */
   @media print {
     .wedding-invitation {
-      background: oklch(100% 0 0);
+      background: #ffffff;
       padding: 0;
     }
 
-    .background-elements {
+    .background-pattern {
+      display: none;
+    }
+
+    .lavender-elements,
+    .butterflies-container {
       display: none;
     }
 
     .invitation-container {
       box-shadow: none;
-      border: 1px solid oklch(0% 0 0 / 0.1);
+      border: 1px solid var(--color-border);
+      padding: 2rem;
     }
 
-    .bottom-hearts svg {
-      animation: none;
+    .detail-card:hover {
+      transform: none;
+      box-shadow: none;
     }
   }
 </style>
-
