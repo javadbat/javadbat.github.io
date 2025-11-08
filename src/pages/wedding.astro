@@ -25,93 +25,237 @@ import Layout from "../layouts/Layout.astro";
       <svg class="butterfly butterfly-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="butterflyGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.8" />
-            <stop offset="50%" style="stop-color:#d4c4e8;stop-opacity:0.6" />
-            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.8" />
+            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.85" />
+            <stop offset="30%" style="stop-color:#d4c4e8;stop-opacity:0.7" />
+            <stop offset="70%" style="stop-color:#a08bc7;stop-opacity:0.75" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.85" />
           </linearGradient>
+          <radialGradient id="wingSpot1" cx="35%" cy="35%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.35" />
+            <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+          </radialGradient>
         </defs>
-        <!-- Left wing -->
-        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad1)" opacity="0.7"/>
-        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.5"/>
-        <!-- Right wing -->
-        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad1)" opacity="0.7"/>
-        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.5"/>
-        <!-- Body -->
-        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.8"/>
-        <!-- Antennae -->
-        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.6"/>
-        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.6"/>
-        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.6"/>
-        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.6"/>
+        <!-- Body (static) -->
+        <ellipse cx="50" cy="50" rx="2.5" ry="38" fill="#6b5b88" opacity="0.85"/>
+        <ellipse cx="50" cy="50" rx="1.5" ry="35" fill="#8b7ba8" opacity="0.6"/>
+        <circle cx="50" cy="40" r="2" fill="#5a4a75" opacity="0.5"/>
+        <circle cx="50" cy="50" r="2" fill="#5a4a75" opacity="0.5"/>
+        <circle cx="50" cy="60" r="2" fill="#5a4a75" opacity="0.5"/>
+        <!-- Antennae (static) -->
+        <path d="M 50 12 Q 48 16 46 20" stroke="#6b5b88" stroke-width="1.2" opacity="0.7" fill="none" stroke-linecap="round"/>
+        <path d="M 50 12 Q 52 16 54 20" stroke="#6b5b88" stroke-width="1.2" opacity="0.7" fill="none" stroke-linecap="round"/>
+        <circle cx="46" cy="20" r="1.8" fill="#6b5b88" opacity="0.8"/>
+        <circle cx="54" cy="20" r="1.8" fill="#6b5b88" opacity="0.8"/>
+        
+        <!-- Left upper wing -->
+        <g class="wing-left-upper">
+          <path d="M 50 35 C 40 25, 25 20, 15 30 C 10 40, 12 50, 18 55 C 25 58, 35 55, 42 50 C 38 45, 35 40, 50 35 Z" 
+                fill="url(#butterflyGrad1)" opacity="0.75"/>
+          <ellipse cx="28" cy="38" rx="8" ry="12" fill="url(#wingSpot1)"/>
+          <ellipse cx="25" cy="45" rx="4" ry="6" fill="#ffffff" opacity="0.4"/>
+          <path d="M 50 35 L 30 40 L 20 50" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+          <path d="M 50 35 L 25 38 L 18 48" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+        </g>
+        <!-- Left lower wing -->
+        <g class="wing-left-lower">
+          <path d="M 50 50 C 45 55, 35 60, 20 65 C 15 70, 18 75, 25 78 C 32 80, 40 78, 45 75 C 42 70, 40 65, 50 50 Z" 
+                fill="url(#butterflyGrad1)" opacity="0.7"/>
+          <path d="M 50 50 L 30 60 L 22 70" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+        </g>
+        
+        <!-- Right upper wing -->
+        <g class="wing-right-upper">
+          <path d="M 50 35 C 60 25, 75 20, 85 30 C 90 40, 88 50, 82 55 C 75 58, 65 55, 58 50 C 62 45, 65 40, 50 35 Z" 
+                fill="url(#butterflyGrad1)" opacity="0.75"/>
+          <ellipse cx="72" cy="38" rx="8" ry="12" fill="url(#wingSpot1)"/>
+          <ellipse cx="75" cy="45" rx="4" ry="6" fill="#ffffff" opacity="0.4"/>
+          <path d="M 50 35 L 70 40 L 80 50" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+          <path d="M 50 35 L 75 38 L 82 48" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+        </g>
+        <!-- Right lower wing -->
+        <g class="wing-right-lower">
+          <path d="M 50 50 C 55 55, 65 60, 80 65 C 85 70, 82 75, 75 78 C 68 80, 60 78, 55 75 C 58 70, 60 65, 50 50 Z" 
+                fill="url(#butterflyGrad1)" opacity="0.7"/>
+          <path d="M 50 50 L 70 60 L 78 70" stroke="#8b7ba8" stroke-width="0.5" opacity="0.4" fill="none"/>
+        </g>
       </svg>
 
       <svg class="butterfly butterfly-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="butterflyGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#d4c4e8;stop-opacity:0.7" />
-            <stop offset="50%" style="stop-color:#b19cd9;stop-opacity:0.5" />
-            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.7" />
+            <stop offset="0%" style="stop-color:#d4c4e8;stop-opacity:0.8" />
+            <stop offset="40%" style="stop-color:#b19cd9;stop-opacity:0.65" />
+            <stop offset="70%" style="stop-color:#c5b0e0;stop-opacity:0.7" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.8" />
           </linearGradient>
+          <radialGradient id="wingSpot2" cx="35%" cy="35%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.35" />
+            <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+          </radialGradient>
         </defs>
-        <!-- Left wing -->
-        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad2)" opacity="0.6"/>
-        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.4"/>
-        <!-- Right wing -->
-        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad2)" opacity="0.6"/>
-        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.4"/>
-        <!-- Body -->
-        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.7"/>
-        <!-- Antennae -->
-        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.5"/>
-        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.5"/>
-        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.5"/>
-        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.5"/>
+        <!-- Body (static) -->
+        <ellipse cx="50" cy="50" rx="2.5" ry="36" fill="#6b5b88" opacity="0.8"/>
+        <ellipse cx="50" cy="50" rx="1.5" ry="33" fill="#8b7ba8" opacity="0.55"/>
+        <circle cx="50" cy="42" r="1.8" fill="#5a4a75" opacity="0.45"/>
+        <circle cx="50" cy="50" r="1.8" fill="#5a4a75" opacity="0.45"/>
+        <circle cx="50" cy="58" r="1.8" fill="#5a4a75" opacity="0.45"/>
+        <!-- Antennae (static) -->
+        <path d="M 50 13 Q 48 17 46 21" stroke="#6b5b88" stroke-width="1.1" opacity="0.65" fill="none" stroke-linecap="round"/>
+        <path d="M 50 13 Q 52 17 54 21" stroke="#6b5b88" stroke-width="1.1" opacity="0.65" fill="none" stroke-linecap="round"/>
+        <circle cx="46" cy="21" r="1.6" fill="#6b5b88" opacity="0.75"/>
+        <circle cx="54" cy="21" r="1.6" fill="#6b5b88" opacity="0.75"/>
+        
+        <!-- Left upper wing -->
+        <g class="wing-left-upper">
+          <path d="M 50 36 C 38 24, 22 18, 12 28 C 8 38, 10 48, 16 53 C 23 56, 33 53, 40 48 C 36 42, 33 38, 50 36 Z" 
+                fill="url(#butterflyGrad2)" opacity="0.7"/>
+          <ellipse cx="26" cy="36" rx="9" ry="13" fill="url(#wingSpot2)"/>
+          <ellipse cx="23" cy="44" rx="5" ry="7" fill="#ffffff" opacity="0.45"/>
+          <ellipse cx="28" cy="50" rx="3" ry="4" fill="#ffffff" opacity="0.3"/>
+          <path d="M 50 36 L 28 40 L 18 50" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+          <path d="M 50 36 L 25 38 L 16 48" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+        </g>
+        <!-- Left lower wing -->
+        <g class="wing-left-lower">
+          <path d="M 50 50 C 44 56, 32 62, 18 67 C 12 72, 16 77, 23 80 C 30 82, 38 80, 43 77 C 40 72, 38 67, 50 50 Z" 
+                fill="url(#butterflyGrad2)" opacity="0.65"/>
+          <path d="M 50 50 L 28 62 L 20 72" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+        </g>
+        
+        <!-- Right upper wing -->
+        <g class="wing-right-upper">
+          <path d="M 50 36 C 62 24, 78 18, 88 28 C 92 38, 90 48, 84 53 C 77 56, 67 53, 60 48 C 64 42, 67 38, 50 36 Z" 
+                fill="url(#butterflyGrad2)" opacity="0.7"/>
+          <ellipse cx="74" cy="36" rx="9" ry="13" fill="url(#wingSpot2)"/>
+          <ellipse cx="77" cy="44" rx="5" ry="7" fill="#ffffff" opacity="0.45"/>
+          <ellipse cx="72" cy="50" rx="3" ry="4" fill="#ffffff" opacity="0.3"/>
+          <path d="M 50 36 L 72 40 L 82 50" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+          <path d="M 50 36 L 75 38 L 84 48" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+        </g>
+        <!-- Right lower wing -->
+        <g class="wing-right-lower">
+          <path d="M 50 50 C 56 56, 68 62, 82 67 C 88 72, 84 77, 77 80 C 70 82, 62 80, 57 77 C 60 72, 62 67, 50 50 Z" 
+                fill="url(#butterflyGrad2)" opacity="0.65"/>
+          <path d="M 50 50 L 72 62 L 80 72" stroke="#8b7ba8" stroke-width="0.6" opacity="0.35" fill="none"/>
+        </g>
       </svg>
 
       <svg class="butterfly butterfly-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="butterflyGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#8b7ba8;stop-opacity:0.6" />
-            <stop offset="50%" style="stop-color:#b19cd9;stop-opacity:0.4" />
-            <stop offset="100%" style="stop-color:#d4c4e8;stop-opacity:0.6" />
+            <stop offset="0%" style="stop-color:#8b7ba8;stop-opacity:0.7" />
+            <stop offset="35%" style="stop-color:#b19cd9;stop-opacity:0.55" />
+            <stop offset="65%" style="stop-color:#9d8bc0;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#d4c4e8;stop-opacity:0.7" />
           </linearGradient>
+          <radialGradient id="wingSpot3" cx="40%" cy="45%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4" />
+            <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+          </radialGradient>
         </defs>
-        <!-- Left wing -->
-        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad3)" opacity="0.5"/>
-        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.3"/>
-        <!-- Right wing -->
-        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad3)" opacity="0.5"/>
-        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#d4c4e8" opacity="0.3"/>
-        <!-- Body -->
-        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.6"/>
-        <!-- Antennae -->
-        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.4"/>
-        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.4"/>
-        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.4"/>
-        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.4"/>
+        <!-- Body (static) -->
+        <ellipse cx="50" cy="50" rx="2.5" ry="35" fill="#6b5b88" opacity="0.75"/>
+        <ellipse cx="50" cy="50" rx="1.5" ry="32" fill="#8b7ba8" opacity="0.5"/>
+        <circle cx="50" cy="44" r="1.8" fill="#5a4a75" opacity="0.4"/>
+        <circle cx="50" cy="50" r="1.8" fill="#5a4a75" opacity="0.4"/>
+        <circle cx="50" cy="56" r="1.8" fill="#5a4a75" opacity="0.4"/>
+        <!-- Antennae (static) -->
+        <path d="M 50 11 Q 48 15 46 19" stroke="#6b5b88" stroke-width="1" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <path d="M 50 11 Q 52 15 54 19" stroke="#6b5b88" stroke-width="1" opacity="0.6" fill="none" stroke-linecap="round"/>
+        <circle cx="46" cy="19" r="1.5" fill="#6b5b88" opacity="0.7"/>
+        <circle cx="54" cy="19" r="1.5" fill="#6b5b88" opacity="0.7"/>
+        
+        <!-- Left upper wing -->
+        <g class="wing-left-upper">
+          <path d="M 50 34 C 36 22, 18 16, 8 26 C 4 36, 6 46, 12 51 C 19 54, 29 51, 36 46 C 32 40, 29 36, 50 34 Z" 
+                fill="url(#butterflyGrad3)" opacity="0.65"/>
+          <ellipse cx="30" cy="35" rx="10" ry="14" fill="url(#wingSpot3)"/>
+          <ellipse cx="27" cy="43" rx="6" ry="8" fill="#ffffff" opacity="0.5"/>
+          <ellipse cx="32" cy="48" rx="3.5" ry="5" fill="#ffffff" opacity="0.35"/>
+          <path d="M 50 34 L 30 38 L 20 48" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+          <path d="M 50 34 L 27 36 L 18 46" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+        </g>
+        <!-- Left lower wing -->
+        <g class="wing-left-lower">
+          <path d="M 50 48 C 43 54, 30 60, 16 65 C 10 70, 14 75, 21 78 C 28 80, 36 78, 41 75 C 38 70, 36 65, 50 48 Z" 
+                fill="url(#butterflyGrad3)" opacity="0.6"/>
+          <path d="M 50 48 L 28 60 L 20 70" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+        </g>
+        
+        <!-- Right upper wing -->
+        <g class="wing-right-upper">
+          <path d="M 50 34 C 64 22, 82 16, 92 26 C 96 36, 94 46, 88 51 C 81 54, 71 51, 64 46 C 68 40, 71 36, 50 34 Z" 
+                fill="url(#butterflyGrad3)" opacity="0.65"/>
+          <ellipse cx="70" cy="35" rx="10" ry="14" fill="url(#wingSpot3)"/>
+          <ellipse cx="73" cy="43" rx="6" ry="8" fill="#ffffff" opacity="0.5"/>
+          <ellipse cx="68" cy="48" rx="3.5" ry="5" fill="#ffffff" opacity="0.35"/>
+          <path d="M 50 34 L 70 38 L 80 48" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+          <path d="M 50 34 L 73 36 L 82 46" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+        </g>
+        <!-- Right lower wing -->
+        <g class="wing-right-lower">
+          <path d="M 50 48 C 57 54, 70 60, 84 65 C 90 70, 86 75, 79 78 C 72 80, 64 78, 59 75 C 62 70, 64 65, 50 48 Z" 
+                fill="url(#butterflyGrad3)" opacity="0.6"/>
+          <path d="M 50 48 L 72 60 L 80 70" stroke="#8b7ba8" stroke-width="0.55" opacity="0.3" fill="none"/>
+        </g>
       </svg>
 
       <svg class="butterfly butterfly-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="butterflyGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.65" />
-            <stop offset="50%" style="stop-color:#d4c4e8;stop-opacity:0.45" />
-            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.65" />
+            <stop offset="0%" style="stop-color:#b19cd9;stop-opacity:0.75" />
+            <stop offset="30%" style="stop-color:#d4c4e8;stop-opacity:0.6" />
+            <stop offset="70%" style="stop-color:#a08bc7;stop-opacity:0.65" />
+            <stop offset="100%" style="stop-color:#8b7ba8;stop-opacity:0.75" />
           </linearGradient>
+          <radialGradient id="wingSpot4" cx="32%" cy="38%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.38" />
+            <stop offset="100%" style="stop-color:transparent;stop-opacity:0" />
+          </radialGradient>
         </defs>
-        <!-- Left wing -->
-        <ellipse cx="30" cy="50" rx="25" ry="35" fill="url(#butterflyGrad4)" opacity="0.55"/>
-        <ellipse cx="25" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.35"/>
-        <!-- Right wing -->
-        <ellipse cx="70" cy="50" rx="25" ry="35" fill="url(#butterflyGrad4)" opacity="0.55"/>
-        <ellipse cx="75" cy="45" rx="15" ry="20" fill="#b19cd9" opacity="0.35"/>
-        <!-- Body -->
-        <ellipse cx="50" cy="50" rx="3" ry="40" fill="#8b7ba8" opacity="0.65"/>
-        <!-- Antennae -->
-        <line x1="50" y1="10" x2="45" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.45"/>
-        <line x1="50" y1="10" x2="55" y2="20" stroke="#8b7ba8" stroke-width="1.5" opacity="0.45"/>
-        <circle cx="45" cy="20" r="2" fill="#8b7ba8" opacity="0.45"/>
-        <circle cx="55" cy="20" r="2" fill="#8b7ba8" opacity="0.45"/>
+        <!-- Body (static) -->
+        <ellipse cx="50" cy="50" rx="2.5" ry="37" fill="#6b5b88" opacity="0.8"/>
+        <ellipse cx="50" cy="50" rx="1.5" ry="34" fill="#8b7ba8" opacity="0.58"/>
+        <circle cx="50" cy="41" r="1.9" fill="#5a4a75" opacity="0.42"/>
+        <circle cx="50" cy="50" r="1.9" fill="#5a4a75" opacity="0.42"/>
+        <circle cx="50" cy="59" r="1.9" fill="#5a4a75" opacity="0.42"/>
+        <!-- Antennae (static) -->
+        <path d="M 50 12.5 Q 48 16.5 46 20.5" stroke="#6b5b88" stroke-width="1.15" opacity="0.68" fill="none" stroke-linecap="round"/>
+        <path d="M 50 12.5 Q 52 16.5 54 20.5" stroke="#6b5b88" stroke-width="1.15" opacity="0.68" fill="none" stroke-linecap="round"/>
+        <circle cx="46" cy="20.5" r="1.7" fill="#6b5b88" opacity="0.78"/>
+        <circle cx="54" cy="20.5" r="1.7" fill="#6b5b88" opacity="0.78"/>
+        
+        <!-- Left upper wing -->
+        <g class="wing-left-upper">
+          <path d="M 50 35.5 C 39 23, 23 19, 13 29 C 9 39, 11 49, 17 54 C 24 57, 34 54, 41 49 C 37 43, 34 39, 50 35.5 Z" 
+                fill="url(#butterflyGrad4)" opacity="0.7"/>
+          <ellipse cx="27" cy="37" rx="8.5" ry="12.5" fill="url(#wingSpot4)"/>
+          <ellipse cx="24" cy="45" rx="4.5" ry="6.5" fill="#ffffff" opacity="0.42"/>
+          <path d="M 50 35.5 L 29 39.5 L 19 49.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+          <path d="M 50 35.5 L 26 37.5 L 17 47.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+        </g>
+        <!-- Left lower wing -->
+        <g class="wing-left-lower">
+          <path d="M 50 50.5 C 45.5 56.5, 33 62.5, 19 67.5 C 13 72.5, 17 77.5, 24 80.5 C 31 82.5, 39 80.5, 44 77.5 C 41.5 72.5, 39.5 67.5, 50 50.5 Z" 
+                fill="url(#butterflyGrad4)" opacity="0.65"/>
+          <path d="M 50 50.5 L 29 62.5 L 21 72.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+        </g>
+        
+        <!-- Right upper wing -->
+        <g class="wing-right-upper">
+          <path d="M 50 35.5 C 61 23, 77 19, 87 29 C 91 39, 89 49, 83 54 C 76 57, 66 54, 59 49 C 63 43, 66 39, 50 35.5 Z" 
+                fill="url(#butterflyGrad4)" opacity="0.7"/>
+          <ellipse cx="73" cy="37" rx="8.5" ry="12.5" fill="url(#wingSpot4)"/>
+          <ellipse cx="76" cy="45" rx="4.5" ry="6.5" fill="#ffffff" opacity="0.42"/>
+          <path d="M 50 35.5 L 71 39.5 L 81 49.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+          <path d="M 50 35.5 L 74 37.5 L 83 47.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+        </g>
+        <!-- Right lower wing -->
+        <g class="wing-right-lower">
+          <path d="M 50 50.5 C 54.5 56.5, 67 62.5, 81 67.5 C 87 72.5, 83 77.5, 76 80.5 C 69 82.5, 61 80.5, 56 77.5 C 58.5 72.5, 60.5 67.5, 50 50.5 Z" 
+                fill="url(#butterflyGrad4)" opacity="0.65"/>
+          <path d="M 50 50.5 L 71 62.5 L 79 72.5" stroke="#8b7ba8" stroke-width="0.5" opacity="0.38" fill="none"/>
+        </g>
       </svg>
     </div>
 
@@ -510,36 +654,122 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
-  /* Wing flapping animation */
-  .butterfly svg {
-    animation: wingFlap 0.3s ease-in-out infinite;
+  /* Realistic wing flapping animation */
+  .wing-left-upper,
+  .wing-left-lower {
+    transform-origin: 50% 50%;
+    animation: wingFlapLeft 0.25s ease-in-out infinite;
   }
 
-  .butterfly-1 svg {
+  .wing-right-upper,
+  .wing-right-lower {
+    transform-origin: 50% 50%;
+    animation: wingFlapRight 0.25s ease-in-out infinite;
+  }
+
+  /* Butterfly 1 wing speeds */
+  .butterfly-1 .wing-left-upper,
+  .butterfly-1 .wing-left-lower {
     animation-duration: 0.25s;
   }
 
-  .butterfly-2 svg {
+  .butterfly-1 .wing-right-upper,
+  .butterfly-1 .wing-right-lower {
+    animation-duration: 0.25s;
+  }
+
+  /* Butterfly 2 wing speeds */
+  .butterfly-2 .wing-left-upper,
+  .butterfly-2 .wing-left-lower {
     animation-duration: 0.28s;
     animation-delay: 0.05s;
   }
 
-  .butterfly-3 svg {
+  .butterfly-2 .wing-right-upper,
+  .butterfly-2 .wing-right-lower {
+    animation-duration: 0.28s;
+    animation-delay: 0.05s;
+  }
+
+  /* Butterfly 3 wing speeds */
+  .butterfly-3 .wing-left-upper,
+  .butterfly-3 .wing-left-lower {
     animation-duration: 0.32s;
     animation-delay: 0.1s;
   }
 
-  .butterfly-4 svg {
+  .butterfly-3 .wing-right-upper,
+  .butterfly-3 .wing-right-lower {
+    animation-duration: 0.32s;
+    animation-delay: 0.1s;
+  }
+
+  /* Butterfly 4 wing speeds */
+  .butterfly-4 .wing-left-upper,
+  .butterfly-4 .wing-left-lower {
     animation-duration: 0.27s;
     animation-delay: 0.08s;
   }
 
-  @keyframes wingFlap {
+  .butterfly-4 .wing-right-upper,
+  .butterfly-4 .wing-right-lower {
+    animation-duration: 0.27s;
+    animation-delay: 0.08s;
+  }
+
+  /* Left wings flap up and down - more realistic motion */
+  @keyframes wingFlapLeft {
     0%, 100% {
-      transform: scaleY(1);
+      transform: rotate(0deg) scaleY(1) scaleX(1);
+    }
+    12.5% {
+      transform: rotate(-5deg) scaleY(0.98) scaleX(1.01);
+    }
+    25% {
+      transform: rotate(-10deg) scaleY(0.95) scaleX(1.02);
+    }
+    37.5% {
+      transform: rotate(-12deg) scaleY(0.92) scaleX(1.03);
     }
     50% {
-      transform: scaleY(0.85);
+      transform: rotate(-15deg) scaleY(0.88) scaleX(1.04);
+    }
+    62.5% {
+      transform: rotate(-12deg) scaleY(0.92) scaleX(1.03);
+    }
+    75% {
+      transform: rotate(-10deg) scaleY(0.95) scaleX(1.02);
+    }
+    87.5% {
+      transform: rotate(-5deg) scaleY(0.98) scaleX(1.01);
+    }
+  }
+
+  /* Right wings flap opposite direction - synchronized */
+  @keyframes wingFlapRight {
+    0%, 100% {
+      transform: rotate(0deg) scaleY(1) scaleX(1);
+    }
+    12.5% {
+      transform: rotate(5deg) scaleY(0.98) scaleX(1.01);
+    }
+    25% {
+      transform: rotate(10deg) scaleY(0.95) scaleX(1.02);
+    }
+    37.5% {
+      transform: rotate(12deg) scaleY(0.92) scaleX(1.03);
+    }
+    50% {
+      transform: rotate(15deg) scaleY(0.88) scaleX(1.04);
+    }
+    62.5% {
+      transform: rotate(12deg) scaleY(0.92) scaleX(1.03);
+    }
+    75% {
+      transform: rotate(10deg) scaleY(0.95) scaleX(1.02);
+    }
+    87.5% {
+      transform: rotate(5deg) scaleY(0.98) scaleX(1.01);
     }
   }
 
