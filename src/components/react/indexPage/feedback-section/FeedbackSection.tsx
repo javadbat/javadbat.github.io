@@ -1,5 +1,5 @@
 import React from 'react'
-import { ContentWrapper, DescWrapper, FeedbackSectionWrapper, FormWrapper, Title, Desc, FeedbackGrid } from './styles';
+import styles from './styles.module.css';
 
 declare module "react" {
     namespace JSX {
@@ -19,18 +19,18 @@ function FeedbackSection() {
     , []);
     
     return (
-        <FeedbackSectionWrapper>
-            <FeedbackGrid>
+        <section className={styles.feedbackSectionWrapper}>
+            <div className={styles.feedbackGrid}>
 
-                <ContentWrapper>
-                    <Title>Feedback</Title>
-                    <DescWrapper>
-                        <Desc>feedback is essential for each person who want to make progress and become better each day</Desc>
-                        <Desc>by giving me a Feedback you help me to see my life and decisions from your perspective so more feedback from different peoples would let me see myself in a 360° view</Desc>
-                        <Desc>so i would be really glad if you give me a feedback and help me to become a better person :)</Desc>
-                    </DescWrapper>
-                </ContentWrapper>
-                <FormWrapper>
+                <div className={styles.contentWrapper}>
+                    <h2 className={styles.title}>Feedback</h2>
+                    <article className={styles.descWrapper}>
+                        <p className={styles.desc}>feedback is essential for each person who want to make progress and become better each day</p>
+                        <p className={styles.desc}>by giving me a Feedback you help me to see my life and decisions from your perspective so more feedback from different peoples would let me see myself in a 360° view</p>
+                        <p className={styles.desc}>so i would be really glad if you give me a feedback and help me to become a better person :)</p>
+                    </article>
+                </div>
+                <div className={styles.formWrapper}>
                     <agileverse-feedback theme="light"
                         title="Feedback Form"
                         rate-description="Which Emoji Would Express You're Feeling About Me Better?"
@@ -42,10 +42,10 @@ function FeedbackSection() {
                         thanks-title="thank you 😻"
                         thanks-subtitle=""
                     ></agileverse-feedback>
-                </FormWrapper>
-            </FeedbackGrid>
+                </div>
+            </div>
 
-        </FeedbackSectionWrapper>
+        </section>
     )
 }
 

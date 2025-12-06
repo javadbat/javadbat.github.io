@@ -1,26 +1,26 @@
 import React from 'react'
-import { SkillItem } from './styles'
+import styles from './styles.module.css'
 
 function FrontendSkillItems() {
   return (
     <>
-        <SkillItem>HTML</SkillItem>
-        <SkillItem>CSS</SkillItem>
-        <SkillItem>JavaScript</SkillItem>
-        <SkillItem>ReactJS</SkillItem>
-        <SkillItem>ES6-10</SkillItem>
-        <SkillItem>MobX</SkillItem>
-        <SkillItem>RXJS</SkillItem>
-        <SkillItem>Web-Components</SkillItem>
-        <SkillItem>NextJS</SkillItem>
-        <SkillItem>Sass</SkillItem>
-        <SkillItem>Styled-Component</SkillItem>
-        <SkillItem>Graphql</SkillItem>
-        <SkillItem>TypeScript</SkillItem>
-        <SkillItem>Babel</SkillItem>
-        <SkillItem>Webpack</SkillItem>
-        <SkillItem>Rollup</SkillItem>
-        <SkillItem>Brotli</SkillItem>
+        <div className={styles.skillItem}>HTML</div>
+        <div className={styles.skillItem}>CSS</div>
+        <div className={styles.skillItem}>JavaScript</div>
+        <div className={styles.skillItem}>ReactJS</div>
+        <div className={styles.skillItem}>ES6-10</div>
+        <div className={styles.skillItem}>MobX</div>
+        <div className={styles.skillItem}>RXJS</div>
+        <div className={styles.skillItem}>Web-Components</div>
+        <div className={styles.skillItem}>NextJS</div>
+        <div className={styles.skillItem}>Sass</div>
+        <div className={styles.skillItem}>Styled-Component</div>
+        <div className={styles.skillItem}>Graphql</div>
+        <div className={styles.skillItem}>TypeScript</div>
+        <div className={styles.skillItem}>Babel</div>
+        <div className={styles.skillItem}>Webpack</div>
+        <div className={styles.skillItem}>Rollup</div>
+        <div className={styles.skillItem}>Brotli</div>
     </>
   )
 }

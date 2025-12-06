@@ -2,39 +2,39 @@ import BackendSkillItems from './BackendSkillItems'
 import { SkillsBackground } from './background/SkillsBackground'
 import FrontendSkillItems from './FrontendSkillItems'
 import NonTechnicalSkills from './NonTechnicalSkills'
-import { SkillGroups, SkillGroup, SkillGroupTitle, SkillItems, SkillsSectionWrapper, Title, SkillsContent, SkillsBackgroundWrapper } from './styles'
+import styles from './styles.module.css'
 
 function SkillsSection() {
   return (
-    <SkillsSectionWrapper>
-      <SkillsBackgroundWrapper>
+    <section className={styles.skillsSectionWrapper}>
+      <div className={styles.skillsBackgroundWrapper}>
         <SkillsBackground></SkillsBackground>
-      </SkillsBackgroundWrapper>
-      <SkillsContent>
-        <Title>Skills</Title>
-        <SkillGroups>
-          <SkillGroup>
-            <SkillGroupTitle>Back-end</SkillGroupTitle>
-            <SkillItems>
+      </div>
+      <div className={styles.skillsContent}>
+        <h2 className={styles.title}>Skills</h2>
+        <div className={styles.skillGroups}>
+          <div className={styles.skillGroup}>
+            <div className={styles.skillGroupTitle}>Back-end</div>
+            <div className={styles.skillItems}>
               <BackendSkillItems></BackendSkillItems>
-            </SkillItems>
-          </SkillGroup>
-          <SkillGroup>
-            <SkillGroupTitle>Front-end</SkillGroupTitle>
-            <SkillItems>
+            </div>
+          </div>
+          <div className={styles.skillGroup}>
+            <div className={styles.skillGroupTitle}>Front-end</div>
+            <div className={styles.skillItems}>
               <FrontendSkillItems></FrontendSkillItems>
-            </SkillItems>
-          </SkillGroup>
-          <SkillGroup>
-            <SkillGroupTitle>Non-Technical</SkillGroupTitle>
-            <SkillItems>
+            </div>
+          </div>
+          <div className={styles.skillGroup}>
+            <div className={styles.skillGroupTitle}>Non-Technical</div>
+            <div className={styles.skillItems}>
               <NonTechnicalSkills></NonTechnicalSkills>
-            </SkillItems>
-          </SkillGroup>
-        </SkillGroups>
-      </SkillsContent>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    </SkillsSectionWrapper>
+    </section>
   )
 }
 

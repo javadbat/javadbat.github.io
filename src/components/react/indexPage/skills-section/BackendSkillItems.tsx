@@ -1,19 +1,19 @@
 import React from 'react';
-import { SkillItem } from './styles';
+import styles from './styles.module.css';
 
 function BackendSkillItems() {
   return (
     <>
-        <SkillItem>Nodejs</SkillItem>
-        <SkillItem>MongoDB</SkillItem>
-        <SkillItem>NestJs</SkillItem>
-        <SkillItem>Ghost</SkillItem>
-        <SkillItem>Strapi</SkillItem>
-        <SkillItem>Express</SkillItem>
-        <SkillItem>SqlServer</SkillItem>
-        <SkillItem>PostgreSQL</SkillItem>
-        <SkillItem>Rust</SkillItem>
-        <SkillItem>Docker</SkillItem>
+        <div className={styles.skillItem}>Nodejs</div>
+        <div className={styles.skillItem}>MongoDB</div>
+        <div className={styles.skillItem}>NestJs</div>
+        <div className={styles.skillItem}>Ghost</div>
+        <div className={styles.skillItem}>Strapi</div>
+        <div className={styles.skillItem}>Express</div>
+        <div className={styles.skillItem}>SqlServer</div>
+        <div className={styles.skillItem}>PostgreSQL</div>
+        <div className={styles.skillItem}>Rust</div>
+        <div className={styles.skillItem}>Docker</div>
     </>
   )
 }

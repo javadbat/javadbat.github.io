@@ -1,0 +1,23 @@
+.title {
+  text-align: center;
+  color: var(--p-color);
+  transition: all 0.2s 0s ease;
+  margin: 0;
+  padding: 0;
+  font-family: "title-font";
+  font-size: 3.5rem;
+  display: block;
+  letter-spacing: -0.1rem;
+}
+
+.title:hover {
+  color: var(--p-color-light);
+}
+
+@media (max-width: 991px) {
+  .title {
+    font-size: 1.7rem;
+    letter-spacing: -0.05rem;
+  }
+}
+

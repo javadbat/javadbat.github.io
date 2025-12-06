@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import {CompanyDESC, CompanyName, ExperienceDate, ExperienceWrapper } from './styles';
+import styles from './styles.module.css';
 
 type ExperienceProps = {
   name:string,
@@ -12,12 +12,12 @@ const Experience: React.FC<ExperienceProps> = ({name,fromDate,ToDate,Logo,desc})
     const FromDateString = useMemo(()=>{return Intl.DateTimeFormat("en",{dateStyle:"medium"}).format(new Date(fromDate)) },[fromDate])
     const ToDateString = useMemo(()=>{return Intl.DateTimeFormat("en",{dateStyle:"medium"}).format(new Date(ToDate)) },[ToDate]);
   return (
-    <ExperienceWrapper>
-        <CompanyName>{name}</CompanyName>
-        <ExperienceDate>{FromDateString}-{ToDateString}</ExperienceDate>
+    <div className={styles.experienceWrapper}>
+        <div className={styles.companyName}>{name}</div>
+        <div className={styles.experienceDate}>{FromDateString}-{ToDateString}</div>
         <Logo></Logo>
-        <CompanyDESC>{desc}</CompanyDESC>
-    </ExperienceWrapper>
+        <div className={styles.companyDESC}>{desc}</div>
+    </div>
   )
 }
 

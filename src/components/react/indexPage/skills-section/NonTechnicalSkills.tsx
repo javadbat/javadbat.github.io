@@ -1,14 +1,14 @@
 import React from 'react'
-import { SkillItem } from './styles'
+import styles from './styles.module.css'
 
 function NonTechnicalSkills() {
   return (
     <>
-        <SkillItem>Agile Management</SkillItem>
-        <SkillItem>Scrum Methodology</SkillItem>
-        <SkillItem>Basic of HR</SkillItem>
-        <SkillItem>Human Behavior</SkillItem>
-        <SkillItem>UI/UX</SkillItem>
+        <div className={styles.skillItem}>Agile Management</div>
+        <div className={styles.skillItem}>Scrum Methodology</div>
+        <div className={styles.skillItem}>Basic of HR</div>
+        <div className={styles.skillItem}>Human Behavior</div>
+        <div className={styles.skillItem}>UI/UX</div>
     </>
   )
 }
