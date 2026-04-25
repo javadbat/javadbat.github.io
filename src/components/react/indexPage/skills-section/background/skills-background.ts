@@ -132,7 +132,7 @@ export class SkillsBackground extends HTMLElement {
       const box = new Box3().setFromObject(model);
       box.getCenter(center);
       model.position.sub(center);
-      //because earth model has wrong x center we have to create a pivot with correct center
+      //because jupiter model has wrong x center we have to create a pivot with correct center
       const pivot = new THREE.Group();
       pivot.add(model);
       this.#shapes.jupiter = pivot;

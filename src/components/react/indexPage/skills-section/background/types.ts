@@ -5,5 +5,5 @@ export type Shapes = {
   earth:Group<Object3DEventMap> | null
   earthOrbit:Group<Object3DEventMap> | null
   jupiter:Group<Object3DEventMap> | null
-  jupiterOrbit:Group<Object3DEventMap> | null
+  jupiterOrbit:Group<Object3DEventMap> | null,
 }
