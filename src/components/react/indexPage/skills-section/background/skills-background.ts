@@ -1,8 +1,8 @@
 import CSS from './style.css?inline';
 import { renderHTML } from './render';
 import * as THREE from 'three';
-import { Box3, MathUtils, Vector3 } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Box3, MathUtils, SphereGeometry, Vector3 } from 'three';
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Shapes } from './types';
 import earthShapeURL from './shapes/earth2.glb?url';
@@ -13,6 +13,24 @@ export class SkillsBackground extends HTMLElement {
   }
   get #height() {
     return window.innerHeight
+  }
+  get orbitCenter() {
+    return new Vector3(-1 * this.sphereRadius, 0, 0)
+  }
+  get sphereRadius() {
+    // console.log(this.#sphereFillPercent);
+
+    return (this.pixelsToUnit(this.#height * (this.#sphereFillPercent / 100))) / 2;
+  }
+  #sphereFillPercent = 45;
+  get sphereFillPercent() {
+    return this.#sphereFillPercent;
+  }
+  set sphereFillPercent(value: number) {
+    console.log(value);
+
+    this.#sphereFillPercent = value;
+    this.#setPositions();
   }
   #canvas: HTMLCanvasElement;
   #camera: THREE.PerspectiveCamera | null = null;
@@ -36,11 +54,43 @@ export class SkillsBackground extends HTMLElement {
 
   }
   connectedCallback() {
-    this.#initThreeShape();
+    window.addEventListener("resize", () => {
+      this.#setPositions();
+    })
+    this.#initScenes();
+  }
+  static get observedAttributes() {
+    return ['sphere-fill-percent'];
+  }
+  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
+    switch (name) {
+      case 'sphere-fill-percent':
+        this.sphereFillPercent = Number(newValue);
+        break;
+    }
+  }
+  #setPositions() {
+    this.#renderer?.setSize(this.#width, this.#height);
+    this.#shapes.core?.position.set(-1 * this.sphereRadius, 0, 0);
+    this.#shapes.core?.geometry.dispose();
+    this.#shapes.core!.geometry = new SphereGeometry(this.sphereRadius, 16, 16);
+    //size
+    const maxSize = (this.sphereRadius * 2) * 1 / 6;
+    this.#shapes.earth?.scale.setScalar(this.#calcModelScale(this.#shapes.earth, maxSize));
+    //set scale
+    const jupiterMaxSize = (this.sphereRadius * 2) * 2 / 6;
+    this.#shapes.jupiter?.scale.setScalar(this.#calcModelScale(this.#shapes.jupiter, jupiterMaxSize));
+    //pos
+    this.#shapes.jupiterOrbit?.position.copy(this.orbitCenter);
+    this.#shapes.jupiter?.position.setX(this.sphereRadius * 1.6)
+    this.#shapes.earthOrbit?.position.copy(this.orbitCenter);
+    this.#shapes.earth?.position.setX(this.sphereRadius * 2);
+    this.#renderer?.render(this.#scene!, this.#camera!);
   }
   #setupCamera() {
-    const camera = new THREE.PerspectiveCamera(70, this.#width / this.#height, 0.01, 10);
+    const camera = new THREE.PerspectiveCamera(40, this.#width / this.#height, 0.01, 10);
     camera.position.z = 1;
+
     this.#camera = camera;
   }
   //for debug purpose
@@ -64,13 +114,10 @@ export class SkillsBackground extends HTMLElement {
     this.#scene?.add(bottomLight);
     this.#scene?.add(bottomLight.target);
   }
-  #initThreeShape() {
+  async #initScenes() {
     // init
     this.#setupCamera();
-    this.#initShapes();
     this.#scene = new THREE.Scene();
-
-    this.#scene.add(this.#shapes.core!);
     this.#renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.#canvas, alpha: true });
     this.#renderer.setSize(this.#width, this.#height);
     this.#renderer.setAnimationLoop(this.#animate.bind(this));
@@ -78,9 +125,17 @@ export class SkillsBackground extends HTMLElement {
     this.#scene.background = null;
     // this.#setupOrbitControl();
     this.#setupLight();
+    await this.#initShapes();
+    this.#addShapesToScenes();
+    this.#setPositions();
   }
-  #initShapes() {
-    const geometry = new THREE.SphereGeometry(0.3, 16, 16);
+  #addShapesToScenes() {
+    this.#scene!.add(this.#shapes.core!);
+    this.#scene?.add(this.#shapes.earthOrbit!);
+    this.#scene?.add(this.#shapes.jupiterOrbit!);
+  }
+  async #initShapes() {
+    const geometry = new THREE.SphereGeometry(this.sphereRadius, 16, 16);
     // const material = new THREE.MeshNormalMaterial();
     // const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     // const material = new THREE.MeshLambertMaterial({ color: 0xeeeeff, flatShading: true });
@@ -100,53 +155,61 @@ export class SkillsBackground extends HTMLElement {
     });
     const mesh = new THREE.Mesh(geometry, mat);
     this.#shapes.core = mesh;
-    this.#loadExternalAsset();
+    await this.#loadExternalAsset();
   }
-  #loadExternalAsset() {
-    const loader = new GLTFLoader();
+  #initEarth(gltf: GLTF) {
+    const model = gltf.scene;
 
-    loader.load(earthShapeURL, (gltf) => {
-      const model = gltf.scene;
-      model.scale.setScalar(0.009);
-      const center = new THREE.Vector3();
-      const box = new Box3().setFromObject(model);
-      box.getCenter(center);
-      model.position.sub(center);
-      //because earth model has wrong x center we have to create a pivot with correct center
-      const pivot = new THREE.Group();
-      pivot.add(model);
-      this.#shapes.earth = pivot;
-      //now we add earth orbit
-      const orbit = new THREE.Group();
-      this.#shapes.earthOrbit = orbit
-      orbit.position.copy(this.#shapes.core!.position);
-      pivot.position.set(0.8, 0, 0)
-      orbit.add(pivot);
-      this.#scene?.add(orbit);
-    }, undefined, (err) => console.error(err));
+    const center = new THREE.Vector3();
+    const box = new Box3().setFromObject(model);
+    box.getCenter(center);
+    model.position.sub(center);
+    //because earth model has wrong x center we have to create a pivot with correct center
+    const pivot = new THREE.Group();
+    pivot.add(model);
+    this.#shapes.earth = pivot;
+    //now we add earth orbit
+    const orbit = new THREE.Group();
+    this.#shapes.earthOrbit = orbit
+    orbit.add(pivot);
+  }
+  #calcModelScale(model: THREE.Group<THREE.Object3DEventMap>, targetSize: number) {
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = targetSize / maxDim;
+    return scale
+  }
+  #initJupiter(gltf: GLTF) {
+    const model = gltf.scene;
+
+    //
+    const center = new THREE.Vector3();
+    const box = new Box3().setFromObject(model);
+    box.getCenter(center);
+    model.position.sub(center);
+    //because jupiter model has wrong x center we have to create a pivot with correct center
+    const pivot = new THREE.Group();
+    pivot.add(model);
+    this.#shapes.jupiter = pivot;
+    //now we add earth orbit
+    const orbit = new THREE.Group();
+    this.#shapes.jupiterOrbit = orbit
+    orbit.add(pivot);
+  }
+  async #loadExternalAsset() {
+    const loader = new GLTFLoader();
+    const earthGLTF = await loader.loadAsync(earthShapeURL)
+    this.#initEarth(earthGLTF);
+
     //jupiter
-    loader.load(jupiterShapeURL, (gltf) => {
-      const model = gltf.scene;
-      model.scale.setScalar(0.015);
-      const center = new THREE.Vector3();
-      const box = new Box3().setFromObject(model);
-      box.getCenter(center);
-      model.position.sub(center);
-      //because jupiter model has wrong x center we have to create a pivot with correct center
-      const pivot = new THREE.Group();
-      pivot.add(model);
-      this.#shapes.jupiter = pivot;
-      //now we add earth orbit
-      const orbit = new THREE.Group();
-      this.#shapes.jupiterOrbit = orbit
-      orbit.position.copy(this.#shapes.core!.position);
-      pivot.position.set(0.5, 0, 0)
-      orbit.add(pivot);
-      this.#scene?.add(orbit);
-    }, undefined, (err) => console.error(err));
+    const jupiterGLTF = await loader.loadAsync(jupiterShapeURL);
+    this.#initJupiter(jupiterGLTF);
+    return;
   }
   #prevTime: number = 0;
-  #earthReverse = false;
   #animate(time: number) {
     const dt = time - this.#prevTime;
     const orbitTime = time;
@@ -156,10 +219,10 @@ export class SkillsBackground extends HTMLElement {
       this.#shapes.earth.rotation.y = time / 400;
       this.#shapes.earth.rotation.x = tilt;
       //rotate orbit
-      console.log("rev", this.#earthReverse);
+
 
       const orbitTilt = MathUtils.degToRad(330);
-      this.#shapes.earthOrbit!.rotation.y = orbitTime / 1000
+      this.#shapes.earthOrbit!.rotation.y = orbitTime / 1400
       this.#shapes.earthOrbit!.rotation.x = orbitTilt
       this.#shapes.earthOrbit!.rotation.z = MathUtils.degToRad(0)
     }
@@ -170,7 +233,7 @@ export class SkillsBackground extends HTMLElement {
       this.#shapes.jupiter.rotation.x = tilt;
       //rotate orbit
       const orbitTilt = MathUtils.degToRad(30);
-      this.#shapes.jupiterOrbit!.rotation.y = jupiterTime / 2000
+      this.#shapes.jupiterOrbit!.rotation.y = jupiterTime / 2400
       this.#shapes.jupiterOrbit!.rotation.x = orbitTilt
       this.#shapes.jupiterOrbit!.rotation.z = MathUtils.degToRad(0)
     }
@@ -178,15 +241,30 @@ export class SkillsBackground extends HTMLElement {
       const boxA = new THREE.Box3().setFromObject(this.#shapes.earth);
       const boxB = new THREE.Box3().setFromObject(this.#shapes.jupiter);
       if (boxA.intersectsBox(boxB)) {
-        this.#earthReverse = true;
+        //on planet hit
       } else {
-        this.#earthReverse = false;
+        //on planet not hit
       }
     }
 
 
     this.#renderer?.render(this.#scene!, this.#camera!);
     this.#prevTime = time;
+  }
+  #pixelsPerUnitAtZ() {
+    //distance of an object from camera
+    const zFromCamera = 1;
+    const vFov = THREE.MathUtils.degToRad(this.#camera!.fov);
+    const heightAtZ = 2 * Math.tan(vFov / 2) * zFromCamera; // world units
+    return this.#renderer!.domElement.clientHeight / heightAtZ;
+  }
+  unitsToPixel(units: number) {
+    const ppu = this.#pixelsPerUnitAtZ();
+    return units * ppu;
+  }
+  pixelsToUnit(pixels: number) {
+    const ppu = this.#pixelsPerUnitAtZ();
+    return pixels / ppu;
   }
 }
 const myElementNotExists = !customElements.get('skills-background');

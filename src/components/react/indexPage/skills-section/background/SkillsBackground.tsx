@@ -11,14 +11,19 @@ declare module "react" {
       class?: string,
       name?: string,
       ref?:React.RefObject<SkillsBackgroundWebComponent>,
+      "sphere-fill-percent":string
     }
   }
 }
-export function SkillsBackground() {
+export function SkillsBackground(props:Props) {
   useEffect(()=>{
     import('./skills-background')
   },[])
   return (
-    <skills-background></skills-background>
+    <skills-background sphere-fill-percent={props.sphereFillPercent.toString()}></skills-background>
   )
+}
+
+type Props = {
+  sphereFillPercent:number
 }

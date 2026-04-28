@@ -16,7 +16,9 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  z-index: 0;
+  z-index: 3;
+  pointer-events: none;
+
 }
 
 .skillsBackgroundWrapper :global(skills-background) {
@@ -26,7 +28,9 @@
   overflow: hidden;
 }
 
-.skillsContent {
+
+
+.skillsContentWrapper {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -35,22 +39,37 @@
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  flex-direction: column;
   z-index: 1;
+  container-type: size;
+}
+
+.skillsContent {
+  width: 900px;
+  display: grid;
+  grid-template-columns: 50cqh max-content;
+  grid-template-areas: "first-col second-col";
+  /* turn 50 ch to 100ch * fill percent */
+  margin-inline-start: calc((100cqw / 2) - (100cqh * var(--chsp)));
 }
 
 .title {
+  grid-area: first-col;
+  display: flex;
   text-align: center;
+  height: 100%;
   color: var(--p-color);
   transition: all 0.2s 0s ease;
   margin: 0;
   padding: 0;
   font-family: "title-font";
   font-size: 3.5rem;
-  display: block;
   letter-spacing: -0.1rem;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  transform: translateX(calc(var(--sgp) * 0.5cqh));
 }
 
 .title:hover {
@@ -64,35 +83,80 @@
   }
 }
 
-.skillGroups {
-  display: grid;
-  grid-template-columns: 2fr 3fr 2fr;
-  max-width: 1200px;
-  margin: 64px auto;
-  gap: 32px;
+.dividerSVG {
+  grid-area: first-col;
+  stroke: var(--p-color);
+  stroke-width: 2;
+  stroke-linecap: round;
+  height: 100%;
+  overflow: visible;
+  transform: translateX(calc(var(--sgp) * 0.5cqh));
 }
 
-@media (max-width: 991px) {
-  .skillGroups {
-    margin: 32px 32px;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+.bullet {
+  fill: #fff;
+}
+
+.skillsGroup {
+  pointer-events: all;
+  cursor: pointer;
+  &:hover {
+
+    .skillGroupTitle,
+    .skillGroupDescription {
+      filter: blur(0.3px);
+    }
+
+    .skillGroup:hover {
+      .skillGroupTitle,.skillGroupDescription {
+        filter: none;
+      }
+    }
   }
 }
 
 .skillGroup {
+  pointer-events: all;
 }
 
 .skillGroupTitle {
-  font-size: 2rem;
-  text-align: center;
-  text-align: center;
+  font-size: 0.7rem;
   font-weight: 600;
+  stroke-width: 0;
+  alignment-baseline: text-after-edge;
+  transform: translate(0.6rem, 0);
+  transition: filter 0.2s 0s ease;
+
+  &[data-size="sm"] {
+    font-size: 0.3rem;
+  }
+
+  &[data-size="md"] {
+    font-size: 0.5rem;
+  }
+}
+
+.skillGroupDescription {
+  font-size: 0.3rem;
+  font-weight: 100;
+  stroke-width: 0;
+  alignment-baseline: text-before-edge;
+  fill: var(--mid-grey);
+  transform: translate(0.6rem, 0);
+  transition: filter 0.2s 0s ease;
+
+  &[data-size="sm"] {
+    font-size: 0.2rem;
+  }
+
+  &[data-size="md"] {
+    font-size: 0.25rem;
+  }
 }
 
 @media (max-width: 991px) {
   .skillGroupTitle {
-    font-size: 1.2rem;
+    font-size: 0.5rem;
   }
 }
 
@@ -111,4 +175,3 @@
 .skillItem:nth-child(n)::after {
   content: ', ';
 }
-
