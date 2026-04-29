@@ -17,7 +17,7 @@ function SkillsSection() {
       <div className={styles.skillsContentWrapper} >
         <div className={styles.skillsContent} style={{ height: `${contentHeightShare}%` }}>
           <h2 className={styles.title}><span>Skills</span></h2>
-          <svg className={styles.dividerSVG} viewBox='0 0 120 120'>
+          <svg className={styles.dividerSVG} viewBox='0 0 265 120'>
             <title>divider shape</title>
             <path d={halfCirclePath} fill="none" filter="url(#softShadow)"/>
             <g className={styles.skillsGroup}>
