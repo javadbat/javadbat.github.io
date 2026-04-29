@@ -62,12 +62,15 @@
     margin-inline-start: calc((100cqw - ((100cqh * var(--chsp))* 2.2)) / 2);
   }
 }
+
 @media (max-aspect-ratio: 1/1) {
+
   /* height >= width */
   .skillsContent {
-    margin-inline-start: calc(-1 * (100cqh * var(--chsp))/2);
+    margin-inline-start: calc(-1 * (120cqh * var(--chsp))/2);
   }
 }
+
 .title {
   grid-area: first-col;
   display: flex;
@@ -97,6 +100,14 @@
   }
 }
 
+@media (max-aspect-ratio: 1/1) {
+  .title{
+    text-align: end;
+    justify-content: end;
+    transform: translateX(calc(-2.5 * var(--sgp) * 0.5cqh));
+  }
+}
+
 .dividerSVG {
   grid-area: first-col;
   stroke: var(--p-color);
@@ -107,6 +118,12 @@
   transform: translateX(calc(var(--sgp) * 0.5cqh));
 }
 
+@media (max-aspect-ratio: 1/1) {
+  .dividerSVG {
+    transform: none;
+  }
+}
+
 .bullet {
   fill: #fff;
 }
@@ -115,6 +132,7 @@
   pointer-events: all;
   cursor: pointer;
   will-change: filter;
+
   &:hover {
 
     .skillGroupTitle,
@@ -152,6 +170,24 @@
     font-size: 0.5rem;
   }
 }
+@media (max-width: 991px) {
+  .skillGroupTitle {
+    font-size: 0.5rem;
+  }
+}
+@media (max-aspect-ratio: 1/1) {
+  .skillGroupTitle {
+    font-size: 0.3rem;
+
+    &[data-size="sm"] {
+      font-size: 0.3rem;
+    }
+
+    &[data-size="md"] {
+      font-size: 0.3rem;
+    }
+  }
+}
 
 .skillGroupDescription {
   font-size: 0.3rem;
@@ -171,9 +207,19 @@
   }
 }
 
-@media (max-width: 991px) {
-  .skillGroupTitle {
-    font-size: 0.5rem;
+
+
+@media (max-aspect-ratio: 1/1) {
+  .skillGroupDescription {
+    font-size: 0.15rem;
+
+    &[data-size="sm"] {
+      font-size: 0.15rem;
+    }
+
+    &[data-size="md"] {
+      font-size: 0.15rem;
+    }
   }
 }
 

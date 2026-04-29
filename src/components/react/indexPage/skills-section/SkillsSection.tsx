@@ -1,3 +1,4 @@
+import { useMediaQuery } from 'usehooks-ts'
 import BackendSkillItems from './BackendSkillItems'
 import { SkillsBackground } from './background/SkillsBackground'
 import FrontendSkillItems from './FrontendSkillItems'
@@ -9,6 +10,7 @@ function SkillsSection() {
   const { contentHeightShare, sphereGapPercent, variableStyle } = useSyncSize();
   const halfCirclePath = useHalfCirclePath();
   const bullets = useBulletPoints();
+  const matches = useMediaQuery('(max-aspect-ratio: 1/1)');
   return (
     <section className={styles.skillsSectionWrapper} style={variableStyle}>
       <div className={styles.skillsBackgroundWrapper}>
@@ -18,8 +20,8 @@ function SkillsSection() {
         <div className={styles.skillsContent} style={{ height: `${contentHeightShare}%` }}>
           <h2 className={styles.title}><span>Skills</span></h2>
           <svg className={styles.dividerSVG} viewBox='0 0 265 120'>
-            <title>divider shape</title>
-            <path d={halfCirclePath} fill="none" filter="url(#softShadow)"/>
+            <title>Skills</title>
+            <path d={halfCirclePath} fill="none" filter="url(#softShadow)" />
             <g className={styles.skillsGroup}>
               <g transform={`translate(${bullets.ui.x}, ${bullets.ui.y})`} className={styles.skillGroup}>
                 <circle cx="0" cy="0" r="1" className={styles.bullet}></circle>
@@ -29,18 +31,42 @@ function SkillsSection() {
               <g transform={`translate(${bullets.backend.x}, ${bullets.backend.y})`} className={styles.skillGroup}>
                 <circle cx="0" cy="0" r="2" className={styles.bullet}></circle>
                 <text className={`${styles.skillGroupTitle}`} data-size="md">Back-end Developer</text>
-                <text className={`${styles.skillGroupDescription}`} data-size="md">Good proficiency for Small/Mid Projects in NodeJS,Rust,C#</text>
+                {
+                  !matches ?
+                    <text className={`${styles.skillGroupDescription}`} data-size="md">Good proficiency for Small/Mid Projects in NodeJS,Rust,C#</text> :
+                    <text className={`${styles.skillGroupDescription}`} data-size="md">
+                      Good proficiency for Small/Mid Projects in
+                      <tspan x="0" dy="6">NodeJS,Rust,C#</tspan>
+                    </text>
+                }
               </g>
               <g transform={`translate(${bullets.frontend.x}, ${bullets.frontend.y})`} className={styles.skillGroup}>
                 <circle cx="0" cy="0" r="4" className={styles.bullet}></circle>
                 <text className={`${styles.skillGroupTitle}`} >Front-end Developer</text>
-                <text className={`${styles.skillGroupDescription}`} >Expert in Front-end Development, React, Web component,...</text>
+                {
+                  !matches &&
+                  <text className={`${styles.skillGroupDescription}`} >Expert in Front-end Development, React, Web component,...</text>
+                }
+                {
+                  matches &&
+                  <text className={`${styles.skillGroupDescription}`} >
+                    Expert in Front-end Development
+                    <tspan x="0" dy="6">React, Web component,...</tspan>
+                  </text>
+                }
               </g>
               <g transform={`translate(${bullets.agile.x}, ${bullets.agile.y})`} className={styles.skillGroup}>
                 <circle cx="0" cy="0" r="2" className={styles.bullet}></circle>
                 <text className={`${styles.skillGroupTitle}`} data-size="md">Agile & Management</text>
-                <text className={`${styles.skillGroupDescription}`} data-size="md">Foundational Understanding of Agile Methodologies an Human Behaviors</text>÷
-              </g>
+                {
+                  !matches?
+                  <text className={`${styles.skillGroupDescription}`} data-size="md">Foundational Understanding of Agile Methodologies an Human Behaviors</text>:
+                  <text className={`${styles.skillGroupDescription}`} data-size="md">
+                    Foundational Understanding of Agile Methodologies
+                    <tspan x="0" dy="6">an Human Behaviors</tspan>
+                  </text>
+                }
+                </g>
               <g transform={`translate(${bullets.product.x}, ${bullets.product.y})`} className={styles.skillGroup}>
                 <circle cx="0" cy="0" r="1" className={styles.bullet}></circle>
                 <text className={`${styles.skillGroupTitle}`} data-size="sm">Product & Soft Skills</text>

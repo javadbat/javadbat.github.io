@@ -22,7 +22,8 @@ export class SkillsBackground extends HTMLElement {
     const cqw = this.pixelsToUnit(this.#width);
     const endCenterX = -1*cqw/2;
     if(this.#height>=this.#width){
-      return new Vector3(endCenterX, 0, 0)
+      // we get back more than 50% (60%) to fit it in most phones
+      return new Vector3(endCenterX*1.2, 0, 0)
     }
     const contentContainerWidth = this.pixelsToUnit(this.#height )
     const contentCenter = endCenterX + (contentContainerWidth/2);
