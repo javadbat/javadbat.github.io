@@ -15,38 +15,34 @@ export class SkillsBackground extends HTMLElement {
     return window.innerHeight
   }
   get orbitCenter() {
-    if(this.#width>this.#height * 1.33){
+    if (this.#width > this.#height * 1.33) {
       // biggest screen
       return new Vector3(-1 * this.sphereRadius, 0, 0)
     }
     const cqw = this.pixelsToUnit(this.#width);
-    const endCenterX = -1*cqw/2;
-    if(this.#height>=this.#width){
+    const endCenterX = -1 * cqw / 2;
+    if (this.#height >= this.#width) {
       // we get back more than 50% (60%) to fit it in most phones
-      return new Vector3(endCenterX*1.2, 0, 0)
+      return new Vector3(endCenterX * 1.2, 0, 0)
     }
-    const contentContainerWidth = this.pixelsToUnit(this.#height )
-    const contentCenter = endCenterX + (contentContainerWidth/2);
-    const padding =  endCenterX - contentCenter ;
+    const contentContainerWidth = this.pixelsToUnit(this.#height)
+    const contentCenter = endCenterX + (contentContainerWidth / 2);
+    const padding = endCenterX - contentCenter;
     const x = padding + this.sphereRadius;
-    console.log(x);
-    
+
     return new Vector3(x, 0, 0)
   }
   get sphereRadius() {
-    // console.log(this.#sphereFillPercent);
-   return this.getRadiusBaseOnPercent(this.#sphereFillPercent);
+    return this.getRadiusBaseOnPercent(this.#sphereFillPercent);
   }
-  getRadiusBaseOnPercent(percent:number){
-     return (this.pixelsToUnit(this.#height * (percent / 100))) / 2;
+  getRadiusBaseOnPercent(percent: number) {
+    return (this.pixelsToUnit(this.#height * (percent / 100))) / 2;
   }
   #sphereFillPercent = 45;
   get sphereFillPercent() {
     return this.#sphereFillPercent;
   }
   set sphereFillPercent(value: number) {
-    console.log(value);
-
     this.#sphereFillPercent = value;
     this.#setPositions();
   }
@@ -88,16 +84,18 @@ export class SkillsBackground extends HTMLElement {
     }
   }
   #setPositions() {
+
     this.#renderer?.setSize(this.#width, this.#height);
     this.#shapes.core?.position.copy(this.orbitCenter);
     this.#shapes.core?.geometry.dispose();
     this.#shapes.core!.geometry = new SphereGeometry(this.sphereRadius, 16, 16);
-    //size
+    //earth scale
     const maxSize = (this.sphereRadius * 2) * 1 / 6;
-    this.#shapes.earth?.scale.setScalar(this.#calcModelScale(this.#shapes.earth, maxSize));
-    //set scale
+    const scale = this.#calcModelScale(this.#shapes.earth!, maxSize);
+    this.#shapes.earth?.scale.multiplyScalar(scale);
+    //jupiter scale
     const jupiterMaxSize = (this.sphereRadius * 2) * 2 / 6;
-    this.#shapes.jupiter?.scale.setScalar(this.#calcModelScale(this.#shapes.jupiter, jupiterMaxSize));
+    this.#shapes.jupiter?.scale.multiplyScalar(this.#calcModelScale(this.#shapes.jupiter, jupiterMaxSize));
     //pos
     this.#shapes.jupiterOrbit?.position.copy(this.orbitCenter);
     this.#shapes.jupiter?.position.setX(this.sphereRadius * 1.6)
