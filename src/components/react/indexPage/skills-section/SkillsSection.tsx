@@ -77,7 +77,7 @@ function SkillsSection() {
               <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur" />
                 <feOffset in="blur" dx="0" dy="4" result="offset" />
-                <feFlood flood-color="var(--p-color)" flood-opacity="0.25" result="color" />
+                <feFlood floodColor="var(--p-color)" floodOpacity="0.25" result="color" />
                 <feComposite in="color" in2="offset" operator="in" result="shadow" />
                 <feMerge>
                   <feMergeNode in="shadow" />
