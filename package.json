@@ -10,23 +10,26 @@
   },
   "dependencies": {
     "@astrojs/react": "^5.0.3",
-    "@swc/core": "^1.15.30",
-    "@swc/plugin-styled-components": "^12.8.0",
+    "@swc/core": "^1.15.33",
+    "@swc/plugin-styled-components": "^12.9.0",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.177.0",
+    "@types/three": "^0.184.0",
     "agileverse-feedback": "^0.0.8",
-    "astro": "^5.15.3",
+    "astro": "^6.2.2",
     "babel-plugin-styled-components": "^2.1.4",
+    "jb-core": "^0.27.2",
+    "jb-input": "^3.16.0",
+    "jb-modal": "^1.12.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "styled-breakpoints": "^14.1.4",
-    "styled-components": "^6.1.13",
+    "styled-breakpoints": "^14.2.0",
+    "styled-components": "^6.4.1",
     "three": "^0.184.0",
     "typescript": "^6.0.3",
     "usehooks-ts": "^3.1.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.9.5"
+    "@rollup/rollup-linux-x64-gnu": "4.60.3"
   }
 }

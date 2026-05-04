@@ -5,12 +5,17 @@ import FrontendSkillItems from './FrontendSkillItems'
 import { useBulletPoints, useHalfCirclePath, useSyncSize } from './hooks'
 import NonTechnicalSkills from './NonTechnicalSkills'
 import styles from './styles.module.css'
+import {useEvent} from 'jb-core/react'
+import { Activity, useState } from 'react'
+import ProductContent from './contents/ProductContent'
+import {JBInput} from 'jb-input/react'
 
 function SkillsSection() {
   const { contentHeightShare, sphereGapPercent, variableStyle } = useSyncSize();
   const halfCirclePath = useHalfCirclePath();
   const bullets = useBulletPoints();
   const matches = useMediaQuery('(max-aspect-ratio: 1/1)');
+  const [modalContent, setModalContent] = useState<"product"|"agile"|"front"|"backend"|"ui"|null>(null)
   return (
     <section className={styles.skillsSectionWrapper} style={variableStyle}>
       <div className={styles.skillsBackgroundWrapper}>
@@ -67,7 +72,7 @@ function SkillsSection() {
                   </text>
                 }
                 </g>
-              <g transform={`translate(${bullets.product.x}, ${bullets.product.y})`} className={styles.skillGroup}>
+              <g transform={`translate(${bullets.product.x}, ${bullets.product.y})`} className={styles.skillGroup} onClick={()=>setModalContent("product")}>
                 <circle cx="0" cy="0" r="1" className={styles.bullet}></circle>
                 <text className={`${styles.skillGroupTitle}`} data-size="sm">Product & Soft Skills</text>
                 <text className={`${styles.skillGroupDescription}`} data-size="sm">Able to Understand User Needs & balance Cost/Quality</text>
@@ -87,9 +92,12 @@ function SkillsSection() {
             </defs>
           </svg>
         </div>
-
       </div>
-
+      {/* <JBModal isOpen={!!modalContent}>
+        <Activity mode={modalContent=="product"?"visible":"hidden"}>
+          <ProductContent/>
+        </Activity>
+      </JBModal> */}
     </section>
   )
 }
