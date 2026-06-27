@@ -1,0 +1,30 @@
+.skillContent{
+  /*45 + 2*2(padding)*/
+  max-width: 49rem;
+  padding-block: 1rem;
+  padding-inline: 2rem;
+}
+
+.skillTitle{
+  font-size: 1.8rem;
+  color: var(--p-color);
+  font-weight: 600;
+  font-family: title-font;
+}
+
+.skillParagraph{
+  text-align: justify;
+  font-size:1rem;
+  line-height: 1.7;
+}
+
+.indent{
+  text-indent: 1.5em;
+}
+
+.SkillUl{
+  li{
+    padding-block: 0.5rem;
+  }
+}
+
