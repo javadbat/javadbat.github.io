@@ -101,7 +101,7 @@
 }
 
 @media (max-aspect-ratio: 1/1) {
-  .title{
+  .title {
     text-align: end;
     justify-content: end;
     transform: translateX(calc(-2.5 * var(--sgp) * 0.5cqh));
@@ -170,11 +170,13 @@
     font-size: 0.5rem;
   }
 }
+
 @media (max-width: 991px) {
   .skillGroupTitle {
     font-size: 0.5rem;
   }
 }
+
 @media (max-aspect-ratio: 1/1) {
   .skillGroupTitle {
     font-size: 0.3rem;
@@ -223,18 +225,12 @@
   }
 }
 
-.skillItems {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-block: 32px;
-  justify-content: center;
-}
 
-.skillItem {
-  display: inline;
-}
-
-.skillItem:nth-child(n)::after {
-  content: ', ';
+.skillModal {
+  &::part(content-box) {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+      rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+    background:linear-gradient(30deg, hsl(205 26% 92% / 1) 0%, #ffffff 15%, hsl(205 26% 100% / 1) 60%, hsl(205 26% 92% / 1) 100%);
+    corner-shape: squircle;
+  }
 }
