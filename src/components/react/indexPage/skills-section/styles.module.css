@@ -232,5 +232,6 @@
       rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
     background:linear-gradient(30deg, hsl(205 26% 92% / 1) 0%, #ffffff 15%, hsl(205 26% 100% / 1) 60%, hsl(205 26% 92% / 1) 100%);
     corner-shape: squircle;
+    --jb-modal-back-bg-color:oklch(from var(--jb-white) l c h / .5);
   }
 }

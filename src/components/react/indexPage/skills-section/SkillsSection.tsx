@@ -93,7 +93,7 @@ function SkillsSection() {
           </svg>
         </div>
       </div>
-      <ClientJBModal isOpen={!!modalContent} onClose={() => setModalContent(null)} className={styles.skillModal}>
+      <ClientJBModal id="SkillDetail" isOpen={!!modalContent} onClose={() => setModalContent(null)} className={styles.skillModal}>
         <Activity mode={modalContent=="product"?"visible":"hidden"}>
           <ProductContent/>
         </Activity>
