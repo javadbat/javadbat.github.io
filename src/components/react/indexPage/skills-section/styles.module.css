@@ -227,11 +227,58 @@
 
 
 .skillModal {
+  --jb-modal-back-bg-color:oklch(from var(--jb-white) l c h / .5);
   &::part(content-box) {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
       rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
     background:linear-gradient(30deg, hsl(205 26% 92% / 1) 0%, #ffffff 15%, hsl(205 26% 100% / 1) 60%, hsl(205 26% 92% / 1) 100%);
     corner-shape: squircle;
-    --jb-modal-back-bg-color:oklch(from var(--jb-white) l c h / .5);
   }
+}
+@media (min-width: 769px) {
+
+    @property --anime-duration {
+        syntax: "<time>";
+        inherits: false;
+        initial-value: 300ms;
+    }
+
+    .skillModal {
+        transition: display var(--anime-duration) allow-discrete;
+    }
+
+    .skillModal::part(background) {
+        opacity: 0;
+        transition: opacity var(--anime-duration) ease,
+                    backdrop-filter  var(--anime-duration) ease;
+        backdrop-filter: blur(0px) contrast(1);
+    }
+
+    .skillModal:state(open)::part(background) {
+        opacity: 1;
+        backdrop-filter: blur(10px) contrast(3.5);
+        @starting-style {
+            opacity: 0;
+            backdrop-filter: blur(10px) contrast(1);
+        }
+    }
+
+    .skillModal::part(content-box) {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.8);
+        transition:
+            opacity var(--anime-duration) ease,
+            transform var(--anime-duration) cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+
+    .skillModal:state(open)::part(content-box) {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+
+        @starting-style {
+            opacity: 0;
+            transform: translateY(3rem) scale(0.8);
+        }
+    }
 }
