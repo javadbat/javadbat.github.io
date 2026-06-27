@@ -8,7 +8,7 @@ import styles from './styles.module.css'
 import { Activity, useState } from 'react'
 import ProductContent from './contents/ProductContent'
 import { ClientJBModal } from '../../components/modal/ClientJBModal'
-import UiContent from './contents/uiContent'
+import UiContent from './contents/UiContent'
 
 function SkillsSection() {
   const { contentHeightShare, sphereGapPercent, variableStyle } = useSyncSize();
