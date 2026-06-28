@@ -52,6 +52,7 @@
   grid-template-areas: "first-col second-col";
   /* turn 50 ch to 100ch * fill percent */
   margin-inline-start: calc((100cqw / 2) - (100cqh * var(--chsp)));
+  overflow-x: hidden;
 }
 
 @media (max-aspect-ratio: 4/3) {

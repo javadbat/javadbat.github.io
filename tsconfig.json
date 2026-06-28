@@ -12,7 +12,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
-      "@react-components/*":["src/components/react/components/*"]
+      "@react-components/*":["./src/components/react/components/*"]
     }
   }
 }
