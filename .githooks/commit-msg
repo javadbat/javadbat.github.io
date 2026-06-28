@@ -1,0 +1,31 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+commit_msg="$(sed '1q' "$commit_msg_file")"
+
+allowed_types="build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test"
+conventional_pattern="^($allowed_types)(\([A-Za-z0-9._-]+\))?!?: .+"
+
+case "$commit_msg" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *)
+    exit 0
+    ;;
+esac
+
+if ! printf '%s\n' "$commit_msg" | grep -Eq "$conventional_pattern"; then
+  cat >&2 <<'EOF'
+Invalid commit message.
+
+Use Conventional Commits:
+  type(scope): message
+
+Examples:
+  feat: add skills section
+  fix(styles): adjust mobile spacing
+  chore: update dependencies
+
+Allowed types:
+  build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+EOF
+  exit 1
+fi
