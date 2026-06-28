@@ -20,7 +20,7 @@
     "babel-plugin-styled-components": "^2.1.4",
     "jb-core": "^0.27.2",
     "jb-input": "^3.16.0",
-    "jb-modal": "^1.13.0",
+    "jb-modal": "^1.13.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "styled-breakpoints": "^14.2.0",
