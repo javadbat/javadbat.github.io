@@ -66,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
         working-directory: ${{ env.BUILD_PATH }}
+      - name: Sync Astro types
+        run: ${{ steps.detect-package-manager.outputs.runner }} astro sync
+        working-directory: ${{ env.BUILD_PATH }}
       - name: Check types
         run: ${{ steps.detect-package-manager.outputs.manager }} run check
         working-directory: ${{ env.BUILD_PATH }}
