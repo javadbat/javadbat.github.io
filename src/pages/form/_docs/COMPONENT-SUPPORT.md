@@ -55,7 +55,7 @@ A component moves from inventory coverage to implemented support only when:
 
 - [ ] Its registry entry declares the package, tag/component, defaults, value type, and supported schema version.
 - [ ] Its registry entry generates a non-empty valid `name` and applies it at runtime; repeated names remain valid for array collection.
-- [ ] Its registry entry maps to an approved semantic JB icon used consistently in catalog and element-list surfaces.
+- [ ] Its registry entry maps to a proper existing or locally designed semantic icon used consistently in catalog and element-list surfaces.
 - [ ] Every approved editable property has a configuration control.
 - [ ] Every approved event needed by preview/runtime behavior is mapped.
 - [ ] Slots and declarative child content serialize without executable values.

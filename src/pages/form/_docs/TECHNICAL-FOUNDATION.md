@@ -1,6 +1,6 @@
 # JB Form — Technical Foundation
 
-Status: Proposed architecture; owner review required  
+Status: Approved for Phase 1
 Phase: 1 — Form Builder and Preview  
 Inputs: `PROJECT.md`, `PRODUCT-FLOW.md`, approved `FORM-JSON-CONTRACT.md`, component inventory, and DSR-005
 
@@ -33,7 +33,7 @@ Dependencies are added only when implementation reaches their owning step.
 | ADR-005 | Use Ajv 2020 plus format validation for the published JSON Schema, followed by semantic and registry validation. |
 | ADR-006 | Use a versioned component-adapter registry as the only mapping between portable elements and JB packages. |
 | ADR-007 | Keep `<jb-form-builder>` route- and storage-agnostic; consume it through a thin application adapter. |
-| ADR-008 | Use `jb-core/i18n`; independent editor/form locales require the scoped-context upgrade in DSR-006. |
+| ADR-008 | Use the client-side `jb-core/i18n` singleton with one active locale per route page in Phase 1. |
 | ADR-009 | Use external pure CSS/CSS Modules, JB tokens, `rem`, and logical properties; no CSS-in-JS. |
 | ADR-010 | Use typed result/error objects at infrastructure boundaries and route-level recoverable states. |
 
@@ -141,14 +141,14 @@ Navigation to Designer and Preview performs a full document navigation after a s
 
 Named-form slugs exist only in a user's IndexedDB and cannot be enumerated by Astro at build time. GitHub Pages has no rewrite rule for arbitrary `/form/{mode}/:slug` paths.
 
-Recommended Phase 1 handling:
+Approved simple Phase 1 handling:
 
 - generate normal static shells for the no-slug routes;
 - add a form-aware `404.html` shell;
 - when the 404 path matches the strict form-route parser, mount the correct route island without changing the URL;
 - render the normal not-found page for every other path.
 
-This makes direct slug navigation usable on GitHub Pages, but the initial HTTP response remains `404`. A `200` response for arbitrary slug deep links requires hosting with a rewrite to the form shell.
+This makes direct slug navigation usable on GitHub Pages, but the initial HTTP response remains `404`. This limitation is accepted for Phase 1 and may be enhanced later. A `200` response for arbitrary slug deep links requires hosting with a rewrite to the form shell.
 
 ## State boundaries
 
@@ -351,7 +351,9 @@ Registry rules:
 - Unknown props and unsupported validation rules are rejected.
 - Package imports are lazy by element type so unused catalog packages do not enter the initial route chunk.
 - Catalog and canvas consume the same `displayNameKey` and `icon`.
-- Exact icon keys must come from the approved JB icon source. Missing icons trigger a detailed owner/design-system request; no emoji, third-party icon, handwritten SVG, or CSS substitute is allowed.
+- Prefer suitable existing JB icon assets.
+- If no suitable asset exists, design a repository-owned SVG with a `24 × 24` view box, `currentColor`, and consistent stroke/fill geometry.
+- Keep every icon mapping in the registry. Do not use emoji, Unicode text symbols, third-party icon packages, or CSS-drawn icons.
 
 ## Renderer boundary
 
@@ -388,15 +390,13 @@ The approved data model separates:
 - editor locale: application preference, not portable;
 - form default locale/direction: portable document configuration.
 
-`jb-core@0.30.0` cannot currently scope these contexts to different subtrees. DSR-006 requests:
+All Phase 1 form applications are client-only. Each route configures one active `jb-core/i18n` locale after the browser document exists:
 
-- scoped web-component and React i18n providers;
-- global singleton fallback;
-- SSR-safe imports;
-- disposal/listener cleanup;
-- independent English/LTR and Persian/RTL subtrees.
+- Builder uses its active editor locale.
+- Preview uses the loaded form's default locale and direction.
+- Designer uses the active application locale for its placeholder.
 
-Until DSR-006 is implemented, independent editor/form locales in the same Builder page are blocked. The application will not create a private competing i18n system or silently force the two approved concepts to be the same.
+Simultaneous independently scoped locales inside one route are not required in Phase 1. The JSON structure remains multilingual-ready for Phase 2. DSR-006 is closed and may be reconsidered only if multilingual authoring later requires simultaneous JB component subtrees with different locales.
 
 ## Styling
 
@@ -484,16 +484,18 @@ The implementation step adds scripts for unit tests, type checking, linting, bui
 
 Builder shell implementation may begin when:
 
-- this architecture is approved;
-- the GitHub Pages slug fallback behavior is accepted or hosting rewrite support is chosen;
-- exact approved JB icon keys are available for the 16 catalog entries;
-- DSR-006 has an agreed upgrade path (it may be implemented in parallel, but independent locale acceptance remains blocked);
+- this approved architecture is reflected in implementation;
+- the simple form-aware GitHub Pages fallback is kept isolated for later enhancement;
+- all 16 catalog entries receive a suitable existing or locally designed icon;
 - DSR-001 and DSR-004 remain tracked for their affected integrations;
 - DSR-005 local test exception remains isolated and replaceable.
 
-## Owner checkpoint
+## Owner approval
 
-1. Approve route-local MobX, native IndexedDB, Ajv, and external CSS Modules.
-2. Accept the GitHub Pages form-aware `404.html` fallback, including its HTTP 404 status, or move the form routes to hosting with rewrite support.
-3. Provide/approve the exact JB icon package and icon keys for all 16 catalog entries; if the package is missing, add it to the design system.
-4. Upgrade `jb-core/i18n` and JB component standards per DSR-006 so editor and form locales can be scoped independently.
+Approved:
+
+- route-local MobX, native IndexedDB, Ajv, and external CSS Modules;
+- the simple form-aware GitHub Pages `404.html` fallback for Phase 1;
+- sourcing or locally designing proper catalog icons during implementation;
+- client-only `jb-core/i18n` with one active locale per route page;
+- deferring any enhanced deep-link hosting or scoped-locale work until it is actually needed.

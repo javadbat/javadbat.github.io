@@ -1,6 +1,6 @@
 # JB Form — Form-Element Component Inventory
 
-Status: Initial input inventory complete; DSR-001, DSR-004, renderer publication DSR-005, and scoped i18n DSR-006 remain open  
+Status: Initial input inventory complete; DSR-001, DSR-004, and renderer publication DSR-005 remain open; DSR-006 is closed
 Reviewed: 2026-07-29  
 Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`](https://github.com/javadbat/design-system/tree/8afc94a5cae5910c2dccab35c033d4d01150d27e)
 
@@ -81,10 +81,10 @@ Every builder element receives a builder-owned stable `id`, ordered position, co
 - Missing or invalid name blocks Preview and export.
 - Names must be non-empty and syntactically valid. Repeated names are supported because `jb-form` returns an array when multiple controls share a name.
 - The JSON contract defines character, normalization, length, and suffix rules.
-- Every catalog and canvas-list entry maps to a proper semantic icon from the approved JB icon source.
+- Every catalog and canvas-list entry maps to a proper semantic icon, preferring an existing JB asset and otherwise using a locally designed catalog icon.
 - Icons supplement visible component names and include correct decorative/accessible treatment.
-- Emoji, Unicode symbols, CSS drawings, and handcrafted SVG substitutes are not permitted.
-- If the JB icon source lacks an appropriate icon, submit a detailed design-system icon request before implementing a substitute.
+- Emoji, Unicode text symbols, third-party icon packages, CSS drawings, and ad hoc inline SVGs are not permitted; approved repository-owned catalog SVG assets are allowed.
+- If no suitable JB icon exists, design a consistent repository-owned SVG under the approved catalog-icon standard.
 
 ### Input family
 
@@ -185,6 +185,6 @@ Design-system requests found during inventory and technical-foundation review:
 - DSR-003 — resolved in `jb-switch@1.7.1`; the required rule now maps to `valueMissing`.
 - DSR-004 — repair the unreachable `jb-switch` gitlink in the latest design-system repository revision.
 - DSR-005 — publish `jb-form-builder`; a replaceable application-local renderer is approved for tests only.
-- DSR-006 — add scoped, SSR-safe i18n contexts so editor and form subtrees can use independent locales.
+- DSR-006 — closed for Phase 1; the application is client-only and uses one active `jb-core/i18n` locale per route page.
 
 Full evidence, requested APIs, and acceptance criteria are in `DESIGN-SYSTEM-REQUESTS.md`.

@@ -1,6 +1,6 @@
 # JB Form — Route-Family Delivery Plan
 
-Status: Draft for review  
+Status: Approved plan; ready for implementation
 Active phase: Phase 1 — Form Builder  
 Phase 2 gate: Do not start until Phase 1 is accepted.  
 Phase 3 gate: Do not start until Phase 2 is accepted.
@@ -47,7 +47,7 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 - [x] Define a representative large-form size and performance target.
   - Baseline: a form with 100 elements.
   - Response targets: editing feedback within 100 ms and restore/export completion within 1 second on the reference test environment.
-- [ ] Agree on Phase 1 completion and Phase 2 entry criteria.
+- [x] Agree on Phase 1 completion and Phase 2 entry criteria.
 
 ## Phase 1 — Form Builder
 
@@ -63,7 +63,7 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 - [x] Check for required components missing from the JB Design System and submit detailed requests if found. No missing component was found in the initial inventory.
 - [x] Track each design-system request as a blocker for the affected builder task until the change is available or a documented alternative is approved.
 
-Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, DSR-005, and DSR-006 remain open. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
+Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, and DSR-005 remain open; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
 
 ### 2. Product flow and interaction specification
 
@@ -78,7 +78,7 @@ Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTE
 - [x] Define Persian/RTL and LTR layout, direction switching, and focus-order behavior.
 - [x] Define navigation to the separate Designer and Preview routes.
 - [x] Define responsive Preview loading from IndexedDB and rendering through `<jb-form-builder>`.
-- [x] Check the flow's editor-shell needs against the JB Design System. Exact catalog icons and `jb-icon` stability remain an implementation prerequisite.
+- [x] Check the flow's editor-shell needs against the JB Design System. Catalog icons may be sourced or designed locally under the approved icon standard.
 - [x] Answer the owner questions and approve the interaction decisions in `PRODUCT-FLOW.md`.
 
 Deliverable: `PRODUCT-FLOW.md`. Product flow and interaction decisions are approved.
@@ -110,18 +110,18 @@ Deliverable: approved `FORM-JSON-CONTRACT.md`, JSON Schema, TypeScript types, fi
 - [x] Select route-local MobX state management and Ajv schema validation.
 - [x] Document why Builder complexity requires MobX while Preview remains route-local.
 - [x] Define the component-registry interface.
-- [x] Define required name defaults and the approved-icon-source boundary.
+- [x] Define required name defaults and the existing-or-locally-designed icon boundary.
 - [x] Finalize the DSR-005 `<jb-form-builder>` public JSON property, states, methods, events, and publication contract.
 - [x] Define separation between portable form data and editor-only state.
 - [x] Define separation between portable form data and Preview runtime response state.
 - [x] Select external CSS Modules, prohibit CSS-in-JS, and require `rem`/logical-property styling.
 - [x] Define error boundaries and recoverable fallback states.
 - [x] Establish unit, integration, accessibility, and end-to-end test layers.
-- [ ] Approve the architecture decisions and GitHub Pages deep-link fallback.
-- [ ] Approve/provide exact JB icon keys for all 16 catalog entries.
-- [ ] Resolve DSR-006 scoped i18n before independent editor/form locale acceptance.
+- [x] Approve the architecture decisions and simple GitHub Pages deep-link fallback.
+- [x] Authorize implementation to source or design proper icons for all 16 catalog entries.
+- [x] Close DSR-006 for Phase 1: all form routes are client-only and use one active `jb-core/i18n` locale per page.
 
-Deliverable: `TECHNICAL-FOUNDATION.md`. Architecture and test-strategy proposal complete; owner/dependency checkpoints remain.
+Deliverable: approved `TECHNICAL-FOUNDATION.md` architecture and test strategy.
 
 ### 5. Builder shell
 
@@ -152,7 +152,7 @@ Deliverable: complete editor workflow independent of persistence.
 
 - [ ] Implement one registry adapter per inventory item.
 - [ ] Require every adapter to generate and validate `name`.
-- [ ] Map every adapter to an approved semantic JB icon.
+- [ ] Map every adapter to a proper existing or locally designed semantic icon.
 - [ ] Expose every approved component property.
 - [ ] Map component events and validation behavior correctly.
 - [ ] Verify serialization round trips without data loss.

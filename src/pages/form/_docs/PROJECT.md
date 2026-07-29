@@ -1,6 +1,6 @@
 # JB Form — Route-Family Project Description
 
-Status: Draft for review  
+Status: Approved for Phase 1
 Route namespace: `/form`  
 Design system: [JB Design System](https://javadbat.github.io/design-system/?path=/docs/getting-started-introduction--docs)
 
@@ -107,7 +107,7 @@ Each supported element defines:
 - runtime render behavior;
 - JSON serialization/deserialization.
 
-If the JB icon set lacks an appropriate icon, stop the affected mapping and ask the project owner to add it with the required concept, states, accessible meaning, and sizes.
+If the JB icon set lacks an appropriate icon, design a repository-owned catalog SVG using the shared icon standard and register it centrally.
 
 ### Editing
 
@@ -175,7 +175,7 @@ If the JB icon set lacks an appropriate icon, stop the affected mapping and ask 
 - Use `rem` for authored sizes, spacing, typography, and breakpoints.
 - Use CSS logical properties for LTR/RTL.
 - Consume JB theme tokens and component styling hooks.
-- Use approved JB icons; do not substitute emoji, Unicode symbols, CSS drawings, or handcrafted SVG approximations.
+- Prefer existing JB icons; otherwise use consistent repository-owned SVG catalog icons. Do not use emoji, Unicode symbols, third-party icon packages, or CSS drawings.
 
 ## State-management constraint
 
@@ -185,10 +185,10 @@ If the JB icon set lacks an appropriate icon, stop the affected mapping and ask 
 
 ## JB Design System dependency policy
 
-- JB Design System is the source of truth for components, behavior, icons, i18n, and UI standards.
+- JB Design System is the source of truth for components, behavior, i18n, and UI standards; its icon assets are preferred when suitable.
 - If a required JB feature is missing, stop the affected work and ask the owner for an upgrade with the limitation, requested API/behavior, and usage example.
-- If a required component or icon does not exist, ask the owner to add it with responsibilities, API, states, accessibility, styling, and usage details.
-- Do not create a local substitute, fork, alternate icon source, or hidden workaround without explicit approval.
+- If a required component does not exist, ask the owner to add it with responsibilities, API, states, accessibility, styling, and usage details. Missing catalog icons may be designed locally.
+- Do not create a local component substitute, fork, or hidden workaround without explicit approval. Repository-owned catalog SVGs are explicitly approved.
 
 ## Quality requirements
 
@@ -196,7 +196,7 @@ If the JB icon set lacks an appropriate icon, stop the affected mapping and ask 
 - Builder supports the latest two stable Chrome, Edge, and Firefox releases and latest stable Safari.
 - Builder editing supports desktop widths from the approved minimum.
 - Preview is responsive and touch-usable in Phase 1.
-- Builder and Preview support independent LTR/RTL combinations.
+- Each client-only route configures its active English/LTR or Persian/RTL locale through `jb-core/i18n`; simultaneous scoped locales on one page are not required in Phase 1.
 - Invalid configuration is explained near its control and in a summary.
 - Save, route-loading, renderer, and export failures are visible and recoverable.
 - Performance baseline: 100 elements, editing feedback within 100 ms, restore/export within 1 second on the reference environment.
@@ -251,9 +251,7 @@ Phase 3 adds responsive/touch Builder editing without regressing responsive Prev
 
 ## Open decisions
 
-- Which exact icons map to every catalog element, and does `jb-icon` need additions/stabilization?
-- What IndexedDB migration and retention guarantees are required?
-- Are the product goals, non-goals, and phase-entry criteria approved?
+No blocking product or architecture decisions remain. Component upgrade verification and renderer publication remain tracked implementation dependencies rather than undecided product behavior.
 
 ## Documentation rule
 

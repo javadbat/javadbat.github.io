@@ -1,6 +1,6 @@
 # JB Form — Route-Family Product Flow and Interaction Specification
 
-Status: Product flow approved; downstream schema and technical decisions remain  
+Status: Approved for Phase 1
 Phase: Phase 1 — Form Builder  
 Route namespace: `/form`  
 Reviewed: 2026-07-29
@@ -156,12 +156,12 @@ All implementation dimensions use `rem`. A one-device-pixel border may use the d
 
 ### Icons
 
-- Every catalog item and canvas element summary has a component-specific icon from the approved JB icon source.
+- Every catalog item and canvas element summary has a component-specific icon, reusing a suitable JB asset or using a locally designed catalog SVG.
 - Icons communicate component type; they do not replace the visible component name.
 - Icons have accessible treatment appropriate to whether they are decorative or meaningful.
-- No emoji, Unicode symbol, handcrafted SVG, or CSS-drawn approximation is used.
+- No emoji, Unicode text symbol, third-party icon package, or CSS-drawn approximation is used.
 - The component registry owns the icon mapping so Builder and future Designer surfaces stay consistent.
-- If an appropriate JB icon does not exist, request it from the project owner with the required concept, states, accessible meaning, and intended sizes.
+- When no appropriate JB icon exists, create a repository-owned SVG using the shared `24 × 24` view box, `currentColor`, consistent stroke/fill treatment, and accessible decorative handling beside visible text.
 
 ### Browsing and adding
 
@@ -504,7 +504,7 @@ Browser-reserved shortcuts are not overridden.
 | Locale configuration | `jb-core/i18n` |
 | Preview rendering | `<jb-form-builder>` |
 
-Before implementation, inventory the exact icon for each catalog component. If `jb-icon` lacks a required icon or cannot meet production stability/accessibility requirements, ask the project owner to add or upgrade it.
+Before implementation, inventory the exact icon for each catalog component. Reuse suitable JB assets first; otherwise design the missing icon locally and keep the mapping in the component registry.
 
 ## Core acceptance journeys
 

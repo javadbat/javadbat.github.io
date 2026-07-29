@@ -1,6 +1,6 @@
 # JB Form — Design System Dependency Requests
 
-Status: Release audit complete; DSR-002 and DSR-003 resolved, DSR-001, DSR-004, DSR-005, and DSR-006 open  
+Status: Release audit complete; DSR-002 and DSR-003 resolved, DSR-006 closed, DSR-001, DSR-004, and DSR-005 open
 Baseline source revision reviewed: `835fddf109e39c33ee7aecd0af6e4a0b4832ebda`  
 Latest design-system revision audited: `8afc94a5cae5910c2dccab35c033d4d01150d27e`
 Latest npm release audit: 2026-07-29
@@ -293,11 +293,17 @@ The project owner explicitly approved an application-local `<jb-form-builder>` f
 - Web-component source, typings, custom-elements manifest, documentation, tests, and React wrapper are published.
 - The application replaces its local test implementation with the published package before Phase 1 production acceptance.
 
-## DSR-006 — Add scoped, SSR-safe i18n contexts
+## DSR-006 — Scoped and SSR-safe i18n review
 
-Priority: Phase 1 independent-locale blocker  
-Status: Open  
+Priority: None for Phase 1; reconsider only if Phase 2 needs simultaneous scoped locales
+Status: Closed; not required by the approved client-only architecture
 Baseline reviewed: `jb-core@0.30.0`
+
+### Resolution
+
+Every Phase 1 form route is a client-only application and configures one active `jb-core/i18n` locale after the browser document exists. Builder uses its active editor locale; Preview is a separate page and uses the form's default locale/direction. Simultaneous independently scoped JB component subtrees are not required in Phase 1, and no SSR import is needed.
+
+The following analysis is retained as a possible Phase 2 enhancement, not a current design-system request or implementation blocker.
 
 ### Use case
 
@@ -309,7 +315,7 @@ Builder chrome has an editor locale, while the portable form document has its ow
 
 Although `JBI18N` is constructible, JB components have no standard property/provider for receiving a scoped instance. Creating a second instance in the application does not make component internals consume it.
 
-### Requested standard and API
+### Possible future standard and API
 
 - Define an official scoped i18n context that a JB component subtree can consume independently of the document-global singleton.
 - Support at least locale, language, direction, calendar, numbering system, and locale-change subscription.
@@ -356,4 +362,4 @@ The exact provider API may differ, but consumers must not need to mutate the doc
 
 ## Missing-component review
 
-The form-element inventory itself requires no additional input component. Product-flow design identified the missing JSON renderer tracked by DSR-005. The owner approved a local test implementation while the publishable design-system package is developed. Technical-foundation review identified the scoped-i18n standard gap tracked by DSR-006; there is no approved application-local substitute for that shared standard.
+The form-element inventory itself requires no additional input component. Product-flow design identified the missing JSON renderer tracked by DSR-005. The owner approved a local test implementation while the publishable design-system package is developed. DSR-006 is closed because scoped/SSR i18n is not required for the client-only Phase 1 route model.
