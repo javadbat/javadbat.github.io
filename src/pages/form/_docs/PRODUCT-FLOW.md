@@ -1,0 +1,569 @@
+# JB Form — Route-Family Product Flow and Interaction Specification
+
+Status: Product flow approved; downstream schema and technical decisions remain  
+Phase: Phase 1 — Form Builder  
+Route namespace: `/form`  
+Reviewed: 2026-07-29
+
+## Purpose
+
+This document defines navigation and interaction across the Phase 1 Form pages. It covers Builder editing, the empty Designer destination, responsive Preview rendering, form resolution from IndexedDB, keyboard and focus behavior, locale/direction behavior, persistence feedback, and recovery.
+
+It does not define the final JSON schema, Theme Designer UI, state-management implementation, visual theme, or mobile/touch editing.
+
+## Confirmed product constraints
+
+- `/form` is the route namespace.
+- `/form` has its own landing page.
+- Builder, Designer, and Preview are separate routes.
+- Each route accepts an optional form slug.
+- When a slug is present, the page loads that named form by default.
+- When no slug is present, the page loads the current working draft.
+- Builder contains links to Designer and Preview for the current form.
+- Designer is an empty destination in Phase 1 and is implemented in Phase 2.
+- Builder has no embedded Preview mode.
+- Preview is a separate responsive page.
+- Preview loads its form JSON from IndexedDB and passes it to `<jb-form-builder>`.
+- `<jb-form-builder>` receives portable form JSON and renders the runtime `jb-form`.
+- English and LTR are the defaults.
+- Locale configuration and translation use `jb-core/i18n`.
+- Every generated form element has a non-empty `name` attribute.
+- Element names are non-empty. Duplicate names are allowed because `jb-form` intentionally collects controls sharing a name into an array.
+- Catalog and element-list entries use proper semantic icons, not emoji or text-symbol substitutes.
+- Styling uses Tailwind and, where needed, external pure CSS. CSS-in-JS is prohibited.
+- Authored layout and spacing dimensions use `rem`.
+- If application state management becomes necessary, use MobX.
+- Builder remains desktop-first in Phase 1; Preview is responsive in Phase 1.
+
+## Route contract
+
+| Purpose | Without slug | With slug |
+| --- | --- | --- |
+| Landing | `/form` | N/A |
+| Builder | `/form/builder` | `/form/builder/:slug` |
+| Designer | `/form/designer` | `/form/designer/:slug` |
+| Preview | `/form/preview` | `/form/preview/:slug` |
+
+The slug is an optional final path segment, not a query parameter.
+
+### Landing page
+
+`/form` is the entry and form-selection surface. It provides:
+
+- Continue current draft when one exists.
+- Create new form.
+- Open a named form in Builder.
+- Open a named form directly in Designer or Preview.
+- Clear empty, unavailable-storage, incompatible-record, and no-saved-forms states.
+
+Creating a new form while the current draft contains work uses the approved Save, Continue without saving, or Cancel decision pattern. The landing page uses `jb-core/i18n`, defaults to English/LTR, and supports Persian/RTL.
+
+### Form resolution
+
+Every route uses the same resolution contract:
+
+1. Initialize IndexedDB.
+2. If a slug is present, resolve the compatible named-form record for that slug.
+3. If no slug is present, resolve the current working draft.
+4. Validate and migrate the stored record before use.
+5. If the record does not exist or cannot be opened safely, show the route-specific recovery state.
+
+The route must not silently fall back from an invalid or unknown slug to another form. That would make the URL misleading.
+
+```mermaid
+flowchart TD
+    A[Open a /form subroute] --> B[Initialize IndexedDB]
+    B --> C{Slug present?}
+    C -->|Yes| D[Load named form by slug]
+    C -->|No| E[Load current working draft]
+    D --> F{Compatible document?}
+    E --> F
+    F -->|Yes| G[Render route]
+    F -->|Missing| H[Show not-found recovery]
+    F -->|Corrupt or incompatible| I[Preserve record and show recovery]
+```
+
+## Shared form context
+
+The three routes share these concepts:
+
+| Term | Meaning |
+| --- | --- |
+| Working draft | The current editor document. Its last explicitly saved snapshot is stored in IndexedDB and used by no-slug routes. |
+| Named form | An explicitly saved snapshot with stable ID, unique slug, display name, and timestamps. |
+| Linked named form | The named form from which the working draft was loaded or most recently saved. |
+| Named-form changes | Differences between the in-memory working document and its last explicitly saved snapshot. |
+| Builder locale | Editor UI locale managed through `jb-core/i18n`; editor-only state. |
+| Form default locale | Portable form configuration. Defaults to English. |
+| Form direction | Portable form configuration. Defaults to LTR. |
+
+## Builder page
+
+### Persistent header
+
+The Builder header contains, in logical order:
+
+1. Product identity.
+2. Current form name or `Untitled form`.
+3. Settings button beside the form name.
+4. Named-form state:
+   - `Not saved`;
+   - `Changes not saved to named form`;
+   - `Saved to named form`.
+5. Working-draft state:
+   - `Saving draft…`;
+   - `Draft saved`;
+   - `Draft not saved`.
+6. Builder-locale selector.
+7. `Designer` navigation button.
+8. `Preview` navigation button.
+9. `Export JSON`.
+
+Designer and Preview are navigation actions, not mode toggles.
+
+Named-form state and working-draft state must remain separate so `Draft saved` is never mistaken for an explicit named-form Save.
+
+### Workspace regions
+
+| Region | Position | Responsibility |
+| --- | --- | --- |
+| Component catalog | Inline start | Search, categories, semantic component icons, descriptions, and Add actions. |
+| Form canvas | Center | Ordered single-column form structure, selection, and element actions. |
+| Configuration panel | Inline end | Editable configuration for the selected element. |
+
+In RTL, inline start is the right side and inline end is the left. Vertical form order never reverses.
+
+### Desktop layout
+
+| Width | Behavior |
+| --- | --- |
+| `90rem` and wider | Catalog, canvas, and configuration panel remain visible. |
+| `75rem`–`89.9375rem` | All three regions remain visible with compact side panels. |
+| `64rem`–`74.9375rem` | Canvas remains primary; only one side panel is expanded at a time. |
+| Below `64rem` | Phase 1 shows a desktop-editing explanation and preserves the draft. Preview remains available. |
+
+All implementation dimensions use `rem`. A one-device-pixel border may use the design-system token or the smallest appropriate CSS border value when a `rem` conversion would create inconsistent rendering.
+
+### Direct entry
+
+- `/form/builder` restores the current draft or creates a new empty draft.
+- `/form/builder/:slug` loads the named form and establishes it as the working draft and linked named form.
+- The builder never opens with a project selector.
+- Storage initialization completes before choosing empty versus restored state.
+- Default new-form configuration is locale `en` and direction `ltr`.
+
+## Component catalog
+
+### Icons
+
+- Every catalog item and canvas element summary has a component-specific icon from the approved JB icon source.
+- Icons communicate component type; they do not replace the visible component name.
+- Icons have accessible treatment appropriate to whether they are decorative or meaningful.
+- No emoji, Unicode symbol, handcrafted SVG, or CSS-drawn approximation is used.
+- The component registry owns the icon mapping so Builder and future Designer surfaces stay consistent.
+- If an appropriate JB icon does not exist, request it from the project owner with the required concept, states, accessible meaning, and intended sizes.
+
+### Browsing and adding
+
+- Search covers display name, tag name, category, and keywords.
+- Categories remain visible when search is empty.
+- Each item has a visible `Add` button.
+- Activating Add appends a valid default element.
+- Desktop pointer drag may insert at a visible canvas insertion point if approved in the final checkpoint.
+- Keyboard Add keeps focus on the Add button and announces the inserted component and position.
+- Pointer drag focuses the inserted element after drop.
+
+Adding:
+
+- creates a stable element ID;
+- generates a non-empty default `name`;
+- selects the element;
+- scrolls it into view;
+- updates the configuration panel;
+- schedules working-draft persistence;
+- marks the linked named form as changed.
+
+## Form-element naming contract
+
+- Every generated catalog element, including action elements such as `jb-button`, has a non-empty `name` attribute.
+- Add generates a valid name from the component type.
+- Duplicate generates a new element ID and preserves the name by default so repeated values can be grouped.
+- The configuration panel treats name as a required property.
+- Clearing name produces an inline error.
+- Preview and JSON export are blocked while any element lacks a valid name.
+- Names may repeat across the form. The JSON contract defines allowed characters, normalization, and maximum length.
+
+## Canvas editing
+
+### Element card
+
+Every form element has:
+
+- a focusable selection surface;
+- semantic component icon;
+- component name and accessible position;
+- drag handle;
+- Move up and Move down;
+- Duplicate;
+- Remove;
+- a non-interactive rendering of the configured JB component.
+
+The rendered form control does not receive pointer or keyboard interaction in Builder. Selecting its editor card updates the configuration panel.
+
+### Selection and configuration
+
+- Pointer click, `Enter`, or `Space` selects a focused card.
+- `ArrowUp` and `ArrowDown` move card focus.
+- Selection does not automatically move focus into configuration.
+- A visible Configure action focuses the first configuration control.
+- The configuration panel exposes only supported JB properties.
+- Invalid configuration is explained inline and summarized before Preview or export navigation.
+
+### Reordering
+
+- Pointer users drag by the handle and see an insertion indicator.
+- `Escape` cancels active dragging.
+- Keyboard users have Move up and Move down buttons.
+- `Alt+ArrowUp` and `Alt+ArrowDown` are equivalent shortcuts while a card owns focus.
+- Focus and selection remain on the moved element.
+- New position is announced.
+
+### Duplicate
+
+Duplicate inserts immediately after the source:
+
+- configuration is copied;
+- stable element ID is regenerated;
+- `name` is regenerated to avoid collision;
+- Preview response data and validation display state are not copied;
+- the duplicate becomes selected and focused.
+
+### Remove
+
+The draft proposes confirmation for every removal because undo is deferred to Phase 2.
+
+After confirmation:
+
+- focus moves to the next element, previous element, or empty heading;
+- the configuration panel follows the new selection;
+- the Builder marks the document unsaved without writing IndexedDB;
+- the named form becomes changed.
+
+Cancel returns focus to Remove.
+
+## Configuration behavior
+
+- Valid configuration updates the canvas immediately.
+- Invalid intermediate values remain in their controls with inline errors.
+- Users may navigate to another element while configuration is invalid.
+- The canvas isolates component render failures to the affected card.
+- Designer, Preview, and export navigation validate the document before continuing.
+- An error summary links to the affected card and control.
+- Every committed change schedules draft persistence.
+
+## Designer navigation and placeholder
+
+Designer is a separate destination:
+
+- `/form/designer` resolves the working draft.
+- `/form/designer/:slug` resolves the named form.
+- Builder has a visible Designer button with an appropriate icon.
+- Before navigation, Builder requires the changed document to validate and save successfully.
+- Phase 1 Designer shows an intentional empty/not-yet-available page with:
+  - resolved form identity;
+  - a clear Phase 2 message;
+  - Back to Builder;
+  - Open Preview.
+- Designer does not alter form JSON in Phase 1.
+
+The empty Designer page is not a fake theme editor.
+
+## Preview page
+
+### Loading contract
+
+Preview never depends on in-memory Builder state because it is a separate page.
+
+1. Open `/form/preview` or `/form/preview/:slug`.
+2. Initialize IndexedDB.
+3. Resolve the working draft or named form using the shared route contract.
+4. Validate and migrate the stored form document.
+5. Pass the portable JSON document to `<jb-form-builder>`.
+6. `<jb-form-builder>` renders the runtime form and applies locale, direction, initial values, options, and declarative validation rules.
+
+```mermaid
+flowchart TD
+    A[Open Preview route] --> B[Load document from IndexedDB]
+    B --> C[Validate and migrate]
+    C -->|Invalid| D[Show Preview recovery]
+    C -->|Valid| E[Pass JSON to jb-form-builder]
+    E --> F[Render responsive jb-form]
+    F --> G[Interact, validate, reset, or submit locally]
+```
+
+### Renderer responsibility
+
+The application-local test `<jb-form-builder>`:
+
+- accepts the complete portable form JSON through a documented JavaScript property;
+- renders the ordered form elements;
+- applies required `name` attributes;
+- creates runtime `jb-validation` rules from declarative JSON;
+- applies default locale and direction;
+- initializes values from form configuration;
+- exposes loading, ready, invalid-document, component-error, reset, and validation-result states;
+- never writes runtime response values back into the form definition;
+- does not own IndexedDB lookup or route resolution.
+
+This local implementation is explicitly approved for testing. It must be converted into and consumed from a published JB Design System package before Phase 1 production acceptance.
+
+The Preview page owns IndexedDB and supplies JSON to the renderer.
+
+### Responsive behavior
+
+- Preview supports narrow mobile through wide desktop viewports in Phase 1.
+- The generated single-column form uses available inline size without horizontal page scrolling.
+- Controls remain usable at 200% zoom.
+- Form content respects its own LTR/RTL direction independently of Preview navigation chrome.
+- Preview navigation and recovery controls remain accessible on small screens.
+- Touch interaction is supported through the underlying JB form controls; touch editing remains Phase 3.
+- Layout values use `rem`, logical properties, and JB design tokens.
+
+### Runtime values
+
+- A Preview session begins from configured initial values.
+- Reset restores configured initial values.
+- Form submission runs native and JB validation but sends no backend request.
+- Runtime response values are session-only.
+- Reloading Preview reloads form JSON from IndexedDB.
+
+## Builder-to-Designer and Builder-to-Preview navigation
+
+Before navigation:
+
+1. Commit valid pending configuration edits.
+2. Validate the portable document.
+3. If the document is dirty, require an explicit Save.
+4. If Save fails or is canceled, remain in Builder and offer Retry or Export; do not open a destination that would load stale JSON.
+5. Navigate only after the destination can resolve the intended stored record.
+
+For a linked named form with changes, Designer and Preview require explicit Save before navigation and then open the slug route. They never preview an older named snapshot while presenting it as the current form.
+
+An unnamed working draft may use a no-slug Designer or Preview route only after an explicit current-draft Save succeeds.
+
+## Form management
+
+The settings button opens `jb-modal`.
+
+### Current form
+
+The modal contains:
+
+- form name;
+- slug or slug preview;
+- default locale, initially English;
+- direction, initially LTR;
+- linked named-form state;
+- Save;
+- Save As.
+
+Save behavior:
+
+- unnamed draft: Save creates a named record and slug;
+- linked form: Save explicitly replaces the named snapshot;
+- Builder Save As: creates a new IndexedDB form ID and slug while preserving copied element IDs;
+- Export/download another file: preserves the portable document ID and element IDs;
+- all IndexedDB writes require explicit Save or Save As;
+- successful named Save clears named-form changed state;
+- failure preserves modal values and offers Retry.
+
+### Loading
+
+Named forms are ordered by most recently updated. Each shows name, slug, update time, element count, compatibility, and Load.
+
+Loading over changed or unnamed work proposes:
+
+- Save current work;
+- Load without saving;
+- Cancel.
+
+Deleting named forms remains deferred until IndexedDB retention behavior is agreed.
+
+## Locale and direction
+
+### Builder UI
+
+- Use `jb-core/i18n` as the only locale dictionary/configuration mechanism.
+- Default builder locale is English.
+- Default builder direction is LTR.
+- Persian/RTL remains supported in Phase 1.
+- Builder locale is editor-only state and does not alter form content.
+- Locale preference is restored independently from the form document.
+
+### Form runtime
+
+- Default form locale is English.
+- Default form direction is LTR.
+- Form locale and direction are portable form configuration.
+- Preview applies form locale/direction through `<jb-form-builder>`.
+- Localizable values retain a Phase 1 structure that can add locale variants in Phase 2.
+- Exact locale identifiers, fallback, and schema representation are defined in the JSON-contract step.
+
+## Styling and state constraints
+
+### Styling
+
+- Use Tailwind for application-shell layout and common utilities.
+- Use external pure CSS for behavior Tailwind cannot express clearly, component Shadow DOM styles, and design-system integration.
+- Do not use CSS-in-JS, runtime-generated style objects, or component-scoped JavaScript styling.
+- Use `rem` for authored spacing, sizing, typography, breakpoints, and layout dimensions.
+- Use CSS logical properties for direction-aware layout.
+- Consume JB design tokens and styling hooks rather than copying component CSS.
+
+### State management
+
+- Do not add a state library until state complexity requires one.
+- If a state-management library is introduced, it must be MobX.
+- Portable form JSON, route/load state, editor-only state, and Preview runtime response state remain separate regardless of whether MobX is used.
+
+## Save-state model
+
+### Working draft
+
+| State | Treatment | Recovery |
+| --- | --- | --- |
+| Initializing | Loading status while IndexedDB resolves | Retry |
+| Saving | `Saving draft…` | Continue editing |
+| Saved | `Draft saved` | None |
+| Failed | Persistent `Draft not saved` | Retry, continue in memory, export |
+
+### Named form
+
+| State | Treatment | Meaning |
+| --- | --- | --- |
+| Unnamed | `Not saved as a named form` | Only working draft exists |
+| Linked clean | `Saved to named form` | Draft matches snapshot |
+| Linked changed | `Changes not saved to named form` | Draft is newer than named snapshot |
+| Saving | Save loading state | Explicit save is running |
+| Failed | Inline modal error | Snapshot was not replaced |
+
+## Error and recovery
+
+| State | Builder | Designer | Preview |
+| --- | --- | --- | --- |
+| Unknown slug | Not-found with Open current draft | Not-found with Back to Builder | Not-found with Open current draft |
+| IndexedDB unavailable | Continue in memory; Export remains | Cannot resolve form; Back | Cannot resolve form; Retry |
+| Quota exceeded | Stop claiming saved; Retry/Export | Existing records remain readable where possible | Existing records remain readable where possible |
+| Corrupt record | Preserve raw record; recovery actions | Do not render placeholder as valid | Do not pass JSON to renderer |
+| Newer schema | Read-only recovery/export | Compatibility message | Compatibility message |
+| Invalid names/config | Inline and summary; block navigation/export | N/A | Do not render invalid document |
+| Renderer element failure | Builder card fallback | N/A | `<jb-form-builder>` isolates and reports affected element |
+
+## Keyboard and focus contract
+
+| Input/action | Result |
+| --- | --- |
+| `Tab` / `Shift+Tab` | Follow visible controls in semantic DOM order |
+| `Ctrl+S` / `Cmd+S` | Explicit named Save, or open form management for unnamed draft |
+| `Escape` | Close topmost modal/popover or cancel drag |
+| Add | Keep focus on Add and announce insertion |
+| Move | Keep focus on moved card and announce position |
+| Duplicate | Focus duplicate |
+| Remove cancel | Return to Remove |
+| Remove confirm | Focus next, previous, or empty heading |
+| Designer/Preview navigation failure | Return focus to initiating button or error summary |
+| Modal close | Return to settings button |
+
+Browser-reserved shortcuts are not overridden.
+
+## Accessibility
+
+- Every icon-only control has an accessible name and tooltip where useful.
+- Catalog icons are paired with visible names.
+- Drag is never the only add or reorder method.
+- Edit-mode component renderings cannot accidentally receive focus.
+- Errors link to their element and configuration control.
+- Save and route-loading states are announced without relying on color.
+- Preview preserves the underlying JB controls' keyboard and validation behavior.
+- Builder LTR/RTL visual order and DOM focus order are tested together.
+- Responsive Preview is tested with keyboard, touch, screen reader semantics, zoom, and both directions.
+
+## JB Design System usage
+
+| Need | JB component/module |
+| --- | --- |
+| Actions and route links | `jb-button` |
+| Catalog search | `jb-searchbar` |
+| Text configuration | `jb-input` and specialized controls |
+| Enumerated configuration | `jb-select` |
+| Form management and confirmation | `jb-modal` |
+| Transient feedback | `jb-notification` |
+| Loading | `jb-loading` |
+| Contextual help | `jb-tooltip` |
+| Catalog and action icons | `jb-icon` |
+| Locale configuration | `jb-core/i18n` |
+| Preview rendering | `<jb-form-builder>` |
+
+Before implementation, inventory the exact icon for each catalog component. If `jb-icon` lacks a required icon or cannot meet production stability/accessibility requirements, ask the project owner to add or upgrade it.
+
+## Core acceptance journeys
+
+### New draft
+
+1. Open `/form/builder`.
+2. Restore or create the current draft.
+3. Confirm English/LTR defaults.
+4. Add elements with generated names and icons.
+5. Configure, reorder, duplicate, and save the draft.
+6. Refresh and restore.
+
+### Slug entry
+
+1. Open `/form/builder/:slug`.
+2. Resolve the named form from IndexedDB.
+3. Establish it as linked working draft.
+4. Change it and observe separate draft/named save states.
+
+### Separate Preview
+
+1. Change a valid draft.
+2. Activate Preview.
+3. Flush IndexedDB before navigation.
+4. Preview reloads JSON independently.
+5. `<jb-form-builder>` renders the responsive form.
+6. Interact, validate, reset, and reload without changing form configuration.
+
+### Designer placeholder
+
+1. Activate Designer for the current form.
+2. Resolve the same form identity.
+3. Show the Phase 2 placeholder.
+4. Return to the correct Builder route or open Preview.
+
+### RTL form in English UI
+
+1. Keep Builder in English/LTR.
+2. Configure the form as Persian/RTL.
+3. Preview applies Persian/RTL through the renderer.
+4. Navigation chrome and runtime form direction remain independent.
+
+### Persistence failure before navigation
+
+1. Change the draft.
+2. Make IndexedDB persistence fail.
+3. Activate Designer or Preview.
+4. Remain in Builder with Retry/Export.
+5. Do not show stale JSON on the destination page.
+
+## Approved interaction decisions
+
+- `/form` is a landing page.
+- Builder editing is supported from `64rem`; smaller widths keep Preview available but show a desktop-editing explanation.
+- Add supports a button and desktop drag-to-insert.
+- Every removal requires confirmation in Phase 1.
+- Loading over changed work offers Save, Continue without saving, or Cancel.
+- Save As is included in Phase 1; named-form deletion is deferred.
+- Preview begins from configured initial values and keeps response values session-only.
+- Every element name is non-empty and valid; repeated names produce intentional array values.
+- Changed linked forms require explicit Save before Designer or Preview navigation.
+- A local `<jb-form-builder>` is approved for tests; publication is required before Phase 1 production acceptance.

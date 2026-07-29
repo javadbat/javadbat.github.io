@@ -1,0 +1,229 @@
+{
+  "$schema": "https://javadbat.github.io/schemas/jb-form/v1.json",
+  "schemaVersion": 1,
+  "id": "7933ad60-0ccf-4ad5-b6ef-4e62d587b7e5",
+  "slug": "customer-registration",
+  "metadata": {
+    "name": {
+      "translations": {
+        "en": "Customer registration",
+        "fa": "ثبت‌نام مشتری"
+      }
+    },
+    "description": {
+      "translations": {
+        "en": "Collect customer account information.",
+        "fa": "اطلاعات حساب مشتری را دریافت می‌کند."
+      }
+    },
+    "createdAt": "2026-07-29T12:00:00.000Z",
+    "updatedAt": "2026-07-29T12:30:00.000Z"
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "locales": {
+      "en": {
+        "direction": "ltr"
+      },
+      "fa": {
+        "direction": "rtl"
+      }
+    }
+  },
+  "elements": [
+    {
+      "id": "c069817a-f3d3-4941-b2ea-3900908b80ab",
+      "type": "jb-input",
+      "adapterVersion": 1,
+      "name": "fullName",
+      "required": true,
+      "disabled": false,
+      "initialValue": "",
+      "label": {
+        "translations": {
+          "en": "Full name",
+          "fa": "نام کامل"
+        }
+      },
+      "placeholder": {
+        "translations": {
+          "en": "Enter your full name",
+          "fa": "نام کامل خود را وارد کنید"
+        }
+      },
+      "props": {
+        "size": "md",
+        "type": "text"
+      },
+      "validation": [
+        {
+          "id": "20f45ee7-e281-4f0a-a17d-6876a854544f",
+          "rule": "minLength",
+          "params": {
+            "value": 3
+          },
+          "message": {
+            "translations": {
+              "en": "Enter at least 3 characters.",
+              "fa": "حداقل ۳ نویسه وارد کنید."
+            }
+          }
+        },
+        {
+          "id": "3ed40402-9f58-4b74-8c71-0f564ca48a82",
+          "rule": "maxLength",
+          "params": {
+            "value": 80
+          },
+          "message": {
+            "translations": {
+              "en": "Use no more than 80 characters.",
+              "fa": "حداکثر ۸۰ نویسه وارد کنید."
+            }
+          }
+        },
+        {
+          "id": "5841433b-e279-4f85-9b55-3cf8d163aa52",
+          "rule": "pattern",
+          "params": {
+            "source": "^[\\p{L} ]+$",
+            "flags": "u"
+          },
+          "message": {
+            "translations": {
+              "en": "Use letters and spaces only.",
+              "fa": "فقط از حروف و فاصله استفاده کنید."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "0ac6f641-d172-4abc-9397-5aca3912ecf2",
+      "type": "jb-number-input",
+      "adapterVersion": 1,
+      "name": "age",
+      "required": true,
+      "disabled": false,
+      "initialValue": "18",
+      "label": {
+        "translations": {
+          "en": "Age",
+          "fa": "سن"
+        }
+      },
+      "props": {
+        "acceptNegative": false,
+        "decimalPrecision": 0,
+        "showThousandSeparator": false,
+        "step": 1
+      },
+      "validation": [
+        {
+          "id": "ad31eb1a-577d-4649-908d-a2ccfe552218",
+          "rule": "minValue",
+          "params": {
+            "value": 18
+          },
+          "message": {
+            "translations": {
+              "en": "You must be at least 18.",
+              "fa": "سن باید حداقل ۱۸ سال باشد."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "e2836712-a14e-4ace-b877-a03e90f7b76b",
+      "type": "jb-select",
+      "adapterVersion": 1,
+      "name": "accountType",
+      "required": true,
+      "disabled": false,
+      "initialValue": "personal",
+      "label": {
+        "translations": {
+          "en": "Account type",
+          "fa": "نوع حساب"
+        }
+      },
+      "placeholder": {
+        "translations": {
+          "en": "Choose an account type",
+          "fa": "نوع حساب را انتخاب کنید"
+        }
+      },
+      "props": {
+        "multiple": false,
+        "hideClear": false,
+        "options": [
+          {
+            "id": "personal",
+            "value": "personal",
+            "label": {
+              "translations": {
+                "en": "Personal",
+                "fa": "شخصی"
+              }
+            },
+            "disabled": false
+          },
+          {
+            "id": "business",
+            "value": "business",
+            "label": {
+              "translations": {
+                "en": "Business",
+                "fa": "تجاری"
+              }
+            },
+            "disabled": false
+          }
+        ]
+      },
+      "validation": []
+    },
+    {
+      "id": "df597ad0-a6bd-4731-8a62-2de6bc56f137",
+      "type": "jb-checkbox",
+      "adapterVersion": 1,
+      "name": "termsAccepted",
+      "required": true,
+      "disabled": false,
+      "initialValue": false,
+      "label": {
+        "translations": {
+          "en": "I accept the terms",
+          "fa": "شرایط را می‌پذیرم"
+        }
+      },
+      "props": {
+        "size": "md"
+      },
+      "validation": []
+    },
+    {
+      "id": "f711ed7f-b49e-4c82-a76f-68ed530c1cf9",
+      "type": "jb-button",
+      "adapterVersion": 1,
+      "name": "submitRegistration",
+      "disabled": false,
+      "props": {
+        "content": {
+          "translations": {
+            "en": "Create account",
+            "fa": "ایجاد حساب"
+          }
+        },
+        "type": "submit",
+        "color": "primary",
+        "variant": "solid",
+        "size": "md",
+        "square": false
+      },
+      "validation": []
+    }
+  ],
+  "theme": null
+}
