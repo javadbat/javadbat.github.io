@@ -14,11 +14,10 @@ The route family contains:
 - **Designer** — an empty Phase 1 destination that becomes the Theme Designer in Phase 2.
 - **Preview** — load stored form JSON and render a responsive runtime form.
 
-The project has three gated phases:
+The project has two gated phases:
 
 1. **Form Builder and Preview** — build/configure forms, persist them in IndexedDB, export JSON, and render them on the responsive Preview route.
-2. **Theme Designer and workflow enhancements** — implement Designer, multilingual form authoring, JSON import, and undo/redo.
-3. **Responsive and touch Builder** — adapt the editing experience for mobile and touch. Preview is already responsive in Phase 1.
+2. **Theme Designer and workflow enhancements** — implement Designer, multilingual form authoring, JSON import, undo/redo, and responsive/touch Builder editing. Preview is already responsive in Phase 1.
 
 ## Route family
 
@@ -70,7 +69,7 @@ The slug is optional. A slug route loads that named form from IndexedDB by defau
 4. Browse the icon-supported catalog.
 5. Add elements with generated names.
 6. Configure, reorder, duplicate, or remove elements.
-7. Explicitly save a named form when required.
+7. Explicitly save the current draft or linked named form.
 8. Open Designer for the same form and see the Phase 2 placeholder.
 9. Open Preview for the same form.
 10. Preview reloads JSON from IndexedDB and passes it to `<jb-form-builder>`.
@@ -169,8 +168,8 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 
 ## Styling requirements
 
-- Use Tailwind for application layout and common utilities.
-- Use external pure CSS when needed, including Shadow DOM/component styling.
+- Use CSS Modules for React application layout and component styling.
+- Use external pure CSS where Shadow DOM or design-system integration requires it.
 - Do not use CSS-in-JS or runtime-generated styling.
 - Use `rem` for authored sizes, spacing, typography, and breakpoints.
 - Use CSS logical properties for LTR/RTL.
@@ -179,8 +178,9 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 
 ## State-management constraint
 
-- Add no state library unless the Builder's state complexity requires one.
-- If a state library is needed, use MobX.
+- Use local React state (`useState` or `useReducer`) when state is owned by one component or one tightly contained subtree.
+- Use MobX only when the same state is shared across independent Builder regions or cross-cutting actions.
+- Keep ephemeral UI state local rather than adding it to MobX.
 - Portable form state, route/storage state, editor-only state, and Preview response state remain separate.
 
 ## JB Design System dependency policy
@@ -200,10 +200,11 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Invalid configuration is explained near its control and in a summary.
 - Save, route-loading, renderer, and export failures are visible and recoverable.
 - Performance baseline: 100 elements, editing feedback within 100 ms, restore/export within 1 second on the reference environment.
-- Preview loading and rendering receive a separate agreed performance target during technical planning.
+- Preview loads, validates, and reaches renderer-ready within 1.5 seconds for 100 elements on the reference environment.
+- React and MobX subscriptions are scoped so an element edit does not rerender the entire catalog, canvas, or unrelated configuration controls.
 - Routes build as part of the existing Astro application.
 
-## Proposed boundaries
+## Architecture boundaries
 
 - **Form document:** portable serializable JSON.
 - **Component registry:** defaults, names, icons, configuration metadata, validation, rendering, serialization.
@@ -221,9 +222,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 
 Phase 1 completes when Builder supports the approved inventory, drafts and named forms persist reliably, Designer placeholder navigation preserves form identity, responsive Preview independently renders stored JSON through `<jb-form-builder>`, export is validated, and acceptance tests pass.
 
-Phase 2 implements Designer, themes, multilingual authoring, JSON import, and undo/redo without changing existing form/element identity or route meaning.
-
-Phase 3 adds responsive/touch Builder editing without regressing responsive Preview.
+Phase 2 implements Designer, themes, multilingual authoring, JSON import, undo/redo, and responsive/touch Builder editing without changing existing form/element identity or route meaning.
 
 ## Confirmed decisions
 
@@ -238,16 +237,15 @@ Phase 3 adds responsive/touch Builder editing without regressing responsive Prev
 - Every generated form element has a non-empty valid name; repeated names are supported intentionally.
 - English/LTR is the default.
 - Locale work uses `jb-core/i18n`.
-- Tailwind or external pure CSS is used; CSS-in-JS is prohibited.
+- CSS Modules and external pure CSS are used; CSS-in-JS is prohibited.
 - Authored styling uses `rem`.
 - Catalog and element lists use proper icons.
-- MobX is the required state library if one is introduced.
+- Local component state uses React; shared Builder state uses MobX.
 - A local `<jb-form-builder>` may be created for testing, but the final renderer is a published JB Design System package.
 - Changed linked forms must be explicitly saved before Designer or Preview navigation.
 - The interaction defaults in `PRODUCT-FLOW.md` are approved.
 - Current drafts and named forms persist only through explicit Save or Save As.
-- Phase 2 includes Designer implementation, multilingual authoring, import, and undo/redo.
-- Phase 3 includes responsive/touch Builder editing.
+- Phase 2 includes Designer implementation, multilingual authoring, import, undo/redo, and responsive/touch Builder editing.
 
 ## Open decisions
 

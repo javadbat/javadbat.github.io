@@ -30,9 +30,9 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 - Every generated form element has a non-empty `name` attribute.
 - Element names are non-empty. Duplicate names are allowed because `jb-form` intentionally collects controls sharing a name into an array.
 - Catalog and element-list entries use proper semantic icons, not emoji or text-symbol substitutes.
-- Styling uses Tailwind and, where needed, external pure CSS. CSS-in-JS is prohibited.
+- Styling uses CSS Modules and external pure CSS. CSS-in-JS is prohibited.
 - Authored layout and spacing dimensions use `rem`.
-- If application state management becomes necessary, use MobX.
+- Component-owned UI state uses local React state; state shared across Builder regions uses MobX.
 - Builder remains desktop-first in Phase 1; Preview is responsive in Phase 1.
 
 ## Route contract
@@ -106,22 +106,23 @@ The Builder header contains, in logical order:
 1. Product identity.
 2. Current form name or `Untitled form`.
 3. Settings button beside the form name.
-4. Named-form state:
-   - `Not saved`;
-   - `Changes not saved to named form`;
-   - `Saved to named form`.
-5. Working-draft state:
-   - `Saving draft…`;
-   - `Draft saved`;
-   - `Draft not saved`.
-6. Builder-locale selector.
-7. `Designer` navigation button.
-8. `Preview` navigation button.
-9. `Export JSON`.
+4. Form identity state:
+   - `Current draft`;
+   - `Linked to {form name}`.
+5. Save state:
+   - `Unsaved changes`;
+   - `Saving…`;
+   - `Saved`;
+   - `Save failed`.
+6. Explicit `Save` action.
+7. Builder-locale selector.
+8. `Designer` navigation button.
+9. `Preview` navigation button.
+10. `Export JSON`.
 
 Designer and Preview are navigation actions, not mode toggles.
 
-Named-form state and working-draft state must remain separate so `Draft saved` is never mistaken for an explicit named-form Save.
+The identity label and Save state remain separate: identity explains which record is linked, while Save state reports whether the current in-memory document matches its last explicit snapshot.
 
 ### Workspace regions
 
@@ -169,7 +170,7 @@ All implementation dimensions use `rem`. A one-device-pixel border may use the d
 - Categories remain visible when search is empty.
 - Each item has a visible `Add` button.
 - Activating Add appends a valid default element.
-- Desktop pointer drag may insert at a visible canvas insertion point if approved in the final checkpoint.
+- Desktop pointer drag may insert at a visible canvas insertion point.
 - Keyboard Add keeps focus on the Add button and announces the inserted component and position.
 - Pointer drag focuses the inserted element after drop.
 
@@ -180,7 +181,7 @@ Adding:
 - selects the element;
 - scrolls it into view;
 - updates the configuration panel;
-- schedules working-draft persistence;
+- marks the in-memory document unsaved without writing IndexedDB;
 - marks the linked named form as changed.
 
 ## Form-element naming contract
@@ -234,13 +235,13 @@ Duplicate inserts immediately after the source:
 
 - configuration is copied;
 - stable element ID is regenerated;
-- `name` is regenerated to avoid collision;
+- `name` is preserved so repeated values can remain intentionally grouped;
 - Preview response data and validation display state are not copied;
 - the duplicate becomes selected and focused.
 
 ### Remove
 
-The draft proposes confirmation for every removal because undo is deferred to Phase 2.
+Phase 1 requires confirmation for every removal because undo is deferred to Phase 2.
 
 After confirmation:
 
@@ -259,7 +260,7 @@ Cancel returns focus to Remove.
 - The canvas isolates component render failures to the affected card.
 - Designer, Preview, and export navigation validate the document before continuing.
 - An error summary links to the affected card and control.
-- Every committed change schedules draft persistence.
+- Every committed change marks the document unsaved; persistence occurs only through explicit Save or Save As.
 
 ## Designer navigation and placeholder
 
@@ -324,9 +325,9 @@ The Preview page owns IndexedDB and supplies JSON to the renderer.
 - Preview supports narrow mobile through wide desktop viewports in Phase 1.
 - The generated single-column form uses available inline size without horizontal page scrolling.
 - Controls remain usable at 200% zoom.
-- Form content respects its own LTR/RTL direction independently of Preview navigation chrome.
+- Preview applies the loaded form locale/direction to the client-side page and renderer in Phase 1.
 - Preview navigation and recovery controls remain accessible on small screens.
-- Touch interaction is supported through the underlying JB form controls; touch editing remains Phase 3.
+- Touch interaction is supported through the underlying JB form controls; touch Builder editing remains Phase 2.
 - Layout values use `rem`, logical properties, and JB design tokens.
 
 ### Runtime values
@@ -369,7 +370,8 @@ The modal contains:
 
 Save behavior:
 
-- unnamed draft: Save creates a named record and slug;
+- unnamed draft: Save persists the singleton current-draft snapshot;
+- unnamed draft with a supplied name/slug: the same Save transaction also creates a named record;
 - linked form: Save explicitly replaces the named snapshot;
 - Builder Save As: creates a new IndexedDB form ID and slug while preserving copied element IDs;
 - Export/download another file: preserves the portable document ID and element IDs;
@@ -387,7 +389,7 @@ Loading over changed or unnamed work proposes:
 - Load without saving;
 - Cancel.
 
-Deleting named forms remains deferred until IndexedDB retention behavior is agreed.
+Deleting named forms remains deferred to Phase 2.
 
 ## Locale and direction
 
@@ -413,8 +415,8 @@ Deleting named forms remains deferred until IndexedDB retention behavior is agre
 
 ### Styling
 
-- Use Tailwind for application-shell layout and common utilities.
-- Use external pure CSS for behavior Tailwind cannot express clearly, component Shadow DOM styles, and design-system integration.
+- Use CSS Modules for React application-shell layout and component styling.
+- Use external pure CSS for component Shadow DOM styles and design-system integration.
 - Do not use CSS-in-JS, runtime-generated style objects, or component-scoped JavaScript styling.
 - Use `rem` for authored spacing, sizing, typography, breakpoints, and layout dimensions.
 - Use CSS logical properties for direction-aware layout.
@@ -422,9 +424,23 @@ Deleting named forms remains deferred until IndexedDB retention behavior is agre
 
 ### State management
 
-- Do not add a state library until state complexity requires one.
-- If a state-management library is introduced, it must be MobX.
+- Use `useState`/`useReducer` for state owned by one component or tightly contained subtree.
+- Use MobX only for state observed or changed by independent Builder regions.
+- Keep ephemeral state such as a local disclosure, hover, temporary input presentation, or isolated loading indicator out of MobX.
 - Portable form JSON, route/load state, editor-only state, and Preview runtime response state remain separate regardless of whether MobX is used.
+
+### Performance and memoization
+
+- The reference form contains 100 elements.
+- Editing actions provide visible feedback within `100 ms`.
+- Restore/export complete within `1 second`; Preview reaches renderer-ready within `1.5 seconds`.
+- Canvas cards subscribe only to their own element and necessary shared selection/order state.
+- Catalog filtering, canvas updates, and configuration commits do not rerender unrelated regions.
+- Use stable element IDs as keys.
+- Use `observer`, `React.memo`, `useMemo`, and `useCallback` only at measured boundaries with stable inputs.
+- Keep local UI state local so isolated interactions do not invalidate MobX observers.
+- Full-document cloning, serialization, and validation do not run on every keystroke.
+- Lazy-load component packages and clean up listeners/reactions on unmount.
 
 ## Save-state model
 
@@ -433,9 +449,10 @@ Deleting named forms remains deferred until IndexedDB retention behavior is agre
 | State | Treatment | Recovery |
 | --- | --- | --- |
 | Initializing | Loading status while IndexedDB resolves | Retry |
-| Saving | `Saving draft…` | Continue editing |
-| Saved | `Draft saved` | None |
-| Failed | Persistent `Draft not saved` | Retry, continue in memory, export |
+| Clean | `Saved` | None |
+| Dirty | `Unsaved changes` | Save or export |
+| Saving | `Saving…` | Continue editing; serialize one save transaction |
+| Failed | Persistent `Save failed` | Retry, continue in memory, export |
 
 ### Named form
 
@@ -464,7 +481,7 @@ Deleting named forms remains deferred until IndexedDB retention behavior is agre
 | Input/action | Result |
 | --- | --- |
 | `Tab` / `Shift+Tab` | Follow visible controls in semantic DOM order |
-| `Ctrl+S` / `Cmd+S` | Explicit named Save, or open form management for unnamed draft |
+| `Ctrl+S` / `Cmd+S` | Explicitly save the current draft; named linked forms update their named snapshot in the same transaction |
 | `Escape` | Close topmost modal/popover or cancel drag |
 | Add | Keep focus on Add and announce insertion |
 | Move | Keep focus on moved card and announce position |
@@ -499,7 +516,7 @@ Browser-reserved shortcuts are not overridden.
 | Form management and confirmation | `jb-modal` |
 | Transient feedback | `jb-notification` |
 | Loading | `jb-loading` |
-| Contextual help | `jb-tooltip` |
+| Contextual help | Visible help text or accessible description; no tooltip package required |
 | Catalog and action icons | `jb-icon` |
 | Locale configuration | `jb-core/i18n` |
 | Preview rendering | `<jb-form-builder>` |
@@ -528,7 +545,7 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 
 1. Change a valid draft.
 2. Activate Preview.
-3. Flush IndexedDB before navigation.
+3. Complete an explicit Save before navigation.
 4. Preview reloads JSON independently.
 5. `<jb-form-builder>` renders the responsive form.
 6. Interact, validate, reset, and reload without changing form configuration.
@@ -540,12 +557,12 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 3. Show the Phase 2 placeholder.
 4. Return to the correct Builder route or open Preview.
 
-### RTL form in English UI
+### Persian/RTL form
 
 1. Keep Builder in English/LTR.
 2. Configure the form as Persian/RTL.
-3. Preview applies Persian/RTL through the renderer.
-4. Navigation chrome and runtime form direction remain independent.
+3. Open Preview after Save.
+4. The client-only Preview page and renderer apply Persian/RTL through `jb-core/i18n`.
 
 ### Persistence failure before navigation
 

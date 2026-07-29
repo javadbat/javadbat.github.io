@@ -87,7 +87,7 @@ Top-level unknown fields are rejected in version 1.
 
 ### Element names
 
-Proposed version 1 syntax:
+Version 1 syntax:
 
 ```text
 ^[A-Za-z][A-Za-z0-9_-]{0,63}$
@@ -106,7 +106,7 @@ Rules:
 
 ### Slugs
 
-Proposed version 1 syntax:
+Version 1 syntax:
 
 ```text
 ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -484,7 +484,7 @@ Export:
 - rejects non-finite numbers;
 - validates structural and registry rules before download.
 
-Proposed filename:
+Filename:
 
 ```text
 {slug-or-untitled-form}.jb-form.json

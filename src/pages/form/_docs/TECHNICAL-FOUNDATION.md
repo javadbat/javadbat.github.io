@@ -6,7 +6,7 @@ Inputs: `PROJECT.md`, `PRODUCT-FLOW.md`, approved `FORM-JSON-CONTRACT.md`, compo
 
 ## Outcome
 
-JB Form will use Astro for static route shells and one client-only React application island per route. Domain, validation, registry, routing, and IndexedDB modules remain framework-independent. Builder uses a route-local MobX store because selection, configuration, validation, explicit persistence, and navigation state are shared across several panels. Preview owns only load/render/runtime-response state.
+JB Form will use Astro for static route shells and one client-only React application island per route. Domain, validation, registry, routing, and IndexedDB modules remain framework-independent. Builder uses a route-local MobX store only for state shared across the catalog, canvas, configuration panel, toolbar, or route guards. Component-owned UI state stays in local React state. Preview, Landing, and Designer use local React state unless a future feature introduces genuinely shared state.
 
 No form document is written to IndexedDB while the user edits. Save and Save As are the only persistence commands.
 
@@ -15,7 +15,7 @@ No form document is written to IndexedDB while the user edits. Save and Save As 
 - The site uses Astro `7`, React `19`, and static GitHub Pages deployment.
 - `@astrojs/react` is already configured.
 - Existing interactive UI is implemented as React islands.
-- Tailwind, MobX, IndexedDB helpers, JSON Schema validators, and test frameworks are not currently installed.
+- MobX, IndexedDB helpers, JSON Schema validators, and test frameworks are not currently installed.
 - Existing application styling uses external CSS/CSS Modules.
 - The application now uses `jb-core@0.30.0`, matching the component-inventory baseline.
 - `jb-core/i18n` accesses browser globals during construction and exports a global singleton.
@@ -28,7 +28,7 @@ Dependencies are added only when implementation reaches their owning step.
 | --- | --- |
 | ADR-001 | Use Astro static shells with client-only React islands for `/form` routes. |
 | ADR-002 | Keep route parsing and navigation in a framework-independent route module. |
-| ADR-003 | Use a route-local MobX Builder store; do not use a process-global application store. |
+| ADR-003 | Use local React state for component-owned state and a route-local MobX store only for shared Builder state; never use a process-global application store. |
 | ADR-004 | Use a small native IndexedDB repository rather than adding an IndexedDB wrapper. |
 | ADR-005 | Use Ajv 2020 plus format validation for the published JSON Schema, followed by semantic and registry validation. |
 | ADR-006 | Use a versioned component-adapter registry as the only mapping between portable elements and JB packages. |
@@ -102,6 +102,8 @@ The approved schema/type source remains under `_docs/schema/v1` until implementa
 Client-only rendering is required because route resolution depends on IndexedDB and `jb-core/i18n` currently touches browser globals during module initialization.
 
 Each route owns its loading, unavailable-storage, incompatible-document, unknown-slug, and ready states. Route islands share application modules but never share in-memory state. Preview must prove this separation by reloading the document from IndexedDB.
+
+Route-level loading/error presentation that is owned only by one route root uses local React state or `useReducer`; it is not automatically promoted to MobX.
 
 ### Optional-slug parsing
 
@@ -178,11 +180,21 @@ interface BuilderState {
   status: "loading" | "ready" | "saving" | "save-error";
   isDirty: boolean;
   issues: FormIssue[];
-  activeModal: "form-management" | "remove-confirmation" | null;
 }
 ```
 
-MobX is justified because catalog, canvas, configuration panel, toolbar, validation summary, management modal, and route guards all observe overlapping state and async actions. `makeAutoObservable` is used on the route-local store; domain documents and repository records stay plain.
+MobX is justified for the document, selection, linked-record, Save status, and issue state because catalog, canvas, configuration panel, toolbar, validation summary, and route guards observe overlapping values and actions. `makeAutoObservable` is used on the route-local store; domain documents and repository records stay plain.
+
+Local React state owns values that do not cross those boundaries, including:
+
+- whether one disclosure/popover/modal is open;
+- temporary input presentation before a valid commit;
+- hover and focus presentation;
+- an isolated async indicator used by one component;
+- Preview response and renderer state;
+- Landing and Designer placeholder UI state.
+
+Do not mirror local React state into MobX or duplicate MobX state in React state.
 
 ### Preview state
 
@@ -197,7 +209,7 @@ interface PreviewState {
 }
 ```
 
-Response values are session-only. Preview never writes them into the portable document or IndexedDB.
+`PreviewState` is implemented with local React state or `useReducer`, not MobX. Response values are session-only. Preview never writes them into the portable document or IndexedDB.
 
 ## Explicit-save model
 
@@ -408,7 +420,39 @@ Simultaneous independently scoped locales inside one route are not required in P
 - Use `dir` selectors only where logical properties cannot express behavior.
 - Preview is fluid from narrow mobile to desktop and must not horizontally scroll.
 - Builder editing begins at the approved `64rem` viewport; smaller viewports show the desktop-editing notice and retain Preview navigation.
-- Tailwind is not introduced because the repository already uses external CSS/CSS Modules and no Tailwind dependency exists.
+
+## Performance and memoization
+
+Reference workload: a valid 100-element form on the agreed reference browser/device.
+
+Budgets:
+
+- an add, select, configuration commit, reorder, duplicate, or remove action provides visible feedback within `100 ms`;
+- current-draft restore and deterministic export complete within `1 second`;
+- Preview loads IndexedDB, validates the document, and reaches renderer-ready within `1.5 seconds`;
+- normal element editing does not rerender the entire catalog, every canvas card, or unrelated configuration controls.
+
+Implementation rules:
+
+- Use stable element UUIDs as React keys; never use array indexes.
+- Wrap canvas cards and registry catalog rows at the smallest useful subscription boundary.
+- Use `observer` for components that read shared MobX observables; do not make the whole Builder island one broad observer.
+- Keep component-owned state local so a hover, disclosure, or temporary field value cannot invalidate shared observers.
+- Use `React.memo`, `useMemo`, and `useCallback` only where stable inputs and profiling show avoided work; do not blanket-memoize trivial components.
+- Prefer MobX `computed` values for shared derived data and avoid storing duplicate derived arrays/maps.
+- Compile the Ajv schema once per bundle and cache registry metadata.
+- Run targeted element/field validation during editing; run the full validation pipeline only for load, Save, Preview, and export.
+- Lazy-load JB component packages by adapter/type.
+- Do not virtualize the 100-element canvas by default because it can complicate keyboard order and accessibility; introduce windowing only if profiling proves it necessary and acceptance tests cover focus/order.
+- Do not clone/serialize the entire portable document on every keystroke. Produce plain snapshots only at validation, Save, renderer, and export boundaries.
+- Clean up event listeners, MobX reactions, observers, and renderer subscriptions on unmount.
+
+Measurement:
+
+- add `performance.mark`/`performance.measure` around restore, Save validation, export, and Preview readiness;
+- use React Profiler or render-count instrumentation in development tests;
+- add a generated 100-element fixture and enforce the budgets in the Phase 1 hardening suite;
+- record the reference environment with test results so later comparisons remain meaningful.
 
 ## Errors and recovery
 
@@ -437,7 +481,9 @@ React route error boundaries catch unexpected UI exceptions. Domain and infrastr
 - registry defaults and prop/rule validation;
 - Save/Save As ID behavior;
 - migrations and deterministic export;
-- MobX Builder actions without UI.
+- shared MobX Builder actions without UI;
+- local-state components do not create or mutate the shared store;
+- memoized/observed rows do not rerender when unrelated elements change.
 
 ### Persistence integration
 
@@ -473,7 +519,7 @@ React route error boundaries catch unexpected UI exceptions. Domain and infrastr
 - JSON export/schema fixture verification;
 - narrow and desktop responsive Preview.
 
-Proposed implementation dependencies:
+Implementation dependencies:
 
 - runtime: `mobx`, `mobx-react-lite`, `ajv`, `ajv-formats`;
 - tests: `vitest`, `fake-indexeddb`, React Testing Library, Playwright, and axe integration.
@@ -494,7 +540,7 @@ Builder shell implementation may begin when:
 
 Approved:
 
-- route-local MobX, native IndexedDB, Ajv, and external CSS Modules;
+- local React state, shared route-local MobX state, native IndexedDB, Ajv, and external CSS Modules;
 - the simple form-aware GitHub Pages `404.html` fallback for Phase 1;
 - sourcing or locally designing proper catalog icons during implementation;
 - client-only `jb-core/i18n` with one active locale per route page;

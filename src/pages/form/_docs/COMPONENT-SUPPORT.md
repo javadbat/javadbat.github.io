@@ -62,6 +62,7 @@ A component moves from inventory coverage to implemented support only when:
 - [ ] Built-in and user-configured validation rules round-trip through JSON.
 - [ ] `<jb-form-builder>` Preview rendering matches the stored JSON configuration.
 - [ ] Serialization and deserialization lose no portable configuration.
+- [ ] Adapter loading and element updates meet the lazy-loading, render-isolation, and 100-element performance contract.
 - [ ] Keyboard and accessibility checks pass.
 - [ ] Component-specific unit and integration tests pass.
 - [ ] No unresolved design-system request blocks the supported flow.

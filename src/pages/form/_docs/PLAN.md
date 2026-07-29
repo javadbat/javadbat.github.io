@@ -3,7 +3,6 @@
 Status: Approved plan; ready for implementation
 Active phase: Phase 1 — Form Builder  
 Phase 2 gate: Do not start until Phase 1 is accepted.  
-Phase 3 gate: Do not start until Phase 2 is accepted.
 
 ## How to use this plan
 
@@ -17,7 +16,7 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 
 ## Planning checkpoint
 
-- [ ] Review and approve the product goals and Phase 1 non-goals.
+- [x] Review and approve the product goals and Phase 1 non-goals.
 - [x] Decide how users enter the builder and manage saved forms.
   - Open `/form/builder` directly with no initial project selector.
   - Use `/form` as the landing and form-selection page.
@@ -31,7 +30,7 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 - [x] Schedule JSON import for Phase 2.
 - [x] Schedule undo/redo for Phase 2.
 - [x] Schedule multilingual form authoring for Phase 2 and require a localization-ready Phase 1 document.
-- [x] Limit Phase 1 to desktop layouts and schedule mobile/touch support for Phase 3.
+- [x] Limit Phase 1 to desktop layouts and schedule mobile/touch Builder support for Phase 2.
 - [x] Limit Phase 1 form structure to a single ordered column.
 - [x] Require Persian/RTL and LTR operation in Phase 1.
 - [x] Default Builder and new forms to English/LTR and use `jb-core/i18n`.
@@ -39,14 +38,16 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 - [x] Add a separate Designer route and Phase 1 placeholder.
 - [x] Require a non-empty valid `name` on every generated form element while allowing repeated names for intentional array collection.
 - [x] Require proper semantic icons for catalog and element-list items.
-- [x] Prohibit CSS-in-JS; use Tailwind or external pure CSS with `rem` dimensions.
-- [x] Use MobX if a state-management library becomes necessary.
+- [x] Prohibit CSS-in-JS; use CSS Modules/external pure CSS with `rem` dimensions.
+- [x] Use local React state for component-owned state and MobX only for state shared across Builder regions.
 - [x] Define the supported desktop browsers and versions.
   - Latest two stable Chrome, Edge, and Firefox releases.
   - Latest stable Safari release.
 - [x] Define a representative large-form size and performance target.
   - Baseline: a form with 100 elements.
   - Response targets: editing feedback within 100 ms and restore/export completion within 1 second on the reference test environment.
+  - Preview target: load, validate, and reach renderer-ready within 1.5 seconds for 100 elements.
+  - Prevent an element edit from rerendering the entire catalog, canvas, or unrelated configuration controls.
 - [x] Agree on Phase 1 completion and Phase 2 entry criteria.
 
 ## Phase 1 — Form Builder
@@ -60,7 +61,7 @@ Phase 3 gate: Do not start until Phase 2 is accepted.
 - [x] Create a support matrix with one acceptance checklist per element.
 - [x] Document how each applicable form element integrates with `jb-validation` and which validation rules it supports.
 - [x] Identify required features that existing JB components or standards cannot support and submit detailed upgrade requests to the project owner.
-- [x] Check for required components missing from the JB Design System and submit detailed requests if found. No missing component was found in the initial inventory.
+- [x] Check for required components missing from the JB Design System and submit detailed requests if found. No addable form input was missing; the cross-cutting renderer request is tracked as DSR-005.
 - [x] Track each design-system request as a blocker for the affected builder task until the change is available or a documented alternative is approved.
 
 Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, and DSR-005 remain open; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
@@ -86,9 +87,9 @@ Deliverable: `PRODUCT-FLOW.md`. Product flow and interaction decisions are appro
 ### 3. Form JSON contract
 
 - [x] Define stable identifiers for forms and elements.
-- [x] Define proposed slug generation, uniqueness, rename, and collision behavior.
+- [x] Define slug generation, uniqueness, rename, and collision behavior.
 - [x] Define form metadata and ordered element structure.
-- [x] Define proposed required element-name syntax, normalization, length, generation, and repeated-name behavior.
+- [x] Define required element-name syntax, normalization, length, generation, and repeated-name behavior.
 - [x] Define common and component-specific configuration boundaries.
 - [x] Read the `jb-validation` source and define how users configure supported validation rules.
 - [x] Define how portable `jb-validation` rules are represented in the form JSON.
@@ -107,8 +108,8 @@ Deliverable: approved `FORM-JSON-CONTRACT.md`, JSON Schema, TypeScript types, fi
 
 - [x] Confirm SPA/island boundaries across `/form/builder`, `/form/designer`, and `/form/preview`.
 - [x] Define the optional-slug route resolver shared by all three routes.
-- [x] Select route-local MobX state management and Ajv schema validation.
-- [x] Document why Builder complexity requires MobX while Preview remains route-local.
+- [x] Select Ajv schema validation and MobX for shared Builder state only.
+- [x] Require local React state for component-owned UI state; Preview, Landing, and Designer do not use MobX unless state becomes shared.
 - [x] Define the component-registry interface.
 - [x] Define required name defaults and the existing-or-locally-designed icon boundary.
 - [x] Finalize the DSR-005 `<jb-form-builder>` public JSON property, states, methods, events, and publication contract.
@@ -117,6 +118,7 @@ Deliverable: approved `FORM-JSON-CONTRACT.md`, JSON Schema, TypeScript types, fi
 - [x] Select external CSS Modules, prohibit CSS-in-JS, and require `rem`/logical-property styling.
 - [x] Define error boundaries and recoverable fallback states.
 - [x] Establish unit, integration, accessibility, and end-to-end test layers.
+- [x] Define memoization, observer granularity, lazy-loading, and performance measurement boundaries.
 - [x] Approve the architecture decisions and simple GitHub Pages deep-link fallback.
 - [x] Authorize implementation to source or design proper icons for all 16 catalog entries.
 - [x] Close DSR-006 for Phase 1: all form routes are client-only and use one active `jb-core/i18n` locale per page.
@@ -134,6 +136,7 @@ Deliverable: approved `TECHNICAL-FOUNDATION.md` architecture and test strategy.
 - [ ] Add Designer and Preview route buttons for the current form.
 - [ ] Configure Builder locale with `jb-core/i18n`, defaulting to English/LTR.
 - [ ] Verify keyboard navigation and supported desktop behavior.
+- [ ] Verify render counts and response-time targets with a 100-element document.
 
 Deliverable: usable builder shell with registry-driven placeholder elements.
 
@@ -144,7 +147,6 @@ Deliverable: usable builder shell with registry-driven placeholder elements.
 - [ ] Reorder elements.
 - [ ] Duplicate elements with new stable identifiers while preserving names by default.
 - [ ] Remove elements with the agreed recovery behavior.
-- [ ] Require an explicit successful Save before navigating changed work to Designer or Preview.
 
 Deliverable: complete editor workflow independent of persistence.
 
@@ -162,10 +164,10 @@ Deliverable: all agreed JB form elements marked supported.
 
 ### 8. IndexedDB persistence
 
-- [ ] Define database, object store, key, and index names.
-- [ ] Add a unique slug index for named forms if slug uniqueness is approved.
+- [x] Define database, object store, key, and index names.
+- [x] Define a unique slug index for named forms.
 - [ ] Implement database initialization and migrations.
-- [ ] Define a stored-form record containing form ID, form name, document schema version, builder version, timestamps, and form document.
+- [x] Define stored current-draft and named-form records with identity, schema/builder versions, timestamps, and form document.
 - [ ] Persist the current working draft only through explicit Save.
 - [ ] Restore the current draft directly into the builder on page load.
 - [ ] Resolve named forms by slug on all `/form` subroutes.
@@ -186,6 +188,7 @@ Deliverable: reliable current-draft and named-form persistence with builder-vers
 - [ ] Map declarative validation rules inside `<jb-form-builder>`.
 - [ ] Implement responsive Preview loading from IndexedDB.
 - [ ] Keep Preview response values session-only.
+- [ ] Require a successful explicit Save before navigating changed work to Designer or Preview.
 - [ ] Verify Preview across narrow mobile, desktop, zoom, touch, keyboard, LTR, and RTL.
 - [ ] Verify unknown-slug, unavailable-storage, corrupt-record, and incompatible-schema recovery.
 - [ ] Integrate the published `jb-form-builder` package and remove the local test implementation before Phase 1 acceptance.
@@ -210,6 +213,7 @@ Deliverable: validated, versioned JSON export.
 - [ ] Verify optional-slug navigation and cross-page IndexedDB resolution.
 - [ ] Verify responsive Preview and `<jb-form-builder>` error isolation.
 - [ ] Verify the agreed large-form size and response-time targets.
+- [ ] Verify memoization/observer boundaries with React Profiler or equivalent render-count instrumentation.
 - [ ] Verify the agreed desktop browsers and layouts.
 - [ ] Verify every component-support matrix row.
 - [ ] Resolve or explicitly defer all Phase 1 blockers.
@@ -252,14 +256,9 @@ Phase 2 begins only after Phase 1 acceptance:
 - [ ] Implement JSON import, validation, migration, and import-error recovery.
 - [ ] Implement undo/redo for approved form and theme editing actions.
 - [ ] Implement multilingual form authoring, locale management, localized content fallback, and direction configuration using the Phase 1 localization boundary.
-- [ ] Create and approve a separate Theme Builder delivery plan.
-
-## Phase 3 — Responsive and touch support
-
-Phase 3 begins only after Phase 2 acceptance:
-
 - [ ] Define supported mobile viewport, browser, and device targets.
-- [ ] Adapt the builder layout for mobile viewports.
+- [ ] Adapt the Builder layout for mobile viewports.
 - [ ] Define and implement touch interactions for selection, ordering, and configuration.
 - [ ] Verify mobile accessibility, performance, persistence, import, and export flows.
-- [ ] Confirm that Phase 3 changes do not regress the desktop experience.
+- [ ] Confirm that responsive/touch changes do not regress the desktop experience.
+- [ ] Create and approve a separate Theme Builder delivery plan.
