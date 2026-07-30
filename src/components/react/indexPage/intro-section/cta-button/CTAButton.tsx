@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react";
-import styles from './CTAButton.module.css';
+import styles from "./CTAButton.module.css";
 
 export function CTAButton(props: PropsWithChildren<{}>) {
   return (
@@ -9,6 +9,5 @@ export function CTAButton(props: PropsWithChildren<{}>) {
         <span className={styles.dropShadow}></span>
       </button>
     </a>
-  )
+  );
 }
-

@@ -1,0 +1,87 @@
+:host {
+  --jb-form-builder-surface: oklch(1 0 0);
+  --jb-form-builder-ink: oklch(0.28 0.055 255);
+  --jb-form-builder-muted: oklch(0.56 0.035 255);
+  --jb-form-builder-line: oklch(0.89 0.02 255);
+  --jb-form-builder-error: oklch(0.52 0.19 28);
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  color: var(--jb-form-builder-ink);
+}
+
+[part~="form-container"],
+[part~="form"] {
+  display: block;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+[part~="form"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+[part~="element"] {
+  display: block;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+[part~="element"] > * {
+  max-inline-size: 100%;
+}
+
+[part~="loading"],
+[part~="error-summary"],
+[part~="element-error"] {
+  border-radius: 0.875rem;
+  corner-shape: squircle;
+}
+
+[part~="loading"] {
+  padding: 1rem;
+  border: 0.0625rem solid var(--jb-form-builder-line);
+  color: var(--jb-form-builder-muted);
+  background: var(--jb-form-builder-surface);
+}
+
+[part~="error-summary"] {
+  margin-block-end: 1rem;
+  padding: 1rem;
+  border: 0.0625rem solid
+    color-mix(in oklch, var(--jb-form-builder-error) 35%, transparent);
+  color: var(--jb-form-builder-error);
+  background: color-mix(
+    in oklch,
+    var(--jb-form-builder-error) 7%,
+    var(--jb-form-builder-surface)
+  );
+}
+
+[part~="error-summary"] strong {
+  display: block;
+}
+
+[part~="error-summary"] ul {
+  margin: 0.65rem 0 0;
+  padding-inline-start: 1.25rem;
+}
+
+[part~="element-error"] {
+  margin: 0;
+  padding: 0.85rem;
+  border: 0.0625rem dashed
+    color-mix(in oklch, var(--jb-form-builder-error) 45%, transparent);
+  color: var(--jb-form-builder-error);
+  background: color-mix(
+    in oklch,
+    var(--jb-form-builder-error) 5%,
+    var(--jb-form-builder-surface)
+  );
+}
+
+[hidden] {
+  display: none !important;
+}

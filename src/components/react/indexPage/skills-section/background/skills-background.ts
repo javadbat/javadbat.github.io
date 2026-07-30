@@ -1,42 +1,42 @@
-import CSS from './style.css?inline';
-import { renderHTML } from './render';
-import * as THREE from 'three';
-import { Box3, MathUtils, SphereGeometry, Vector3 } from 'three';
-import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import CSS from "./style.css?inline";
+import { renderHTML } from "./render";
+import * as THREE from "three";
+import { Box3, MathUtils, SphereGeometry, Vector3 } from "three";
+import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 // import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import type { Shapes } from './types';
-import earthShapeURL from './shapes/earth2.glb?url';
-import jupiterShapeURL from './shapes/jupiter.glb?url';
+import type { Shapes } from "./types";
+import earthShapeURL from "./shapes/earth2.glb?url";
+import jupiterShapeURL from "./shapes/jupiter.glb?url";
 export class SkillsBackground extends HTMLElement {
   get #width() {
-    return window.innerWidth
+    return window.innerWidth;
   }
   get #height() {
-    return window.innerHeight
+    return window.innerHeight;
   }
   get orbitCenter() {
     if (this.#width > this.#height * 1.33) {
       // biggest screen
-      return new Vector3(-1 * this.sphereRadius, 0, 0)
+      return new Vector3(-1 * this.sphereRadius, 0, 0);
     }
     const cqw = this.pixelsToUnit(this.#width);
-    const endCenterX = -1 * cqw / 2;
+    const endCenterX = (-1 * cqw) / 2;
     if (this.#height >= this.#width) {
       // we get back more than 50% (60%) to fit it in most phones
-      return new Vector3(endCenterX * 1.2, 0, 0)
+      return new Vector3(endCenterX * 1.2, 0, 0);
     }
-    const contentContainerWidth = this.pixelsToUnit(this.#height)
-    const contentCenter = endCenterX + (contentContainerWidth / 2);
+    const contentContainerWidth = this.pixelsToUnit(this.#height);
+    const contentCenter = endCenterX + contentContainerWidth / 2;
     const padding = endCenterX - contentCenter;
     const x = padding + this.sphereRadius;
 
-    return new Vector3(x, 0, 0)
+    return new Vector3(x, 0, 0);
   }
   get sphereRadius() {
     return this.getRadiusBaseOnPercent(this.#sphereFillPercent);
   }
   getRadiusBaseOnPercent(percent: number) {
-    return (this.pixelsToUnit(this.#height * (percent / 100))) / 2;
+    return this.pixelsToUnit(this.#height * (percent / 100)) / 2;
   }
   #sphereFillPercent = 45;
   get sphereFillPercent() {
@@ -56,49 +56,47 @@ export class SkillsBackground extends HTMLElement {
     jupiter: null,
     jupiterOrbit: null,
     earthOrbit: null,
-  }
+  };
   constructor() {
     super();
-    const shadowRoot = this.attachShadow({ delegatesFocus: false, mode: 'open' });
+    const shadowRoot = this.attachShadow({ delegatesFocus: false, mode: "open" });
     const html = `<style>${CSS}</style>\n${renderHTML()}`;
-    const element = document.createElement('template');
+    const element = document.createElement("template");
     element.innerHTML = html;
     shadowRoot.appendChild(element.content.cloneNode(true));
-    this.#canvas = shadowRoot.querySelector(".bg-canvas")!
-
+    this.#canvas = shadowRoot.querySelector(".bg-canvas")!;
   }
   connectedCallback() {
     window.addEventListener("resize", () => {
       this.#setPositions();
-    })
+    });
     this.#initScenes();
   }
   static get observedAttributes() {
-    return ['sphere-fill-percent'];
+    return ["sphere-fill-percent"];
   }
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     switch (name) {
-      case 'sphere-fill-percent':
+      case "sphere-fill-percent":
         this.sphereFillPercent = Number(newValue);
         break;
     }
   }
   #setPositions() {
-
     this.#renderer?.setSize(this.#width, this.#height);
     this.#shapes.core?.position.copy(this.orbitCenter);
     this.#shapes.core?.geometry.dispose();
     this.#shapes.core!.geometry = new SphereGeometry(this.sphereRadius, 16, 16);
     //earth scale
-    const maxSize = (this.sphereRadius * 2) * 1 / 6;
+    const maxSize = (this.sphereRadius * 2 * 1) / 6;
     const scale = this.#calcModelScale(this.#shapes.earth!, maxSize);
     this.#shapes.earth?.scale.multiplyScalar(scale);
     //jupiter scale
-    const jupiterMaxSize = (this.sphereRadius * 2) * 2 / 6;
+    const jupiterMaxSize = (this.sphereRadius * 2 * 2) / 6;
     this.#shapes.jupiter?.scale.multiplyScalar(this.#calcModelScale(this.#shapes.jupiter, jupiterMaxSize));
     //pos
     this.#shapes.jupiterOrbit?.position.copy(this.orbitCenter);
-    this.#shapes.jupiter?.position.setX(this.sphereRadius * 1.6)
+    this.#shapes.jupiter?.position.setX(this.sphereRadius * 1.6);
     this.#shapes.earthOrbit?.position.copy(this.orbitCenter);
     this.#shapes.earth?.position.setX(this.sphereRadius * 2);
     this.#renderer?.render(this.#scene!, this.#camera!);
@@ -186,7 +184,7 @@ export class SkillsBackground extends HTMLElement {
     this.#shapes.earth = pivot;
     //now we add earth orbit
     const orbit = new THREE.Group();
-    this.#shapes.earthOrbit = orbit
+    this.#shapes.earthOrbit = orbit;
     orbit.add(pivot);
   }
   #calcModelScale(model: THREE.Group<THREE.Object3DEventMap>, targetSize: number) {
@@ -196,7 +194,7 @@ export class SkillsBackground extends HTMLElement {
 
     const maxDim = Math.max(size.x, size.y, size.z);
     const scale = targetSize / maxDim;
-    return scale
+    return scale;
   }
   #initJupiter(gltf: GLTF) {
     const model = gltf.scene;
@@ -212,12 +210,12 @@ export class SkillsBackground extends HTMLElement {
     this.#shapes.jupiter = pivot;
     //now we add earth orbit
     const orbit = new THREE.Group();
-    this.#shapes.jupiterOrbit = orbit
+    this.#shapes.jupiterOrbit = orbit;
     orbit.add(pivot);
   }
   async #loadExternalAsset() {
     const loader = new GLTFLoader();
-    const earthGLTF = await loader.loadAsync(earthShapeURL)
+    const earthGLTF = await loader.loadAsync(earthShapeURL);
     this.#initEarth(earthGLTF);
 
     //jupiter
@@ -225,9 +223,7 @@ export class SkillsBackground extends HTMLElement {
     this.#initJupiter(jupiterGLTF);
     return;
   }
-  #prevTime: number = 0;
   #animate(time: number) {
-    const dt = time - this.#prevTime;
     const orbitTime = time;
     this.#shapes.core!.rotation.y = time / 10000;
     if (this.#shapes.earth) {
@@ -236,11 +232,10 @@ export class SkillsBackground extends HTMLElement {
       this.#shapes.earth.rotation.x = tilt;
       //rotate orbit
 
-
       const orbitTilt = MathUtils.degToRad(330);
-      this.#shapes.earthOrbit!.rotation.y = orbitTime / 1400
-      this.#shapes.earthOrbit!.rotation.x = orbitTilt
-      this.#shapes.earthOrbit!.rotation.z = MathUtils.degToRad(0)
+      this.#shapes.earthOrbit!.rotation.y = orbitTime / 1400;
+      this.#shapes.earthOrbit!.rotation.x = orbitTilt;
+      this.#shapes.earthOrbit!.rotation.z = MathUtils.degToRad(0);
     }
     if (this.#shapes.jupiter) {
       const jupiterTime = orbitTime - 1500;
@@ -249,9 +244,9 @@ export class SkillsBackground extends HTMLElement {
       this.#shapes.jupiter.rotation.x = tilt;
       //rotate orbit
       const orbitTilt = MathUtils.degToRad(30);
-      this.#shapes.jupiterOrbit!.rotation.y = jupiterTime / 2400
-      this.#shapes.jupiterOrbit!.rotation.x = orbitTilt
-      this.#shapes.jupiterOrbit!.rotation.z = MathUtils.degToRad(0)
+      this.#shapes.jupiterOrbit!.rotation.y = jupiterTime / 2400;
+      this.#shapes.jupiterOrbit!.rotation.x = orbitTilt;
+      this.#shapes.jupiterOrbit!.rotation.z = MathUtils.degToRad(0);
     }
     if (this.#shapes.jupiter && this.#shapes.earth) {
       const boxA = new THREE.Box3().setFromObject(this.#shapes.earth);
@@ -263,9 +258,7 @@ export class SkillsBackground extends HTMLElement {
       }
     }
 
-
     this.#renderer?.render(this.#scene!, this.#camera!);
-    this.#prevTime = time;
   }
   #pixelsPerUnitAtZ() {
     //distance of an object from camera
@@ -283,7 +276,7 @@ export class SkillsBackground extends HTMLElement {
     return pixels / ppu;
   }
 }
-const myElementNotExists = !customElements.get('skills-background');
+const myElementNotExists = !customElements.get("skills-background");
 if (myElementNotExists) {
-  window.customElements.define('skills-background', SkillsBackground);
+  window.customElements.define("skills-background", SkillsBackground);
 }

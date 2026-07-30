@@ -1,11 +1,22 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  lang?: string;
+  dir?: "ltr" | "rtl";
+}
+
+const { title = "mohammad javad bathaei", description = "seyed mohammad javad bathaei official website", lang = "en", dir = "ltr" } = Astro.props;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang={lang} dir={dir}>
 	<head>
 		<meta charset="UTF-8" />
-		<title>mohammad javad bathaei</title>
-		<meta name="description" content="seyed mohammad javad bathaei official website" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" href="/favicon.svg" />
 		<link rel="stylesheet" href="/styles/globals.css" />
 	</head>
 	<body>

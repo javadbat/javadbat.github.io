@@ -1,0 +1,57 @@
+{
+  "$schema": "https://javadbat.github.io/schemas/jb-form/v1.json",
+  "schemaVersion": 1,
+  "id": "14b177d3-cd63-4e5a-8b02-dc9eaed32bf1",
+  "metadata": {
+    "name": {
+      "translations": {
+        "en": "Repeated phone numbers"
+      }
+    },
+    "createdAt": "2026-07-29T12:00:00.000Z",
+    "updatedAt": "2026-07-29T12:00:00.000Z"
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "locales": {
+      "en": {
+        "direction": "ltr"
+      }
+    }
+  },
+  "elements": [
+    {
+      "id": "b76d7116-d71a-4be3-b8b6-6c6e125b8465",
+      "type": "jb-mobile-input",
+      "adapterVersion": 1,
+      "name": "phone",
+      "required": false,
+      "disabled": false,
+      "initialValue": "",
+      "label": {
+        "translations": {
+          "en": "Primary phone number"
+        }
+      },
+      "props": {},
+      "validation": []
+    },
+    {
+      "id": "bf53747a-f38a-4c70-8b0a-2cb8d32fd244",
+      "type": "jb-mobile-input",
+      "adapterVersion": 1,
+      "name": "phone",
+      "required": false,
+      "disabled": false,
+      "initialValue": "",
+      "label": {
+        "translations": {
+          "en": "Secondary phone number"
+        }
+      },
+      "props": {},
+      "validation": []
+    }
+  ],
+  "theme": null
+}

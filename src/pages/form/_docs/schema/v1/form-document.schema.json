@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://javadbat.github.io/schemas/jb-form/v1.json",
+  "title": "JB Form document",
+  "description": "Portable version 1 form definition consumed by Builder, export, and jb-form-builder.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "id", "metadata", "localization", "elements", "theme"],
+  "properties": {
+    "$schema": {
+      "const": "https://javadbat.github.io/schemas/jb-form/v1.json"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "slug": {
+      "$ref": "#/$defs/slug"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "localization": {
+      "$ref": "#/$defs/localization"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/element"
+      }
+    },
+    "theme": {
+      "type": "null"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "slug": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "elementName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "localeCode": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "localizedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["translations"],
+      "properties": {
+        "translations": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/localeCode"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "createdAt", "updatedAt"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "description": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaultLocale", "locales"],
+      "properties": {
+        "defaultLocale": {
+          "$ref": "#/$defs/localeCode"
+        },
+        "locales": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/localeCode"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/localeDefinition"
+          }
+        }
+      }
+    },
+    "localeDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction"],
+      "properties": {
+        "direction": {
+          "enum": ["ltr", "rtl"]
+        }
+      }
+    },
+    "jsonValue": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "scalarValue": {
+      "type": ["string", "number", "boolean", "null"]
+    },
+    "element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "adapterVersion", "name", "props", "validation"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "type": {
+          "enum": [
+            "jb-input",
+            "jb-number-input",
+            "jb-mobile-input",
+            "jb-password-input",
+            "jb-payment-input",
+            "jb-national-input",
+            "jb-date-input",
+            "jb-time-input",
+            "jb-pin-input",
+            "jb-textarea",
+            "jb-select",
+            "jb-checkbox",
+            "jb-switch",
+            "jb-file-input",
+            "jb-image-input",
+            "jb-button"
+          ]
+        },
+        "adapterVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "$ref": "#/$defs/elementName"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "initialValue": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "label": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "placeholder": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/validationRule"
+          }
+        }
+      }
+    },
+    "validationRule": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/minLengthRule"
+        },
+        {
+          "$ref": "#/$defs/maxLengthRule"
+        },
+        {
+          "$ref": "#/$defs/patternRule"
+        },
+        {
+          "$ref": "#/$defs/minValueRule"
+        },
+        {
+          "$ref": "#/$defs/maxValueRule"
+        },
+        {
+          "$ref": "#/$defs/allowedValuesRule"
+        }
+      ]
+    },
+    "minLengthRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "minLength"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    },
+    "maxLengthRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "maxLength"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    },
+    "patternRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "pattern"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "flags"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "flags": {
+              "type": "string",
+              "pattern": "^[imsu]{0,4}$"
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    },
+    "minValueRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "minValue"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": {
+              "type": "number"
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    },
+    "maxValueRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "maxValue"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value"],
+          "properties": {
+            "value": {
+              "type": "number"
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    },
+    "allowedValuesRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "params", "message"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "rule": {
+          "const": "allowedValues"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["values"],
+          "properties": {
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/scalarValue"
+              }
+            }
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/localizedText"
+        }
+      }
+    }
+  }
+}

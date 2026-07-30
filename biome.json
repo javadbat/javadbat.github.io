@@ -33,14 +33,14 @@
         "noNonNullAssertion": "off",
         "noCommonJs": "error",
         "noEnum": "warn",
-        "useExponentiationOperator":"off"
+        "useExponentiationOperator": "off"
       },
       "complexity": {
         "noImportantStyles": "error",
         "noUselessTypeConstraint": "warn",
         "useLiteralKeys": "off",
-        "useArrowFunction":"off",
-        "noBannedTypes":"off"
+        "useArrowFunction": "off",
+        "noBannedTypes": "off"
       },
       "security": {
         "recommended": true
@@ -51,7 +51,7 @@
         "noArrayIndexKey": "warn",
         "noImplicitAnyLet": "warn",
         "noAssignInExpressions": "warn",
-        "noDoubleEquals":"off"
+        "noDoubleEquals": "off"
       },
       "correctness": {
         "recommended": true,
@@ -59,7 +59,7 @@
         "useIsNan": "error",
         "noUnusedImports": "warn",
         "useExhaustiveDependencies": "warn",
-        "noInvalidPositionAtImportRule":"info",
+        "noInvalidPositionAtImportRule": "info",
         "useHookAtTopLevel": "warn",
         "noInvalidUseBeforeDeclaration": "warn"
       }
@@ -74,6 +74,19 @@
       "lineEnding": "lf"
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off"
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "enabled": true,
     "actions": {

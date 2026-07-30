@@ -1,0 +1,12 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { FormLandingApp } from "../../features/form/landing/FormLandingApp";
+---
+
+<Layout
+  title="JB Form"
+  description="Build and preview portable forms with the JB Design System."
+>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <FormLandingApp client:only="react" />
+</Layout>

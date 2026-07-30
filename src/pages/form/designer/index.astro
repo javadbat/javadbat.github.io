@@ -1,0 +1,12 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { DesignerPlaceholderApp } from "../../../features/form/designer/DesignerPlaceholderApp";
+---
+
+<Layout
+  title="JB Form Designer"
+  description="Design the theme of a saved JB form."
+>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <DesignerPlaceholderApp client:only="react" />
+</Layout>
