@@ -31,6 +31,8 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 - Element names are non-empty. Duplicate names are allowed because `jb-form` intentionally collects controls sharing a name into an array.
 - Catalog and element-list entries use proper semantic icons, not emoji or text-symbol substitutes.
 - Styling uses CSS Modules and external pure CSS. CSS-in-JS is prohibited.
+- Application color tokens use OKLCH.
+- App-owned rounded surfaces use `corner-shape: squircle` with their existing `border-radius` as the unsupported-browser fallback.
 - Authored layout and spacing dimensions use `rem`.
 - Component-owned UI state uses local React state; state shared across Builder regions uses MobX.
 - Builder remains desktop-first in Phase 1; Preview is responsive in Phase 1.
@@ -210,6 +212,8 @@ Every form element has:
 - a non-interactive rendering of the configured JB component.
 
 The rendered form control does not receive pointer or keyboard interaction in Builder. Selecting its editor card updates the configuration panel.
+
+To keep the 100-element editing baseline responsive, the full JB action toolbar is mounted only for the selected card. Every card keeps its lightweight selection surface and keyboard navigation, and selecting a card reveals Configure, Move, Duplicate, Remove, and drag-handle actions without changing document data.
 
 ### Selection and configuration
 
@@ -421,6 +425,7 @@ Deleting named forms remains deferred to Phase 2.
 - Use `rem` for authored spacing, sizing, typography, breakpoints, and layout dimensions.
 - Use CSS logical properties for direction-aware layout.
 - Consume JB design tokens and styling hooks rather than copying component CSS.
+- Track JB Shadow DOM squircle support through DSR-007; do not pierce or duplicate component internals in the application.
 
 ### State management
 
@@ -517,7 +522,7 @@ Browser-reserved shortcuts are not overridden.
 | Transient feedback | `jb-notification` |
 | Loading | `jb-loading` |
 | Contextual help | Visible help text or accessible description; no tooltip package required |
-| Catalog and action icons | `jb-icon` |
+| Catalog and action icons | Registry-owned repository SVG assets |
 | Locale configuration | `jb-core/i18n` |
 | Preview rendering | `<jb-form-builder>` |
 

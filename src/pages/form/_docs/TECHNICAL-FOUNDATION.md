@@ -15,7 +15,7 @@ No form document is written to IndexedDB while the user edits. Save and Save As 
 - The site uses Astro `7`, React `19`, and static GitHub Pages deployment.
 - `@astrojs/react` is already configured.
 - Existing interactive UI is implemented as React islands.
-- MobX, IndexedDB helpers, JSON Schema validators, and test frameworks are not currently installed.
+- MobX, Ajv, Vitest, Testing Library, Happy DOM, and fake-indexeddb are installed. Persistence continues to use native IndexedDB rather than a runtime wrapper.
 - Existing application styling uses external CSS/CSS Modules.
 - The application now uses `jb-core@0.30.0`, matching the component-inventory baseline.
 - `jb-core/i18n` accesses browser globals during construction and exports a global singleton.
@@ -292,6 +292,19 @@ interface FormRepository {
 }
 ```
 
+IndexedDB implementation status:
+
+- `FormDatabase` owns the memoized native connection, version-change closure, and sequential database migration entry point;
+- migration v1 creates `forms`, `drafts`, `recovery`, and `meta` with the approved keys and indexes;
+- `IndexedDbFormRepository` exposes typed draft, slug lookup, list, and save commands without leaking `IDBRequest`;
+- named form and current draft writes share one read-write transaction;
+- unique slug checks and optimistic `revision` checks distinguish collisions from stale multi-tab saves;
+- Save As creates a new form ID while preserving element IDs;
+- JSON Schema/Ajv is dynamically imported only when an existing record or Save needs validation, keeping it out of the empty Builder startup path;
+- record envelopes, projection consistency, semantic rules, registry adapters, corrupt data, newer record versions, quota, abort, and unavailable storage return typed failures;
+- Builder writes only from explicit Save/Save As, restores current or slug-selected records, and retains edits made while a transaction is in flight;
+- Landing, Designer, and Preview resolve storage independently, and the form-aware `404.html` shell preserves arbitrary strict slug URLs on GitHub Pages.
+
 ## Validation pipeline
 
 Every load, Save, Preview render, and export runs:
@@ -319,6 +332,7 @@ interface FormIssue {
   code: string;
   path: string;
   messageKey: string;
+  message: string;
   elementId?: string;
   details?: Record<string, unknown>;
 }
@@ -367,6 +381,18 @@ Registry rules:
 - If no suitable asset exists, design a repository-owned SVG with a `24 × 24` view box, `currentColor`, and consistent stroke/fill geometry.
 - Keep every icon mapping in the registry. Do not use emoji, Unicode text symbols, third-party icon packages, or CSS-drawn icons.
 
+Registry implementation status:
+
+- all 16 entries now declare common-field support, initial-value kind, JSON-safe default props, and editable property metadata;
+- property definitions drive shared configuration controls, including localized props and declarative select options;
+- add and duplicate deep-clone JSON-safe defaults/configuration so elements never share mutable prop objects;
+- all 16 adapters declare package, tag, adapter/form schema versions, value type, events, supported validation rules, and one literal dynamic package loader;
+- adapters reject unsupported common fields, unknown props, invalid option structures, incompatible validation, and invalid portable values with stable registry issues;
+- serialization/deserialization use lossless structured clones and runtime application resolves localized properties and declarative `jb-option` children;
+- user validation remains function-free JSON (`minLength`, `maxLength`, `pattern`, `minValue`, `maxValue`, and `allowedValues`) and is compiled into trusted `jb-validation` entries only at runtime;
+- optional empty fields pass custom rules; the component's built-in `required` behavior exclusively owns missing-value errors;
+- component-iterated adapter tests and the production build pass; per-component rendered Preview checks remain in Step 9.
+
 ## Renderer boundary
 
 Preview imports one adapter module, not the local or published renderer directly:
@@ -374,12 +400,27 @@ Preview imports one adapter module, not the local or published renderer directly
 ```ts
 interface FormRendererElement extends HTMLElement {
   formDocument: JBFormDocument | null;
-  readonly form: HTMLFormElement | null;
+  autoImport: boolean;
+  locale: string | null;
+  readonly state:
+    | "empty"
+    | "loading"
+    | "waiting-dependencies"
+    | "ready"
+    | "invalid"
+    | "degraded"
+    | "error";
+  readonly form: RuntimeJBForm | null;
   readonly value: Record<string, unknown>;
+  readonly updateComplete: Promise<void>;
+  readonly requiredDependencies: readonly RendererDependency[];
   reset(): void;
   getFormValues(): Record<string, unknown>;
+  setFormValues(value: Record<string, unknown>): void;
   checkValidity(): boolean;
   reportValidity(): boolean;
+  checkValidityAsync(showError?: boolean): Promise<boolean>;
+  retryRender(): Promise<void>;
 }
 ```
 
@@ -392,6 +433,14 @@ The adapter:
 - contains no route or IndexedDB logic.
 
 DSR-005 defines the final events, states, parts, accessibility behavior, and package acceptance. Publication remains a Phase 1 release blocker.
+
+The application-local renderer is now implemented under `src/features/form/renderer/jb-form-builder`. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency.
+
+Automatic dependency loading defaults to enabled and imports `jb-form` plus only the unique component packages used by the assigned document. Loads are memoized across instances. `auto-import="false"` performs no package loading or global i18n configuration; the consumer registers the reported `requiredDependencies`, configures i18n, and calls `retryRender()`.
+
+The React wrapper is a separate entry. It assigns the document as an object property, forwards the underlying element ref, installs one stable listener set with current callback refs, and adds no renderer state mirror.
+
+Current Phase 1 usage is client-only. Browser-specific work remains behind registration, render, dependency, and locale modules; the default definition is guarded and a Node-environment import test passes. This preparation does not make the current JB packages SSR-compatible: direct Node imports of representative installed packages still throw on `HTMLElement` or `document`. Exact required design-system changes and acceptance tests are documented beside the component in `JB-DESIGN-SYSTEM-CHANGES.md`.
 
 ## Locale and direction
 
@@ -415,6 +464,9 @@ Simultaneous independently scoped locales inside one route are not required in P
 - Use CSS Modules for React route UI and external component CSS where shadow-DOM styling is required.
 - Do not use inline style objects for authored design values or any CSS-in-JS library.
 - Use JB design tokens and exposed parts before adding feature tokens.
+- Define application-owned color tokens with OKLCH values.
+- Apply `corner-shape: squircle` to app-owned rounded surfaces and keep `border-radius` as the progressive-enhancement fallback.
+- Do not pierce JB Shadow DOM for corner geometry; DSR-007 owns the core/component token upgrade.
 - Use `rem` for authored size, spacing, and typography values.
 - Use logical properties (`margin-inline`, `padding-block`, `inset-inline`, etc.).
 - Use `dir` selectors only where logical properties cannot express behavior.

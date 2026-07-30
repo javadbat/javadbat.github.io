@@ -39,6 +39,7 @@ Phase 2 gate: Do not start until Phase 1 is accepted.
 - [x] Require a non-empty valid `name` on every generated form element while allowing repeated names for intentional array collection.
 - [x] Require proper semantic icons for catalog and element-list items.
 - [x] Prohibit CSS-in-JS; use CSS Modules/external pure CSS with `rem` dimensions.
+- [x] Use OKLCH for application color tokens and progressive-enhancement `corner-shape: squircle` with radius fallbacks.
 - [x] Use local React state for component-owned state and MobX only for state shared across Builder regions.
 - [x] Define the supported desktop browsers and versions.
   - Latest two stable Chrome, Edge, and Firefox releases.
@@ -64,7 +65,7 @@ Phase 2 gate: Do not start until Phase 1 is accepted.
 - [x] Check for required components missing from the JB Design System and submit detailed requests if found. No addable form input was missing; the cross-cutting renderer request is tracked as DSR-005.
 - [x] Track each design-system request as a blocker for the affected builder task until the change is available or a documented alternative is approved.
 
-Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, and DSR-005 remain open; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
+Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, DSR-005, and DSR-007 remain open; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
 
 ### 2. Product flow and interaction specification
 
@@ -127,83 +128,92 @@ Deliverable: approved `TECHNICAL-FOUNDATION.md` architecture and test strategy.
 
 ### 5. Builder shell
 
-- [ ] Implement the approved page layout using the JB Design System.
-- [ ] Implement empty, loading, ready, and failure states.
-- [ ] Implement the component catalog from registry metadata.
-- [ ] Render proper registry icons in the catalog and element list.
-- [ ] Implement form selection and configuration-panel wiring.
-- [ ] Implement the form-name settings icon and form-management modal.
-- [ ] Add Designer and Preview route buttons for the current form.
-- [ ] Configure Builder locale with `jb-core/i18n`, defaulting to English/LTR.
-- [ ] Verify keyboard navigation and supported desktop behavior.
-- [ ] Verify render counts and response-time targets with a 100-element document.
+- [x] Implement the approved page layout using the JB Design System.
+- [x] Implement empty, loading, ready, and failure states.
+- [x] Implement the component catalog from registry metadata.
+- [x] Render proper registry icons in the catalog and element list.
+- [x] Implement form selection and configuration-panel wiring.
+- [x] Implement the form-name settings icon and form-management modal.
+- [x] Add Designer and Preview route buttons for the current form.
+- [x] Configure Builder locale with `jb-core/i18n`, defaulting to English/LTR.
+- [x] Verify keyboard navigation and supported desktop behavior.
+- [x] Verify render isolation and response-time targets with a 100-element document.
 
-Deliverable: usable builder shell with registry-driven placeholder elements.
+Deliverable: usable builder shell with registry-driven placeholder elements. Completed with browser verification and the focused `npm run test:form` suite.
 
 ### 6. Core editing
 
-- [ ] Add elements with valid defaults and generated non-empty names.
-- [ ] Select and configure elements.
-- [ ] Reorder elements.
-- [ ] Duplicate elements with new stable identifiers while preserving names by default.
-- [ ] Remove elements with the agreed recovery behavior.
+- [x] Add elements with valid defaults and generated non-empty names.
+- [x] Select and configure common and registry-declared component properties.
+- [x] Reorder elements through pointer insertion targets, buttons, and keyboard shortcuts.
+- [x] Duplicate elements with new stable identifiers while preserving names by default.
+- [x] Remove elements with confirmation and the agreed focus recovery behavior.
 
-Deliverable: complete editor workflow independent of persistence.
+Deliverable: complete editor workflow independent of persistence. Completed with registry-owned configuration metadata for all 16 catalog entries, inline name validation, select-option editing, selected-card action isolation, focused store/performance tests, and browser verification in English/LTR and Persian/RTL.
 
 ### 7. JB element coverage
 
-- [ ] Implement one registry adapter per inventory item.
-- [ ] Require every adapter to generate and validate `name`.
-- [ ] Map every adapter to a proper existing or locally designed semantic icon.
-- [ ] Expose every approved component property.
-- [ ] Map component events and validation behavior correctly.
-- [ ] Verify serialization round trips without data loss.
-- [ ] Complete visual, interaction, accessibility, and JSON checks for every support-matrix row.
+- [x] Implement one registry adapter per inventory item.
+- [x] Require every adapter to generate and validate `name`.
+- [x] Map every adapter to a proper existing or locally designed semantic icon.
+- [x] Expose every approved component property.
+- [x] Map component events and validation behavior correctly.
+- [x] Verify serialization round trips without data loss.
+- [ ] Complete visual, interaction, accessibility, and JSON checks for every support-matrix row. Registry/JSON/unit checks and the Builder validation-editor browser check pass; per-element rendered Preview checks belong to Step 9.
 
-Deliverable: all agreed JB form elements marked supported.
+Deliverable status: the 16 adapter implementations are complete with isolated package loaders, approved property/event metadata, portable user validation, runtime compilation, lossless cloning, and component-iterated tests. Final supported status remains gated by the Step 9 renderer checks and DSR-001 (`jb-time-input` still lacks `formDisabledCallback` in `2.3.0`).
 
 ### 8. IndexedDB persistence
 
 - [x] Define database, object store, key, and index names.
 - [x] Define a unique slug index for named forms.
-- [ ] Implement database initialization and migrations.
+- [x] Implement database initialization and migrations.
 - [x] Define stored current-draft and named-form records with identity, schema/builder versions, timestamps, and form document.
-- [ ] Persist the current working draft only through explicit Save.
-- [ ] Restore the current draft directly into the builder on page load.
-- [ ] Resolve named forms by slug on all `/form` subroutes.
-- [ ] Implement naming and explicit saving through the form-management modal.
-- [ ] Implement the list and loading of previously saved named forms.
-- [ ] Handle unavailable, corrupt, incompatible, or quota-limited storage.
-- [ ] Test refresh, browser restart, migration, and recovery scenarios.
+- [x] Persist the current working draft only through explicit Save.
+- [x] Restore the current draft directly into the builder on page load.
+- [x] Resolve named forms by slug on all `/form` subroutes.
+- [x] Implement naming and explicit saving through the form-management modal.
+- [x] Implement the list and loading of previously saved named forms.
+- [x] Handle unavailable, corrupt, incompatible, or quota-limited storage.
+- [x] Test refresh, browser restart, migration, and recovery scenarios.
 
-Deliverable: reliable current-draft and named-form persistence with builder-version and migration coverage.
+Deliverable: reliable current-draft and named-form persistence with builder-version and migration coverage. Completed with a native versioned repository, one memoized database connection, four approved stores, atomic draft/named writes, optimistic revisions, Save As identity rules, compiled JSON Schema plus semantic/registry validation, typed failures, named-form landing list, shared route resolution, and deterministic fake-IndexedDB tests.
 
 ### 9. Form route family and Preview renderer
 
-- [ ] Create Builder, Designer, and Preview routes with optional slug.
-- [ ] Implement the `/form` landing page.
-- [ ] Implement shared IndexedDB form resolution and recovery.
-- [ ] Implement the Phase 1 Designer placeholder with preserved form identity.
-- [ ] Implement a replaceable application-local `<jb-form-builder>` for tests using the DSR-005 contract.
-- [ ] Map declarative validation rules inside `<jb-form-builder>`.
-- [ ] Implement responsive Preview loading from IndexedDB.
-- [ ] Keep Preview response values session-only.
-- [ ] Require a successful explicit Save before navigating changed work to Designer or Preview.
+- [x] Create Builder, Designer, and Preview routes with optional slug.
+- [x] Implement the `/form` landing page.
+- [x] Implement shared IndexedDB form resolution and recovery.
+- [x] Implement the Phase 1 Designer placeholder with preserved form identity.
+- [x] Implement a replaceable application-local `<jb-form-builder>` for tests using the DSR-005 contract.
+- [x] Map declarative validation rules inside `<jb-form-builder>`.
+- [x] Implement responsive Preview loading from IndexedDB.
+- [x] Keep Preview response values session-only.
+- [x] Require a successful explicit Save before navigating changed work to Designer or Preview.
 - [ ] Verify Preview across narrow mobile, desktop, zoom, touch, keyboard, LTR, and RTL.
 - [ ] Verify unknown-slug, unavailable-storage, corrupt-record, and incompatible-schema recovery.
 - [ ] Integrate the published `jb-form-builder` package and remove the local test implementation before Phase 1 acceptance.
 
 Deliverable: navigable route family with empty Designer and responsive JSON-driven Preview.
 
+Local renderer status: implemented as concern-specific TypeScript modules with an open Shadow DOM, external CSS, automatic or consumer-controlled dependency registration, lazy package memoization, validated document cloning, locale override, generation-safe asynchronous rendering, partial error isolation, `jb-form` value/validity/reset facades, typed events, and a separate React wrapper. Unit coverage includes the server-import boundary, manual dependency reporting, every registered element type, repeated names, values/events/reset, invalid documents, attributes, and wrapper property/event bridging. Publication and full browser/accessibility acceptance remain open.
+
 ### 10. JSON export
 
-- [ ] Validate the current document before export.
-- [ ] Exclude editor-only state.
-- [ ] Produce deterministic, readable JSON.
-- [ ] Download using the agreed file-name convention.
-- [ ] Verify exported output against the agreed fixtures.
+- [x] Validate the current document before export.
+- [x] Exclude editor-only state.
+- [x] Produce deterministic, readable JSON.
+- [x] Download using the agreed file-name convention.
+- [x] Verify exported output against the agreed fixtures.
 
 Deliverable: validated, versioned JSON export.
+
+Implementation status: the Builder lazily loads a reusable Mantine
+`@mantine/code-highlight` viewer with a Shiki adapter when the export dialog is
+opened. The dialog shows the validated JSON with localized copy feedback and
+downloads `{slug-or-untitled-form}.jb-form.json`. Recursive key ordering makes
+equivalent documents byte-for-byte deterministic while array order remains
+semantically intact.
 
 ### 11. Phase 1 hardening and acceptance
 

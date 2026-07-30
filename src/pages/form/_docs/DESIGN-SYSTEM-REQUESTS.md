@@ -1,6 +1,6 @@
 # JB Form — Design System Dependency Requests
 
-Status: Release audit complete; DSR-002 and DSR-003 resolved, DSR-006 closed, DSR-001, DSR-004, and DSR-005 open
+Status: Release audit complete; DSR-002 and DSR-003 resolved, DSR-006 closed, DSR-001, DSR-004, DSR-005, and DSR-007 open
 Baseline source revision reviewed: `835fddf109e39c33ee7aecd0af6e4a0b4832ebda`  
 Latest design-system revision audited: `8afc94a5cae5910c2dccab35c033d4d01150d27e`
 Latest npm release audit: 2026-07-29
@@ -39,6 +39,8 @@ Status: Partially resolved
 The release adds the `JBFormInputStandards<string>` class declaration, public `form` getter, and public `name` getter/setter. The published source still does not provide `formDisabledCallback`.
 
 DSR-001 remains a Phase 1 blocker until `formDisabledCallback` preserves the component's disabled behavior when a native parent form or disabled fieldset changes its form-associated disabled state, and the acceptance test covers that behavior.
+
+Implementation audit on 2026-07-30 reconfirmed that the installed and latest published `jb-time-input@2.3.0` class ends without a `formDisabledCallback`. The application adapter intentionally does not emulate this missing form-associated lifecycle.
 
 ### Builder usage example
 
@@ -177,8 +179,8 @@ The generated form must reject submission until `termsAccepted` is `true`.
 
 ## DSR-005 — Publish `jb-form-builder` as the JSON form renderer
 
-Priority: Phase 1 production-release blocker  
-Status: Open; application-local implementation approved for tests only  
+Priority: Phase 1 production-release blocker
+Status: Open for publication; application-local implementation complete
 Proposed package/tag: `jb-form-builder` / `<jb-form-builder>`
 
 ### Use case
@@ -203,17 +205,26 @@ The separate Preview route loads portable form JSON from IndexedDB and needs one
 ```ts
 class JBFormBuilderWebComponent extends HTMLElement {
   formDocument: JBFormDocument | null;
-  readonly form: HTMLFormElement | null;
+  autoImport: boolean;
+  locale: string | null;
+  readonly form: JBFormWebComponent | null;
   readonly value: Record<string, unknown>;
+  readonly updateComplete: Promise<void>;
+  readonly requiredDependencies: readonly RendererDependency[];
 
   reset(): void;
   getFormValues(): Record<string, unknown>;
+  setFormValues(value: Record<string, unknown>): void;
   checkValidity(): boolean;
   reportValidity(): boolean;
+  checkValidityAsync(showError?: boolean): Promise<boolean>;
+  retryRender(): Promise<void>;
 }
 ```
 
 The document is assigned as an object property, not serialized into an HTML attribute.
+
+`autoImport` defaults to `true` and reflects to the enumerated `auto-import` attribute. When false, the component performs no JB component imports or automatic global i18n configuration. Missing registrations are exposed through `requiredDependencies` and `dependencies-required`.
 
 ### Proposed events
 
@@ -224,6 +235,7 @@ The document is assigned as an object property, not serialized into an HTML attr
 - `input` and `change` — runtime value changes, with form values available to the consumer.
 - `submit` — valid local form submission; the component does not call a backend.
 - `reset` — runtime values returned to configured initial values.
+- `dependencies-required` — manual loading is active and one or more required tags are not registered.
 
 ### Required states
 
@@ -281,6 +293,8 @@ The project owner explicitly approved an application-local `<jb-form-builder>` f
 - not be presented as a permanent local substitute;
 - use no CSS-in-JS; and
 - be removed after the published package is integrated.
+
+The local implementation now follows this exception and includes a separate React wrapper. Required JB package changes, SSR-import findings, shared-contract extraction, dependency policy, and publication acceptance are recorded in the adjacent `JB-DESIGN-SYSTEM-CHANGES.md`.
 
 ### Acceptance criteria
 
@@ -360,6 +374,63 @@ The exact provider API may differ, but consumers must not need to mutate the doc
 - Provider/context listeners can be removed or disposed.
 - Web-component and React tests cover independent contexts, runtime switching, nested fallback, SSR import, and cleanup.
 
+## DSR-007 — Add a standard squircle corner-shape token
+
+Priority: High for Phase 1 visual consistency
+Status: Open; app-owned surfaces use progressive enhancement, JB Shadow DOM surfaces require a design-system upgrade
+Baseline reviewed: `jb-core@0.30.0`, `jb-button@4.0.0`, `jb-input@3.17.0`, `jb-select@7.4.3`, `jb-searchbar@3.1.0`, `jb-modal@1.14.0`, and `jb-checkbox@1.4.0`
+
+### Use case
+
+JB Form uses `corner-shape: squircle` for its authored cards, panels, badges, icon tiles, modals, and other rounded surfaces. Existing `border-radius` values remain the fallback for browsers that do not yet support CSS Borders Level 4.
+
+The JB controls used inside those surfaces must be able to consume the same corner-shape decision so buttons, inputs, selects, search/filter controls, modals, popovers, and checkboxes do not mix round and squircle geometry.
+
+### Current limitation
+
+The audited JB components expose radius custom properties, but their Shadow DOM styles do not apply or expose `corner-shape`. Setting `corner-shape` on the custom-element host does not change an internal element that owns the background, border, outline, overflow, or shadow.
+
+`jb-checkbox` also draws checked/unchecked geometry with SVG `rx`/`ry`, where CSS `corner-shape` does not apply.
+
+JB Core color tokens already emit OKLCH values, so no color-system upgrade is requested.
+
+### Requested standard
+
+- Add a backward-compatible core token such as `--jb-corner-shape`, defaulting to `round`.
+- Add an optional component override such as `--jb-button-corner-shape`, falling back to `--jb-corner-shape`.
+- Apply the resolved token to every internal element that owns a non-zero `border-radius`, including interactive boxes, list/popover surfaces, chips, and modal containers.
+- Keep existing radius tokens; `corner-shape` modifies their curve and does not replace their size.
+- Preserve `round` for intentional circles and indicators unless a component-specific token explicitly changes them.
+- For SVG-owned checkbox geometry, provide an equivalent squircle path/shape option or move the visual box to a CSS-styled element that can consume the token.
+- Document limited browser availability and retain the current rounded appearance as the unsupported-browser fallback.
+- Expose the token through component documentation, examples, and the design-system theme contract.
+
+Example:
+
+```css
+:host {
+  --corner-shape: var(
+    --jb-button-corner-shape,
+    var(--jb-corner-shape, round)
+  );
+}
+
+.button {
+  border-radius: var(--border-radius);
+  corner-shape: var(--corner-shape);
+}
+```
+
+### Acceptance criteria
+
+- Setting `--jb-corner-shape: squircle` produces consistent squircle controls across the audited component set.
+- Component-level overrides can opt a control back into `round` without changing its radius.
+- Backgrounds, borders, outlines, shadows, overflow clipping, hover/focus states, and hit areas follow the selected corner shape.
+- Circular indicators remain circular by default.
+- Unsupported browsers preserve the existing radius-based presentation.
+- Light/dark themes, LTR/RTL, all size variants, keyboard focus, zoom, and forced-colors behavior remain correct.
+- Web-component source, typings/custom-property documentation, Storybook examples, and visual tests cover both `round` and `squircle`.
+
 ## Missing-component review
 
-The form-element inventory itself requires no additional input component. Product-flow design identified the missing JSON renderer tracked by DSR-005. The owner approved a local test implementation while the publishable design-system package is developed. DSR-006 is closed because scoped/SSR i18n is not required for the client-only Phase 1 route model.
+The form-element inventory itself requires no additional input component. Product-flow design identified the missing JSON renderer tracked by DSR-005. The owner approved a local test implementation while the publishable design-system package is developed. DSR-006 is closed because scoped/SSR i18n is not required for the client-only Phase 1 route model. DSR-007 tracks a styling-standard upgrade rather than a missing component.

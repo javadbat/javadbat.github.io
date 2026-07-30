@@ -1,0 +1,21 @@
+export { defineJBFormBuilder, JB_FORM_BUILDER_TAG_NAME } from "./define";
+export { JBFormBuilderWebComponent } from "./jb-form-builder";
+export type {
+  FormValues,
+  JBFormBuilderElement,
+  JBFormBuilderEventMap,
+  RendererDependenciesDetail,
+  RendererDependency,
+  RendererIssuesDetail,
+  RendererReadyDetail,
+  RendererState,
+  RendererValueDetail,
+  RuntimeJBForm,
+} from "./types";
+
+import { defineJBFormBuilder } from "./define";
+
+// The default web-component entry is zero-configuration in browsers. The
+// guarded define function is a no-op when this module is evaluated by tooling
+// without DOM globals.
+defineJBFormBuilder();

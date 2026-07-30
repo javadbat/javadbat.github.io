@@ -1,0 +1,12 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { BuilderApp } from "../../../features/form/builder/BuilderApp";
+---
+
+<Layout
+  title="JB Form Builder"
+  description="Compose and configure a portable JB form."
+>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <BuilderApp client:only="react" />
+</Layout>

@@ -171,6 +171,9 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Use CSS Modules for React application layout and component styling.
 - Use external pure CSS where Shadow DOM or design-system integration requires it.
 - Do not use CSS-in-JS or runtime-generated styling.
+- Define application color tokens in OKLCH.
+- Use `corner-shape: squircle` on app-owned rounded surfaces while retaining `border-radius` fallback geometry.
+- Keep DSR-007 open until JB Shadow DOM controls expose the same corner-shape standard.
 - Use `rem` for authored sizes, spacing, typography, and breakpoints.
 - Use CSS logical properties for LTR/RTL.
 - Consume JB theme tokens and component styling hooks.

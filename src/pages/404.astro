@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Form404App } from "../features/form/shell/Form404App";
+---
+
+<Layout
+  title="Page not found"
+  description="The requested page could not be found."
+>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <Form404App client:only="react" />
+</Layout>

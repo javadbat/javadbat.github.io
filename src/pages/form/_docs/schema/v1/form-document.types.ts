@@ -5,17 +5,13 @@
  * validation source of truth; these types provide compile-time integration.
  */
 
-export const JB_FORM_SCHEMA_V1 =
-  "https://javadbat.github.io/schemas/jb-form/v1.json" as const;
+export const JB_FORM_SCHEMA_V1 = "https://javadbat.github.io/schemas/jb-form/v1.json" as const;
 
 export type UUID = string;
 export type LocaleCode = string;
 
 export type JSONPrimitive = string | number | boolean | null;
-export type JSONValue =
-  | JSONPrimitive
-  | JSONValue[]
-  | { [key: string]: JSONValue };
+export type JSONValue = JSONPrimitive | JSONValue[] | { [key: string]: JSONValue };
 
 export interface LocalizedText {
   translations: Record<LocaleCode, string>;
@@ -55,45 +51,24 @@ export type JBFormElementType =
   | "jb-image-input"
   | "jb-button";
 
-interface ValidationRuleBase<
-  Rule extends string,
-  Params extends Record<string, JSONValue>,
-> {
+interface ValidationRuleBase<Rule extends string, Params extends Record<string, JSONValue>> {
   id: UUID;
   rule: Rule;
   params: Params;
   message: LocalizedText;
 }
 
-export type MinLengthValidationRule = ValidationRuleBase<
-  "minLength",
-  { value: number }
->;
+export type MinLengthValidationRule = ValidationRuleBase<"minLength", { value: number }>;
 
-export type MaxLengthValidationRule = ValidationRuleBase<
-  "maxLength",
-  { value: number }
->;
+export type MaxLengthValidationRule = ValidationRuleBase<"maxLength", { value: number }>;
 
-export type PatternValidationRule = ValidationRuleBase<
-  "pattern",
-  { source: string; flags: string }
->;
+export type PatternValidationRule = ValidationRuleBase<"pattern", { source: string; flags: string }>;
 
-export type MinValueValidationRule = ValidationRuleBase<
-  "minValue",
-  { value: number }
->;
+export type MinValueValidationRule = ValidationRuleBase<"minValue", { value: number }>;
 
-export type MaxValueValidationRule = ValidationRuleBase<
-  "maxValue",
-  { value: number }
->;
+export type MaxValueValidationRule = ValidationRuleBase<"maxValue", { value: number }>;
 
-export type AllowedValuesValidationRule = ValidationRuleBase<
-  "allowedValues",
-  { values: JSONPrimitive[] }
->;
+export type AllowedValuesValidationRule = ValidationRuleBase<"allowedValues", { values: JSONPrimitive[] }>;
 
 export type JBValidationRule =
   | MinLengthValidationRule

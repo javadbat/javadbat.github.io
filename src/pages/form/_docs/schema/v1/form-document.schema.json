@@ -5,15 +5,7 @@
   "description": "Portable version 1 form definition consumed by Builder, export, and jb-form-builder.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "$schema",
-    "schemaVersion",
-    "id",
-    "metadata",
-    "localization",
-    "elements",
-    "theme"
-  ],
+  "required": ["$schema", "schemaVersion", "id", "metadata", "localization", "elements", "theme"],
   "properties": {
     "$schema": {
       "const": "https://javadbat.github.io/schemas/jb-form/v1.json"
@@ -67,9 +59,7 @@
     "localizedText": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "translations"
-      ],
+      "required": ["translations"],
       "properties": {
         "translations": {
           "type": "object",
@@ -86,11 +76,7 @@
     "metadata": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name",
-        "createdAt",
-        "updatedAt"
-      ],
+      "required": ["name", "createdAt", "updatedAt"],
       "properties": {
         "name": {
           "$ref": "#/$defs/localizedText"
@@ -111,10 +97,7 @@
     "localization": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "defaultLocale",
-        "locales"
-      ],
+      "required": ["defaultLocale", "locales"],
       "properties": {
         "defaultLocale": {
           "$ref": "#/$defs/localeCode"
@@ -134,15 +117,10 @@
     "localeDefinition": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "direction"
-      ],
+      "required": ["direction"],
       "properties": {
         "direction": {
-          "enum": [
-            "ltr",
-            "rtl"
-          ]
+          "enum": ["ltr", "rtl"]
         }
       }
     },
@@ -175,24 +153,12 @@
       ]
     },
     "scalarValue": {
-      "type": [
-        "string",
-        "number",
-        "boolean",
-        "null"
-      ]
+      "type": ["string", "number", "boolean", "null"]
     },
     "element": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "type",
-        "adapterVersion",
-        "name",
-        "props",
-        "validation"
-      ],
+      "required": ["id", "type", "adapterVersion", "name", "props", "validation"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -280,12 +246,7 @@
     "minLengthRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -296,9 +257,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "value"
-          ],
+          "required": ["value"],
           "properties": {
             "value": {
               "type": "integer",
@@ -314,12 +273,7 @@
     "maxLengthRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -330,9 +284,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "value"
-          ],
+          "required": ["value"],
           "properties": {
             "value": {
               "type": "integer",
@@ -348,12 +300,7 @@
     "patternRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -364,10 +311,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "source",
-            "flags"
-          ],
+          "required": ["source", "flags"],
           "properties": {
             "source": {
               "type": "string",
@@ -388,12 +332,7 @@
     "minValueRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -404,9 +343,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "value"
-          ],
+          "required": ["value"],
           "properties": {
             "value": {
               "type": "number"
@@ -421,12 +358,7 @@
     "maxValueRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -437,9 +369,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "value"
-          ],
+          "required": ["value"],
           "properties": {
             "value": {
               "type": "number"
@@ -454,12 +384,7 @@
     "allowedValuesRule": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "rule",
-        "params",
-        "message"
-      ],
+      "required": ["id", "rule", "params", "message"],
       "properties": {
         "id": {
           "$ref": "#/$defs/uuid"
@@ -470,9 +395,7 @@
         "params": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "values"
-          ],
+          "required": ["values"],
           "properties": {
             "values": {
               "type": "array",

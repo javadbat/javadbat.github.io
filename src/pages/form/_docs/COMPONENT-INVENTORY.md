@@ -1,6 +1,6 @@
 # JB Form — Form-Element Component Inventory
 
-Status: Initial input inventory complete; DSR-001, DSR-004, and renderer publication DSR-005 remain open; DSR-006 is closed
+Status: Initial input inventory complete; DSR-001, DSR-004, renderer publication DSR-005, and corner-shape standard DSR-007 remain open; DSR-006 is closed
 Reviewed: 2026-07-29  
 Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`](https://github.com/javadbat/design-system/tree/8afc94a5cae5910c2dccab35c033d4d01150d27e)
 
@@ -186,5 +186,6 @@ Design-system requests found during inventory and technical-foundation review:
 - DSR-004 — repair the unreachable `jb-switch` gitlink in the latest design-system repository revision.
 - DSR-005 — publish `jb-form-builder`; a replaceable application-local renderer is approved for tests only.
 - DSR-006 — closed for Phase 1; the application is client-only and uses one active `jb-core/i18n` locale per route page.
+- DSR-007 — open; add a core/component `corner-shape` token so JB Shadow DOM controls can match the app's squircle geometry.
 
 Full evidence, requested APIs, and acceptance criteria are in `DESIGN-SYSTEM-REQUESTS.md`.

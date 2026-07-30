@@ -1,0 +1,12 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { PreviewApp } from "../../../features/form/preview/PreviewApp";
+---
+
+<Layout
+  title="JB Form Preview"
+  description="Preview a saved JB form responsively."
+>
+  <link rel="stylesheet" href="/styles/fonts.css" />
+  <PreviewApp client:only="react" />
+</Layout>
