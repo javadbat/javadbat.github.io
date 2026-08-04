@@ -133,7 +133,7 @@ const ValidationRuleEditor = observer(function ValidationRuleEditor({ rule, inde
       <JBInput
         name={`validation-message-${rule.id}`}
         label={messages.validationMessage}
-        value={getLocalizedText(rule.message, locale)}
+        value={getLocalizedText(rule.message, locale, store.document.localization.defaultLocale)}
         onInput={event =>
           commit({
             ...rule,

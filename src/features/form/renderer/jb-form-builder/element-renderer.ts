@@ -39,17 +39,17 @@ function appendElementError(wrapper: HTMLElement, element: JBFormElementV1, mess
   wrapper.append(error);
 }
 
-function renderRuntimeElement(wrapper: HTMLElement, element: JBFormElementV1, adapter: FormElementRegistryEntry, locale: string): void {
+function renderRuntimeElement(wrapper: HTMLElement, element: JBFormElementV1, adapter: FormElementRegistryEntry, locale: string, defaultLocale: string): void {
   // Element content is created through DOM APIs and textContent only. Portable
   // JSON is never interpreted as HTML, script, or an executable callback.
   const runtimeElement = document.createElement(adapter.tagName) as RuntimeFormElement;
   runtimeElement.id = element.id;
   runtimeElement.dataset.formElementId = element.id;
-  adapter.applyToRuntime(runtimeElement, element, locale);
+  adapter.applyToRuntime(runtimeElement, element, locale, defaultLocale);
   wrapper.append(runtimeElement);
 }
 
-export function renderFormElement(element: JBFormElementV1, locale: string, unavailableTypes: ReadonlySet<string>): RenderedElement {
+export function renderFormElement(element: JBFormElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale = "en"): RenderedElement {
   const wrapper = createWrapper(element);
   // A dependency failure is isolated to its own wrapper so the rest of a valid
   // form remains usable and the error stays in the original document position.
@@ -67,7 +67,7 @@ export function renderFormElement(element: JBFormElementV1, locale: string, unav
   }
 
   try {
-    renderRuntimeElement(wrapper, element, adapter, locale);
+    renderRuntimeElement(wrapper, element, adapter, locale, defaultLocale);
     return { wrapper };
   } catch (error) {
     const issue = rendererIssue(

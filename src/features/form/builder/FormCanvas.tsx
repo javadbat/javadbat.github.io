@@ -13,6 +13,7 @@ import styles from "./BuilderApp.module.css";
 
 interface FormCanvasProps {
   messages: FormMessages;
+  onConfigureElement?: (elementId: string) => void;
 }
 
 interface CanvasCardProps {
@@ -21,6 +22,7 @@ interface CanvasCardProps {
   count: number;
   isSelected: boolean;
   locale: string;
+  defaultLocale: string;
   messages: FormMessages;
   onConfigure: (elementId: string) => void;
   onMove: (elementId: string, offset: -1 | 1) => void;
@@ -42,6 +44,7 @@ const CanvasCard = observer(function CanvasCard({
   count,
   isSelected,
   locale,
+  defaultLocale,
   messages,
   onConfigure,
   onMove,
@@ -50,12 +53,13 @@ const CanvasCard = observer(function CanvasCard({
   onFocusOffset,
 }: CanvasCardProps) {
   const store = useBuilderStore();
+  const [activeActionIcon, setActiveActionIcon] = useState<"configure" | "remove" | null>(null);
   const entry = registryByType.get(element.type);
   if (!entry) {
     return null;
   }
 
-  const label = getLocalizedText(element.label, locale) || entry.displayName;
+  const label = getLocalizedText(element.label, locale, defaultLocale) || entry.displayName;
   const position = index + 1;
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -99,8 +103,19 @@ const CanvasCard = observer(function CanvasCard({
 
       {isSelected ? (
         <div className={styles.cardActions}>
-          <JBButton square size="sm" variant="ghost" aria-label={messages.configure} title={messages.configure} onClick={() => onConfigure(element.id)}>
-            <CatalogIcon iconId="configure" />
+          <JBButton
+            square
+            size="sm"
+            variant="ghost"
+            aria-label={messages.configure}
+            title={messages.configure}
+            onPointerEnter={() => setActiveActionIcon("configure")}
+            onPointerLeave={() => setActiveActionIcon(null)}
+            onFocus={() => setActiveActionIcon("configure")}
+            onBlur={() => setActiveActionIcon(null)}
+            onClick={() => onConfigure(element.id)}
+          >
+            <CatalogIcon iconId="configure" active={activeActionIcon === "configure"} />
           </JBButton>
           <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} title={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
             <CatalogIcon iconId="move-up" />
@@ -111,8 +126,20 @@ const CanvasCard = observer(function CanvasCard({
           <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} title={messages.duplicate} onClick={() => onDuplicate(element.id)}>
             <CatalogIcon iconId="duplicate" />
           </JBButton>
-          <JBButton id={`element-remove-${element.id}`} square size="sm" variant="ghost" aria-label={messages.remove} title={messages.remove} onClick={() => onRemove(element.id)}>
-            <CatalogIcon iconId="remove" />
+          <JBButton
+            id={`element-remove-${element.id}`}
+            square
+            size="sm"
+            variant="ghost"
+            aria-label={messages.remove}
+            title={messages.remove}
+            onPointerEnter={() => setActiveActionIcon("remove")}
+            onPointerLeave={() => setActiveActionIcon(null)}
+            onFocus={() => setActiveActionIcon("remove")}
+            onBlur={() => setActiveActionIcon(null)}
+            onClick={() => onRemove(element.id)}
+          >
+            <CatalogIcon iconId="remove" active={activeActionIcon === "remove"} />
           </JBButton>
           <JBButton
             square
@@ -135,11 +162,12 @@ const CanvasCard = observer(function CanvasCard({
   );
 });
 
-export const FormCanvas = observer(function FormCanvas({ messages }: FormCanvasProps) {
+export const FormCanvas = observer(function FormCanvas({ messages, onConfigureElement }: FormCanvasProps) {
   const store = useBuilderStore();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
-  const locale = store.document.localization.defaultLocale;
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const count = store.document.elements.length;
   const pendingRemoval = pendingRemovalId ? (store.document.elements.find(element => element.id === pendingRemovalId) ?? null) : null;
   const pendingRemovalEntry = pendingRemoval ? registryByType.get(pendingRemoval.type) : undefined;
@@ -154,11 +182,12 @@ export const FormCanvas = observer(function FormCanvas({ messages }: FormCanvasP
   const configureElement = useCallback(
     (elementId: string) => {
       store.selectElement(elementId);
+      onConfigureElement?.(elementId);
       window.setTimeout(() => {
         document.getElementById(`element-name-${elementId}`)?.focus({ preventScroll: false });
       }, 0);
     },
-    [store],
+    [onConfigureElement, store],
   );
 
   const moveElement = useCallback(
@@ -315,6 +344,7 @@ export const FormCanvas = observer(function FormCanvas({ messages }: FormCanvasP
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 locale={locale}
+                defaultLocale={defaultLocale}
                 messages={messages}
                 onConfigure={configureElement}
                 onMove={moveElement}
@@ -341,7 +371,7 @@ export const FormCanvas = observer(function FormCanvas({ messages }: FormCanvasP
 
       <RemoveElementModal
         isOpen={pendingRemoval !== null}
-        elementLabel={pendingRemoval ? getLocalizedText(pendingRemoval.label, locale) || pendingRemovalEntry?.displayName || pendingRemoval.type : ""}
+        elementLabel={pendingRemoval ? getLocalizedText(pendingRemoval.label, locale, defaultLocale) || pendingRemovalEntry?.displayName || pendingRemoval.type : ""}
         messages={messages}
         onCancel={cancelRemoval}
         onConfirm={confirmRemoval}

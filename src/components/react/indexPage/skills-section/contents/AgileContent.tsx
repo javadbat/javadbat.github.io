@@ -3,10 +3,7 @@ import styles from "./common.module.css";
 function AgileContent() {
   return (
     <div className={styles.skillContent}>
-      <div slot="header">
-        <h2 className={styles.skillTitle}>✦ My Journey: From Coding to Cultivating Agile Teams</h2>
-      </div>
-      <div slot="content">
+      <div>
         <p className={styles.skillParagraph}>
           My passion has always been building great software. But early in my career, I noticed a common problem: teams worked hard, yet the results often didn't satisfy the
           customer. We were busy, but were we being productive? This "gap" between effort and value became the central question of my career.

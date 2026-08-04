@@ -3,9 +3,6 @@ import styles from "./common.module.css";
 function FrontendSkillItems() {
   return (
     <div className={styles.skillContent}>
-      <div slot="header">
-        <h2 className={styles.skillTitle}>✦ Front-End Engineering & Scalable Interfaces</h2>
-      </div>
       <p className={`${styles.skillParagraph}`}>
         Front-end development is the core of my professional experience. Over the years, I have worked mostly on admin panels, dashboards, PWA applications, design systems, and
         data-heavy interfaces, where structure, performance, maintainability, and user experience all matter at the same time.

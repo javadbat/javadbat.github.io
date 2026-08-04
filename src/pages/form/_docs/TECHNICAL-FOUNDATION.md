@@ -2,7 +2,7 @@
 
 Status: Approved for Phase 1
 Phase: 1 — Form Builder and Preview  
-Inputs: `PROJECT.md`, `PRODUCT-FLOW.md`, approved `FORM-JSON-CONTRACT.md`, component inventory, and DSR-005
+Inputs: `PROJECT.md`, `PRODUCT-FLOW.md`, approved `FORM-JSON-CONTRACT.md`, and the component inventory
 
 ## Outcome
 
@@ -426,15 +426,13 @@ interface FormRendererElement extends HTMLElement {
 
 The adapter:
 
-- loads the published `jb-form-builder` package in production;
-- may load the isolated local test implementation during development/integration;
+- currently loads the application renderer during development/integration;
+- will load the published `jb-form-builder` package in the final delivery step;
 - assigns the validated document as a JavaScript property;
 - forwards typed renderer events;
 - contains no route or IndexedDB logic.
 
-DSR-005 defines the final events, states, parts, accessibility behavior, and package acceptance. Publication remains a Phase 1 release blocker.
-
-The application-local renderer is now implemented under `src/features/form/renderer/jb-form-builder`. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency.
+The application renderer is implemented under `src/features/form/renderer/jb-form-builder`. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency. Package publication is reserved for the final delivery step.
 
 Automatic dependency loading defaults to enabled and imports `jb-form` plus only the unique component packages used by the assigned document. Loads are memoized across instances. `auto-import="false"` performs no package loading or global i18n configuration; the consumer registers the reported `requiredDependencies`, configures i18n, and calls `retryRender()`.
 
@@ -466,12 +464,15 @@ Simultaneous independently scoped locales inside one route are not required in P
 - Use JB design tokens and exposed parts before adding feature tokens.
 - Define application-owned color tokens with OKLCH values.
 - Apply `corner-shape: squircle` to app-owned rounded surfaces and keep `border-radius` as the progressive-enhancement fallback.
-- Do not pierce JB Shadow DOM for corner geometry; DSR-007 owns the core/component token upgrade.
+- Use documented `::part` selectors for JB control corner geometry; do not introduce a shared corner-shape variable or pierce private Shadow DOM.
 - Use `rem` for authored size, spacing, and typography values.
 - Use logical properties (`margin-inline`, `padding-block`, `inset-inline`, etc.).
 - Use `dir` selectors only where logical properties cannot express behavior.
 - Preview is fluid from narrow mobile to desktop and must not horizontally scroll.
-- Builder editing begins at the approved `64rem` viewport; smaller viewports show the desktop-editing notice and retain Preview navigation.
+- Builder editing is supported from `320px` through `1023px` CSS width. The mobile baseline is `375px`, the large-phone baseline is `412px`, the tablet baseline is `768px`, and `64rem` (`1024px`) remains the desktop breakpoint. Viewports below `320px` are outside the support target.
+- Mobile verification covers the latest two stable Chrome Android releases, the latest two supported Safari iOS major versions, and the latest two stable Firefox Android releases. Representative profiles are 320px-, 375px-, 412px-, and 768px-class touch viewports; browser engine, CSS viewport, pixel ratio, and touch capability matter more than device branding.
+- Coarse pointers use explicit `2.75rem` Move up/down actions for ordering; native HTML drag-and-drop and its handle are fine-pointer enhancements only.
+- Mobile Add returns to the canvas and Configure switches to Properties before focusing its first control. These panel changes are editor-only state and never enter the form document or undo history.
 
 ## Performance and memoization
 
@@ -550,7 +551,7 @@ React route error boundaries catch unexpected UI exceptions. Domain and infrastr
 - React Testing Library for shell state and keyboard interactions;
 - real-browser tests for JB web components, form association, focus, and shadow-DOM behavior;
 - every registry adapter runs the shared support-matrix contract;
-- local renderer runs the same contract expected from published DSR-005.
+- local renderer runs the same integration contract that will be published in the final delivery step.
 
 ### Accessibility
 
@@ -585,8 +586,7 @@ Builder shell implementation may begin when:
 - this approved architecture is reflected in implementation;
 - the simple form-aware GitHub Pages fallback is kept isolated for later enhancement;
 - all 16 catalog entries receive a suitable existing or locally designed icon;
-- DSR-001 and DSR-004 remain tracked for their affected integrations;
-- DSR-005 local test exception remains isolated and replaceable.
+- DSR-001 through DSR-004 are resolved and remain covered by integration tests;
 
 ## Owner approval
 

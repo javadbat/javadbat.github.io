@@ -1,6 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
 import "jb-icons/triangle";
-import "jb-icons/react";
 import styles from "./BuilderApp.module.css";
 
 interface CollapsibleConfigurationSectionProps {
@@ -24,7 +23,7 @@ export function CollapsibleConfigurationSection({ title, children, defaultOpen =
           {/* The logical direction keeps the collapsed arrow correct in both
               LTR and RTL locales without duplicating locale-specific CSS. */}
           <span className={styles.configurationSectionIcon} aria-hidden="true">
-            <jb-icon-triangle direction="inline-end" spin={isOpen?90:0} size="xs" />
+            <jb-icon-triangle direction="inline-end" spin={isOpen ? 90 : 0} size="xs" />
           </span>
           <span>{title}</span>
         </button>

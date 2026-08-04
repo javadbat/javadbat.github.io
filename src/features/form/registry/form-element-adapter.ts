@@ -37,7 +37,7 @@ export interface FormElementAdapter extends FormElementAdapterDefinition {
   validate(element: JBFormElementV1, context: FormElementAdapterContext): FormIssue[];
   serialize(element: JBFormElementV1): JBFormElementV1;
   deserialize(value: JBFormElementV1): JBFormElementV1;
-  applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string): void;
+  applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string, defaultLocale?: string): void;
 }
 
 const inputEvents = ["change", "input", "beforeinput", "focus", "blur", "keyup", "keydown", "enter"] as const;
@@ -283,11 +283,22 @@ function setRuntimeValue(target: RuntimeFormElement, key: string, value: unknown
   }
 }
 
-function resolveRuntimeValue(value: JSONValue, locale: string): unknown {
-  return isLocalizedText(value) ? getLocalizedText(value, locale) : value;
+function resolveRuntimeValue(value: JSONValue, locale: string, defaultLocale: string): unknown {
+  return isLocalizedText(value) ? getLocalizedText(value, locale, defaultLocale) : value;
 }
 
-function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | undefined, locale: string): void {
+function setNumberSeparatorRuntimeValue(target: RuntimeFormElement, key: "showThousandSeparator" | "thousandSeparator", value: unknown): void {
+  // jb-number-input uses the same `thousand-separator` attribute both as a
+  // boolean switch and as the separator text. Mirroring the separate builder
+  // properties to attributes makes a configured separator turn the feature on
+  // even when showThousandSeparator is false. Its two public properties are
+  // independent, so assign them directly and remove misleading attributes.
+  target[key] = value;
+  target.removeAttribute(toAttributeName(key));
+  target.removeAttribute("thousand-separator");
+}
+
+function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | undefined, locale: string, defaultLocale: string): void {
   target.querySelectorAll("[data-jb-form-option]").forEach(option => {
     option.remove();
   });
@@ -304,29 +315,31 @@ function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | unde
     (option as HTMLElement & { value?: JSONPrimitive }).value = optionValue;
     option.setAttribute("value", String(optionValue));
     option.toggleAttribute("disabled", candidate.disabled === true);
-    option.textContent = isLocalizedText(candidate.label) ? getLocalizedText(candidate.label, locale) : String(optionValue);
+    option.textContent = isLocalizedText(candidate.label) ? getLocalizedText(candidate.label, locale, defaultLocale) : String(optionValue);
     target.append(option);
   }
 }
 
-function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string): void {
+function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string, defaultLocale = "en"): void {
   setRuntimeValue(target, "name", element.name);
   setRuntimeValue(target, "required", element.required);
   setRuntimeValue(target, "disabled", element.disabled);
   setRuntimeValue(target, "initialValue", element.initialValue);
-  setRuntimeValue(target, "label", element.label ? getLocalizedText(element.label, locale) : undefined);
-  setRuntimeValue(target, "placeholder", element.placeholder ? getLocalizedText(element.placeholder, locale) : undefined);
+  setRuntimeValue(target, "label", element.label ? getLocalizedText(element.label, locale, defaultLocale) : undefined);
+  setRuntimeValue(target, "placeholder", element.placeholder ? getLocalizedText(element.placeholder, locale, defaultLocale) : undefined);
   for (const [key, value] of Object.entries(element.props)) {
     if (key === "options") {
-      renderSelectOptions(target, value, locale);
+      renderSelectOptions(target, value, locale, defaultLocale);
     } else if (key === "content") {
-      target.textContent = String(resolveRuntimeValue(value, locale));
+      target.textContent = String(resolveRuntimeValue(value, locale, defaultLocale));
+    } else if (element.type === "jb-number-input" && (key === "showThousandSeparator" || key === "thousandSeparator")) {
+      setNumberSeparatorRuntimeValue(target, key, resolveRuntimeValue(value, locale, defaultLocale));
     } else {
-      setRuntimeValue(target, key, resolveRuntimeValue(value, locale));
+      setRuntimeValue(target, key, resolveRuntimeValue(value, locale, defaultLocale));
     }
   }
   if (target.validation) {
-    target.validation.list = element.validation.map(rule => compileValidationRule(rule, locale));
+    target.validation.list = element.validation.map(rule => compileValidationRule(rule, locale, defaultLocale));
   }
 }
 

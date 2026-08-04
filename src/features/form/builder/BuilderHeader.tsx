@@ -16,6 +16,9 @@ interface BuilderHeaderProps {
   setLocale: Dispatch<SetStateAction<FormAppLocale>>;
   onOpenSettings: () => void;
   onNavigate: (target: BuilderNavigationTarget) => void;
+  onImport: () => void;
+  onUndo: () => boolean;
+  onRedo: () => boolean;
   onExport: () => void;
 }
 
@@ -25,7 +28,7 @@ interface BuilderHeaderProps {
  * The component observes the store directly so save-state changes update only
  * the header and the builder sections that actually consume those values.
  */
-export const BuilderHeader = observer(function BuilderHeader({ locale, messages, setLocale, onOpenSettings, onNavigate, onExport }: BuilderHeaderProps) {
+export const BuilderHeader = observer(function BuilderHeader({ locale, messages, setLocale, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   const store = useBuilderStore();
 
   return (
@@ -74,11 +77,29 @@ export const BuilderHeader = observer(function BuilderHeader({ locale, messages,
           <JBOption value="en">EN</JBOption>
           <JBOption value="fa">FA</JBOption>
         </JBSelect>
+        <JBSelect<string>
+          name="contentLocale"
+          aria-label={messages.contentLocale}
+          size="sm"
+          value={store.editingLocale}
+          onChange={event => store.setEditingLocale(event.target.value)}
+        >
+          {Object.keys(store.document.localization.locales).map(locale => <JBOption key={locale} value={locale}>{locale}</JBOption>)}
+        </JBSelect>
         <JBButton variant="ghost" size="sm" onClick={() => onNavigate("designer")}>
           {messages.designer}
         </JBButton>
+        <JBButton variant="ghost" size="sm" disabled={!store.canUndo} onClick={onUndo}>
+          {messages.undo}
+        </JBButton>
+        <JBButton variant="ghost" size="sm" disabled={!store.canRedo} onClick={onRedo}>
+          {messages.redo}
+        </JBButton>
         <JBButton variant="outline" size="sm" onClick={() => onNavigate("preview")}>
           {messages.preview}
+        </JBButton>
+        <JBButton variant="ghost" size="sm" onClick={onImport}>
+          {messages.importJson}
         </JBButton>
         <JBButton variant="ghost" size="sm" onClick={onExport}>
           {messages.exportJson}

@@ -10,6 +10,7 @@ import { CATALOG_DRAG_TYPE } from "./builder-drag";
 import 'jb-icons/search'
 interface ComponentCatalogProps {
   messages: FormMessages;
+  onElementAdded?: (elementId: string) => void;
 }
 
 interface CatalogRowProps {
@@ -42,7 +43,7 @@ const CatalogRow = memo(function CatalogRow({ entry, addLabel, onAdd }: CatalogR
   );
 });
 
-export function ComponentCatalog({ messages }: ComponentCatalogProps) {
+export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogProps) {
   const store = useBuilderStore();
   const [query, setQuery] = useState("");
   const addElement = useCallback(
@@ -50,11 +51,12 @@ export function ComponentCatalog({ messages }: ComponentCatalogProps) {
       const elementId = store.addElement(entry);
       const position = store.getElementPosition(elementId) + 1;
       store.announce(`${entry.displayName} ${messages.addedAnnouncement} ${position} ${messages.of} ${store.document.elements.length}`);
+      onElementAdded?.(elementId);
       requestAnimationFrame(() => {
         document.getElementById(`element-card-${elementId}`)?.scrollIntoView({ block: "nearest" });
       });
     },
-    [messages, store],
+    [messages, onElementAdded, store],
   );
 
   const filteredGroups = useMemo(() => {

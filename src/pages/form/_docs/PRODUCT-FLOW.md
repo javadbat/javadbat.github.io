@@ -20,7 +20,7 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 - When a slug is present, the page loads that named form by default.
 - When no slug is present, the page loads the current working draft.
 - Builder contains links to Designer and Preview for the current form.
-- Designer is an empty destination in Phase 1 and is implemented in Phase 2.
+- Designer is an empty destination in Phase 1 and is implemented in Phase 3.
 - Builder has no embedded Preview mode.
 - Preview is a separate responsive page.
 - Preview loads its form JSON from IndexedDB and passes it to `<jb-form-builder>`.
@@ -217,16 +217,18 @@ To keep the 100-element editing baseline responsive, the full JB action toolbar 
 
 ### Selection and configuration
 
-- Pointer click, `Enter`, or `Space` selects a focused card.
+- Pointer tap/click, `Enter`, or `Space` selects a focused card.
 - `ArrowUp` and `ArrowDown` move card focus.
 - Selection does not automatically move focus into configuration.
-- A visible Configure action focuses the first configuration control.
+- On mobile, Add selects the new element and returns from Components to Form canvas.
+- A visible Configure action opens the mobile Properties panel when needed and then focuses the first configuration control.
 - The configuration panel exposes only supported JB properties.
 - Invalid configuration is explained inline and summarized before Preview or export navigation.
 
 ### Reordering
 
 - Pointer users drag by the handle and see an insertion indicator.
+- Coarse-pointer users do not receive the drag handle; they reorder through the selected card's explicit Move up and Move down controls.
 - `Escape` cancels active dragging.
 - Keyboard users have Move up and Move down buttons.
 - `Alt+ArrowUp` and `Alt+ArrowDown` are equivalent shortcuts while a card owns focus.
@@ -245,7 +247,7 @@ Duplicate inserts immediately after the source:
 
 ### Remove
 
-Phase 1 requires confirmation for every removal because undo is deferred to Phase 2.
+Removal keeps an explicit confirmation step. A confirmed removal can be restored with Undo.
 
 After confirmation:
 
@@ -276,7 +278,7 @@ Designer is a separate destination:
 - Before navigation, Builder requires the changed document to validate and save successfully.
 - Phase 1 Designer shows an intentional empty/not-yet-available page with:
   - resolved form identity;
-  - a clear Phase 2 message;
+  - a clear Phase 3 message;
   - Back to Builder;
   - Open Preview.
 - Designer does not alter form JSON in Phase 1.
@@ -320,18 +322,21 @@ The application-local test `<jb-form-builder>`:
 - never writes runtime response values back into the form definition;
 - does not own IndexedDB lookup or route resolution.
 
-This local implementation is explicitly approved for testing. It must be converted into and consumed from a published JB Design System package before Phase 1 production acceptance.
+This application renderer remains in use through Phase 2 implementation. It will be converted into and consumed from a published JB Design System package only at the owner-approved final delivery step.
 
 The Preview page owns IndexedDB and supplies JSON to the renderer.
 
 ### Responsive behavior
 
 - Preview supports narrow mobile through wide desktop viewports in Phase 1.
+- Phase 2 Builder editing uses a single visible workspace panel below `64rem`, with persistent Components, Form canvas, and Properties navigation. The form canvas is the initial mobile panel.
+- Mobile header actions remain in document order and scroll horizontally when they do not fit; no action is removed from the narrow layout.
 - The generated single-column form uses available inline size without horizontal page scrolling.
 - Controls remain usable at 200% zoom.
 - Preview applies the loaded form locale/direction to the client-side page and renderer in Phase 1.
 - Preview navigation and recovery controls remain accessible on small screens.
-- Touch interaction is supported through the underlying JB form controls; touch Builder editing remains Phase 2.
+- Touch Builder selection uses the card surface, Add and Configure advance to the relevant mobile panel, and ordering uses explicit Move controls. HTML drag-and-drop remains a fine-pointer enhancement.
+- Primary coarse-pointer actions use a minimum `2.75rem` (`44px` at the default root size) target.
 - Layout values use `rem`, logical properties, and JB design tokens.
 
 ### Runtime values
@@ -425,7 +430,7 @@ Deleting named forms remains deferred to Phase 2.
 - Use `rem` for authored spacing, sizing, typography, breakpoints, and layout dimensions.
 - Use CSS logical properties for direction-aware layout.
 - Consume JB design tokens and styling hooks rather than copying component CSS.
-- Track JB Shadow DOM squircle support through DSR-007; do not pierce or duplicate component internals in the application.
+- Style exposed JB control parts with `::part` selectors when a component surface needs the app's squircle treatment; do not add a shared corner-shape variable or pierce private Shadow DOM.
 
 ### State management
 
@@ -509,6 +514,7 @@ Browser-reserved shortcuts are not overridden.
 - Preview preserves the underlying JB controls' keyboard and validation behavior.
 - Builder LTR/RTL visual order and DOM focus order are tested together.
 - Responsive Preview is tested with keyboard, touch, screen reader semantics, zoom, and both directions.
+- Mobile Builder verification covers 320px, 375px, and 768px live layouts, the shared 412px breakpoint behavior, panel focus transitions, 44px touch targets, saved-draft restoration, import boundaries, and export presentation.
 
 ## JB Design System usage
 
@@ -559,7 +565,7 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 
 1. Activate Designer for the current form.
 2. Resolve the same form identity.
-3. Show the Phase 2 placeholder.
+3. Show the Phase 3 placeholder.
 4. Return to the correct Builder route or open Preview.
 
 ### Persian/RTL form
@@ -588,4 +594,4 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 - Preview begins from configured initial values and keeps response values session-only.
 - Every element name is non-empty and valid; repeated names produce intentional array values.
 - Changed linked forms require explicit Save before Designer or Preview navigation.
-- A local `<jb-form-builder>` is approved for tests; publication is required before Phase 1 production acceptance.
+- The application `<jb-form-builder>` renderer is used through Phase 2; publication remains the owner-approved final delivery step.

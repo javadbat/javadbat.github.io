@@ -3,9 +3,6 @@ import styles from "./common.module.css";
 export default function ProductContent() {
   return (
     <div className={styles.skillContent}>
-      <div slot="header">
-        <h2 className={styles.skillTitle}>✦ Product Awareness & Team Collaboration</h2>
-      </div>
       <p className={`${styles.skillParagraph}`}>
         When I work on a new feature, I like to look beyond the task itself. Before thinking only about the code, I try to understand why we are building it, who is going to use
         it, and what kind of problem it should solve.

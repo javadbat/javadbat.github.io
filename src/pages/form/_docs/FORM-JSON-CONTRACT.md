@@ -69,7 +69,7 @@ The form document is the portable source of truth shared by Builder, IndexedDB r
 | `metadata` | Yes | Localized display metadata and portable timestamps. |
 | `localization` | Yes | Default locale and supported locale/direction declarations. |
 | `elements` | Yes | Ordered form-element array. Array order is form order. |
-| `theme` | Yes | Phase 1 writes `null`; the key reserves the Theme Designer boundary. |
+| `theme` | Yes | Phase 1 writes `null`; the key reserves the Phase 2 Theme Builder boundary and later Phase 3 Designer work. |
 
 Top-level unknown fields are rejected in version 1.
 
@@ -154,9 +154,8 @@ Rules:
 - LTR is the default direction.
 - Every translation key must exist in `localization.locales`.
 - `defaultLocale` must exist in `localization.locales`.
-- Phase 1 Builder edits only the default-locale value.
-- Phase 1 preserves other locale entries without editing them.
-- Phase 2 adds locale management, fallback configuration, and multilingual authoring.
+- Phase 2 Builder editing selects any declared locale, preserves other locale entries, and writes localized values under the active content locale.
+- The Builder supports locale management, explicit direction configuration, and fallback resolution without changing stable form or element identities.
 - `<jb-form-builder>` uses `jb-core/i18n` and the selected/default locale to resolve text.
 
 ### Localized text
@@ -417,7 +416,7 @@ Phase 1 exports:
 }
 ```
 
-`null` means use the default JB theme. Phase 2 promotes `theme` to a versioned object and increments the form document schema version. No Phase 1 element property is reinterpreted as theme data.
+`null` means use the default JB theme. Phase 2 promotes `theme` to the versioned object defined in `THEME-SCHEMA.md` and increments the form document schema version. No Phase 1 element property is reinterpreted as theme data.
 
 ## Portable document versus IndexedDB record
 

@@ -3,10 +3,7 @@ import styles from "./common.module.css";
 export default function UiContent() {
   return (
     <div className={styles.skillContent}>
-      <div slot="header">
-        <h2 className={styles.skillTitle}>✦ Design-Minded Front-End Developer</h2>
-      </div>
-      <div slot="content">
+      <div>
         <p className={styles.skillParagraph}>
           I’m mainly a front-end developer, but UI/UX design has always been a natural part of my journey. While building digital products, I’ve often found myself not only coding
           interfaces, but also shaping how they look, feel, and work for users.

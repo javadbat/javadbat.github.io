@@ -41,6 +41,8 @@
 }
 
 .control {
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
   border: 0.0625rem solid var(--code-viewer-line);
   border-radius: 0.65rem;
   color: var(--code-viewer-muted);

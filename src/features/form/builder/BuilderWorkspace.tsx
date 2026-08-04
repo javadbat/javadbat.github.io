@@ -7,6 +7,7 @@ import { FormCanvas } from "./FormCanvas";
 import styles from "./BuilderApp.module.css";
 
 type CompactPanel = "catalog" | "properties";
+type MobilePanel = "catalog" | "canvas" | "properties";
 
 interface BuilderWorkspaceProps {
   messages: FormMessages;
@@ -18,6 +19,7 @@ interface BuilderWorkspaceProps {
  */
 export const BuilderWorkspace = memo(function BuilderWorkspace({ messages }: BuilderWorkspaceProps) {
   const [compactPanel, setCompactPanel] = useState<CompactPanel>("catalog");
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("canvas");
 
   return (
     <div className={styles.builderShell}>
@@ -29,9 +31,20 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages }: Bui
           {messages.properties}
         </JBButton>
       </nav>
-      <div className={styles.workspace} data-side-panel={compactPanel}>
-        <ComponentCatalog messages={messages} />
-        <FormCanvas messages={messages} />
+      <nav className={styles.mobileTabs} aria-label="Mobile workspace panels">
+        <JBButton size="sm" variant={mobilePanel === "catalog" ? "solid" : "ghost"} aria-pressed={mobilePanel === "catalog" ? "true" : "false"} onClick={() => setMobilePanel("catalog")}>
+          {messages.componentCatalog}
+        </JBButton>
+        <JBButton size="sm" variant={mobilePanel === "canvas" ? "solid" : "ghost"} aria-pressed={mobilePanel === "canvas" ? "true" : "false"} onClick={() => setMobilePanel("canvas")}>
+          {messages.formCanvas}
+        </JBButton>
+        <JBButton size="sm" variant={mobilePanel === "properties" ? "solid" : "ghost"} aria-pressed={mobilePanel === "properties" ? "true" : "false"} onClick={() => setMobilePanel("properties")}>
+          {messages.properties}
+        </JBButton>
+      </nav>
+      <div className={styles.workspace} data-side-panel={compactPanel} data-mobile-panel={mobilePanel}>
+        <ComponentCatalog messages={messages} onElementAdded={() => setMobilePanel("canvas")} />
+        <FormCanvas messages={messages} onConfigureElement={() => setMobilePanel("properties")} />
         <ConfigurationPanel messages={messages} />
       </div>
     </div>

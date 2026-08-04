@@ -1,6 +1,6 @@
 # JB Form — Route-Family Project Description
 
-Status: Approved for Phase 1
+Status: Phase 1 accepted; Phase 2 in progress
 Route namespace: `/form`  
 Design system: [JB Design System](https://javadbat.github.io/design-system/?path=/docs/getting-started-introduction--docs)
 
@@ -11,13 +11,14 @@ JB Form is a local-first route family for building, designing, and previewing fo
 The route family contains:
 
 - **Builder** — create and configure form structure.
-- **Designer** — an empty Phase 1 destination that becomes the Theme Designer in Phase 2.
+- **Designer** — an empty Phase 1 destination that becomes the Theme Designer in Phase 3.
 - **Preview** — load stored form JSON and render a responsive runtime form.
 
 The project has two gated phases:
 
 1. **Form Builder and Preview** — build/configure forms, persist them in IndexedDB, export JSON, and render them on the responsive Preview route.
-2. **Theme Designer and workflow enhancements** — implement Designer, multilingual form authoring, JSON import, undo/redo, and responsive/touch Builder editing. Preview is already responsive in Phase 1.
+2. **Theme Builder** — define the theme contract, theme data, token mapping, component styling hooks, and theme operations. Preview is already responsive in Phase 1.
+3. **Designer** — implement the Theme Designer and its Designer workflow after the Theme Builder phase.
 
 ## Route family
 
@@ -70,7 +71,7 @@ The slug is optional. A slug route loads that named form from IndexedDB by defau
 5. Add elements with generated names.
 6. Configure, reorder, duplicate, or remove elements.
 7. Explicitly save the current draft or linked named form.
-8. Open Designer for the same form and see the Phase 2 placeholder.
+8. Open Designer for the same form and see the Phase 3 placeholder.
 9. Open Preview for the same form.
 10. Preview reloads JSON from IndexedDB and passes it to `<jb-form-builder>`.
 11. Interact with the responsive rendered form.
@@ -121,7 +122,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Builder contains a Designer button for the current form.
 - Designer is a separate route and independently resolves JSON/form identity from IndexedDB.
 - Phase 1 Designer is an intentional empty placeholder.
-- Designer does not mutate JSON until Phase 2.
+- Designer does not mutate JSON until its Phase 3 implementation.
 
 ### Preview
 
@@ -132,9 +133,10 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - `<jb-form-builder>` renders the ordered JB form controls, values, locale, direction, and declarative validation.
 - Preview response values are runtime-only and are never written into the form definition.
 - Preview is responsive from narrow mobile through wide desktop viewports.
+- Phase 2 Builder editing targets `320px`–`1023px` CSS widths, with 320px, 375px, 412px, and 768px representative touch baselines; the desktop editing breakpoint remains `1024px`.
 - Form submission validates locally and does not call a backend.
 - The first implementation of `<jb-form-builder>` is application-local for testing.
-- The renderer must be published as a JB Design System package and replace the local test implementation before Phase 1 production acceptance.
+- The renderer is application-local during implementation and verification; publishing and integrating the JB Design System package is the final delivery step.
 
 ### Local persistence
 
@@ -173,7 +175,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Do not use CSS-in-JS or runtime-generated styling.
 - Define application color tokens in OKLCH.
 - Use `corner-shape: squircle` on app-owned rounded surfaces while retaining `border-radius` fallback geometry.
-- Keep DSR-007 open until JB Shadow DOM controls expose the same corner-shape standard.
+- Style JB controls through their documented `::part` selectors when component-owned geometry needs the app's corner shape; do not introduce a shared corner-shape variable or patch private Shadow DOM.
 - Use `rem` for authored sizes, spacing, typography, and breakpoints.
 - Use CSS logical properties for LTR/RTL.
 - Consume JB theme tokens and component styling hooks.
@@ -216,7 +218,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - **Persistence adapter:** IndexedDB initialization, indexes, migrations, and recovery.
 - **Export adapter:** validation and JSON download.
 - **`<jb-form-builder>`:** JSON-to-runtime-form renderer; no route or IndexedDB responsibility.
-- **Local renderer exception:** approved for test work only and replaced by the published package before Phase 1 acceptance.
+- **Renderer delivery:** the application renderer remains in use through Phase 2; the published package replaces it at the owner-approved final delivery step.
 - **Preview state:** runtime response values and validation display state.
 - **i18n adapter:** `jb-core/i18n` configuration for UI and form runtime.
 - **Theme contract:** reserved Phase 2 boundary.
@@ -225,7 +227,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 
 Phase 1 completes when Builder supports the approved inventory, drafts and named forms persist reliably, Designer placeholder navigation preserves form identity, responsive Preview independently renders stored JSON through `<jb-form-builder>`, export is validated, and acceptance tests pass.
 
-Phase 2 implements Designer, themes, multilingual authoring, JSON import, undo/redo, and responsive/touch Builder editing without changing existing form/element identity or route meaning.
+Phase 2 implements the Theme Builder contract and theme operations without changing existing form/element identity or route meaning. Phase 3 implements Designer.
 
 ## Confirmed decisions
 
@@ -244,16 +246,16 @@ Phase 2 implements Designer, themes, multilingual authoring, JSON import, undo/r
 - Authored styling uses `rem`.
 - Catalog and element lists use proper icons.
 - Local component state uses React; shared Builder state uses MobX.
-- A local `<jb-form-builder>` may be created for testing, but the final renderer is a published JB Design System package.
+- A local `<jb-form-builder>` is used during implementation; the final delivery publishes and integrates the JB Design System package.
 - Changed linked forms must be explicitly saved before Designer or Preview navigation.
 - The interaction defaults in `PRODUCT-FLOW.md` are approved.
 - Current drafts and named forms persist only through explicit Save or Save As.
-- Phase 2 includes Designer implementation, multilingual authoring, import, undo/redo, and responsive/touch Builder editing.
+- Phase 3 includes Designer implementation. Other scheduled workflow enhancements remain independently sequenced after their contracts are approved.
 
 ## Open decisions
 
-No blocking product or architecture decisions remain. Component upgrade verification and renderer publication remain tracked implementation dependencies rather than undecided product behavior.
+No blocking product or architecture decisions remain. DSR-001 through DSR-004 are resolved, DSR-006 is closed for the client-only Phase 1 route model, and renderer publication is deferred by owner until the final delivery step.
 
 ## Documentation rule
 
-Durable product decisions belong here. Form serialization decisions belong in `FORM-JSON-CONTRACT.md`; technical decisions belong in `TECHNICAL-FOUNDATION.md`; interaction detail belongs in `PRODUCT-FLOW.md`; execution status belongs in `PLAN.md`.
+Durable product decisions belong here. Form serialization decisions belong in `FORM-JSON-CONTRACT.md`; technical decisions belong in `TECHNICAL-FOUNDATION.md`; interaction detail belongs in `PRODUCT-FLOW.md`; Phase 2 theme surfaces belong in `THEME-INVENTORY.md` and `THEME-BEHAVIOR.md`; execution status belongs in `PLAN.md`.

@@ -3,9 +3,6 @@ import styles from "./common.module.css";
 function BackendSkillItems() {
   return (
     <div className={styles.skillContent}>
-      <div slot="header">
-        <h2 className={styles.skillTitle}>✦ Backend Foundation & Full-Stack Awareness</h2>
-      </div>
       <p className={`${styles.skillParagraph}`}>
         Before becoming fully focused on front-end development, I worked for several years with <b>C#/.NET and SQL Server</b>. That experience gave me a solid understanding of
         backend logic, database structure, APIs, and how software works behind the interface.

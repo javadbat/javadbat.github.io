@@ -45,12 +45,12 @@ function isLocalizedText(value: JSONValue | undefined): value is JSONValue & {
   );
 }
 
-function localizedPropertyValue(value: JSONValue | undefined, locale: string): string {
+function localizedPropertyValue(value: JSONValue | undefined, locale: string, defaultLocale: string): string {
   if (!isLocalizedText(value)) {
     return typeof value === "string" ? value : "";
   }
 
-  const translated = value.translations[locale] ?? value.translations.en ?? Object.values(value.translations)[0];
+  const translated = value.translations[locale] ?? value.translations[defaultLocale] ?? value.translations.en ?? Object.values(value.translations)[0];
   return typeof translated === "string" ? translated : "";
 }
 
@@ -89,11 +89,12 @@ function asSelectOptions(value: JSONValue | undefined): PortableSelectOption[] {
 
 interface SelectOptionsEditorProps {
   locale: string;
+  defaultLocale: string;
   messages: FormMessages;
   label: string;
 }
 
-const SelectOptionsEditor = observer(function SelectOptionsEditor({ locale, messages, label }: SelectOptionsEditorProps) {
+const SelectOptionsEditor = observer(function SelectOptionsEditor({ locale, defaultLocale, messages, label }: SelectOptionsEditorProps) {
   const store = useBuilderStore();
   const options = asSelectOptions(store.selectedElement?.props.options);
 
@@ -151,7 +152,7 @@ const SelectOptionsEditor = observer(function SelectOptionsEditor({ locale, mess
           <JBInput
             name={`optionLabel-${option.id}`}
             label={messages.optionLabel}
-            value={getLocalizedText(option.label, locale)}
+            value={getLocalizedText(option.label, locale, defaultLocale)}
             onInput={event => updateOptionLabel(index, inputValue(event as unknown as Event))}
           />
           <JBInput
@@ -182,10 +183,11 @@ const SelectOptionsEditor = observer(function SelectOptionsEditor({ locale, mess
 interface PropertyFieldProps {
   definition: FormElementPropertyDefinition;
   locale: string;
+  defaultLocale: string;
   messages: FormMessages;
 }
 
-const PropertyField = observer(function PropertyField({ definition, locale, messages }: PropertyFieldProps) {
+const PropertyField = observer(function PropertyField({ definition, locale, defaultLocale, messages }: PropertyFieldProps) {
   const store = useBuilderStore();
   const element = store.selectedElement;
   if (!element) {
@@ -196,7 +198,7 @@ const PropertyField = observer(function PropertyField({ definition, locale, mess
   const label = propertyLabel(definition.label, locale);
 
   if (definition.control === "options") {
-    return <SelectOptionsEditor locale={locale} messages={messages} label={label} />;
+      return <SelectOptionsEditor locale={locale} defaultLocale={defaultLocale} messages={messages} label={label} />;
   }
 
   if (definition.control === "boolean") {
@@ -229,7 +231,7 @@ const PropertyField = observer(function PropertyField({ definition, locale, mess
         ? value.filter(item => typeof item === "string").join(", ")
         : ""
       : definition.localized
-        ? localizedPropertyValue(value, locale)
+        ? localizedPropertyValue(value, locale, defaultLocale)
         : typeof value === "string" || typeof value === "number"
           ? String(value)
           : "";
@@ -270,7 +272,8 @@ const PropertyField = observer(function PropertyField({ definition, locale, mess
 export const ConfigurationPanel = observer(function ConfigurationPanel({ messages }: ConfigurationPanelProps) {
   const store = useBuilderStore();
   const element = store.selectedElement;
-  const locale = store.document.localization.defaultLocale;
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const entry = element ? registryByType.get(element.type) : undefined;
   const nameError = element ? store.getElementNameError(element.id) : null;
 
@@ -323,7 +326,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
               <JBInput
                 name="elementLabel"
                 label={messages.label}
-                value={getLocalizedText(element.label, locale)}
+                value={getLocalizedText(element.label, locale, defaultLocale)}
                 onInput={event => store.updateSelectedText("label", inputValue(event as unknown as Event), locale)}
               />
             ) : null}
@@ -331,7 +334,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
               <JBInput
                 name="elementPlaceholder"
                 label={messages.placeholder}
-                value={getLocalizedText(element.placeholder, locale)}
+                value={getLocalizedText(element.placeholder, locale, defaultLocale)}
                 onInput={event => store.updateSelectedText("placeholder", inputValue(event as unknown as Event), locale)}
               />
             ) : null}
@@ -399,7 +402,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           {entry.propertyDefinitions.length > 0 ? (
             <CollapsibleConfigurationSection title={messages.componentSettings}>
               {entry.propertyDefinitions.map(definition => (
-                <PropertyField key={definition.key} definition={definition} locale={locale} messages={messages} />
+                <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
               ))}
             </CollapsibleConfigurationSection>
           ) : null}

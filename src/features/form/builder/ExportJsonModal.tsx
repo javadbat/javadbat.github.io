@@ -22,28 +22,20 @@ export function ExportJsonModal({ document, messages, onClose }: ExportJsonModal
 
   return (
     <ClientJBModal isOpen label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
-      <div className={styles.exportModalContent}>
-        <div className={styles.exportModalHeading}>
-          <div>
-            <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
-            <h2>{messages.exportJson}</h2>
-          </div>
-          {exportResult.valid ? <code className={styles.exportFileName}>{exportResult.fileName}</code> : null}
+      <div slot="header" className={styles.exportModalHeading}>
+        <div>
+          <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
+          <h2>{messages.exportJson}</h2>
         </div>
+        {exportResult.valid ? <code className={styles.exportFileName}>{exportResult.fileName}</code> : null}
+      </div>
 
+      <div slot="content" className={styles.exportModalContent}>
         {exportResult.valid ? (
           <>
             <p className={styles.modalDescription}>{messages.exportDescription}</p>
             <div className={styles.exportCodeViewer}>
               <CodeViewer code={exportResult.json} language="json" ariaLabel={messages.exportCodeLabel} copyLabel={messages.copyCode} copiedLabel={messages.copiedCode} />
-            </div>
-            <div className={styles.modalActions}>
-              <JBButton variant="ghost" onClick={onClose}>
-                {messages.close}
-              </JBButton>
-              <JBButton color="primary" onClick={() => downloadFormExport(exportResult)}>
-                {messages.downloadJson}
-              </JBButton>
             </div>
           </>
         ) : (
@@ -59,12 +51,24 @@ export function ExportJsonModal({ document, messages, onClose }: ExportJsonModal
                 </li>
               ))}
             </ul>
-            <div className={styles.modalActions}>
-              <JBButton color="primary" onClick={onClose}>
-                {messages.close}
-              </JBButton>
-            </div>
           </>
+        )}
+      </div>
+
+      <div slot="footer" className={styles.modalActions}>
+        {exportResult.valid ? (
+          <>
+            <JBButton variant="ghost" onClick={onClose}>
+              {messages.close}
+            </JBButton>
+            <JBButton color="primary" onClick={() => downloadFormExport(exportResult)}>
+              {messages.downloadJson}
+            </JBButton>
+          </>
+        ) : (
+          <JBButton color="primary" onClick={onClose}>
+            {messages.close}
+          </JBButton>
         )}
       </div>
     </ClientJBModal>

@@ -18,7 +18,25 @@ The published component should retain this public behavior:
 - provide the `jb-form-builder/react` wrapper as a separate export;
 - expose typed renderer events and stable Shadow DOM parts.
 
-## 1. Make JB package imports safe outside a browser
+## Delivery split
+
+The design-system changes below have two delivery windows. The first is required for the current client-only form builder. The second is deliberately deferred until the application needs server-compatible module evaluation or simultaneous locale scopes.
+
+### Phase 1 — client-only requirements (do now)
+
+- Standardize idempotent, dependency-controlled custom-element registration (Phase 1 requirement 1 below).
+- Preserve portable declarative validation and complete `jb-time-input` form standards (Phase 1 requirements 5–6 below).
+
+These requirements are browser-facing and remain mandatory even though the route does not render on a server. The renderer package will be published as the final delivery step after implementation and verification are complete.
+
+### Deferred — SSR/platform compatibility (do later)
+
+- Make every JB package importable when browser globals are absent (Deferred SSR requirement 1 below).
+- Make `jb-core/i18n` constructible without a DOM, isolate observation from state, and support scoped locale providers (Deferred SSR requirement 2 below).
+
+The deferred work must preserve the existing browser auto-registration behavior and the portable form JSON contract. It is not a Phase 1 blocker, but it becomes required before this renderer is imported or evaluated in an SSR process.
+
+## Deferred SSR requirement 1 — Make JB package imports safe outside a browser
 
 ### Current limitation
 
@@ -80,7 +98,7 @@ await import("jb-core/i18n");
 
 All imports must resolve without throwing. A separate browser test must confirm that the normal package entry still defines its documented tag.
 
-## 2. Change `jb-core/i18n` initialization
+## Deferred SSR requirement 2 — Change `jb-core/i18n` initialization
 
 ### Current limitation
 
@@ -113,7 +131,7 @@ Scoped i18n becomes necessary when multilingual form support requires two simult
 - Two explicitly provided scoped instances do not change each other.
 - Observer cleanup is verified.
 
-## 3. Standardize dependency-controlled custom-element registration
+## Phase 1 requirement 1 — Standardize dependency-controlled custom-element registration
 
 `jb-form-builder` supports two modes:
 
@@ -139,7 +157,7 @@ For reliable package composition, every JB custom-element package should:
 
 `jb-select` must explicitly document that it also registers `jb-option`.
 
-## 4. Publish the renderer package
+## Renderer integration boundary — final package step
 
 Requested package/tag:
 
@@ -148,7 +166,7 @@ package: jb-form-builder
 tag:     jb-form-builder
 ```
 
-The published source should preserve the local concern boundaries:
+The final package should preserve the local concern boundaries:
 
 ```text
 jb-form-builder/
@@ -194,11 +212,11 @@ The exact conditions should include types and ESM files. The React entry must no
 - Already registered custom elements take precedence over automatic imports.
 - Package loads are memoized across renderer instances.
 
-## 5. Publish the shared document contract
+## Shared document contract
 
 The local renderer currently reuses the application's framework-independent document types, JSON Schema, registry adapters, and validation-rule compiler. Copying those files into a new repository would create contract drift.
 
-Before publishing, move the portable contract into a shared design-system module or an exported platform-neutral subpath:
+At the final package step, move the portable contract into a shared design-system module or an exported platform-neutral subpath:
 
 - document TypeScript types;
 - JSON Schema;
@@ -212,7 +230,7 @@ Builder, Preview renderer, import/export, and migrations must consume the same s
 
 The shared contract must not import React, MobX, IndexedDB, Astro, or browser-only JB components.
 
-## 6. Correct the `jb-form` type exposed by the renderer
+## `jb-form` type exposed by the renderer
 
 The renderer's `form` property is not an `HTMLFormElement`. It is the `JBFormWebComponent`-compatible runtime element and exposes:
 
@@ -225,7 +243,7 @@ The renderer's `form` property is not an `HTMLFormElement`. It is the `JBFormWeb
 
 Published typings should use the `jb-form` public type or a structurally compatible interface rather than claiming it is a native form.
 
-## 7. Retain declarative validation portability
+## Phase 1 requirement 5 — Retain declarative validation portability
 
 The renderer accepts no consumer-supplied validation functions. Portable JSON rules are compiled into trusted `jb-validation` entries only after the document passes schema, semantic, and adapter validation.
 
@@ -240,29 +258,29 @@ JB validation packages must continue supporting:
 
 No renderer path may use `eval`, `Function`, or HTML injection.
 
-## 8. Complete `jb-time-input` form-standard support
+## Phase 1 requirement 6 — Verify `jb-time-input` form-standard integration
 
-`jb-time-input@2.3.0` still needs `formDisabledCallback` behavior aligned with the other form-associated JB controls. A disabled native parent form or fieldset must update and restore the component's effective disabled state.
+`jb-time-input@2.4.0` provides the complete `JBFormInputStandards<string>` contract, including public `name` and `form` accessors and `formDisabledCallback`. A disabled native parent form or fieldset must update and restore the component's effective disabled state through the available component contract.
 
-This remains DSR-001 and a Phase 1 component-support blocker independent of the renderer package.
+DSR-001 is resolved at the design-system dependency level. The remaining task is to retain integration coverage in the renderer's acceptance suite; no application adapter workaround is required.
 
-## 9. Styling and distribution
+## Renderer styling contract
 
 Renderer styles are authored in a standalone CSS file and attached inside an open Shadow Root by the package build. Required rules:
 
 - use rem units and logical properties;
 - use OKLCH for renderer-owned color tokens;
-- use `corner-shape: squircle` with `border-radius` fallback;
+- use `corner-shape: squircle` with `border-radius` fallback on renderer-owned surfaces, and use documented `::part` selectors for JB control surfaces;
 - prevent horizontal overflow at narrow widths;
 - expose `form`, `form-container`, `element`, `loading`, `error-summary`, and `element-error` parts;
 - avoid relying on application Preview CSS;
-- publish all CSS assets needed by direct ESM/CDN consumption.
+- keep the CSS assets ready for the final package step.
 
-The package build must verify that its CSS strategy works for bundlers and direct browser ESM delivery without an application-specific loader.
+The final package build must verify that its CSS strategy works for bundlers and direct browser ESM delivery without an application-specific loader.
 
-## 10. Publication acceptance
+## Final package checklist
 
-Before replacing the local implementation:
+At the final delivery step, before replacing the application renderer:
 
 - render every support-matrix component from portable JSON;
 - verify automatic and manual dependency modes;

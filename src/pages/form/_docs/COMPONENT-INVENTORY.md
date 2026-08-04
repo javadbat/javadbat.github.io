@@ -1,6 +1,6 @@
 # JB Form — Form-Element Component Inventory
 
-Status: Initial input inventory complete; DSR-001, DSR-004, renderer publication DSR-005, and corner-shape standard DSR-007 remain open; DSR-006 is closed
+Status: Initial input inventory complete; DSR-001, DSR-002, DSR-003, DSR-004, and DSR-006 are closed
 Reviewed: 2026-07-29  
 Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`](https://github.com/javadbat/design-system/tree/8afc94a5cae5910c2dccab35c033d4d01150d27e)
 
@@ -11,7 +11,7 @@ Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`]
 - [Form Elements overview](https://github.com/javadbat/design-system/blob/835fddf109e39c33ee7aecd0af6e4a0b4832ebda/docs/form-element.mdx)
 - Each component's pinned source submodule, package manifest, React wrapper, README, stories, and current npm release.
 
-The baseline package versions matched npm on 2026-07-28. The newer `jb-time-input@2.3.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.1` releases were audited on 2026-07-29. The latest design-system revision advances the time and file input gitlinks, but its switch gitlink is unreachable; see DSR-004.
+The baseline package versions matched npm on 2026-07-28. The newer `jb-time-input@2.4.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.3` releases were audited through 2026-08-04. The `jb-switch` source reference has since been updated and is no longer a reproducibility blocker.
 
 ## Scope rule
 
@@ -58,12 +58,12 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | Financial | Payment Input | `jb-payment-input@3.5.0` | Card/SHABA string | Inherited from `jb-input` | Yes |
 | Identity | National ID Input | `jb-national-input@2.4.0` | National-code string | Inherited from `jb-input` | Yes |
 | Date/time | Date Input | `jb-date-input@6.3.0` | `string`, `Date`, or timestamp-facing configuration | Verified | Yes |
-| Date/time | Time Input | `jb-time-input@2.3.0` | Time string | Partial — DSR-001 | Yes |
+| Date/time | Time Input | `jb-time-input@2.4.0` | Time string | Verified | Yes |
 | Text | PIN Input | `jb-pin-input@1.14.0` | `string` | Verified | Yes |
 | Text | Textarea | `jb-textarea@3.13.1` | `string` | Verified | Yes |
 | Choice | Select | `jb-select@7.4.3` | Generic value or array in multiple mode | Verified | Yes |
 | Choice | Checkbox | `jb-checkbox@1.4.0` | `boolean` | Verified | Yes |
-| Choice | Switch | `jb-switch@1.7.1` | `boolean` | Verified; DSR-003 resolved | Yes |
+| Choice | Switch | `jb-switch@1.7.3` | `boolean` | Verified; DSR-003 resolved | Yes |
 | File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
 | File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
@@ -180,12 +180,10 @@ These constraints are inputs to the Form JSON Contract task. They do not authori
 
 Design-system requests found during inventory and technical-foundation review:
 
-- DSR-001 — partially resolved in `jb-time-input@2.3.0`; `formDisabledCallback` and its acceptance coverage remain open.
+- DSR-001 — resolved in `jb-time-input@2.4.0`; the complete form-associated contract, including `formDisabledCallback`, is available. Integration acceptance coverage remains part of the form-builder verification work.
 - DSR-002 — resolved in `jb-file-input@3.3.0`.
-- DSR-003 — resolved in `jb-switch@1.7.1`; the required rule now maps to `valueMissing`.
-- DSR-004 — repair the unreachable `jb-switch` gitlink in the latest design-system repository revision.
-- DSR-005 — publish `jb-form-builder`; a replaceable application-local renderer is approved for tests only.
+- DSR-003 — resolved in `jb-switch@1.7.3`; the required rule now maps to `valueMissing`.
+- DSR-004 — resolved after the `jb-switch` source reference was updated.
 - DSR-006 — closed for Phase 1; the application is client-only and uses one active `jb-core/i18n` locale per route page.
-- DSR-007 — open; add a core/component `corner-shape` token so JB Shadow DOM controls can match the app's squircle geometry.
 
 Full evidence, requested APIs, and acceptance criteria are in `DESIGN-SYSTEM-REQUESTS.md`.

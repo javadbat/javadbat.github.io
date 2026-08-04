@@ -3,8 +3,8 @@ import { formRouteHref, getCurrentFormRoute } from "../application/form-route";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
-import { JBFormBuilder } from "../renderer/jb-form-builder/react";
 import styles from "../shell/RouteShell.module.css";
+import { PreviewFormPanel } from "./PreviewFormPanel";
 
 export function PreviewApp() {
   const { locale, direction, messages } = useFormLocale("en");
@@ -48,9 +48,7 @@ export function PreviewApp() {
             <h1>{formName || messages.previewReadyTitle}</h1>
             <p>{messages.previewReadyDescription}</p>
           </header>
-          <section className={styles.rendererSurface} aria-label={formName || messages.previewReadyTitle}>
-            <JBFormBuilder formDocument={resolution.document} locale={resolution.document.localization.defaultLocale} autoImport />
-          </section>
+          <PreviewFormPanel document={resolution.document} accessibleName={formName || messages.previewReadyTitle} messages={messages} />
         </main>
       ) : (
         <main className={styles.placeholder}>

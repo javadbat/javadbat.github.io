@@ -93,12 +93,29 @@ export function localizedText(value: string, locale = "en"): LocalizedText {
   return { translations: { [locale]: value } };
 }
 
-export function getLocalizedText(value: LocalizedText | undefined, locale: string): string {
+const localeCodePattern = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/;
+
+export function canonicalizeLocaleCode(value: string): string | null {
+  const trimmed = value.trim();
+  if (!localeCodePattern.test(trimmed)) {
+    return null;
+  }
+  return trimmed
+    .split("-")
+    .map((part, index) => index === 0 ? part.toLowerCase() : part.length === 2 ? part.toUpperCase() : part.toLowerCase())
+    .join("-");
+}
+
+export function inferLocaleDirection(locale: string): LocaleDefinition["direction"] {
+  return new Set(["ar", "dv", "fa", "he", "ku", "ps", "ur", "yi"]).has(locale.split("-")[0].toLowerCase()) ? "rtl" : "ltr";
+}
+
+export function getLocalizedText(value: LocalizedText | undefined, locale: string, defaultLocale = "en"): string {
   if (!value) {
     return "";
   }
 
-  return value.translations[locale] ?? value.translations.en ?? Object.values(value.translations)[0] ?? "";
+  return value.translations[locale] ?? value.translations[defaultLocale] ?? value.translations.en ?? Object.values(value.translations)[0] ?? "";
 }
 
 export function createEmptyFormDocument(): JBFormDocumentV1 {

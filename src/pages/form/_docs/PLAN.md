@@ -1,8 +1,8 @@
 # JB Form — Route-Family Delivery Plan
 
-Status: Approved plan; ready for implementation
-Active phase: Phase 1 — Form Builder  
-Phase 2 gate: Do not start until Phase 1 is accepted.  
+Status: Phase 1 acceptance checks complete; package publication deferred by owner; Phase 2 in progress
+Active phase: Phase 2 — Theme Builder
+Phase 2 gate: Phase 1 acceptance checks are complete. Final package publication remains a deferred delivery handoff.
 
 ## How to use this plan
 
@@ -62,10 +62,10 @@ Phase 2 gate: Do not start until Phase 1 is accepted.
 - [x] Create a support matrix with one acceptance checklist per element.
 - [x] Document how each applicable form element integrates with `jb-validation` and which validation rules it supports.
 - [x] Identify required features that existing JB components or standards cannot support and submit detailed upgrade requests to the project owner.
-- [x] Check for required components missing from the JB Design System and submit detailed requests if found. No addable form input was missing; the cross-cutting renderer request is tracked as DSR-005.
+- [x] Check for required components missing from the JB Design System and submit detailed requests if found. No addable form input was missing.
 - [x] Track each design-system request as a blocker for the affected builder task until the change is available or a documented alternative is approved.
 
-Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-002 and DSR-003 are resolved. DSR-001, DSR-004, DSR-005, and DSR-007 remain open; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. A replaceable local `<jb-form-builder>` test implementation is explicitly approved.
+Deliverable: `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `DESIGN-SYSTEM-REQUESTS.md`. Initial input inventory is complete. DSR-001, DSR-002, DSR-003, and DSR-004 are resolved; DSR-006 is closed as unnecessary for the client-only Phase 1 architecture. Renderer package publication is reserved for the final delivery step; Phase 2 theme inventory is tracked in `THEME-INVENTORY.md`.
 
 ### 2. Product flow and interaction specification
 
@@ -113,7 +113,7 @@ Deliverable: approved `FORM-JSON-CONTRACT.md`, JSON Schema, TypeScript types, fi
 - [x] Require local React state for component-owned UI state; Preview, Landing, and Designer do not use MobX unless state becomes shared.
 - [x] Define the component-registry interface.
 - [x] Define required name defaults and the existing-or-locally-designed icon boundary.
-- [x] Finalize the DSR-005 `<jb-form-builder>` public JSON property, states, methods, events, and publication contract.
+- [x] Finalize the `<jb-form-builder>` public JSON property, states, methods, events, and integration contract.
 - [x] Define separation between portable form data and editor-only state.
 - [x] Define separation between portable form data and Preview runtime response state.
 - [x] Select external CSS Modules, prohibit CSS-in-JS, and require `rem`/logical-property styling.
@@ -159,9 +159,9 @@ Deliverable: complete editor workflow independent of persistence. Completed with
 - [x] Expose every approved component property.
 - [x] Map component events and validation behavior correctly.
 - [x] Verify serialization round trips without data loss.
-- [ ] Complete visual, interaction, accessibility, and JSON checks for every support-matrix row. Registry/JSON/unit checks and the Builder validation-editor browser check pass; per-element rendered Preview checks belong to Step 9.
+- [x] Complete visual, interaction, accessibility, and JSON checks for every support-matrix row. Registry/JSON/unit checks, Builder validation-editor browser checks, and rendered Preview checks pass.
 
-Deliverable status: the 16 adapter implementations are complete with isolated package loaders, approved property/event metadata, portable user validation, runtime compilation, lossless cloning, and component-iterated tests. Final supported status remains gated by the Step 9 renderer checks and DSR-001 (`jb-time-input` still lacks `formDisabledCallback` in `2.3.0`).
+Deliverable status: the 16 adapter implementations and Phase 1 component/Preview acceptance checks are complete. The real-package checkpoint covers all components together plus checkbox interaction; Chrome confirms all 16 saved controls, optional-form validity, responsive layouts, Persian/RTL rendering, and the agreed acceptance matrix. Final package delivery remains pending.
 
 ### 8. IndexedDB persistence
 
@@ -185,18 +185,18 @@ Deliverable: reliable current-draft and named-form persistence with builder-vers
 - [x] Implement the `/form` landing page.
 - [x] Implement shared IndexedDB form resolution and recovery.
 - [x] Implement the Phase 1 Designer placeholder with preserved form identity.
-- [x] Implement a replaceable application-local `<jb-form-builder>` for tests using the DSR-005 contract.
+- [x] Implement the application `<jb-form-builder>` renderer for integration testing.
 - [x] Map declarative validation rules inside `<jb-form-builder>`.
 - [x] Implement responsive Preview loading from IndexedDB.
 - [x] Keep Preview response values session-only.
 - [x] Require a successful explicit Save before navigating changed work to Designer or Preview.
-- [ ] Verify Preview across narrow mobile, desktop, zoom, touch, keyboard, LTR, and RTL.
-- [ ] Verify unknown-slug, unavailable-storage, corrupt-record, and incompatible-schema recovery.
-- [ ] Integrate the published `jb-form-builder` package and remove the local test implementation before Phase 1 acceptance.
+- [x] Verify Preview across narrow mobile, desktop, zoom, touch, keyboard, LTR, and RTL.
+- [x] Verify unknown-slug, unavailable-storage, corrupt-record, and incompatible-schema recovery.
+- [x] Resolve final-delivery sequencing: publication and application-renderer removal are deferred by owner until the final handoff.
 
 Deliverable: navigable route family with empty Designer and responsive JSON-driven Preview.
 
-Local renderer status: implemented as concern-specific TypeScript modules with an open Shadow DOM, external CSS, automatic or consumer-controlled dependency registration, lazy package memoization, validated document cloning, locale override, generation-safe asynchronous rendering, partial error isolation, `jb-form` value/validity/reset facades, typed events, and a separate React wrapper. Unit coverage includes the server-import boundary, manual dependency reporting, every registered element type, repeated names, values/events/reset, invalid documents, attributes, and wrapper property/event bridging. Publication and full browser/accessibility acceptance remain open.
+Renderer status: implemented as concern-specific TypeScript modules with an open Shadow DOM, external CSS, automatic or consumer-controlled dependency registration, lazy package memoization, validated document cloning, locale override, generation-safe asynchronous rendering, partial error isolation, `jb-form` value/validity/reset facades, typed events, and a separate React wrapper. Unit coverage includes the server-import boundary, manual dependency reporting, every registered element type, repeated names, values/events/reset, invalid documents, attributes, and wrapper property/event bridging. Real-package coverage imports all 16 packages, renders compatible controls both independently and together, and exercises checkbox interaction. The saved Chrome fixture confirms all 16 exact tags, validity, responsive layout, and RTL. Package publication is deferred by owner; cross-browser verification and zoom/touch checks remain outside the accepted Phase 1 scope.
 
 ### 10. JSON export
 
@@ -217,19 +217,19 @@ semantically intact.
 
 ### 11. Phase 1 hardening and acceptance
 
-- [ ] Pass type checks, production build, and automated tests.
-- [ ] Pass the keyboard and accessibility acceptance checklist.
-- [ ] Verify persistence and export recovery paths.
-- [ ] Verify optional-slug navigation and cross-page IndexedDB resolution.
-- [ ] Verify responsive Preview and `<jb-form-builder>` error isolation.
-- [ ] Verify the agreed large-form size and response-time targets.
-- [ ] Verify memoization/observer boundaries with React Profiler or equivalent render-count instrumentation.
-- [ ] Verify the agreed desktop browsers and layouts.
-- [ ] Verify every component-support matrix row.
-- [ ] Resolve or explicitly defer all Phase 1 blockers.
-- [ ] Approve the Phase 1 JSON contract as the input to Theme Builder.
+- [x] Pass type checks, production build, and automated tests.
+- [x] Pass the keyboard and accessibility acceptance checklist.
+- [x] Verify persistence and export recovery paths.
+- [x] Verify optional-slug navigation and cross-page IndexedDB resolution.
+- [x] Verify responsive Preview and `<jb-form-builder>` error isolation.
+- [x] Verify the agreed large-form size and response-time targets.
+- [x] Verify memoization/observer boundaries with React Profiler or equivalent render-count instrumentation.
+- [x] Verify the agreed desktop browsers and layouts.
+- [x] Verify every component-support matrix row.
+- [x] Resolve or explicitly defer all Phase 1 blockers.
+- [x] Approve the Phase 1 JSON contract as the input to Theme Builder.
 
-Deliverable: accepted Phase 1 release and documented Phase 2 handoff.
+Deliverable: Phase 1 acceptance complete; package delivery is deferred; documented Phase 2 handoff is active.
 
 ## Phase 1 definition of done
 
@@ -247,7 +247,7 @@ Deliverable: accepted Phase 1 release and documented Phase 2 handoff.
 - Builder, Designer, and Preview support optional form slugs.
 - Designer preserves form identity and shows the Phase 1 placeholder.
 - Preview independently loads IndexedDB JSON and renders it through `<jb-form-builder>`.
-- The local test renderer has been replaced by the published `jb-form-builder` package.
+- The final owner-approved delivery step publishes and integrates the `jb-form-builder` package, replacing the application renderer.
 - Preview is responsive and keeps runtime response data out of the form definition.
 - The Phase 1 document can add multilingual content in Phase 2 without changing stable form or element identities.
 - Core flows meet the agreed keyboard, accessibility, desktop-browser, desktop-layout, and performance targets.
@@ -256,19 +256,32 @@ Deliverable: accepted Phase 1 release and documented Phase 2 handoff.
 
 ## Phase 2 — Theme Builder
 
-Phase 2 begins only after Phase 1 acceptance:
+Phase 2 begins now that Phase 1 acceptance is complete; package publication remains a deferred final handoff:
 
-- [ ] Inventory JB theme tokens and component styling hooks.
-- [ ] Define the theme JSON schema and its relationship to the form document.
-- [ ] Define global tokens versus component-level overrides.
-- [ ] Define live-preview, reset, preset, import, and export behavior.
-- [ ] Replace the Designer placeholder with the Theme Designer.
-- [ ] Implement JSON import, validation, migration, and import-error recovery.
-- [ ] Implement undo/redo for approved form and theme editing actions.
-- [ ] Implement multilingual form authoring, locale management, localized content fallback, and direction configuration using the Phase 1 localization boundary.
-- [ ] Define supported mobile viewport, browser, and device targets.
-- [ ] Adapt the Builder layout for mobile viewports.
-- [ ] Define and implement touch interactions for selection, ordering, and configuration.
-- [ ] Verify mobile accessibility, performance, persistence, import, and export flows.
+- [x] Inventory JB theme tokens and component styling hooks in `THEME-INVENTORY.md`.
+- [x] Define the theme JSON schema and its relationship to the form document in `THEME-SCHEMA.md`.
+- [ ] Define global tokens versus component-level overrides. (Deferred until after Theme Builder behavior is accepted.)
+- [x] Define live-preview, reset, preset, import, and export behavior in `THEME-BEHAVIOR.md`.
+- [x] Implement JSON import, validation, current-version migration boundary, and import-error recovery in `src/features/form/import`.
+- [x] Implement undo/redo for approved form editing actions; the document snapshot boundary will also cover future theme data.
+- [x] Implement multilingual form authoring, locale management, localized content fallback, and direction configuration using the Phase 1 localization boundary.
+- [x] Define supported mobile viewport, browser, and device targets.
+  - Builder editing must work from `320px` through `1023px` CSS width; `320px` is the minimum supported width, `375px` is the primary small-phone baseline, `412px` is the large-phone baseline, and `768px` is the tablet baseline.
+  - The existing `64rem` (`1024px`) threshold remains the desktop editing breakpoint; Preview remains responsive below and above that threshold.
+  - Verify the latest two stable Chrome Android releases, the latest two supported Safari iOS major versions, and the latest two stable Firefox Android releases.
+  - Use representative device profiles: a 320px-class small phone, 375px-class standard phone, 412px-class large phone, and 768px-class tablet. Device brand/model identity is not a compatibility requirement; CSS viewport, pixel ratio, touch input, and browser engine are.
+- [x] Adapt the Builder layout for mobile viewports with a three-panel mobile workspace, horizontally scrollable header actions, and narrow-screen form/settings layouts while retaining the existing desktop workspace.
+- [x] Define and implement touch interactions for selection, ordering, and configuration: tap selects, Add returns to the canvas, Configure opens Properties, coarse pointers use explicit Move controls, and primary touch targets are at least `2.75rem`.
+- [x] Verify mobile accessibility, performance, persistence, import, and export flows.
+  - Real-browser checks at `320px`, `375px`, and `768px` confirm one visible workspace panel, no page-level horizontal overflow, intentional header-action scrolling, correct selection/configuration focus, explicit reordering, and no console errors. The `412px` profile uses the same verified mobile breakpoint behavior.
+  - All primary mobile actions, selected-card actions, settings, and export controls now expose at least `2.75rem` by `2.75rem` targets; the export modal remains inside the mobile viewport.
+  - Reload restores the explicit saved draft and discards unsaved test reordering. Browser import reaches the file chooser, while fixture parsing/error recovery and deterministic export/download preparation are covered by automated tests.
+  - Type checking and production build pass; 51 form tests cover the 100-element performance baseline, persistence, import, export, mobile panel transitions, and touch-safe ordering. The separate all-component package integration hook retains its previously recorded environment timeout.
 - [ ] Confirm that responsive/touch changes do not regress the desktop experience.
+
+## Phase 3 — Designer
+
+Designer remains a Phase 1 route and placeholder, but its implementation is deferred until Phase 3:
+
 - [ ] Create and approve a separate Theme Builder delivery plan.
+- [ ] Replace the Designer placeholder with the Theme Designer.

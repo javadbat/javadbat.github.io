@@ -31,6 +31,12 @@ const formRendererAutoImports = [
   "jb-button",
 ];
 
+// The export dialog is lazy-loaded to keep its highlighter out of the normal
+// editing bundle. Include its dependencies here so the first Export JSON click
+// does not make Vite rebuild the optimization cache and invalidate the dialog's
+// in-flight module request.
+const formBuilderExportImports = ["@mantine/code-highlight", "@mantine/core", "shiki"];
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
@@ -40,7 +46,7 @@ export default defineConfig({
   },
   vite: {
     optimizeDeps: {
-      include: formRendererAutoImports,
+      include: [...formRendererAutoImports, ...formBuilderExportImports],
     },
   },
   site: "https://javadbat.github.io",

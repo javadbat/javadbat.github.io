@@ -1,13 +1,9 @@
 # JB Form — Form-Element Support Matrix
 
-Status: Inventory baseline; DSR-001, DSR-004, renderer publication DSR-005, and corner-shape standard DSR-007 remain open
+Status: Inventory baseline; all design-system dependency requests are resolved
 Reviewed source: JB Design System revision `8afc94a5cae5910c2dccab35c033d4d01150d27e`
 
-The matrix reflects direct audits of `jb-time-input@2.3.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.1` performed on 2026-07-29. DSR-004 separately blocks a reproducible recursive checkout because the latest design-system revision references an unreachable switch commit.
-
-DSR-005 is a cross-cutting Preview release gate: local renderer work may exercise this matrix, but Phase 1 acceptance requires the published `jb-form-builder` package.
-
-DSR-007 is a cross-cutting visual-consistency gate: app-owned surfaces already use progressive-enhancement squircles, while JB Shadow DOM controls need the design-system token upgrade.
+The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.3` performed through 2026-08-04. The `jb-switch` source reference has since been updated, so no design-system dependency request blocks the form-builder flow.
 
 ## Legend
 
@@ -29,17 +25,30 @@ DSR-007 is a cross-cutting visual-consistency gate: app-owned surfaces already u
 | `jb-payment-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-national-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-date-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-time-input` | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | DSR-001; Preview checks pending |
+| `jb-time-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-pin-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-textarea` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-select` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-checkbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-switch` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | DSR-004 reproducibility; Preview checks pending |
+| `jb-switch` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-file-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-image-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-button` | ✅ | ✅ | N/A | N/A | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 
-The Tests column records component-iterated registry, validation, serialization, runtime-application, and performance checks. Final visual and accessibility acceptance of each rendered component remains in Step 9 with the local/published `<jb-form-builder>` renderer.
+The Tests column records component-iterated registry, validation, serialization, runtime-application, and performance checks. Final visual and accessibility acceptance of each rendered component remains in Step 9 with the form renderer.
+
+### Preview integration checkpoint — 2026-08-03
+
+- The installed `jb-national-input@2.4.2` package now imports from a clean ESM boundary without the incomplete nested `jb-input` copy that blocked the previous run.
+- A real-package integration suite imports and registers all 16 catalog packages, then exercises renderer defaults, common-field mapping, validity, reset, and disabled behavior wherever the happy-dom environment implements the browser APIs used by the component.
+- `jb-date-input` and `jb-time-input` are package-registration checks in happy-dom and rendered-behavior checks in Chrome because their nested calendar/time-picker construction depends on browser parsing and upgrade behavior that happy-dom does not reproduce.
+- A reusable Chrome fixture now stores all 16 catalog controls in one named IndexedDB form. The independent Preview route reached `ready`, rendered the exact 16 tags and names in one `jb-form`, reported no renderer errors, and accepted the optional empty form.
+- The same fixture has no horizontal page overflow at narrow-mobile and desktop viewports. It also reloaded in Persian/RTL with `html`, body, and renderer direction aligned while retaining all 16 controls.
+- Keyboard traversal reaches every primary control without trapping focus.
+- The real-package suite now includes an all-components-in-one-form case and real checkbox pointer/Space interaction coverage in addition to per-component defaults, validity, reset, and disabled checks.
+- The number-input adapter now keeps `showThousandSeparator` and `thousandSeparator` as property-only assignments. The component maps both concepts to the same `thousand-separator` attribute, so reflecting the separator text previously enabled separators even when the boolean setting was false.
+
+These checks advance runtime integration confidence but do not complete the pending per-row visual, interaction, keyboard, accessibility, responsive, or cross-browser acceptance work.
 
 ## Non-addable dependencies
 

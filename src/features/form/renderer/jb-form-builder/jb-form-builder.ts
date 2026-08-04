@@ -1,5 +1,6 @@
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import type { FormIssue } from "../../domain/form-issue";
+import { parseBooleanAttribute } from "jb-core";
 import { cloneFormDocument, prepareFormDocument } from "./document-controller";
 import { getMissingDependencies, getRequiredDependencies, loadDependencies, type DependencyFailure } from "./dependency-loader";
 import { dispatchRendererEvent, FormEventController } from "./event-controller";
@@ -47,8 +48,8 @@ export class JBFormBuilderWebComponent extends HTMLElementBase implements JBForm
     return ["auto-import", "locale"];
   }
 
-  readonly #shell: RendererShell;
-  readonly #stateController: RenderStateController;
+  #shell!: RendererShell;
+  #stateController!: RenderStateController;
   #document: JBFormDocumentV1 | null = null;
   #assignmentIssues: FormIssue[] = [];
   #autoImport = true;
@@ -61,8 +62,13 @@ export class JBFormBuilderWebComponent extends HTMLElementBase implements JBForm
 
   constructor() {
     super();
-    // The main class coordinates concerns; shell creation, rendering, loading,
-    // locale work, event forwarding, and form methods remain in their modules.
+    this.initWebComponent();
+  }
+
+  private initWebComponent(): void {
+    // Keep construction focused on wiring the component-owned shell and state,
+    // as in the other JB web components. Rendering, loading, locale work,
+    // event forwarding, and form methods remain in their concern modules.
     this.#shell = createRendererShell(this);
     this.#stateController = new RenderStateController(this);
   }
@@ -82,9 +88,12 @@ export class JBFormBuilderWebComponent extends HTMLElementBase implements JBForm
     this.#form = null;
   }
 
-  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) {
+      return;
+    }
     if (name === "auto-import") {
-      const nextValue = newValue === null || newValue.toLowerCase() !== "false";
+      const nextValue = parseBooleanAttribute(newValue, true);
       if (this.#autoImport !== nextValue) {
         this.#autoImport = nextValue;
         this.requestRender();

@@ -1,15 +1,15 @@
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { formRouteHref, getCurrentFormRoute } from "../application/form-route";
 import type { JBFormDocumentV1 } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
-import { BuilderDesktopNotice } from "./BuilderDesktopNotice";
 import { BuilderHeader, type BuilderNavigationTarget } from "./BuilderHeader";
 import { BuilderStatusScreen } from "./BuilderStatusScreen";
 import { BuilderStoreProvider, useBuilderStore } from "./BuilderStoreContext";
 import { BuilderWorkspace } from "./BuilderWorkspace";
 import { FormSettingsModal } from "./FormSettingsModal";
 import { useBuilderLifecycle } from "./useBuilderLifecycle";
+import { prepareFormImportFile } from "../import/form-import";
 import styles from "./BuilderApp.module.css";
 
 const ExportJsonModal = lazy(() => import("./ExportJsonModal").then(module => ({ default: module.ExportJsonModal })));
@@ -18,6 +18,8 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportDocument, setExportDocument] = useState<JBFormDocumentV1 | null>(null);
+  const [importIssues, setImportIssues] = useState<string[]>([]);
+  const importInputRef = useRef<HTMLInputElement>(null);
   const { locale, direction, setLocale, messages } = useFormLocale("en");
   const route = getCurrentFormRoute();
 
@@ -34,11 +36,59 @@ const BuilderAppContent = observer(function BuilderAppContent() {
     },
     [openSettings, store],
   );
-  const openPreview = useCallback(() => navigate("preview"), [navigate]);
   const openExport = useCallback(() => {
     setExportDocument(store.createDocumentSnapshot());
   }, [store]);
   const closeExport = useCallback(() => setExportDocument(null), []);
+  const openImport = useCallback(() => {
+    setImportIssues([]);
+    importInputRef.current?.click();
+  }, []);
+  const handleImport = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!file) {
+      return;
+    }
+
+    const result = await prepareFormImportFile(file);
+    if (!result.valid) {
+      setImportIssues(result.issues.map(issue => `${issue.path}: ${issue.message}`));
+      return;
+    }
+
+    if (store.importDocument(result.document)) {
+      setImportIssues([]);
+      store.announce(messages.importSuccess);
+    }
+  }, [messages.importSuccess, store]);
+
+  useEffect(() => {
+    function handleHistoryShortcut(event: KeyboardEvent): void {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) {
+        return;
+      }
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+      if (key === "z" && event.shiftKey) {
+        event.preventDefault();
+        store.redo();
+      } else if (key === "z") {
+        event.preventDefault();
+        store.undo();
+      } else if (key === "y") {
+        event.preventDefault();
+        store.redo();
+      }
+    }
+
+    window.addEventListener("keydown", handleHistoryShortcut);
+    return () => window.removeEventListener("keydown", handleHistoryShortcut);
+  }, [store]);
 
   if (store.status === "loading" || store.status === "load-error") {
     return <BuilderStatusScreen messages={messages} slug={route.slug} />;
@@ -46,8 +96,16 @@ const BuilderAppContent = observer(function BuilderAppContent() {
 
   return (
     <div className={styles.app} dir={direction}>
-      <BuilderHeader locale={locale} messages={messages} setLocale={setLocale} onOpenSettings={openSettings} onNavigate={navigate} onExport={openExport} />
-      <BuilderDesktopNotice messages={messages} onPreview={openPreview} />
+      <BuilderHeader locale={locale} messages={messages} setLocale={setLocale} onOpenSettings={openSettings} onNavigate={navigate} onImport={openImport} onUndo={store.undo} onRedo={store.redo} onExport={openExport} />
+      <input ref={importInputRef} className={styles.srOnly} type="file" accept="application/json,.json" aria-label={messages.importJson} onChange={event => void handleImport(event)} />
+      {importIssues.length > 0 ? (
+        <div className={styles.importError} role="alert">
+          <strong>{messages.importFailure}</strong>
+          <ul>
+            {importIssues.map(issue => <li key={issue}>{issue}</li>)}
+          </ul>
+        </div>
+      ) : null}
       <BuilderWorkspace messages={messages} />
 
       <FormSettingsModal isOpen={settingsOpen} messages={messages} onClose={() => setSettingsOpen(false)} />

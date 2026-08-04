@@ -205,8 +205,8 @@ function isEmptyValidationValue(value: unknown): boolean {
   return unwrapped === null || unwrapped === undefined || unwrapped === "" || (Array.isArray(unwrapped) && unwrapped.length === 0);
 }
 
-export function compileValidationRule(rule: JBValidationRule, locale: string): ValidationItem<unknown> {
-  const message = getLocalizedText(rule.message, locale) || "Invalid value.";
+export function compileValidationRule(rule: JBValidationRule, locale: string, defaultLocale = "en"): ValidationItem<unknown> {
+  const message = getLocalizedText(rule.message, locale, defaultLocale) || "Invalid value.";
   const common = { key: rule.id, message };
 
   switch (rule.rule) {

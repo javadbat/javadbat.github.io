@@ -236,6 +236,25 @@
     corner-shape: squircle;
   }
 }
+
+.skillModalClose {
+  padding: 0.55rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  color: var(--p-color);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.skillModalClose:hover {
+  background: oklch(from var(--p-color) l c h / 0.08);
+}
+
+.skillModalClose:focus-visible {
+  outline: 2px solid var(--p-color);
+  outline-offset: 2px;
+}
 @media (min-width: 769px) {
 
     @property --anime-duration {

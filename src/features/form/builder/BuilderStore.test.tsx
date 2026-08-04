@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
 
 import { act, fireEvent, render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
+import { autorun } from "mobx";
+import { describe, expect, it, vi } from "vitest";
+import { createEmptyFormDocument } from "../domain/form-document";
 import { formAppDictionary } from "../i18n/locale-adapter";
 import { formElementRegistry } from "../registry/form-element-registry";
 import { IndexedDbFormRepository } from "../storage/form-repository";
@@ -129,6 +131,91 @@ describe("Builder core editing", () => {
     expect(store.getElementNameError(secondId)).toBe("invalid");
   });
 
+  it("imports a detached document as an unsaved current draft", () => {
+    const store = new BuilderStore();
+    const imported = createEmptyFormDocument();
+    imported.metadata.name = { translations: { en: "Imported form" } };
+
+    store.addElement(formElementRegistry[0]);
+    expect(store.importDocument(imported)).toBe(true);
+
+    expect(store.document).toEqual(imported);
+    expect(store.document).not.toBe(imported);
+    expect(store.selectedElementId).toBeNull();
+    expect(store.linkedRecord).toBeNull();
+    expect(store.hasSavedDraft).toBe(false);
+    expect(store.isDirty).toBe(true);
+  });
+
+  it("undoes and redoes document edits and clears the redo branch after a new edit", () => {
+    const store = new BuilderStore();
+    const entry = formElementRegistry[0];
+
+    store.addElement(entry);
+    expect(store.canUndo).toBe(true);
+    expect(store.canRedo).toBe(false);
+
+    expect(store.undo()).toBe(true);
+    expect(store.document.elements).toHaveLength(0);
+    expect(store.canUndo).toBe(false);
+    expect(store.canRedo).toBe(true);
+
+    expect(store.redo()).toBe(true);
+    expect(store.document.elements).toHaveLength(1);
+
+    store.undo();
+    store.addElement(entry);
+    expect(store.canRedo).toBe(false);
+  });
+
+  it("manages editing locales and preserves fallback text when a locale is removed", () => {
+    const store = new BuilderStore();
+    const elementId = store.addElement(formElementRegistry[0]);
+    store.updateSelectedText("label", "English label", "en");
+    store.setFormLocalization({
+      defaultLocale: "fa",
+      locales: {
+        en: { direction: "ltr" },
+        fa: { direction: "rtl" },
+      },
+    });
+    store.setEditingLocale("fa");
+    store.updateSelectedText("label", "برچسب فارسی", "fa");
+
+    expect(store.editingLocale).toBe("fa");
+    expect(store.document.elements.find(element => element.id === elementId)?.label?.translations).toMatchObject({ en: "English label", fa: "برچسب فارسی" });
+
+    store.setFormLocalization({ defaultLocale: "fa", locales: { fa: { direction: "rtl" } } });
+    expect(store.document.elements.find(element => element.id === elementId)?.label?.translations).toEqual({ fa: "برچسب فارسی" });
+  });
+
+  it("updates an observable validation rule as portable form data", () => {
+    const store = new BuilderStore();
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    const elementId = store.addElement(inputEntry);
+    store.selectElement(elementId);
+    const ruleId = store.addSelectedValidationRule("minLength");
+    const rule = store.selectedElement?.validation[0];
+
+    expect(ruleId).toBeTruthy();
+    expect(rule?.rule).toBe("minLength");
+    if (!rule || rule.rule !== "minLength") {
+      throw new Error("Expected a minimum-length validation rule.");
+    }
+    expect(() =>
+      store.updateSelectedValidationRule(ruleId!, {
+        ...rule,
+        params: { value: 5 },
+      }),
+    ).not.toThrow();
+    expect(store.selectedElement?.validation[0]).toMatchObject({
+      id: ruleId,
+      rule: "minLength",
+      params: { value: 5 },
+    });
+    expect(store.isDirty).toBe(true);
+  });
+
   it("reorders, duplicates, and removes while preserving selection rules", () => {
     const store = new BuilderStore();
     const [firstEntry, secondEntry, thirdEntry] = formElementRegistry;
@@ -198,9 +285,59 @@ describe("Builder core editing", () => {
 
     expect(store.document.elements.map(element => element.id)).toEqual([secondId, firstId]);
   });
+
+  it("reorders selected fields through explicit touch-safe controls", () => {
+    const store = new BuilderStore();
+    const firstId = store.addElement(formElementRegistry[0]);
+    const secondId = store.addElement(formElementRegistry[1]);
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppDictionary.dictionary.en} />
+      </BuilderStoreProvider>,
+    );
+    const moveUp = view.container.querySelector<HTMLElement>("jb-button[aria-label='Move up']");
+
+    expect(moveUp).toBeTruthy();
+    fireEvent.click(moveUp!);
+    expect(store.document.elements.map(element => element.id)).toEqual([secondId, firstId]);
+    expect(store.selectedElementId).toBe(secondId);
+  });
 });
 
 describe("Builder explicit persistence", () => {
+  it("commits async repository results inside MobX actions", async () => {
+    const repository = new IndexedDbFormRepository({
+      name: `builder-actions-${crypto.randomUUID()}`,
+      factory: new IDBFactory(),
+    });
+    const store = new BuilderStore(undefined, repository);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    // MobX only enforces its default strict-action rule for observed values.
+    // Mirror the React observer boundary so this test catches the browser-only
+    // warnings that plain store assertions would otherwise miss.
+    const stopObserving = autorun(() => {
+      void store.document;
+      void store.isDirty;
+      void store.linkedRecord;
+      void store.status;
+    });
+
+    try {
+      expect(await store.initialize()).toBe(true);
+      store.addElement(formElementRegistry[0]);
+      expect(await store.save()).toBe(true);
+
+      const actionWarnings = warn.mock.calls
+        .map(arguments_ => arguments_.join(" "))
+        .filter(message => message.includes("changing (observed) observable values without using an action"));
+      expect(actionWarnings).toEqual([]);
+    } finally {
+      stopObserving();
+      warn.mockRestore();
+      repository.close();
+    }
+  });
+
   it("does not write while editing and restores only after explicit Save", async () => {
     const repository = new IndexedDbFormRepository({
       name: `builder-store-${crypto.randomUUID()}`,

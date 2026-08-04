@@ -188,6 +188,23 @@
   inline-size: 4.5rem;
 }
 
+.importError {
+  position: relative;
+  z-index: 2;
+  margin-inline: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid color-mix(in oklch, var(--form-accent-strong) 55%, transparent);
+  border-radius: 0.65rem;
+  color: var(--form-accent-strong);
+  background: color-mix(in oklch, var(--form-accent) 10%, var(--form-surface));
+  font-size: 0.78rem;
+}
+
+.importError ul {
+  margin-block: 0.35rem 0;
+  padding-inline-start: 1.25rem;
+}
+
 .builderShell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -825,16 +842,33 @@
   display: grid;
   gap: 1rem;
   inline-size: min(28rem, calc(100vw - 3rem));
-  padding: 1.25rem;
+}
+
+.localeEditor {
+  display: grid;
+  gap: 0.65rem;
+  padding-block-start: 0.35rem;
+}
+
+.localeRow {
+  display: grid;
+  grid-template-columns: minmax(4rem, 0.55fr) minmax(8rem, 1fr) auto;
+  gap: 0.55rem;
+  align-items: end;
+}
+
+.localeRow strong {
+  padding-block-end: 0.65rem;
+  color: var(--form-ink);
+  font-size: 0.8rem;
 }
 
 .exportModalContent {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 1rem;
   inline-size: min(62rem, calc(100vw - 3rem));
   max-block-size: min(52rem, calc(100dvh - 3rem));
-  padding: 1.25rem;
   overflow: hidden;
 }
 
@@ -917,7 +951,6 @@
   display: flex;
   gap: 0.65rem;
   justify-content: flex-end;
-  padding-block-start: 0.5rem;
 }
 
 .modalDescription {
@@ -942,6 +975,7 @@
 }
 
 .compactTabs,
+.mobileTabs,
 .desktopNotice {
   display: none;
 }
@@ -1020,40 +1054,200 @@
 }
 
 @media (max-width: 63.999rem) {
+  .app {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
 
-  .header,
-  .builderShell {
+  .header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem 0.75rem;
+    min-block-size: 0;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .brandMark {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+  }
+
+  .brand>span:last-child,
+  .identityBadge {
     display: none;
   }
 
-  .desktopNotice {
+  .documentIdentity {
+    justify-content: flex-end;
+    min-inline-size: 0;
+  }
+
+  .documentName {
+    max-inline-size: min(12rem, 35vw);
+  }
+
+  .saveState {
+    padding-inline: 0.45rem;
+    font-size: 0.62rem;
+  }
+
+  .headerActions {
+    grid-column: 1 / -1;
+    min-inline-size: 0;
+    padding-block-end: 0.2rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    touch-action: pan-x;
+  }
+
+  .headerActions :global(jb-button),
+  .headerActions :global(jb-select) {
+    flex: 0 0 auto;
+  }
+
+  .cardActions :global(jb-button),
+  .catalogRow :global(jb-button),
+  .headerActions :global(jb-button),
+  .mobileTabs :global(jb-button),
+  .modalActions :global(jb-button) {
+    --jb-button-height: 2.75rem;
+    --jb-button-height-sm: 2.75rem;
+  }
+
+  .settingsButton {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+  }
+
+  .cardActions :global(jb-button) {
+    min-inline-size: 2.75rem;
+  }
+
+  .builderShell {
     display: grid;
-    grid-row: 1 / -1;
-    place-items: center;
-    align-content: center;
-    min-block-size: 100dvh;
-    padding: 2rem;
-    text-align: center;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
-  .desktopNotice h1 {
-    max-inline-size: 32rem;
-    margin: 0.75rem 0 0.5rem;
-    font-size: clamp(1.6rem, 7vw, 2.5rem);
+  .compactTabs,
+  .desktopNotice {
+    display: none;
   }
 
-  .desktopNotice>p:not(.eyebrow) {
-    max-inline-size: 30rem;
-    margin: 0 0 1.5rem;
-    color: var(--form-muted);
-    line-height: 1.65;
+  .mobileTabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0.5rem 0.5rem 0;
+    border-block-end: 0.0625rem solid color-mix(in oklch, var(--form-line) 72%, transparent);
+    background: color-mix(in oklch, var(--form-surface) 88%, transparent);
   }
 
-  .noticeMark {
-    inline-size: 3.5rem;
-    block-size: 3.5rem;
-    margin-block-end: 1rem;
-    border-radius: 1rem;
+  .mobileTabs :global(jb-button) {
+    min-inline-size: 0;
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    inline-size: 100%;
+    max-inline-size: none;
+    padding: 0.5rem;
+  }
+
+  .workspace[data-mobile-panel="catalog"] .canvas,
+  .workspace[data-mobile-panel="catalog"] .configuration,
+  .workspace[data-mobile-panel="canvas"] .catalog,
+  .workspace[data-mobile-panel="canvas"] .configuration,
+  .workspace[data-mobile-panel="properties"] .catalog,
+  .workspace[data-mobile-panel="properties"] .canvas {
+    display: none;
+  }
+
+  .catalog,
+  .canvas,
+  .configuration {
+    grid-column: 1;
+    grid-row: 1;
+    min-block-size: 0;
+    block-size: 100%;
+    max-block-size: 100%;
+  }
+
+  .catalog,
+  .configuration {
+    border-radius: 0.75rem;
+  }
+
+  .canvas {
+    padding: 0.5rem 0.25rem 2rem;
+    touch-action: pan-y;
+  }
+
+  .canvasHeader {
+    padding: 0.5rem 0.25rem 0.85rem;
+  }
+
+  .emptyCanvas {
+    min-block-size: 18rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .configurationFields {
+    padding-inline-end: 0.2rem;
+  }
+
+  .exportModalContent {
+    inline-size: calc(100vw - 1.5rem);
+    max-block-size: calc(100dvh - 1.5rem);
+  }
+
+  .modalContent {
+    inline-size: calc(100vw - 1.5rem);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .dragHandle {
+    display: none;
+  }
+
+  .catalogRow,
+  .canvasSelect {
+    min-block-size: 2.75rem;
+    touch-action: pan-y;
+  }
+
+}
+
+@media (max-width: 30rem) {
+  .documentName {
+    max-inline-size: 7rem;
+  }
+
+  .canvasCard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cardActions {
+    grid-template-columns: repeat(3, minmax(2.5rem, 1fr));
+    padding-block-start: 0.35rem;
+    border-block-start: 0.0625rem solid var(--form-line);
+  }
+
+  .localeRow,
+  .validationParameterGrid,
+  .addValidationRule,
+  .exportIssueList li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .localeRow strong {
+    padding-block-end: 0;
+  }
+
+  .modalActions {
+    flex-wrap: wrap;
   }
 }
 

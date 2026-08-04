@@ -8,14 +8,25 @@ import styles from "./styles.module.css";
 import { Activity, useState } from "react";
 import ProductContent from "./contents/ProductContent";
 import { ClientJBModal } from "../../components/modal/ClientJBModal";
+import contentStyles from "./contents/common.module.css";
 import UiContent from "./contents/UiContent";
+
+type SkillModalContent = "product" | "agile" | "front" | "backend" | "ui";
+
+const skillModalTitles: Record<SkillModalContent, string> = {
+  product: "✦ Product Awareness & Team Collaboration",
+  agile: "✦ My Journey: From Coding to Cultivating Agile Teams",
+  front: "✦ Front-End Engineering & Scalable Interfaces",
+  backend: "✦ Backend Foundation & Full-Stack Awareness",
+  ui: "✦ Design-Minded Front-End Developer",
+};
 
 function SkillsSection() {
   const { contentHeightShare, sphereGapPercent, variableStyle } = useSyncSize();
   const halfCirclePath = useHalfCirclePath();
   const bullets = useBulletPoints();
   const matches = useMediaQuery("(max-aspect-ratio: 1/1)");
-  const [modalContent, setModalContent] = useState<"product" | "agile" | "front" | "backend" | "ui" | null>(null);
+  const [modalContent, setModalContent] = useState<SkillModalContent | null>(null);
   return (
     <section className={styles.skillsSectionWrapper} style={variableStyle}>
       <div className={styles.skillsBackgroundWrapper}>
@@ -114,22 +125,32 @@ function SkillsSection() {
           </svg>
         </div>
       </div>
-      <ClientJBModal id="SkillDetail" isOpen={!!modalContent} onClose={() => setModalContent(null)} className={styles.skillModal}>
-        <Activity mode={modalContent == "product" ? "visible" : "hidden"}>
-          <ProductContent />
-        </Activity>
-        <Activity mode={modalContent == "backend" ? "visible" : "hidden"}>
-          <BackendSkillItems />
-        </Activity>
-        <Activity mode={modalContent == "front" ? "visible" : "hidden"}>
-          <FrontendSkillItems />
-        </Activity>
-        <Activity mode={modalContent == "agile" ? "visible" : "hidden"}>
-          <AgileContent />
-        </Activity>
-        <Activity mode={modalContent == "ui" ? "visible" : "hidden"}>
-          <UiContent />
-        </Activity>
+      <ClientJBModal id="SkillDetail" isOpen={!!modalContent} label={modalContent ? skillModalTitles[modalContent] : "Skills"} onClose={() => setModalContent(null)} className={styles.skillModal}>
+        <div slot="header">
+          <h2 className={contentStyles.skillTitle}>{modalContent ? skillModalTitles[modalContent] : "Skills"}</h2>
+        </div>
+        <div slot="content">
+          <Activity mode={modalContent == "product" ? "visible" : "hidden"}>
+            <ProductContent />
+          </Activity>
+          <Activity mode={modalContent == "backend" ? "visible" : "hidden"}>
+            <BackendSkillItems />
+          </Activity>
+          <Activity mode={modalContent == "front" ? "visible" : "hidden"}>
+            <FrontendSkillItems />
+          </Activity>
+          <Activity mode={modalContent == "agile" ? "visible" : "hidden"}>
+            <AgileContent />
+          </Activity>
+          <Activity mode={modalContent == "ui" ? "visible" : "hidden"}>
+            <UiContent />
+          </Activity>
+        </div>
+        <div slot="footer">
+          <button type="button" className={styles.skillModalClose} onClick={() => setModalContent(null)}>
+            Close
+          </button>
+        </div>
       </ClientJBModal>
     </section>
   );
