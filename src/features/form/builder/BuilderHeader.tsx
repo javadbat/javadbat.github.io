@@ -1,19 +1,22 @@
-import type { Dispatch, SetStateAction } from "react";
 import { JBButton } from "jb-button/react";
-import { JBOption, JBSelect } from "jb-select/react";
+import { JBOption } from "jb-select/option/react";
+import { JBSelect } from "jb-select/react";
+import "jb-icons/arrow-tailed";
+import "jb-icons/eye";
+import "jb-icons/react";
 import { observer } from "mobx-react-lite";
 import { formRouteHref } from "../application/form-route";
-import { getStorageIssueMessage, type FormAppLocale, type FormMessages } from "../i18n/locale-adapter";
+import { inferLocaleDirection } from "../domain/form-document";
+import { getStorageIssueMessage, type FormMessages } from "../i18n/locale-adapter";
 import { useBuilderStore } from "./BuilderStoreContext";
 import { CatalogIcon } from "./CatalogIcon";
+import { BuilderTooltip } from "./BuilderTooltip";
 import styles from "./BuilderApp.module.css";
 
 export type BuilderNavigationTarget = "designer" | "preview";
 
 interface BuilderHeaderProps {
-  locale: FormAppLocale;
   messages: FormMessages;
-  setLocale: Dispatch<SetStateAction<FormAppLocale>>;
   onOpenSettings: () => void;
   onNavigate: (target: BuilderNavigationTarget) => void;
   onImport: () => void;
@@ -28,8 +31,21 @@ interface BuilderHeaderProps {
  * The component observes the store directly so save-state changes update only
  * the header and the builder sections that actually consume those values.
  */
-export const BuilderHeader = observer(function BuilderHeader({ locale, messages, setLocale, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   const store = useBuilderStore();
+  const selectableLocales = [...new Set(["en", "fa", ...Object.keys(store.document.localization.locales)])];
+  const selectLocale = (nextLocale: string) => {
+    if (!store.document.localization.locales[nextLocale]) {
+      store.setFormLocalization({
+        ...store.document.localization,
+        locales: {
+          ...store.document.localization.locales,
+          [nextLocale]: { direction: inferLocaleDirection(nextLocale) },
+        },
+      });
+    }
+    store.setEditingLocale(nextLocale);
+  };
 
   return (
     <header className={styles.header}>
@@ -43,9 +59,11 @@ export const BuilderHeader = observer(function BuilderHeader({ locale, messages,
 
       <div className={styles.documentIdentity}>
         <span className={styles.documentName}>{store.formName}</span>
-        <button type="button" className={styles.settingsButton} aria-label={messages.formSettings} onClick={onOpenSettings}>
-          <CatalogIcon iconId="settings" />
-        </button>
+        <BuilderTooltip content={messages.formSettings} positionArea="bottom">
+          <button type="button" className={styles.settingsButton} aria-label={messages.formSettings} onClick={onOpenSettings}>
+            <CatalogIcon iconId="settings" />
+          </button>
+        </BuilderTooltip>
         <span className={styles.identityBadge}>{store.linkedRecord ? messages.linkedNamedForm : messages.currentDraft}</span>
         <output
           className={styles.saveState}
@@ -66,44 +84,49 @@ export const BuilderHeader = observer(function BuilderHeader({ locale, messages,
       </div>
 
       <nav className={styles.headerActions} aria-label="Form actions">
-        <JBSelect<FormAppLocale>
-          name="builderLocale"
-          aria-label={messages.locale}
-          size="sm"
-          value={locale}
-          hideClear
-          onChange={event => setLocale(event.target.value === "fa" ? "fa" : "en")}
-        >
-          <JBOption value="en">EN</JBOption>
-          <JBOption value="fa">FA</JBOption>
-        </JBSelect>
-        <JBSelect<string>
-          name="contentLocale"
-          aria-label={messages.contentLocale}
-          size="sm"
-          value={store.editingLocale}
-          onChange={event => store.setEditingLocale(event.target.value)}
-        >
-          {Object.keys(store.document.localization.locales).map(locale => <JBOption key={locale} value={locale}>{locale}</JBOption>)}
-        </JBSelect>
-        <JBButton variant="ghost" size="sm" onClick={() => onNavigate("designer")}>
-          {messages.designer}
-        </JBButton>
-        <JBButton variant="ghost" size="sm" disabled={!store.canUndo} onClick={onUndo}>
-          {messages.undo}
-        </JBButton>
-        <JBButton variant="ghost" size="sm" disabled={!store.canRedo} onClick={onRedo}>
-          {messages.redo}
-        </JBButton>
+        <div className={styles.documentActions}>
+          <JBButton variant="ghost" size="sm" onClick={onImport}>
+            {messages.importJson}
+          </JBButton>
+          <JBButton variant="ghost" size="sm" onClick={onExport}>
+            {messages.exportJson}
+          </JBButton>
+        </div>
+        <div className={styles.historyActions}>
+          <BuilderTooltip content={messages.undo} positionArea="bottom">
+            <JBButton square variant="ghost" size="sm" aria-label={messages.undo} disabled={!store.canUndo} onClick={onUndo}>
+              <jb-icon-arrow-tailed direction="inline-start" size="sm" />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.redo} positionArea="bottom">
+            <JBButton square variant="ghost" size="sm" aria-label={messages.redo} disabled={!store.canRedo} onClick={onRedo}>
+              <jb-icon-arrow-tailed direction="inline-end" size="sm" />
+            </JBButton>
+          </BuilderTooltip>
+        </div>
         <JBButton variant="outline" size="sm" onClick={() => onNavigate("preview")}>
+          <jb-icon-eye open size="sm" />
           {messages.preview}
         </JBButton>
-        <JBButton variant="ghost" size="sm" onClick={onImport}>
-          {messages.importJson}
+        <JBButton variant="outline" size="sm" onClick={() => onNavigate("designer")}>
+          <span className={styles.artboardIcon} aria-hidden="true" />
+          {messages.designer}
         </JBButton>
-        <JBButton variant="ghost" size="sm" onClick={onExport}>
-          {messages.exportJson}
-        </JBButton>
+        <div className={styles.localeControls}>
+          <CatalogIcon iconId="language" />
+          <JBSelect<string>
+            name="contentLocale"
+            aria-label={messages.contentLocale}
+            size="sm"
+            value={store.editingLocale}
+            hideClear
+            onChange={event => selectLocale(event.target.value)}
+          >
+            {selectableLocales.map(contentLocale => (
+              <JBOption key={contentLocale} value={contentLocale}>{contentLocale.toUpperCase()}</JBOption>
+            ))}
+          </JBSelect>
+        </div>
         <JBButton color="primary" size="sm" disabled={store.status === "saving"} onClick={() => void store.save()}>
           {store.status === "saving" ? messages.saving : messages.save}
         </JBButton>

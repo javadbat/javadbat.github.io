@@ -2,7 +2,8 @@ import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
-import { JBOption, JBSelect } from "jb-select/react";
+import { JBOption } from "jb-select/option/react";
+import { JBSelect } from "jb-select/react";
 import { getLocalizedText, type JSONValue, type LocalizedText } from "../domain/form-document";
 import type { FormMessages } from "../i18n/locale-adapter";
 import type { FormElementPropertyDefinition, PropertyLabel } from "../registry/form-element-configuration";
@@ -359,11 +360,24 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
                 <JBInput
                   name="elementInitialValue"
                   label={messages.initialValue}
-                  value={typeof element.initialValue === "string" || typeof element.initialValue === "number" ? String(element.initialValue) : ""}
+                  value={
+                    Array.isArray(element.initialValue)
+                      ? element.initialValue.join(", ")
+                      : typeof element.initialValue === "string" || typeof element.initialValue === "number"
+                        ? String(element.initialValue)
+                        : ""
+                  }
                   onInput={event => {
                     const value = inputValue(event as unknown as Event);
                     store.updateSelectedElement({
-                      initialValue: value === "" ? undefined : value,
+                      initialValue:
+                        value === ""
+                          ? undefined
+                          : entry.initialValueKind === "range"
+                            ? value.includes(",")
+                              ? value.split(",").map(part => Number(part.trim()))
+                              : Number(value)
+                            : value,
                     });
                   }}
                 />

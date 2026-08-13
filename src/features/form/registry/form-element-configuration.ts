@@ -31,7 +31,7 @@ export interface CommonFieldSupport {
   placeholder: boolean;
 }
 
-export type InitialValueKind = "string" | "boolean" | "select";
+export type InitialValueKind = "string" | "boolean" | "select" | "range";
 
 export interface FormElementConfiguration {
   commonFields: CommonFieldSupport;
@@ -198,6 +198,43 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       booleanProperty("showControlButton", "Show control buttons", "نمایش دکمه‌های کنترل"),
     ],
   ),
+  "jb-range-input": configuration(
+    {
+      required: true,
+      disabled: true,
+      initialValue: true,
+      label: true,
+      placeholder: false,
+    },
+    "range",
+    {
+      mode: "single",
+      startPoint: 0,
+      min: 0,
+      max: 10,
+      step: 1,
+      tickStep: 1,
+      showTickLabels: false,
+      disableBalloonRotation: false,
+      size: "md",
+    },
+    [
+      textProperty("message", "Helper message", "پیام راهنما", true),
+      selectProperty("mode", "Mode", "حالت", [
+        { value: "single", label: label("Single value", "مقدار تکی") },
+        { value: "range", label: label("Range", "بازه") },
+      ]),
+      numberProperty("startPoint", "Start point", "نقطه شروع"),
+      numberProperty("min", "Minimum value", "کمترین مقدار"),
+      numberProperty("max", "Maximum value", "بیشترین مقدار"),
+      numberProperty("step", "Step", "گام", { min: 0 }),
+      numberProperty("tickStep", "Tick step", "گام نشانه‌ها", { min: 0 }),
+      numberProperty("minorTickStep", "Minor tick step", "گام نشانه‌های فرعی", { min: 0 }),
+      booleanProperty("showTickLabels", "Show tick labels", "نمایش برچسب نشانه‌ها"),
+      booleanProperty("disableBalloonRotation", "Disable balloon rotation", "غیرفعال کردن چرخش بالن"),
+      selectProperty("size", "Size", "اندازه", sizeOptions),
+    ],
+  ),
   "jb-mobile-input": configuration(inputCommon, "string", { ...inputDefaults, inputmode: "tel", autocomplete: "tel" }, inputProperties),
   "jb-password-input": configuration(inputCommon, "string", { ...inputDefaults, type: "password", autocomplete: "current-password" }, [
     ...inputProperties,
@@ -304,6 +341,35 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
         { value: "absolute", label: label("Absolute", "مطلق") },
       ]),
       booleanProperty("hideClear", "Hide clear button", "پنهان‌کردن پاک‌کردن"),
+      {
+        key: "options",
+        label: label("Options", "گزینه‌ها"),
+        control: "options",
+      },
+    ],
+  ),
+  "jb-listbox": configuration(
+    {
+      ...valueControlCommon,
+      placeholder: false,
+    },
+    "select",
+    {
+      multiple: false,
+      useCheckbox: true,
+      options: [
+        {
+          id: "option_1",
+          value: "option_1",
+          label: { translations: { en: "Option 1" } },
+          disabled: false,
+        },
+      ],
+    },
+    [
+      textProperty("message", "Helper message", "پیام راهنما", true),
+      booleanProperty("multiple", "Multiple selection", "انتخاب چندگانه"),
+      booleanProperty("useCheckbox", "Use checkbox", "استفاده از چک‌باکس"),
       {
         key: "options",
         label: label("Options", "گزینه‌ها"),

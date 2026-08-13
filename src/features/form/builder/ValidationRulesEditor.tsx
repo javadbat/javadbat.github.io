@@ -2,7 +2,8 @@ import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
-import { JBOption, JBSelect } from "jb-select/react";
+import { JBOption } from "jb-select/option/react";
+import { JBSelect } from "jb-select/react";
 import { getLocalizedText, type JBValidationRule, type LocalizedText } from "../domain/form-document";
 import type { FormMessages } from "../i18n/locale-adapter";
 import {

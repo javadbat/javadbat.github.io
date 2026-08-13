@@ -87,9 +87,10 @@ type RuntimeField = HTMLElement & {
   [key: string]: unknown;
 };
 
-const initialValueByType: Partial<Record<JBFormElementType, string | boolean>> = {
+const initialValueByType: Partial<Record<JBFormElementType, string | number | boolean | [number, number]>> = {
   "jb-input": "Initial text",
   "jb-number-input": "1200",
+  "jb-range-input": 4,
   "jb-mobile-input": "09121234567",
   "jb-password-input": "secret-value",
   "jb-payment-input": "6037997514567890",
@@ -99,6 +100,7 @@ const initialValueByType: Partial<Record<JBFormElementType, string | boolean>> =
   "jb-pin-input": "1234",
   "jb-textarea": "Initial long text",
   "jb-select": "option_1",
+  "jb-listbox": "option_1",
   "jb-checkbox": true,
   "jb-switch": true,
 };
@@ -109,6 +111,7 @@ const initialValueByType: Partial<Record<JBFormElementType, string | boolean>> =
 // in the real-browser acceptance pass documented in COMPONENT-SUPPORT.md.
 const browserOnlyRenderTypes = new Set<JBFormElementType>(["jb-date-input", "jb-time-input"]);
 const happyDomRenderEntries = formElementRegistry.filter(entry => !browserOnlyRenderTypes.has(entry.type));
+let selectLoaderRegisteredOption = false;
 
 function createRenderer(element: JBFormElementV1): JBFormBuilderElement {
   const formDocument = createEmptyFormDocument();
@@ -154,9 +157,15 @@ function expectDefaultProperties(runtime: RuntimeField, element: JBFormElementV1
 }
 
 beforeAll(async () => {
-  // Load independent packages concurrently, matching the renderer's production
-  // dependency strategy while keeping failures attributable to their package.
-  await Promise.all([import("jb-form"), ...formElementRegistry.map(entry => entry.loadComponent())]);
+  // Prove the select dependency is self-contained before listbox (which also
+  // imports jb-option) can mask a missing option registration.
+  const selectEntry = formElementRegistry.find(entry => entry.type === "jb-select")!;
+  await Promise.all([import("jb-form"), selectEntry.loadComponent()]);
+  selectLoaderRegisteredOption = Boolean(customElements.get("jb-option"));
+
+  // Load the remaining independent packages concurrently, matching the
+  // renderer's production dependency strategy.
+  await Promise.all(formElementRegistry.filter(entry => entry !== selectEntry).map(entry => entry.loadComponent()));
 });
 
 beforeEach(() => {
@@ -164,6 +173,10 @@ beforeEach(() => {
 });
 
 describe("real JB component Preview coverage", () => {
+  it("loads jb-option with jb-select for an isolated Preview document", () => {
+    expect(selectLoaderRegisteredOption).toBe(true);
+  });
+
   it.each(formElementRegistry)("loads and defines the $type package", (entry: FormElementRegistryEntry) => {
     expect(customElements.get(entry.tagName)).toBeDefined();
   });
@@ -239,6 +252,20 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.value).toEqual(renderedInitialValue);
   });
 
+  it("preserves both initial values for jb-range-input range mode", async () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-range-input")!;
+    const element = createDefaultElement(entry, "priceRange");
+    element.props.mode = "range";
+    element.initialValue = [2, 8];
+    const renderer = createRenderer(element);
+
+    await renderer.updateComplete;
+
+    const runtime = expectReadyRuntime(renderer, element);
+    expect(runtime.value).toEqual([2, 8]);
+    expect(runtime.initialValue).toEqual([2, 8]);
+  });
+
   it.each(happyDomRenderEntries.filter(entry => entry.commonFields.disabled))("applies the disabled state to $type", async (entry: FormElementRegistryEntry) => {
     const element = createDefaultElement(entry, `${entry.defaultName}DisabledField`);
     element.disabled = true;
@@ -252,8 +279,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(16);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(16);
-    expect(Object.keys(configurationByType)).toHaveLength(16);
+    expect(formElementRegistry).toHaveLength(18);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(18);
+    expect(Object.keys(configurationByType)).toHaveLength(18);
   });
 });

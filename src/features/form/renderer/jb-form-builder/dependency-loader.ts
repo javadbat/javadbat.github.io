@@ -81,7 +81,12 @@ export function getRequiredDependencies(document: JBFormDocumentV1): RendererDep
       packageName: adapter.packageName,
       // jb-option is registered by jb-select and is also created by the shared
       // adapter, so manual mode must verify both definitions.
-      tagNames: element.type === "jb-select" ? [adapter.tagName, "jb-option"] : [adapter.tagName],
+      tagNames:
+        element.type === "jb-listbox"
+          ? [adapter.tagName, "jb-option", "jb-checkbox"]
+          : element.type === "jb-select"
+            ? [adapter.tagName, "jb-option"]
+            : [adapter.tagName],
       elementType: element.type,
     });
   }

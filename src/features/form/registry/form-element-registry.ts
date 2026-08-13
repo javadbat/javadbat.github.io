@@ -39,6 +39,15 @@ const catalogEntries = [
     defaultName: "number",
   },
   {
+    type: "jb-range-input",
+    displayName: "Range input",
+    description: "Choose a numeric value or interval.",
+    category: "Choice",
+    keywords: ["range", "slider", "number", "interval"],
+    iconId: "number-input",
+    defaultName: "range",
+  },
+  {
     type: "jb-mobile-input",
     displayName: "Mobile input",
     description: "Collect a normalized mobile number.",
@@ -118,6 +127,15 @@ const catalogEntries = [
     keywords: ["select", "option", "dropdown", "choice"],
     iconId: "select",
     defaultName: "choice",
+  },
+  {
+    type: "jb-listbox",
+    displayName: "Listbox",
+    description: "Choose from an always-visible list of options.",
+    category: "Choice",
+    keywords: ["listbox", "select", "option", "choice", "multiple"],
+    iconId: "select",
+    defaultName: "listChoice",
   },
   {
     type: "jb-checkbox",

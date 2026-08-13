@@ -27,7 +27,7 @@ Each component manifest exposes its supported CSS custom properties under a comp
 | --- | --- | --- |
 | Input and inherited input controls | `--jb-input-*` | Size variants and specialized inherited namespaces are available. |
 | Date/time controls | `--jb-date-input-*`, `--jb-time-input-*` | Picker z-index and trigger/presentation tokens are component-owned. |
-| Choice controls | `--jb-select-*`, `--jb-checkbox-*`, `--jb-switch-*` | Includes state, focus, sizing, and presentation tokens. |
+| Choice controls | `--jb-select-*`, `--jb-listbox-*`, `--jb-range-input-*`, `--jb-checkbox-*`, `--jb-switch-*` | Includes state, focus, sizing, and presentation tokens. |
 | File controls | `--jb-file-input-*`, `--jb-image-input-*` | Includes upload, loading, overlay, and file-state presentation. |
 | Actions and overlays | `--jb-button-*`, `--jb-popover-*`, `--jb-modal-*` | Includes control geometry, overlay colors, radius, and elevation. |
 
@@ -45,6 +45,7 @@ The following public parts are relevant to form controls and editor surfaces:
 | `jb-pin-input` | `pin-input`, `input-wrapper`, `inputs-wrapper`, `message` |
 | `jb-textarea` | `component`, `textarea-box`, `textarea`, slot wrappers, `label`, `message` |
 | `jb-select` | `arrow-icon`, `clear-button`, `popover`, `search-input`, `selected-value`; option `color-box` |
+| `jb-listbox` | `wrapper`, `label`, `list`, `message`; option `color-box` |
 | `jb-checkbox` | `checkbox`, `check-bg`, `check-mark`, `label`, `message` |
 | `jb-switch` | `component`, `switch`, `bar`, `trigger`, `trigger-button`, `trigger-ring`, `svg-wrapper`, `true-text`, `false-text` |
 | `jb-file-input` | `file-name`, `loading`, `placeholder-title`, `upload-loading`, `uploading-title` |

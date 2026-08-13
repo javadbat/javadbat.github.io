@@ -1,13 +1,13 @@
 import { memo, useCallback, useMemo, useState, type DragEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
+import { JBSearchbar } from "jb-searchbar/react";
 import { useBuilderStore } from "./BuilderStoreContext";
 import { CatalogIcon } from "./CatalogIcon";
 import { formElementRegistry, type FormElementRegistryEntry } from "../registry/form-element-registry";
 import type { FormMessages } from "../i18n/locale-adapter";
 import styles from "./BuilderApp.module.css";
 import { CATALOG_DRAG_TYPE } from "./builder-drag";
-import 'jb-icons/search'
 interface ComponentCatalogProps {
   messages: FormMessages;
   onElementAdded?: (elementId: string) => void;
@@ -81,17 +81,17 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
       </div>
       <p className={styles.panelDescription}>{messages.catalogDescription}</p>
 
-        <div slot="filter" className={styles.searchFilter}>
+      <JBSearchbar className={styles.searchFilter} aria-label={messages.searchComponents}>
+        <div slot="filter">
           <JBInput
             name="componentSearch"
             type="search"
             placeholder={messages.searchComponents}
             value={query}
             onInput={event => setQuery(String((event.target as unknown as { value?: unknown }).value ?? ""))}
-          >
-            <div slot="end-section"><jb-icon-search/></div>
-          </JBInput>
+          />
         </div>
+      </JBSearchbar>
 
       <div className={styles.catalogGroups}>
         {[...filteredGroups.entries()].map(([category, entries]) => (

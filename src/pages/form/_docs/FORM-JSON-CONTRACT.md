@@ -389,6 +389,7 @@ Version 1 supports these registry keys:
 
 - `jb-input`
 - `jb-number-input`
+- `jb-range-input`
 - `jb-mobile-input`
 - `jb-password-input`
 - `jb-payment-input`
@@ -398,6 +399,7 @@ Version 1 supports these registry keys:
 - `jb-pin-input`
 - `jb-textarea`
 - `jb-select`
+- `jb-listbox`
 - `jb-checkbox`
 - `jb-switch`
 - `jb-file-input`

@@ -9,10 +9,10 @@ import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("JB element registry adapters", () => {
   it("declares complete adapter metadata for every inventory component", () => {
-    expect(formElementRegistry).toHaveLength(16);
+    expect(formElementRegistry).toHaveLength(18);
 
     for (const entry of formElementRegistry) {
-      expect(entry.packageName).toBe(entry.type);
+      expect(entry.packageName).toBe(entry.type === "jb-listbox" ? "jb-select/listbox" : entry.type);
       expect(entry.tagName).toBe(entry.type);
       expect(entry.adapterVersion).toBe(1);
       expect(entry.supportedSchemaVersions).toEqual([1]);
@@ -99,6 +99,27 @@ describe("JB element registry adapters", () => {
     expect(target.querySelector("jb-option")?.textContent).toBe("تلفن");
     expect(validation.list).toHaveLength(1);
     expect(validation.list[0].key).toBe("allowed-contact");
+  });
+
+  it("renders listbox options through the jb-select/listbox adapter", () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-listbox")!;
+    const element = createDefaultElement(entry, "visibleChoices");
+    element.initialValue = "option_1";
+    const target = document.createElement("div") as unknown as RuntimeFormElement;
+
+    entry.applyToRuntime(target, element, "en");
+
+    expect(entry.packageName).toBe("jb-select/listbox");
+    expect(element.props.useCheckbox).toBe(true);
+    expect(target.initialValue).toBe("option_1");
+    expect(target.querySelectorAll("jb-option")).toHaveLength(1);
+    expect(target.querySelector("jb-option jb-checkbox")?.getAttribute("label")).toBe("Option 1");
+
+    element.props.useCheckbox = false;
+    entry.applyToRuntime(target, element, "en");
+
+    expect(target.querySelector("jb-option jb-checkbox")).toBeNull();
+    expect(target.querySelector("jb-option")?.textContent).toBe("Option 1");
   });
 
   it("keeps user rules declarative while compiling trusted runtime validators", () => {

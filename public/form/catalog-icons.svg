@@ -103,5 +103,9 @@
     <symbol id="drag" viewBox="0 0 24 24">
       <circle cx="8" cy="6" r="1"/><circle cx="16" cy="6" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="18" r="1"/><circle cx="16" cy="18" r="1"/>
     </symbol>
+    <symbol id="language" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M3.5 12h17M12 3c2.25 2.35 3.4 5.35 3.4 9S14.25 18.65 12 21M12 3C9.75 5.35 8.6 8.35 8.6 12s1.15 6.65 3.4 9"/>
+    </symbol>
   </defs>
 </svg>

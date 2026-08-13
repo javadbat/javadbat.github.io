@@ -53,6 +53,7 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | --- | --- | --- | --- | --- | --- |
 | Text | Input | `jb-input@3.17.0` | `string` | Verified | Yes |
 | Number | Number Input | `jb-number-input@1.6.0` | Numeric string | Inherited from `jb-input` | Yes |
+| Choice | Range Input | `jb-range-input@0.2.0` | Number or two-number tuple | Verified | Yes |
 | Text | Mobile Input | `jb-mobile-input@2.4.0` | Normalized mobile string | Inherited from `jb-input` | Yes |
 | Text | Password Input | `jb-password-input@2.2.0` | `string` | Inherited from `jb-input` | Yes |
 | Financial | Payment Input | `jb-payment-input@3.5.0` | Card/SHABA string | Inherited from `jb-input` | Yes |
@@ -61,14 +62,15 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | Date/time | Time Input | `jb-time-input@2.4.0` | Time string | Verified | Yes |
 | Text | PIN Input | `jb-pin-input@1.14.0` | `string` | Verified | Yes |
 | Text | Textarea | `jb-textarea@3.13.1` | `string` | Verified | Yes |
-| Choice | Select | `jb-select@7.4.3` | Generic value or array in multiple mode | Verified | Yes |
+| Choice | Select | `jb-select@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
+| Choice | Listbox | `jb-select/listbox@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
 | Choice | Checkbox | `jb-checkbox@1.4.0` | `boolean` | Verified | Yes |
 | Choice | Switch | `jb-switch@1.7.3` | `boolean` | Verified; DSR-003 resolved | Yes |
 | File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
 | File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
 
-Total: 15 value-producing controls and 1 action control.
+Total: 17 value-producing controls and 1 action control.
 
 ## Minimum builder configuration and public API
 
@@ -113,6 +115,7 @@ Common input-family styling:
 | `jb-pin-input` | `name`, `label`, `message`, `value`, `initialValue`, `charLength`, `inputmode`, `autofocus`, `disabled`, `required`, declarative validation rules | `change`, `input`, `beforeinput`, keyboard events, `enter`, `focus`, `blur`, `complete` | Required and forced custom error |
 | `jb-textarea` | `name`, `label`, `message`, `placeholder`, `value`, `initialValue`, `autoHeight`, `disabled`, `required`, declarative validation rules | `load`, `init`, `change`, `input`, `beforeinput`, keyboard events, `enter`, `focus`, `blur` | Required and forced custom error |
 | `jb-select` | `name`, `label`, `message`, `placeholder`, `searchPlaceholder`, `value`, `initialValue`, `multiple`, `size`, `popoverPosition`, `hideClear`, `disabled`, `required`, declarative option list and validation rules | `load`, `init`, `change`, `input`, `keyup`; web component also emits `filter-change` | Required and forced custom error |
+| `jb-listbox` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `useCheckbox`, `disabled`, `required`, declarative option list and validation rules | `load`, `init`, `change`, `input`, `invalid`; options respond to `filter-change` | Required and forced custom error |
 | `jb-checkbox` | `name`, `label`, `message`, `value`, `initialValue`, `size`, `disabled`, `required`, declarative validation rules | `change`, `before-change` | Required and forced custom error |
 | `jb-switch` | `name`, `value`, `initialValue`, `trueTitle`, `falseTitle`, `isLoading`, `disabled`, `required`, declarative validation rules | `load`, `init`, `change`, `before-change` | Required with native `valueMissing` mapping |
 | `jb-file-input` | `name`, `acceptTypes`, `placeholderTitle`, upload presentation state, `required`, declarative validation rules; runtime `File` values are not builder configuration | `load`, `init`, `change`; web component also emits `delete` and `download` | Required; source contains a pending file-size validation TODO |
@@ -147,6 +150,7 @@ CSS-variable counts include component variables, compatibility aliases, and refe
 | `jb-pin-input` | None | `pin-input`, `input-wrapper`, `inputs-wrapper`, `message` | 59 |
 | `jb-textarea` | `block-start-section`, `block-end-section`, `inline-start-section`, `inline-end-section` | `component`, `textarea-box`, `textarea`, slot wrappers, `label`, `message` | 137 |
 | `jb-select` | Default options, `empty-list-message`, `select-arrow-icon`, `start-section` | `arrow-icon`, `clear-button`, `popover`, `search-input`, `selected-value`, option `color-box` | 188 |
+| `jb-listbox` | Default options | `wrapper`, `label`, `list`, `message`, option `color-box` | 18 |
 | `jb-checkbox` | `label` | `checkbox`, `check-bg`, `check-mark`, `label`, `message` | 63 |
 | `jb-switch` | None | `component`, `switch`, `bar`, `trigger`, `trigger-button`, `trigger-ring`, `svg-wrapper`, `true-text`, `false-text` | 62 |
 | `jb-file-input` | Default, `file-icon`, `overlay-content`, `placeholder`, `placeholder-icon`, `upload`, `uploader-icon` | `file-name`, `loading`, `placeholder-title`, `upload-loading`, `uploading-title` | 103 |
@@ -169,7 +173,7 @@ CSS-variable counts include component variables, compatibility aliases, and refe
 
 - Validator functions, custom DOM render callbacks, and upload/download bridge functions cannot be placed directly in JSON.
 - `Date`, `File`, `HTMLElement`, `Map`, and callback values need a portable representation or must be excluded from form configuration.
-- `jb-select` builder options must use JSON-safe values and declarative content; arbitrary `getContentDOM` and `getSelectedValueDOM` callbacks are runtime-only.
+- `jb-select` and `jb-listbox` builder options must use JSON-safe values and declarative content; arbitrary DOM callbacks remain runtime-only.
 - `jb-image-input` needs a serializable adapter/configuration reference; its `bridge` functions remain runtime integration code.
 - File and image runtime selections are form-response data, not builder configuration, and must not be exported as the form definition.
 - Date defaults should be normalized to an agreed string or timestamp representation.

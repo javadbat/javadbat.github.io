@@ -8,6 +8,7 @@ import { registryByType, type FormElementRegistryEntry } from "../registry/form-
 import { useBuilderStore } from "./BuilderStoreContext";
 import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE } from "./builder-drag";
 import { CatalogIcon } from "./CatalogIcon";
+import { BuilderTooltip } from "./BuilderTooltip";
 import { RemoveElementModal } from "./RemoveElementModal";
 import styles from "./BuilderApp.module.css";
 
@@ -103,59 +104,68 @@ const CanvasCard = observer(function CanvasCard({
 
       {isSelected ? (
         <div className={styles.cardActions}>
-          <JBButton
-            square
-            size="sm"
-            variant="ghost"
-            aria-label={messages.configure}
-            title={messages.configure}
-            onPointerEnter={() => setActiveActionIcon("configure")}
-            onPointerLeave={() => setActiveActionIcon(null)}
-            onFocus={() => setActiveActionIcon("configure")}
-            onBlur={() => setActiveActionIcon(null)}
-            onClick={() => onConfigure(element.id)}
-          >
-            <CatalogIcon iconId="configure" active={activeActionIcon === "configure"} />
-          </JBButton>
-          <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} title={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
-            <CatalogIcon iconId="move-up" />
-          </JBButton>
-          <JBButton square size="sm" variant="ghost" aria-label={messages.moveDown} title={messages.moveDown} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
-            <CatalogIcon iconId="move-down" />
-          </JBButton>
-          <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} title={messages.duplicate} onClick={() => onDuplicate(element.id)}>
-            <CatalogIcon iconId="duplicate" />
-          </JBButton>
-          <JBButton
-            id={`element-remove-${element.id}`}
-            square
-            size="sm"
-            variant="ghost"
-            aria-label={messages.remove}
-            title={messages.remove}
-            onPointerEnter={() => setActiveActionIcon("remove")}
-            onPointerLeave={() => setActiveActionIcon(null)}
-            onFocus={() => setActiveActionIcon("remove")}
-            onBlur={() => setActiveActionIcon(null)}
-            onClick={() => onRemove(element.id)}
-          >
-            <CatalogIcon iconId="remove" active={activeActionIcon === "remove"} />
-          </JBButton>
-          <JBButton
-            square
-            size="sm"
-            variant="ghost"
-            draggable
-            className={styles.dragHandle}
-            aria-label={messages.dragToReorder}
-            title={messages.dragToReorder}
-            onDragStart={event => {
-              event.dataTransfer.effectAllowed = "move";
-              event.dataTransfer.setData(CANVAS_DRAG_TYPE, element.id);
-            }}
-          >
-            <CatalogIcon iconId="drag" />
-          </JBButton>
+          <BuilderTooltip content={messages.configure}>
+            <JBButton
+              square
+              size="sm"
+              variant="ghost"
+              aria-label={messages.configure}
+              onPointerEnter={() => setActiveActionIcon("configure")}
+              onPointerLeave={() => setActiveActionIcon(null)}
+              onFocus={() => setActiveActionIcon("configure")}
+              onBlur={() => setActiveActionIcon(null)}
+              onClick={() => onConfigure(element.id)}
+            >
+              <CatalogIcon iconId="configure" active={activeActionIcon === "configure"} />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.moveUp}>
+            <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
+              <CatalogIcon iconId="move-up" />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.moveDown}>
+            <JBButton square size="sm" variant="ghost" aria-label={messages.moveDown} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
+              <CatalogIcon iconId="move-down" />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.duplicate}>
+            <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} onClick={() => onDuplicate(element.id)}>
+              <CatalogIcon iconId="duplicate" />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.remove}>
+            <JBButton
+              id={`element-remove-${element.id}`}
+              square
+              size="sm"
+              variant="ghost"
+              aria-label={messages.remove}
+              onPointerEnter={() => setActiveActionIcon("remove")}
+              onPointerLeave={() => setActiveActionIcon(null)}
+              onFocus={() => setActiveActionIcon("remove")}
+              onBlur={() => setActiveActionIcon(null)}
+              onClick={() => onRemove(element.id)}
+            >
+              <CatalogIcon iconId="remove" active={activeActionIcon === "remove"} />
+            </JBButton>
+          </BuilderTooltip>
+          <BuilderTooltip content={messages.dragToReorder}>
+            <JBButton
+              square
+              size="sm"
+              variant="ghost"
+              draggable
+              className={styles.dragHandle}
+              aria-label={messages.dragToReorder}
+              onDragStart={event => {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData(CANVAS_DRAG_TYPE, element.id);
+              }}
+            >
+              <CatalogIcon iconId="drag" />
+            </JBButton>
+          </BuilderTooltip>
         </div>
       ) : null}
     </div>

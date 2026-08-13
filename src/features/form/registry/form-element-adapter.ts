@@ -4,7 +4,7 @@ import type { FormIssue } from "../domain/form-issue";
 import type { CommonFieldSupport, FormElementPropertyDefinition, InitialValueKind } from "./form-element-configuration";
 import { compileValidationRule, validatePortableValidationRule, type ValidationRuleName } from "./validation-rule-registry";
 
-export type FormElementValueType = "string" | "number-string" | "boolean" | "select" | "file" | "image" | "none";
+export type FormElementValueType = "string" | "number-string" | "range" | "boolean" | "select" | "file" | "image" | "none";
 
 export interface RuntimeValidationTarget {
   list: ValidationItem<unknown>[];
@@ -55,6 +55,7 @@ const allowedValuesValidation = ["allowedValues"] as const satisfies readonly Va
 const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-input": () => import("jb-input"),
   "jb-number-input": () => import("jb-number-input"),
+  "jb-range-input": () => import("jb-range-input"),
   "jb-mobile-input": () => import("jb-mobile-input"),
   "jb-password-input": () => import("jb-password-input"),
   "jb-payment-input": () => import("jb-payment-input"),
@@ -63,7 +64,11 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-time-input": () => import("jb-time-input"),
   "jb-pin-input": () => import("jb-pin-input"),
   "jb-textarea": () => import("jb-textarea"),
-  "jb-select": () => import("jb-select"),
+  // jb-select 8 publishes jb-option as a separate entry point. Preview loads
+  // field dependencies lazily, so importing only the select entry would leave
+  // its declarative options as unregistered HTML elements.
+  "jb-select": () => Promise.all([import("jb-select"), import("jb-select/option")]),
+  "jb-listbox": () => Promise.all([import("jb-select/listbox"), import("jb-checkbox")]),
   "jb-checkbox": () => import("jb-checkbox"),
   "jb-switch": () => import("jb-switch"),
   "jb-file-input": () => import("jb-file-input"),
@@ -74,6 +79,7 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
 const definitions = [
   adapterDefinition("jb-input", "string", inputEvents, textValidation),
   adapterDefinition("jb-number-input", "number-string", inputEvents, rangedTextValidation),
+  adapterDefinition("jb-range-input", "range", ["input", "change", "invalid"], []),
   adapterDefinition("jb-mobile-input", "string", inputEvents, textValidation),
   adapterDefinition("jb-password-input", "string", inputEvents, textValidation),
   adapterDefinition("jb-payment-input", "string", inputEvents, textValidation),
@@ -83,6 +89,7 @@ const definitions = [
   adapterDefinition("jb-pin-input", "string", [...inputEvents, "complete"], textValidation),
   adapterDefinition("jb-textarea", "string", ["load", "init", ...inputEvents], textValidation),
   adapterDefinition("jb-select", "select", ["load", "init", "change", "input", "keyup", "filter-change"], allowedValuesValidation),
+  adapterDefinition("jb-listbox", "select", ["load", "init", "change", "input", "invalid", "filter-change"], allowedValuesValidation, "jb-select/listbox"),
   adapterDefinition("jb-checkbox", "boolean", ["change", "before-change"], allowedValuesValidation),
   adapterDefinition("jb-switch", "boolean", ["load", "init", "change", "before-change"], allowedValuesValidation),
   adapterDefinition("jb-file-input", "file", ["load", "init", "change", "delete", "download"], []),
@@ -95,10 +102,11 @@ function adapterDefinition(
   valueType: FormElementValueType,
   eventNames: readonly string[],
   validationRules: readonly ValidationRuleName[],
+  packageName: string = type,
 ): FormElementAdapterDefinition {
   return {
     type,
-    packageName: type,
+    packageName,
     tagName: type,
     adapterVersion: 1,
     supportedSchemaVersions: [1],
@@ -142,8 +150,11 @@ function validateInitialValue(element: JBFormElementV1, kind: InitialValueKind):
   const valid =
     kind === "boolean"
       ? typeof element.initialValue === "boolean"
+      : kind === "range"
+        ? typeof element.initialValue === "number" ||
+          (Array.isArray(element.initialValue) && element.initialValue.length === 2 && element.initialValue.every(value => typeof value === "number" && Number.isFinite(value)))
       : kind === "select"
-        ? typeof element.initialValue === "string" || Array.isArray(element.initialValue) || element.initialValue === null
+        ? ["string", "number", "boolean"].includes(typeof element.initialValue) || Array.isArray(element.initialValue) || element.initialValue === null
         : typeof element.initialValue === "string" || typeof element.initialValue === "number" || element.initialValue === null;
   return valid ? [] : [issue(element, "invalid-initial-value", "initialValue", `Initial value is not compatible with ${kind}.`)];
 }
@@ -298,7 +309,7 @@ function setNumberSeparatorRuntimeValue(target: RuntimeFormElement, key: "showTh
   target.removeAttribute("thousand-separator");
 }
 
-function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | undefined, locale: string, defaultLocale: string): void {
+function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | undefined, locale: string, defaultLocale: string, useCheckbox = false): void {
   target.querySelectorAll("[data-jb-form-option]").forEach(option => {
     option.remove();
   });
@@ -315,7 +326,16 @@ function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | unde
     (option as HTMLElement & { value?: JSONPrimitive }).value = optionValue;
     option.setAttribute("value", String(optionValue));
     option.toggleAttribute("disabled", candidate.disabled === true);
-    option.textContent = isLocalizedText(candidate.label) ? getLocalizedText(candidate.label, locale, defaultLocale) : String(optionValue);
+    const optionLabel = isLocalizedText(candidate.label) ? getLocalizedText(candidate.label, locale, defaultLocale) : String(optionValue);
+    if (useCheckbox) {
+      const checkbox = document.createElement("jb-checkbox") as HTMLElement & { disabled?: boolean };
+      checkbox.setAttribute("label", optionLabel);
+      checkbox.disabled = candidate.disabled === true;
+      checkbox.toggleAttribute("disabled", candidate.disabled === true);
+      option.append(checkbox);
+    } else {
+      option.textContent = optionLabel;
+    }
     target.append(option);
   }
 }
@@ -324,12 +344,14 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
   setRuntimeValue(target, "name", element.name);
   setRuntimeValue(target, "required", element.required);
   setRuntimeValue(target, "disabled", element.disabled);
-  setRuntimeValue(target, "initialValue", element.initialValue);
+  if (element.type !== "jb-range-input") {
+    setRuntimeValue(target, "initialValue", element.initialValue);
+  }
   setRuntimeValue(target, "label", element.label ? getLocalizedText(element.label, locale, defaultLocale) : undefined);
   setRuntimeValue(target, "placeholder", element.placeholder ? getLocalizedText(element.placeholder, locale, defaultLocale) : undefined);
   for (const [key, value] of Object.entries(element.props)) {
     if (key === "options") {
-      renderSelectOptions(target, value, locale, defaultLocale);
+      renderSelectOptions(target, value, locale, defaultLocale, element.type === "jb-listbox" && element.props.useCheckbox !== false);
     } else if (key === "content") {
       target.textContent = String(resolveRuntimeValue(value, locale, defaultLocale));
     } else if (element.type === "jb-number-input" && (key === "showThousandSeparator" || key === "thousandSeparator")) {
@@ -337,6 +359,9 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
     } else {
       setRuntimeValue(target, key, resolveRuntimeValue(value, locale, defaultLocale));
     }
+  }
+  if (element.type === "jb-range-input") {
+    setRuntimeValue(target, "initialValue", element.initialValue);
   }
   if (target.validation) {
     target.validation.list = element.validation.map(rule => compileValidationRule(rule, locale, defaultLocale));

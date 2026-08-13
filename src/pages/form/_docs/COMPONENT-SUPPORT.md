@@ -20,6 +20,7 @@ The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `jb-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-number-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
+| `jb-range-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-mobile-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-password-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-payment-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
@@ -29,6 +30,7 @@ The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0
 | `jb-pin-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-textarea` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-select` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
+| `jb-listbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-checkbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-switch` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-file-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |

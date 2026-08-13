@@ -32,6 +32,7 @@ export interface FormLocalization {
 export type JBFormElementType =
   | "jb-input"
   | "jb-number-input"
+  | "jb-range-input"
   | "jb-mobile-input"
   | "jb-password-input"
   | "jb-payment-input"
@@ -41,6 +42,7 @@ export type JBFormElementType =
   | "jb-pin-input"
   | "jb-textarea"
   | "jb-select"
+  | "jb-listbox"
   | "jb-checkbox"
   | "jb-switch"
   | "jb-file-input"

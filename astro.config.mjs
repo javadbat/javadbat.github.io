@@ -15,6 +15,7 @@ const formRendererAutoImports = [
   "jb-form",
   "jb-input",
   "jb-number-input",
+  "jb-range-input",
   "jb-mobile-input",
   "jb-password-input",
   "jb-payment-input",
@@ -24,6 +25,8 @@ const formRendererAutoImports = [
   "jb-pin-input",
   "jb-textarea",
   "jb-select",
+  "jb-select/option",
+  "jb-select/listbox",
   "jb-checkbox",
   "jb-switch",
   "jb-file-input",
@@ -37,6 +40,12 @@ const formRendererAutoImports = [
 // in-flight module request.
 const formBuilderExportImports = ["@mantine/code-highlight", "@mantine/core", "shiki"];
 
+// Keep MobX in the explicit cache inventory as well. The Builder is the only
+// route that imports mobx-react-lite, so an Astro production build can otherwise
+// replace the shared Vite cache without this entry while the dev server still
+// has a transformed Builder module pointing at the previous cache hash.
+const formBuilderRuntimeImports = ["mobx", "mobx-react-lite"];
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
@@ -46,7 +55,7 @@ export default defineConfig({
   },
   vite: {
     optimizeDeps: {
-      include: [...formRendererAutoImports, ...formBuilderExportImports],
+      include: [...formRendererAutoImports, ...formBuilderRuntimeImports, ...formBuilderExportImports],
     },
   },
   site: "https://javadbat.github.io",

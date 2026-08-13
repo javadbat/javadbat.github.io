@@ -20,10 +20,17 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   const [exportDocument, setExportDocument] = useState<JBFormDocumentV1 | null>(null);
   const [importIssues, setImportIssues] = useState<string[]>([]);
   const importInputRef = useRef<HTMLInputElement>(null);
-  const { locale, direction, setLocale, messages } = useFormLocale("en");
+  const { direction, setLocale, messages } = useFormLocale("en");
   const route = getCurrentFormRoute();
 
   useBuilderLifecycle(route.slug);
+
+  useEffect(() => {
+    // The selected form-content locale is also the builder UI locale. The UI
+    // currently has English and Persian dictionaries; other form locales use
+    // the English interface while their content remains editable as selected.
+    setLocale(store.editingLocale.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
+  }, [setLocale, store.editingLocale]);
 
   const openSettings = useCallback(() => setSettingsOpen(true), []);
   const navigate = useCallback(
@@ -96,7 +103,7 @@ const BuilderAppContent = observer(function BuilderAppContent() {
 
   return (
     <div className={styles.app} dir={direction}>
-      <BuilderHeader locale={locale} messages={messages} setLocale={setLocale} onOpenSettings={openSettings} onNavigate={navigate} onImport={openImport} onUndo={store.undo} onRedo={store.redo} onExport={openExport} />
+      <BuilderHeader messages={messages} onOpenSettings={openSettings} onNavigate={navigate} onImport={openImport} onUndo={store.undo} onRedo={store.redo} onExport={openExport} />
       <input ref={importInputRef} className={styles.srOnly} type="file" accept="application/json,.json" aria-label={messages.importJson} onChange={event => void handleImport(event)} />
       {importIssues.length > 0 ? (
         <div className={styles.importError} role="alert">
