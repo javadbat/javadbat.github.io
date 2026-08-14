@@ -1,0 +1,173 @@
+.modalHeading h2 {
+  margin: 0.1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--form-accent);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modalContent :global(jb-input),
+.modalContent :global(jb-select) {
+  inline-size: 100%;
+}
+
+.fieldError {
+  margin: 0;
+  color: oklch(0.5 0.18 28);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.modalContent {
+  display: grid;
+  gap: 1.25rem;
+  box-sizing: border-box;
+  inline-size: min(34rem, calc(100vw - 3rem));
+}
+
+.settingsSection {
+  display: grid;
+  gap: 0.9rem;
+  min-inline-size: 0;
+}
+
+.localeEditor {
+  display: grid;
+  gap: 0.75rem;
+  min-inline-size: 0;
+  padding-block-start: 0.15rem;
+}
+
+.settingsSectionTitle {
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.localeList {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.localeRow {
+  display: grid;
+  grid-template-columns: minmax(3rem, 0.3fr) minmax(9rem, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  min-inline-size: 0;
+}
+
+.localeRow strong {
+  color: var(--form-ink);
+  font-size: 0.8rem;
+}
+
+.addLocaleRow {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) minmax(9rem, 0.75fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+  min-inline-size: 0;
+  padding-block-start: 0.25rem;
+  border-block-start: 0.0625rem solid var(--form-inner-line);
+}
+
+.draftStatus {
+  margin: 0;
+  padding-block-start: 0.15rem;
+  color: var(--form-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.modalHeading h2 {
+  margin-block-start: 0.25rem;
+  font-size: 1.25rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.modalDescription {
+  max-inline-size: 30rem;
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 63.999rem) {
+  .modalActions :global(jb-button) {
+      --jb-button-height: 2.75rem;
+      --jb-button-height-sm: 2.75rem;
+    }
+   }
+
+@media (max-width: 63.999rem) {
+  .modalContent {
+      inline-size: calc(100vw - 1.5rem);
+    }
+   }
+
+@media (max-width: 30rem) {
+  .localeRow,
+  .addLocaleRow {
+      grid-template-columns: minmax(0, 1fr);
+    }
+   }
+
+@media (max-width: 30rem) {
+  .localeRow strong {
+      padding-block-end: 0;
+    }
+   }
+
+@media (max-width: 30rem) {
+  .modalActions {
+      flex-wrap: wrap;
+    }
+   }
+
+@media (max-width: 40rem) {
+  .modalContent {
+      inline-size: calc(100vw - 3rem);
+    }
+   }
+
+@media (max-width: 40rem) {
+  .addLocaleRow {
+      grid-template-columns: minmax(0, 1fr);
+    }
+   }
+
+@media (max-width: 40rem) {
+  .addLocaleRow :global(jb-button) {
+      inline-size: 100%;
+    }
+   }
+
+@media (max-width: 40rem) {
+  .modalActions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+   }
+
+@media (max-width: 40rem) {
+  .modalActions :global(jb-button:last-child) {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+   }
+

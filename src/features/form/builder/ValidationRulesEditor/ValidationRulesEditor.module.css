@@ -1,0 +1,68 @@
+.validationRule {
+  corner-shape: squircle;
+}
+
+.sectionDescription,
+.emptyRules {
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.addValidationRule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: end;
+}
+
+.validationRuleList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.validationRule {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--form-inner-line);
+  border-radius: var(--form-radius-md);
+  background: oklch(0.985 0.006 255);
+  box-shadow: none;
+}
+
+.validationRuleHeader {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.validationRuleHeader strong {
+  font-size: 0.75rem;
+}
+
+.validationParameterGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.35fr);
+  gap: 0.55rem;
+}
+
+.validationIssues {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline-start: 1rem;
+  color: oklch(0.5 0.18 28);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 30rem) {
+  .validationParameterGrid,
+  .addValidationRule {
+      grid-template-columns: minmax(0, 1fr);
+    }
+   }
+

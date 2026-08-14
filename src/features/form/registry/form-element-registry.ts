@@ -200,6 +200,31 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
+const persianDisplayNames: Record<JBFormElementType, string> = {
+  "jb-input": "ورودی متن",
+  "jb-number-input": "ورودی عدد",
+  "jb-range-input": "ورودی بازه",
+  "jb-mobile-input": "ورودی موبایل",
+  "jb-password-input": "ورودی رمز عبور",
+  "jb-payment-input": "ورودی پرداخت",
+  "jb-national-input": "ورودی کد ملی",
+  "jb-date-input": "ورودی تاریخ",
+  "jb-time-input": "ورودی زمان",
+  "jb-pin-input": "ورودی پین",
+  "jb-textarea": "متن چندخطی",
+  "jb-select": "انتخاب‌گر",
+  "jb-listbox": "فهرست انتخاب",
+  "jb-checkbox": "کادر انتخاب",
+  "jb-switch": "کلید",
+  "jb-file-input": "ورودی فایل",
+  "jb-image-input": "ورودی تصویر",
+  "jb-button": "دکمه",
+};
+
+export function getFormElementDisplayName(entry: FormElementRegistryEntry, locale: string): string {
+  return locale.toLowerCase().split("-")[0] === "fa" ? persianDisplayNames[entry.type] : entry.displayName;
+}
+
 export function createDefaultElement(entry: FormElementRegistryEntry, name: string): JBFormElementV1 {
   const element: JBFormElementV1 = {
     id: crypto.randomUUID(),

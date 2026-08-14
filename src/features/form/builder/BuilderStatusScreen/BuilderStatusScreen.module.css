@@ -1,0 +1,20 @@
+.stateScreen {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-block-size: 100dvh;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--form-ink, oklch(0.29 0.055 255));
+  background: var(--form-canvas, oklch(0.975 0.01 255));
+  text-align: center;
+  --jb-loading-width: 4rem;
+  --jb-loading-height: 4rem;
+
+}
+
+.stateScreen p {
+  margin: 0;
+  color: var(--form-muted, oklch(0.56 0.035 255));
+}
+

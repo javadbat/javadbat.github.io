@@ -11,7 +11,7 @@ import { IndexedDbFormRepository } from "../storage/form-repository";
 import { BuilderStore } from "./BuilderStore";
 import { BuilderStoreProvider } from "./BuilderStoreContext";
 import { CATALOG_DRAG_TYPE } from "./builder-drag";
-import { FormCanvas } from "./FormCanvas";
+import { FormCanvas } from "./FormCanvas/FormCanvas";
 
 function createDataTransfer(): DataTransfer {
   const data = new Map<string, string>();
@@ -189,6 +189,26 @@ describe("Builder core editing", () => {
     expect(store.document.elements.find(element => element.id === elementId)?.label?.translations).toEqual({ fa: "برچسب فارسی" });
   });
 
+  it("accepts localization assembled from observable store state", () => {
+    const store = new BuilderStore();
+    const localization = {
+      ...store.document.localization,
+      locales: {
+        ...store.document.localization.locales,
+        fa: { direction: "rtl" as const },
+      },
+    };
+
+    expect(() => store.setFormLocalization(localization)).not.toThrow();
+    expect(store.document.localization).toEqual({
+      defaultLocale: "en",
+      locales: {
+        en: { direction: "ltr" },
+        fa: { direction: "rtl" },
+      },
+    });
+  });
+
   it("updates an observable validation rule as portable form data", () => {
     const store = new BuilderStore();
     const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
@@ -199,7 +219,7 @@ describe("Builder core editing", () => {
 
     expect(ruleId).toBeTruthy();
     expect(rule?.rule).toBe("minLength");
-    if (!rule || rule.rule !== "minLength") {
+    if (rule?.rule !== "minLength") {
       throw new Error("Expected a minimum-length validation rule.");
     }
     expect(() =>
@@ -270,7 +290,7 @@ describe("Builder core editing", () => {
       store.addElement(formElementRegistry[1]);
     });
     const secondId = store.document.elements[1].id;
-    const canvasHandle = view.container.querySelector<HTMLElement>("jb-button[aria-label='Drag to reorder']");
+    const canvasHandle = view.container.querySelector<HTMLElement>("[data-selected='true'] jb-button[aria-label='Drag to reorder']");
     const firstInsertionTarget = view.container.querySelectorAll<HTMLElement>("div[data-active='false']")[0];
     const canvasTransfer = createDataTransfer();
 
@@ -301,6 +321,24 @@ describe("Builder core editing", () => {
     fireEvent.click(moveUp!);
     expect(store.document.elements.map(element => element.id)).toEqual([secondId, firstId]);
     expect(store.selectedElementId).toBe(secondId);
+  });
+
+  it("notifies the workspace when a field is selected", () => {
+    const store = new BuilderStore();
+    const firstId = store.addElement(formElementRegistry[0]);
+    const secondId = store.addElement(formElementRegistry[1]);
+    const onSelectElement = vi.fn();
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppDictionary.dictionary.en} onSelectElement={onSelectElement} />
+      </BuilderStoreProvider>,
+    );
+
+    fireEvent.click(view.container.querySelector<HTMLElement>(`#element-select-${firstId}`)!);
+
+    expect(store.selectedElementId).toBe(firstId);
+    expect(store.selectedElementId).not.toBe(secondId);
+    expect(onSelectElement).toHaveBeenCalledWith(firstId);
   });
 });
 

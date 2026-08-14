@@ -1,0 +1,78 @@
+.app {
+  --form-ink: var(--jb-neutral-2, oklch(0.25 0.055 258));
+  --form-muted: var(--jb-neutral-5, oklch(0.53 0.035 258));
+  --form-line: var(--jb-neutral-8, oklch(0.91 0.018 258));
+  --form-surface: var(--jb-white, oklch(1 0 0));
+  --form-canvas: var(--jb-neutral-9, oklch(0.982 0.008 258));
+  --form-accent: var(--jb-primary, oklch(0.58 0.21 259));
+  --form-accent-strong: var(--jb-primary-dark, oklch(0.46 0.19 259));
+  --form-accent-soft: var(--jb-primary-subtle, oklch(0.96 0.03 259));
+  --form-neutral-soft: var(--jb-neutral-9, oklch(0.97 0.01 258));
+  --form-success-ink: oklch(0.49 0.075 155);
+  --form-success-soft: oklch(0.965 0.03 155);
+  --form-warning-ink: oklch(0.52 0.1 75);
+  --form-warning-soft: oklch(0.97 0.04 85);
+  --form-shadow: oklch(0.28 0.04 255);
+  --shadow-drop: rgba(14, 63, 126, 0.04) 0 0 0 1px, rgba(42, 51, 69, 0.04) 0 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0 6px 6px -3px, rgba(14, 63, 126, 0.04) 0 12px 12px -6px, rgba(14, 63, 126, 0.04) 0 24px 24px -12px;
+  --shadow-box: rgba(0, 0, 0, 0.13) 0 0 11px -4px inset, rgba(0, 0, 0, 0.06) 0 2px 1px, rgba(0, 0, 0, 0.05) -4px 4px 10px;
+  --shadow-float: rgba(14, 63, 126, 0.08) 0 8px 28px -12px, rgba(42, 51, 70, 0.06) 0 3px 10px -6px;
+  --shadow-selected: 0 0 0 0.1875rem color-mix(in oklch, var(--form-accent) 16%, transparent), var(--shadow-float);
+  --form-radius-sm: 0.75rem;
+  --form-radius-md: 1rem;
+  --form-radius-lg: 1.35rem;
+  --form-inner-line: color-mix(in oklch, var(--form-line) 72%, transparent);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  block-size: 100dvh;
+  min-block-size: 0;
+  overflow: hidden;
+  color: var(--form-ink);
+  background: var(--form-canvas);
+}
+
+.app :global(jb-button[variant="outline"]) {
+  --jb-button-border-width: 0;
+  --jb-button-box-shadow: var(--shadow-drop);
+}
+
+.app :global(jb-button[color="primary"]) {
+  --jb-button-box-shadow: 0 0.4rem 1rem color-mix(in oklch, var(--form-accent) 24%, transparent);
+}
+
+.importError {
+  position: relative;
+  z-index: 2;
+  margin-inline: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 0;
+  border-radius: var(--form-radius-md);
+  color: var(--form-accent-strong);
+  background: color-mix(in oklch, var(--form-accent) 10%, var(--form-surface));
+  box-shadow: var(--shadow-drop);
+  font-size: 0.78rem;
+}
+
+.importError ul {
+  margin-block: 0.35rem 0;
+  padding-inline-start: 1.25rem;
+}
+
+.srOnly {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 0.0625rem;
+  block-size: 0.0625rem;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 63.999rem) {
+  .app {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+   }
+

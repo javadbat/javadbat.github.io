@@ -348,7 +348,16 @@ export class BuilderStore {
 
   setFormLocalization(localization: FormLocalization): void {
     const next = this.createDocumentSnapshot();
-    next.localization = structuredClone(toJS(localization));
+    // Callers can assemble a plain root object by spreading observable store
+    // state. In that case `toJS(localization)` leaves the plain root untouched,
+    // including any observable locale definitions nested inside it, and
+    // structuredClone rejects those MobX proxies. Rebuild this small portable
+    // value from its primitive fields so no observable references cross into
+    // the document snapshot.
+    next.localization = {
+      defaultLocale: localization.defaultLocale,
+      locales: Object.fromEntries(Object.entries(localization.locales).map(([locale, definition]) => [locale, { direction: definition.direction }])),
+    };
     pruneLocalizedTranslations(next as unknown as JSONValue, new Set(Object.keys(next.localization.locales)), next.localization.defaultLocale);
     this.document = next;
     this.editingLocale = next.localization.locales[this.editingLocale] ? this.editingLocale : next.localization.defaultLocale;
@@ -457,11 +466,7 @@ export class BuilderStore {
   private createElementInsertSnapshot(element: JBFormElementV1, insertionIndex: number): JBFormDocumentV1 {
     return {
       ...this.historyDocument,
-      elements: [
-        ...this.historyDocument.elements.slice(0, insertionIndex),
-        toJS(element) as JBFormElementV1,
-        ...this.historyDocument.elements.slice(insertionIndex),
-      ],
+      elements: [...this.historyDocument.elements.slice(0, insertionIndex), toJS(element) as JBFormElementV1, ...this.historyDocument.elements.slice(insertionIndex)],
     };
   }
 
@@ -509,7 +514,9 @@ export class BuilderStore {
 
 function pruneLocalizedTranslations(value: JSONValue, allowedLocales: Set<string>, fallbackLocale: string): void {
   if (Array.isArray(value)) {
-    value.forEach(item => pruneLocalizedTranslations(item, allowedLocales, fallbackLocale));
+    value.forEach(item => {
+      pruneLocalizedTranslations(item, allowedLocales, fallbackLocale);
+    });
     return;
   }
   if (value === null || typeof value !== "object") {
@@ -529,11 +536,23 @@ function pruneLocalizedTranslations(value: JSONValue, allowedLocales: Set<string
     return;
   }
 
-  Object.values(value).forEach(child => pruneLocalizedTranslations(child, allowedLocales, fallbackLocale));
+  Object.values(value).forEach(child => {
+    pruneLocalizedTranslations(child, allowedLocales, fallbackLocale);
+  });
 }
 
 function isLocalizedTextValue(value: JSONValue | undefined): value is JSONValue & { translations: Record<string, string> } {
-  return value !== undefined && value !== null && typeof value === "object" && !Array.isArray(value) && "translations" in value && value.translations !== null && typeof value.translations === "object" && !Array.isArray(value.translations) && Object.values(value.translations).every(item => typeof item === "string");
+  return (
+    value !== undefined &&
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "translations" in value &&
+    value.translations !== null &&
+    typeof value.translations === "object" &&
+    !Array.isArray(value.translations) &&
+    Object.values(value.translations).every(item => typeof item === "string")
+  );
 }
 
 function patchLocalizedText(value: LocalizedText | undefined, text: string, locale: string): LocalizedText | undefined {

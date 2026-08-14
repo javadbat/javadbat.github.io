@@ -1,5 +1,5 @@
 import { parseFormRoute } from "../application/form-route";
-import { BuilderApp } from "../builder/BuilderApp";
+import { BuilderApp } from "../builder/BuilderApp/BuilderApp";
 import { DesignerPlaceholderApp } from "../designer/DesignerPlaceholderApp";
 import { PreviewApp } from "../preview/PreviewApp";
 import styles from "./RouteShell.module.css";
