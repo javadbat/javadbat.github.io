@@ -1,19 +1,28 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
-import { prepareFormImportFile } from "../../import/form-import";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import { formRouteHref } from "../../application/form-route";
 import type { BuilderNavigationTarget } from "../BuilderHeader/BuilderHeader";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 
-export function useBuilderAppActions(messages: FormMessages) {
+export function useBuilderAppActions() {
   const store = useBuilderStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [focusFormName, setFocusFormName] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [exportDocument, setExportDocument] = useState<JBFormDocumentV1 | null>(null);
-  const [importIssues, setImportIssues] = useState<string[]>([]);
-  const importInputRef = useRef<HTMLInputElement>(null);
 
-  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const openSettings = useCallback(() => {
+    setFocusFormName(false);
+    setSettingsOpen(true);
+  }, []);
+  const openSettingsForFormName = useCallback(() => {
+    setFocusFormName(true);
+    setSettingsOpen(true);
+  }, []);
+  const closeSettings = useCallback(() => {
+    setSettingsOpen(false);
+    setFocusFormName(false);
+  }, []);
   const navigate = useCallback(
     (target: BuilderNavigationTarget) => {
       if (store.isDirty || !store.hasSavedDraft) {
@@ -26,27 +35,23 @@ export function useBuilderAppActions(messages: FormMessages) {
   );
   const openExport = useCallback(() => setExportDocument(store.createDocumentSnapshot()), [store]);
   const closeExport = useCallback(() => setExportDocument(null), []);
-  const openImport = useCallback(() => {
-    setImportIssues([]);
-    importInputRef.current?.click();
-  }, []);
-  const handleImport = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.currentTarget.files?.[0];
-      event.currentTarget.value = "";
-      if (!file) return;
-      const result = await prepareFormImportFile(file);
-      if (!result.valid) {
-        setImportIssues(result.issues.map(issue => `${issue.path}: ${issue.message}`));
-      } else if (store.importDocument(result.document)) {
-        setImportIssues([]);
-        store.announce(messages.importSuccess);
-      }
-    },
-    [messages.importSuccess, store],
-  );
+  const openImport = useCallback(() => setImportOpen(true), []);
+  const closeImport = useCallback(() => setImportOpen(false), []);
 
-  return { settingsOpen, setSettingsOpen, exportDocument, importIssues, importInputRef, navigate, openSettings, openExport, closeExport, openImport, handleImport };
+  return {
+    settingsOpen,
+    focusFormName,
+    importOpen,
+    exportDocument,
+    navigate,
+    openSettings,
+    openSettingsForFormName,
+    closeSettings,
+    openExport,
+    closeExport,
+    openImport,
+    closeImport,
+  };
 }
 
 export function useHistoryShortcuts(): void {

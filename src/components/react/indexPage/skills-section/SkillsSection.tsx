@@ -8,6 +8,7 @@ import styles from "./styles.module.css";
 import { Activity, useState } from "react";
 import ProductContent from "./contents/ProductContent";
 import { ClientJBModal } from "../../components/modal/ClientJBModal";
+import { ModalCloseButton } from "../../components/modal/ModalCloseButton";
 import contentStyles from "./contents/common.module.css";
 import UiContent from "./contents/UiContent";
 
@@ -127,7 +128,10 @@ function SkillsSection() {
       </div>
       <ClientJBModal id="SkillDetail" isOpen={!!modalContent} label={modalContent ? skillModalTitles[modalContent] : "Skills"} onClose={() => setModalContent(null)} className={styles.skillModal}>
         <div slot="header">
-          <h2 className={contentStyles.skillTitle}>{modalContent ? skillModalTitles[modalContent] : "Skills"}</h2>
+          <div>
+            <h2 className={contentStyles.skillTitle}>{modalContent ? skillModalTitles[modalContent] : "Skills"}</h2>
+          </div>
+          <ModalCloseButton label="Close" onClick={() => setModalContent(null)} />
         </div>
         <div slot="content">
           <Activity mode={modalContent == "product" ? "visible" : "hidden"}>

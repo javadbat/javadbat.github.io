@@ -11,13 +11,15 @@ type MobilePanel = "catalog" | "canvas" | "properties";
 
 interface BuilderWorkspaceProps {
   messages: FormMessages;
+  onOpenFormNameSettings?: () => void;
 }
 
 /**
- * Keeps the compact-layout tab choice local because no other builder section
- * consumes it. Shared form data continues to live in the MobX builder store.
+ * Provides the breakpoint-specific compact and mobile workspace views. Their
+ * active-panel choices stay local because no other builder section consumes
+ * them; shared form data continues to live in the MobX builder store.
  */
-export const BuilderWorkspace = memo(function BuilderWorkspace({ messages }: BuilderWorkspaceProps) {
+export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpenFormNameSettings }: BuilderWorkspaceProps) {
   const [compactPanel, setCompactPanel] = useState<CompactPanel>("catalog");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("canvas");
 
@@ -46,6 +48,7 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages }: Bui
         <ComponentCatalog messages={messages} onElementAdded={() => setMobilePanel("canvas")} />
         <FormCanvas
           messages={messages}
+          onOpenFormNameSettings={onOpenFormNameSettings}
           onSelectElement={() => {
             setCompactPanel("properties");
           }}

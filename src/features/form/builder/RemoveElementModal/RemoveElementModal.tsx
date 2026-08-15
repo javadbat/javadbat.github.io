@@ -1,5 +1,6 @@
 import { JBButton } from "jb-button/react";
 import { ClientJBModal } from "../../../../components/react/components/modal/ClientJBModal";
+import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import styles from "./RemoveElementModal.module.css";
 
@@ -14,9 +15,12 @@ interface RemoveElementModalProps {
 export function RemoveElementModal({ isOpen, elementLabel, messages, onCancel, onConfirm }: RemoveElementModalProps) {
   return (
     <ClientJBModal isOpen={isOpen} label={messages.confirmRemoveTitle} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onCancel}>
-      <div slot="header" className={styles.modalHeading}>
-        <p className={styles.eyebrow}>{elementLabel}</p>
-        <h2>{messages.confirmRemoveTitle}</h2>
+      <div slot="header">
+        <div className={styles.modalHeading}>
+          <p className={styles.eyebrow}>{elementLabel}</p>
+          <h2>{messages.confirmRemoveTitle}</h2>
+        </div>
+        <ModalCloseButton label={messages.close} onClick={onCancel} />
       </div>
       <div slot="content" className={styles.modalContent}>
         <p className={styles.modalDescription}>{messages.confirmRemoveDescription}</p>

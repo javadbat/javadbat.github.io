@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { canonicalizeLocaleCode, inferLocaleDirection, type LocaleDefinition } from "../../domain/form-document";
 import { isValidFormSlug, normalizeFormSlug } from "../../application/form-slug";
 import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 
 export function copyLocaleDefinitions(locales: Record<string, LocaleDefinition>): Record<string, LocaleDefinition> {
   return Object.fromEntries(Object.entries(locales).map(([locale, definition]) => [locale, { direction: definition.direction }]));
@@ -14,7 +14,6 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
   const [defaultLocale, setDefaultLocale] = useState(store.document.localization.defaultLocale);
   const [locales, setLocales] = useState<Record<string, LocaleDefinition>>({});
   const [newLocale, setNewLocale] = useState("");
-  const [newLocaleDirection, setNewLocaleDirection] = useState<LocaleDefinition["direction"]>("ltr");
   const [localeError, setLocaleError] = useState("");
   const [slug, setSlug] = useState(store.document.slug ?? "");
   const [saveError, setSaveError] = useState("");
@@ -25,7 +24,6 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
     setDefaultLocale(store.document.localization.defaultLocale);
     setLocales(copyLocaleDefinitions(store.document.localization.locales));
     setNewLocale("");
-    setNewLocaleDirection("ltr");
     setLocaleError("");
     setSlug(store.document.slug ?? "");
     setSaveError("");
@@ -37,7 +35,7 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
     const normalized = canonicalizeLocaleCode(newLocale);
     if (!normalized) return setLocaleError(messages.localeInvalid);
     if (locales[normalized]) return setLocaleError(messages.localeAlreadyAdded);
-    setLocales(current => ({ ...current, [normalized]: { direction: newLocaleDirection || inferLocaleDirection(normalized) } }));
+    setLocales(current => ({ ...current, [normalized]: { direction: inferLocaleDirection(normalized) } }));
     setNewLocale("");
     setLocaleError("");
   };
@@ -65,8 +63,6 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
     setLocales,
     newLocale,
     setNewLocale,
-    newLocaleDirection,
-    setNewLocaleDirection,
     localeError,
     slug,
     setSlug,

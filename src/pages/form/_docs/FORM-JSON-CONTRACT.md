@@ -387,6 +387,9 @@ The function exists only at runtime inside the trusted rule registry.
 
 Version 1 supports these registry keys:
 
+- `text` (localized static text)
+- `image` (URL and localized alternative text)
+- `voice` (audio URL)
 - `jb-input`
 - `jb-number-input`
 - `jb-range-input`

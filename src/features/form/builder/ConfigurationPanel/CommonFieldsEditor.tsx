@@ -6,7 +6,7 @@ import { JBSelect } from "jb-select/react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementRegistryEntry } from "../../registry/form-element-registry";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
 import { inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
@@ -65,6 +65,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
         entry.initialValueKind === "boolean" ? (
           <JBSelect<string>
             size="sm"
+            popoverPosition="fixed"
             name="elementInitialValue"
             label={messages.initialValue}
             value={typeof element.initialValue === "boolean" ? String(element.initialValue) : "unset"}

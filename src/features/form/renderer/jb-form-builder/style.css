@@ -33,6 +33,21 @@
   max-inline-size: 100%;
 }
 
+[part~="element"] > p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+[part~="element"] > img {
+  display: block;
+  block-size: auto;
+}
+
+[part~="element"] > audio {
+  display: block;
+  inline-size: 100%;
+}
+
 [part~="loading"],
 [part~="error-summary"],
 [part~="element-error"] {

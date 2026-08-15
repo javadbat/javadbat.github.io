@@ -74,7 +74,7 @@ export function getRequiredDependencies(document: JBFormDocumentV1): RendererDep
     }
     seen.add(element.type);
     const adapter = registryByType.get(element.type);
-    if (!adapter) {
+    if (!adapter || adapter.isContent) {
       continue;
     }
     dependencies.push({

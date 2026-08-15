@@ -30,6 +30,9 @@ export interface FormLocalization {
 }
 
 export type JBFormElementType =
+  | "text"
+  | "image"
+  | "voice"
   | "jb-input"
   | "jb-number-input"
   | "jb-range-input"

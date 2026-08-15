@@ -37,6 +37,12 @@ const formAppDictionarySource = {
     importJson: "Import JSON",
     importSuccess: "JSON imported into the draft. Save to persist it.",
     importFailure: "JSON import failed.",
+    importDescription: "Paste a portable form document or choose a JSON file. The document is checked against the current form schema before import.",
+    pasteJson: "Paste form JSON",
+    pasteJsonPlaceholder: "Paste the exported form JSON here…",
+    chooseJsonFile: "Choose JSON file",
+    jsonSchemaValid: "Valid JSON — the document matches the form schema.",
+    importDocument: "Import document",
     undo: "Undo",
     redo: "Redo",
     exportJson: "Export JSON",
@@ -125,11 +131,11 @@ const formAppDictionarySource = {
     previewPendingDescription: "This page will reload saved JSON from IndexedDB and render it responsively.",
     previewReadyTitle: "Saved form preview",
     previewReadyDescription: "This form was reloaded independently from IndexedDB and rendered from its portable JSON.",
-    validateForm: "Validate form",
+    submitForm: "Submit",
     resetForm: "Reset form",
     formPreparing: "Preparing the form…",
     validatingForm: "Checking the form…",
-    validationReady: "Ready to validate.",
+    validationReady: "Ready to submit.",
     formIsValid: "Everything looks good. The form is valid.",
     formHasErrors: "Some fields need your attention.",
     validationFailed: "Validation could not be completed.",
@@ -185,6 +191,12 @@ const formAppDictionarySource = {
     importJson: "ورود JSON",
     importSuccess: "JSON در پیش‌نویس وارد شد. برای ذخیره‌سازی، ذخیره را بزنید.",
     importFailure: "ورود JSON ناموفق بود.",
+    importDescription: "JSON فرم را جای‌گذاری کنید یا یک فایل JSON انتخاب کنید. سند پیش از ورود با ساختار فعلی فرم بررسی می‌شود.",
+    pasteJson: "جای‌گذاری JSON فرم",
+    pasteJsonPlaceholder: "JSON خروجی فرم را اینجا جای‌گذاری کنید…",
+    chooseJsonFile: "انتخاب فایل JSON",
+    jsonSchemaValid: "JSON معتبر است و با ساختار فرم مطابقت دارد.",
+    importDocument: "ورود سند",
     undo: "واگرد",
     redo: "بازانجام",
     exportJson: "خروجی JSON",
@@ -273,11 +285,11 @@ const formAppDictionarySource = {
     previewPendingDescription: "این صفحه JSON ذخیره‌شده را از IndexedDB می‌خواند و واکنش‌گرا نمایش می‌دهد.",
     previewReadyTitle: "پیش‌نمایش فرم ذخیره‌شده",
     previewReadyDescription: "این فرم به‌طور مستقل از IndexedDB خوانده و از JSON قابل‌انتقال آن رندر شده است.",
-    validateForm: "اعتبارسنجی فرم",
+    submitForm: "ارسال",
     resetForm: "بازنشانی فرم",
     formPreparing: "در حال آماده‌سازی فرم…",
     validatingForm: "در حال بررسی فرم…",
-    validationReady: "آماده اعتبارسنجی است.",
+    validationReady: "آماده ارسال است.",
     formIsValid: "همه‌چیز درست است. فرم معتبر است.",
     formHasErrors: "برخی فیلدها نیاز به بررسی دارند.",
     validationFailed: "اعتبارسنجی کامل نشد.",
@@ -306,6 +318,7 @@ const formAppDictionarySource = {
 
 export type FormMessageKey = keyof (typeof formAppDictionarySource)["en"];
 export type FormMessages = Record<FormMessageKey, string>;
+export const formAppMessages: Record<FormAppLocale, FormMessages> = formAppDictionarySource;
 
 const formMessageKeys = Object.keys(formAppDictionarySource.en) as FormMessageKey[];
 
@@ -356,14 +369,17 @@ function configureJBI18n(locale: FormAppLocale): FormMessages {
 
   document.documentElement.lang = locale;
   document.documentElement.dir = direction;
-  i18n.setLocale(locale === "fa" ? new Intl.Locale("fa", { calendar: "persian", region: "IR" }) : new Intl.Locale("en", { calendar: "gregory", region: "US" }));
+  // jb-core resolves the calendar, region, and numbering-system defaults.
+  // Passing the locale string also ensures every locale-aware JB component,
+  // including jb-range-input, receives the same canonical configuration.
+  i18n.setLocale(locale);
 
   return resolveFormMessages(formAppDictionary, i18n);
 }
 
 export function useFormLocale(initialLocale: FormAppLocale = "en") {
   const [locale, setLocale] = useState<FormAppLocale>(initialLocale);
-  const [messages, setMessages] = useState<FormMessages>(formAppDictionary.dictionary[initialLocale]);
+  const [messages, setMessages] = useState<FormMessages>(formAppMessages[initialLocale]);
 
   useEffect(() => {
     setMessages(configureJBI18n(locale));

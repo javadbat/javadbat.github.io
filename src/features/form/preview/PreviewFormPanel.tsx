@@ -23,7 +23,7 @@ export function PreviewFormPanel({ document, accessibleName, messages }: Preview
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>("preparing");
 
-  const validate = useCallback(async () => {
+  const submit = useCallback(async () => {
     const renderer = rendererRef.current;
     if (!renderer) {
       return;
@@ -35,12 +35,18 @@ export function PreviewFormPanel({ document, accessibleName, messages }: Preview
       // for this public boundary prevents an early validity check from treating
       // a not-yet-created jb-form as valid.
       await renderer.updateComplete;
-      // reportValidity() is the native-style path that asks every JB field to
-      // expose its own error UI. Keep the async check as a second boundary so
-      // this control will also cover asynchronous rules when they are added.
-      const isSynchronouslyValid = renderer.reportValidity();
-      const isAsynchronouslyValid = await renderer.checkValidityAsync(true);
-      setValidationState(isSynchronouslyValid && isAsynchronouslyValid ? "valid" : "invalid");
+      const result = await renderer.form?.jbCheckValidity({ showError: true });
+      if (!result) {
+        setValidationState("error");
+        return;
+      }
+
+      setValidationState(result.isAllValid ? "valid" : "invalid");
+      if (!result.isAllValid) {
+        const { getInvalidElements } = await import("jb-form");
+        const [firstInvalidElement] = getInvalidElements(result);
+        firstInvalidElement?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     } catch {
       setValidationState("error");
     }
@@ -79,8 +85,8 @@ export function PreviewFormPanel({ document, accessibleName, messages }: Preview
       />
       <footer className={styles.previewActions}>
         <div className={styles.previewActionButtons}>
-          <JBButton color="primary" disabled={controlsDisabled} onClick={() => void validate()}>
-            {messages.validateForm}
+          <JBButton color="primary" disabled={controlsDisabled} onClick={() => void submit()}>
+            {messages.submitForm}
           </JBButton>
           <JBButton variant="outline" disabled={controlsDisabled} onClick={reset}>
             {messages.resetForm}

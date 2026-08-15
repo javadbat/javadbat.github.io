@@ -1,3 +1,4 @@
+import { i18n } from "jb-core/i18n";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import type { FormIssue } from "../../domain/form-issue";
 
@@ -5,8 +6,6 @@ export interface ActiveFormLocale {
   locale: string;
   direction: "ltr" | "rtl";
 }
-
-let i18nModulePromise: Promise<typeof import("jb-core/i18n")> | undefined;
 
 export function resolveFormLocale(document: JBFormDocumentV1, override: string | null): ActiveFormLocale {
   const locale = override?.trim() || document.localization.defaultLocale;
@@ -22,17 +21,13 @@ export async function configureFormLocale(activeLocale: ActiveFormLocale, autoIm
     return [];
   }
   try {
-    // jb-core/i18n currently touches document during module initialization.
-    // Keeping this import inside the client render path makes the surrounding
-    // renderer architecture straightforward to make fully SSR-safe later.
     document.documentElement.lang = activeLocale.locale;
     document.documentElement.dir = activeLocale.direction;
-    i18nModulePromise ??= import("jb-core/i18n");
-    const { i18n } = await i18nModulePromise;
-    i18n.setLocale(new Intl.Locale(activeLocale.locale));
+    // jb-core@0.33 is safe to import outside the browser and owns locale
+    // defaults, normalization, and subscriber notification.
+    i18n.setLocale(activeLocale.locale);
     return [];
   } catch (error) {
-    i18nModulePromise = undefined;
     return [
       {
         source: "renderer",

@@ -94,6 +94,16 @@
   outline: none;
 }
 
+.settingsIcon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .identityBadge,
 .saveState {
   display: inline-flex;
@@ -154,16 +164,12 @@
 
 .artboardIcon::after {
   position: absolute;
-  inset-block-start: 0.08rem;
-  inset-inline-start: 0.08rem;
-  inline-size: 0.2rem;
-  block-size: 0.2rem;
-  border-radius: 0.03rem;
-  background: currentcolor;
-  box-shadow:
-    0.64rem 0 currentcolor,
-    0 0.64rem currentcolor,
-    0.64rem 0.64rem currentcolor;
+  inset: 0.08rem;
+  background:
+    linear-gradient(currentcolor 0 0) left top / 0.2rem 0.2rem no-repeat,
+    linear-gradient(currentcolor 0 0) right top / 0.2rem 0.2rem no-repeat,
+    linear-gradient(currentcolor 0 0) left bottom / 0.2rem 0.2rem no-repeat,
+    linear-gradient(currentcolor 0 0) right bottom / 0.2rem 0.2rem no-repeat;
   content: "";
 }
 
@@ -177,6 +183,28 @@
 
 .historyActions {
   padding-inline-end: 0.5rem;
+}
+
+.historyIcon {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.historyIcon[data-action="redo"] {
+  transform: scaleX(-1);
+}
+
+.historyIcon:dir(rtl)[data-action="undo"] {
+  transform: scaleX(-1);
+}
+
+.historyIcon:dir(rtl)[data-action="redo"] {
+  transform: none;
 }
 
 .documentActions {
@@ -361,4 +389,3 @@
       max-inline-size: 7rem;
     }
    }
-

@@ -268,19 +268,7 @@
     }
 
     .skillModal::part(background) {
-        opacity: 0;
-        transition: opacity var(--anime-duration) ease,
-                    backdrop-filter  var(--anime-duration) ease;
-        backdrop-filter: blur(0px) contrast(1);
-    }
-
-    .skillModal:state(open)::part(background) {
-        opacity: 1;
         backdrop-filter: blur(10px) contrast(3.5);
-        @starting-style {
-            opacity: 0;
-            backdrop-filter: blur(10px) contrast(1);
-        }
     }
 
     .skillModal::part(content-box) {

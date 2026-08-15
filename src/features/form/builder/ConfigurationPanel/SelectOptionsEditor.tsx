@@ -4,7 +4,7 @@ import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { getLocalizedText, type JSONValue } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { asSelectOptions, inputValue, type PortableSelectOption } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
 

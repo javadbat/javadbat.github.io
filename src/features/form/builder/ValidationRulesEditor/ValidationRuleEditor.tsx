@@ -4,7 +4,7 @@ import { JBInput } from "jb-input/react";
 import { getLocalizedText, type JBValidationRule, type LocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getValidationIssueMessage, parseAllowedValues, validatePortableValidationRule, type ValidationRuleName } from "../../registry/validation-rule-registry";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { ruleLabel } from "./validation-rule-label";
 import styles from "./ValidationRulesEditor.module.css";
 

@@ -4,14 +4,28 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
 import { autorun } from "mobx";
 import { describe, expect, it, vi } from "vitest";
-import { createEmptyFormDocument } from "../domain/form-document";
-import { formAppDictionary } from "../i18n/locale-adapter";
-import { formElementRegistry } from "../registry/form-element-registry";
-import { IndexedDbFormRepository } from "../storage/form-repository";
+import { createEmptyFormDocument } from "../../domain/form-document";
+import { formAppMessages } from "../../i18n/locale-adapter";
+import { formElementRegistry } from "../../registry/form-element-registry";
+import { IndexedDbFormRepository } from "../../storage/form-repository";
 import { BuilderStore } from "./BuilderStore";
 import { BuilderStoreProvider } from "./BuilderStoreContext";
-import { CATALOG_DRAG_TYPE } from "./builder-drag";
-import { FormCanvas } from "./FormCanvas/FormCanvas";
+import { CATALOG_DRAG_TYPE } from "../builder-drag";
+import { FormCanvas } from "../FormCanvas/FormCanvas";
+import { PropertyField } from "../ConfigurationPanel/PropertyField";
+
+// Happy DOM lacks the ElementInternals API used by jb-tooltip. Real supported
+// browsers provide it; this shim keeps these component tests on the real UI path.
+if (typeof HTMLElement.prototype.attachInternals !== "function") {
+  HTMLElement.prototype.attachInternals = () =>
+    ({
+      states: new Set<string>(),
+      form: null,
+      validationMessage: "",
+      setFormValue: () => undefined,
+      setValidity: () => undefined,
+    }) as unknown as ElementInternals;
+}
 
 function createDataTransfer(): DataTransfer {
   const data = new Map<string, string>();
@@ -65,7 +79,7 @@ describe("Builder shell performance baseline", () => {
     const renderStartedAt = performance.now();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppDictionary.dictionary.en} />
+        <FormCanvas messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
     const renderDuration = performance.now() - renderStartedAt;
@@ -85,6 +99,23 @@ describe("Builder shell performance baseline", () => {
 });
 
 describe("Builder core editing", () => {
+  it("edits static text content with jb-textarea", () => {
+    const store = new BuilderStore();
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    store.addElement(textEntry);
+    const contentDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "content")!;
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <PropertyField definition={contentDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const textarea = view.container.querySelector<HTMLElement>('jb-textarea[name="prop-content"]');
+
+    expect(textarea).toBeTruthy();
+    fireEvent.input(textarea!, { target: { value: "A longer introduction\nwith two lines." } });
+    expect(store.selectedElement?.props.content).toEqual({ translations: { en: "A longer introduction\nwith two lines." } });
+  });
+
   it("creates registry defaults without sharing mutable props", () => {
     const store = new BuilderStore();
 
@@ -272,7 +303,7 @@ describe("Builder core editing", () => {
     const store = new BuilderStore();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppDictionary.dictionary.en} />
+        <FormCanvas messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
     const emptyDropTarget = view.container.querySelector<HTMLElement>("[data-drop-active='false']");
@@ -312,7 +343,7 @@ describe("Builder core editing", () => {
     const secondId = store.addElement(formElementRegistry[1]);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppDictionary.dictionary.en} />
+        <FormCanvas messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
     const moveUp = view.container.querySelector<HTMLElement>("jb-button[aria-label='Move up']");
@@ -330,7 +361,7 @@ describe("Builder core editing", () => {
     const onSelectElement = vi.fn();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppDictionary.dictionary.en} onSelectElement={onSelectElement} />
+        <FormCanvas messages={formAppMessages.en} onSelectElement={onSelectElement} />
       </BuilderStoreProvider>,
     );
 
@@ -339,6 +370,20 @@ describe("Builder core editing", () => {
     expect(store.selectedElementId).toBe(firstId);
     expect(store.selectedElementId).not.toBe(secondId);
     expect(onSelectElement).toHaveBeenCalledWith(firstId);
+  });
+
+  it("opens form-name settings when the canvas title is clicked", () => {
+    const store = new BuilderStore();
+    const onOpenFormNameSettings = vi.fn();
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppMessages.en} onOpenFormNameSettings={onOpenFormNameSettings} />
+      </BuilderStoreProvider>,
+    );
+
+    fireEvent.click(view.container.querySelector<HTMLElement>("#form-canvas-title button")!);
+
+    expect(onOpenFormNameSettings).toHaveBeenCalledOnce();
   });
 });
 
@@ -383,7 +428,8 @@ describe("Builder explicit persistence", () => {
     });
     const store = new BuilderStore(undefined, repository);
     await store.initialize();
-    store.addElement(formElementRegistry[0]);
+    const firstEntry = formElementRegistry[0];
+    store.addElement(firstEntry);
 
     expect(store.isDirty).toBe(true);
     expect(await repository.getCurrentDraft()).toEqual({
@@ -398,7 +444,7 @@ describe("Builder explicit persistence", () => {
     const restored = new BuilderStore(undefined, repository);
     expect(await restored.initialize()).toBe(true);
     expect(restored.document.elements).toHaveLength(1);
-    expect(restored.document.elements[0].name).toBe("text");
+    expect(restored.document.elements[0].name).toBe(firstEntry.defaultName);
     expect(restored.isDirty).toBe(false);
     repository.close();
   });

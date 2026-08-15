@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType } from "../../registry/form-element-registry";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
 import { ValidationRulesEditor } from "../ValidationRulesEditor/ValidationRulesEditor";

@@ -1,6 +1,6 @@
 import type { JBFormElementType, JSONValue } from "../domain/form-document";
 
-export type PropertyControl = "text" | "number" | "boolean" | "select" | "string-list" | "options";
+export type PropertyControl = "text" | "textarea" | "url" | "number" | "boolean" | "select" | "string-list" | "options";
 
 export interface PropertyLabel {
   en: string;
@@ -47,6 +47,19 @@ const textProperty = (key: string, en: string, fa: string, localized = false): F
   label: label(en, fa),
   control: "text",
   localized,
+});
+
+const textareaProperty = (key: string, en: string, fa: string, localized = false): FormElementPropertyDefinition => ({
+  key,
+  label: label(en, fa),
+  control: "textarea",
+  localized,
+});
+
+const urlProperty = (key: string, en: string, fa: string): FormElementPropertyDefinition => ({
+  key,
+  label: label(en, fa),
+  control: "url",
 });
 
 const numberProperty = (key: string, en: string, fa: string, options: Pick<FormElementPropertyDefinition, "min" | "max" | "step"> = {}): FormElementPropertyDefinition => ({
@@ -167,6 +180,94 @@ const configuration = (
 });
 
 export const configurationByType: Record<JBFormElementType, FormElementConfiguration> = {
+  text: configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "string",
+    {
+      content: { translations: { en: "Text" } },
+      color: "#243247",
+      fontSize: 1,
+      fontWeight: "normal",
+      textAlign: "start",
+      lineHeight: 1.6,
+    },
+    [
+      textareaProperty("content", "Text", "متن", true),
+      textProperty("color", "Color", "رنگ"),
+      numberProperty("fontSize", "Font size (rem)", "اندازه متن (rem)", { min: 0.5, max: 6, step: 0.125 }),
+      selectProperty("fontWeight", "Font weight", "ضخامت متن", [
+        { value: "normal", label: label("Normal", "معمولی") },
+        { value: "medium", label: label("Medium", "متوسط") },
+        { value: "semibold", label: label("Semi-bold", "نیمه‌پررنگ") },
+        { value: "bold", label: label("Bold", "پررنگ") },
+      ]),
+      selectProperty("textAlign", "Alignment", "تراز متن", [
+        { value: "start", label: label("Start", "ابتدا") },
+        { value: "center", label: label("Center", "وسط") },
+        { value: "end", label: label("End", "انتها") },
+      ]),
+      numberProperty("lineHeight", "Line height", "ارتفاع خط", { min: 1, max: 3, step: 0.1 }),
+    ],
+  ),
+  image: configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "string",
+    {
+      url: "",
+      alt: { translations: { en: "" } },
+      size: "full",
+      containerType: "plain",
+      aspectRatio: "auto",
+      objectFit: "contain",
+      objectPosition: "center",
+      alignment: "center",
+    },
+    [
+      urlProperty("url", "Image URL", "نشانی تصویر"),
+      textProperty("alt", "Alternative text", "متن جایگزین", true),
+      selectProperty("size", "Size", "اندازه", [
+        { value: "auto", label: label("Original", "اصلی") },
+        { value: "sm", label: label("Small", "کوچک") },
+        { value: "md", label: label("Medium", "متوسط") },
+        { value: "lg", label: label("Large", "بزرگ") },
+        { value: "full", label: label("Full width", "تمام‌عرض") },
+      ]),
+      selectProperty("containerType", "Container", "نوع قاب", [
+        { value: "plain", label: label("Plain", "ساده") },
+        { value: "rounded", label: label("Rounded", "گوشه‌گرد") },
+        { value: "circle", label: label("Circle", "دایره") },
+        { value: "framed", label: label("Framed", "قاب‌دار") },
+      ]),
+      selectProperty("aspectRatio", "Aspect ratio", "نسبت تصویر", [
+        { value: "auto", label: label("Automatic", "خودکار") },
+        { value: "square", label: label("Square (1:1)", "مربع (۱:۱)") },
+        { value: "landscape", label: label("Landscape (16:9)", "افقی (۱۶:۹)") },
+        { value: "portrait", label: label("Portrait (4:5)", "عمودی (۴:۵)") },
+      ]),
+      selectProperty("objectFit", "Image adjustment", "نحوه جای‌گیری تصویر", [
+        { value: "contain", label: label("Fit inside", "نمایش کامل") },
+        { value: "cover", label: label("Fill and crop", "پر کردن و برش") },
+        { value: "fill", label: label("Stretch", "کشیدن") },
+        { value: "scale-down", label: label("Scale down", "کوچک‌سازی") },
+      ]),
+      selectProperty("objectPosition", "Image position", "موقعیت تصویر", [
+        { value: "center", label: label("Center", "وسط") },
+        { value: "top", label: label("Top", "بالا") },
+        { value: "bottom", label: label("Bottom", "پایین") },
+      ]),
+      selectProperty("alignment", "Container alignment", "تراز قاب", [
+        { value: "start", label: label("Start", "ابتدا") },
+        { value: "center", label: label("Center", "وسط") },
+        { value: "end", label: label("End", "انتها") },
+      ]),
+    ],
+  ),
+  voice: configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "string",
+    { url: "" },
+    [urlProperty("url", "Audio URL", "نشانی صدا")],
+  ),
   "jb-input": configuration(inputCommon, "string", inputDefaults, inputProperties),
   "jb-number-input": configuration(
     inputCommon,
@@ -231,6 +332,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       numberProperty("tickStep", "Tick step", "گام نشانه‌ها", { min: 0 }),
       numberProperty("minorTickStep", "Minor tick step", "گام نشانه‌های فرعی", { min: 0 }),
       booleanProperty("showTickLabels", "Show tick labels", "نمایش برچسب نشانه‌ها"),
+      booleanProperty("showPersianNumber", "Show Persian digits", "نمایش ارقام فارسی"),
       booleanProperty("disableBalloonRotation", "Disable balloon rotation", "غیرفعال کردن چرخش بالن"),
       selectProperty("size", "Size", "اندازه", sizeOptions),
     ],

@@ -11,18 +11,16 @@ interface LocaleEditorProps {
   locales: Record<string, LocaleDefinition>;
   defaultLocale: string;
   newLocale: string;
-  newLocaleDirection: LocaleDefinition["direction"];
   localeError: string;
   messages: FormMessages;
   setLocales: Dispatch<SetStateAction<Record<string, LocaleDefinition>>>;
   setNewLocale: Dispatch<SetStateAction<string>>;
-  setNewLocaleDirection: Dispatch<SetStateAction<LocaleDefinition["direction"]>>;
   onAdd: () => void;
   onRemove: (locale: string) => void;
 }
 
 export function LocaleEditor(props: LocaleEditorProps) {
-  const { locales, defaultLocale, newLocale, newLocaleDirection, localeError, messages, setLocales, setNewLocale, setNewLocaleDirection, onAdd, onRemove } = props;
+  const { locales, defaultLocale, newLocale, localeError, messages, setLocales, setNewLocale, onAdd, onRemove } = props;
   return (
     <div className={styles.localeEditor}>
       <p className={styles.settingsSectionTitle}>{messages.supportedLocales}</p>
@@ -53,15 +51,6 @@ export function LocaleEditor(props: LocaleEditorProps) {
           message={localeError || messages.localeCodeHint}
           onInput={event => setNewLocale(String((event.target as unknown as { value?: unknown }).value ?? ""))}
         />
-        <JBSelect<LocaleDefinition["direction"]>
-          name="newLocaleDirection"
-          label={messages.direction}
-          value={newLocaleDirection}
-          onChange={event => setNewLocaleDirection(event.target.value === "rtl" ? "rtl" : "ltr")}
-        >
-          <JBOption value="ltr">{messages.ltr}</JBOption>
-          <JBOption value="rtl">{messages.rtl}</JBOption>
-        </JBSelect>
         <JBButton variant="outline" onClick={onAdd}>
           {messages.addLocale}
         </JBButton>

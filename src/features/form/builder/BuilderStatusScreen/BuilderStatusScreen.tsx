@@ -3,7 +3,7 @@ import { JBLoading } from "jb-loading/react";
 import { observer } from "mobx-react-lite";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getStorageIssueMessage } from "../../i18n/locale-adapter";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./BuilderStatusScreen.module.css";
 
 interface BuilderStatusScreenProps {

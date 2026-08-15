@@ -1,12 +1,12 @@
 import { useState, type KeyboardEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
+import { JBTooltip } from "@jbui/tooltip/react";
 import type { JBFormElementV1 } from "../../domain/form-document";
 import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType } from "../../registry/form-element-registry";
 import { CANVAS_DRAG_TYPE } from "../builder-drag";
-import { BuilderTooltip } from "../BuilderTooltip";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./FormCanvas.module.css";
 
@@ -32,7 +32,7 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
   const [activeIcon, setActiveIcon] = useState<"configure" | "remove" | null>(null);
   return (
     <div className={styles.cardActions}>
-      <BuilderTooltip content={messages.configure}>
+      <JBTooltip content={messages.configure} positionArea="top" tail>
         <JBButton
           square
           size="sm"
@@ -46,23 +46,23 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
         >
           <CatalogIcon iconId="configure" active={activeIcon === "configure"} />
         </JBButton>
-      </BuilderTooltip>
-      <BuilderTooltip content={messages.moveUp}>
+      </JBTooltip>
+      <JBTooltip content={messages.moveUp} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
           <CatalogIcon iconId="move-up" />
         </JBButton>
-      </BuilderTooltip>
-      <BuilderTooltip content={messages.moveDown}>
+      </JBTooltip>
+      <JBTooltip content={messages.moveDown} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.moveDown} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
           <CatalogIcon iconId="move-down" />
         </JBButton>
-      </BuilderTooltip>
-      <BuilderTooltip content={messages.duplicate}>
+      </JBTooltip>
+      <JBTooltip content={messages.duplicate} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} onClick={() => onDuplicate(element.id)}>
           <CatalogIcon iconId="duplicate" />
         </JBButton>
-      </BuilderTooltip>
-      <BuilderTooltip content={messages.remove}>
+      </JBTooltip>
+      <JBTooltip content={messages.remove} positionArea="top" tail>
         <JBButton
           id={`element-remove-${element.id}`}
           square
@@ -77,7 +77,7 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
         >
           <CatalogIcon iconId="remove" active={activeIcon === "remove"} />
         </JBButton>
-      </BuilderTooltip>
+      </JBTooltip>
     </div>
   );
 }

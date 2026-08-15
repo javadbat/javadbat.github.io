@@ -72,9 +72,9 @@
 
 .addLocaleRow {
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) minmax(9rem, 0.75fr) auto;
+  grid-template-columns: minmax(10rem, 1fr) auto;
   gap: 0.75rem;
-  align-items: end;
+  align-items: center;
   min-inline-size: 0;
   padding-block-start: 0.25rem;
   border-block-start: 0.0625rem solid var(--form-inner-line);
@@ -170,4 +170,3 @@
       grid-row: 1;
     }
    }
-

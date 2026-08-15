@@ -1,7 +1,7 @@
 # JB Design System changes required by `jb-form-builder`
 
 Status: local integration renderer implemented; design-system publication work remains  
-Local baseline: `jb-core@0.30.0`, `jb-form@0.12.0`, and the form-package versions installed by this repository
+Local baseline: `jb-core@0.33.0`, `jb-form@0.12.0`, and the form-package versions installed by this repository
 
 ## Purpose
 
@@ -32,7 +32,7 @@ These requirements are browser-facing and remain mandatory even though the route
 ### Deferred — SSR/platform compatibility (do later)
 
 - Make every JB package importable when browser globals are absent (Deferred SSR requirement 1 below).
-- Make `jb-core/i18n` constructible without a DOM, isolate observation from state, and support scoped locale providers (Deferred SSR requirement 2 below).
+- Add scoped locale providers for simultaneously rendered locale scopes (Deferred SSR requirement 2 below). DOM-free construction and explicit subscriptions shipped in `jb-core@0.33.0`.
 
 The deferred work must preserve the existing browser auto-registration behavior and the portable form JSON contract. It is not a Phase 1 blocker, but it becomes required before this renderer is imported or evaluated in an SSR process.
 
@@ -47,7 +47,6 @@ jb-form: ReferenceError: HTMLElement is not defined
 jb-input: ReferenceError: document is not defined
 jb-select: ReferenceError: document is not defined
 jb-date-input: ReferenceError: document is not defined
-jb-core/i18n: ReferenceError: document is not defined
 ```
 
 Phase 1 routes are client-only, so this does not block the application. The local renderer contains a guarded custom-element base and keeps all JB component imports inside its client render pipeline. This is preparation for SSR-safe module evaluation, not a claim that the current JB packages can render on a server.
@@ -102,34 +101,26 @@ All imports must resolve without throwing. A separate browser test must confirm 
 
 ### Current limitation
 
-`jb-core/i18n` constructs the singleton immediately. Its constructor reads `document.documentElement` and creates a `MutationObserver`, so importing the module fails outside the browser.
-
-The singleton is also document-global. Two renderer instances cannot reliably display different active JB locales on one page.
+As of `jb-core@0.33.0`, `jb-core/i18n` is safe to import and construct without a DOM, reads the document language once when available, accepts locale strings, and exposes cleanup-returning subscriptions. The remaining limitation is that JB components consume the shared singleton, so two renderer instances cannot reliably display different active JB locales on one page.
 
 ### Phase 1 requirement
 
-One active locale per page is sufficient. Automatic renderer mode imports `jb-core/i18n` only in the browser, sets the document language/direction, and calls `i18n.setLocale(...)`. Manual mode imports nothing and requires the consumer to configure i18n.
+One active locale per page is sufficient. Automatic renderer mode imports the SSR-safe `jb-core/i18n`, sets the document language/direction in its browser render path, and calls `i18n.setLocale(...)`. Manual mode does not mutate i18n and requires the consumer to configure it.
 
 ### Requested future implementation
 
-- Separate `JBI18N` state construction from DOM observation.
-- Create the document observer only from an explicit browser initializer.
-- Guard all document and observer access with `typeof`, not optional chaining on undeclared identifiers.
-- Allow an i18n instance to exist without a DOM.
 - Add a scoped provider/context that a JB component subtree can consume.
 - Retain the current global singleton as the backward-compatible default.
-- Define how locale observers are disconnected.
 
 Scoped i18n becomes necessary when multilingual form support requires two simultaneously rendered forms with different locales. Switching one renderer between locales does not require scoped i18n.
 
 ### Acceptance tests
 
-- Importing `jb-core/i18n` in Node succeeds.
-- Constructing `JBI18N` without a document succeeds.
-- Browser initialization reads the current document locale.
-- Changing the document language updates the global instance.
+- Importing `jb-core/i18n` in Node succeeds. (Delivered in `0.33.0`.)
+- Constructing `JBI18N` without a document succeeds. (Delivered in `0.33.0`.)
+- Browser initialization reads the current document locale once. (Delivered in `0.33.0`.)
+- Explicit locale changes notify subscribers and subscriptions can be cleaned up. (Delivered in `0.33.0`.)
 - Two explicitly provided scoped instances do not change each other.
-- Observer cleanup is verified.
 
 ## Phase 1 requirement 1 — Standardize dependency-controlled custom-element registration
 

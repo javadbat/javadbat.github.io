@@ -123,7 +123,7 @@
 }
 
 .catalogRow:hover {
-  background: var(--form-accent-soft);
+  background: rgba( from var(--jb-neutral-9) r g b / 0.4);
   box-shadow: var(--shadow-drop);
   transform: translateY(-0.0625rem);
 }

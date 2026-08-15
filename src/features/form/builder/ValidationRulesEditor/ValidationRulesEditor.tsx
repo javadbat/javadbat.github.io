@@ -5,7 +5,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import type { ValidationRuleName } from "../../registry/validation-rule-registry";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
 import { ValidationRuleEditor } from "./ValidationRuleEditor";
 import { ruleLabel } from "./validation-rule-label";
@@ -29,6 +29,7 @@ export const ValidationRulesEditor = observer(function ValidationRulesEditor({ l
       <div className={styles.addValidationRule}>
         <JBSelect<ValidationRuleName>
           size="sm"
+          popoverPosition="fixed"
           name="newValidationRule"
           label={messages.ruleType}
           value={selectedRule}

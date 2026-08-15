@@ -53,7 +53,7 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | --- | --- | --- | --- | --- | --- |
 | Text | Input | `jb-input@3.17.0` | `string` | Verified | Yes |
 | Number | Number Input | `jb-number-input@1.6.0` | Numeric string | Inherited from `jb-input` | Yes |
-| Choice | Range Input | `jb-range-input@0.2.0` | Number or two-number tuple | Verified | Yes |
+| Choice | Range Input | `jb-range-input@0.4.0` | Number or two-number tuple | Verified | Yes |
 | Text | Mobile Input | `jb-mobile-input@2.4.0` | Normalized mobile string | Inherited from `jb-input` | Yes |
 | Text | Password Input | `jb-password-input@2.2.0` | `string` | Inherited from `jb-input` | Yes |
 | Financial | Payment Input | `jb-payment-input@3.5.0` | Card/SHABA string | Inherited from `jb-input` | Yes |
@@ -166,7 +166,7 @@ CSS-variable counts include component variables, compatibility aliases, and refe
 | `jb-calendar@5.2.0` | Embedded picker | Used through `jb-date-input`; not a standalone form value control |
 | `jb-time-picker@2.4.0` | Embedded picker | Used through `jb-time-input`; not a standalone form value control |
 | `jb-popover@1.13.0` | Overlay dependency | Used by select/date/time controls and editor surfaces; not addable |
-| `jb-core@0.30.0` | Foundation | Theme, events, i18n, and React helpers |
+| `jb-core@0.33.0` | Foundation | Theme, events, SSR-safe i18n, and React helpers |
 | `jb-searchbar@3.1.0` | Data filtering control | Excluded from generated forms: it does not implement `JBFormInputStandards` and is cataloged as Data Display |
 
 ## Serialization constraints discovered

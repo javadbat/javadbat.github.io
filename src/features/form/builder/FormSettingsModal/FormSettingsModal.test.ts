@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { describe, expect, it } from "vitest";
-import { BuilderStore } from "../BuilderStore";
+import { BuilderStore } from "../store/BuilderStore";
 import { copyLocaleDefinitions } from "./FormSettingsModal";
 
 describe("FormSettingsModal locale drafts", () => {

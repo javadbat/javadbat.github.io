@@ -1,5 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg">
   <defs>
+    <symbol id="content-text" viewBox="0 0 24 24">
+      <path d="M4 5h16M4 10h16M4 15h11M4 20h8"/>
+    </symbol>
+    <symbol id="content-image" viewBox="0 0 24 24">
+      <rect x="2.75" y="3.5" width="18.5" height="17" rx="4.25"/>
+      <circle cx="8.25" cy="8.75" r="1.75" opacity=".48"/>
+      <path d="m5.25 17 4.25-4.5 3 3 2.25-2.25L19 17"/>
+    </symbol>
+    <symbol id="content-voice" viewBox="0 0 24 24">
+      <path d="M5 9v6M9 6v12M13 3v18M17 7v10M21 10v4"/>
+    </symbol>
     <symbol id="text-input" viewBox="0 0 24 24">
       <rect x="2.75" y="5.5" width="18.5" height="13" rx="4"/>
       <path d="M7 9.75h8.5M7 14.25h5.25" opacity=".42"/>

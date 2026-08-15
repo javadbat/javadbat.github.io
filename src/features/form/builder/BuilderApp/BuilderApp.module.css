@@ -3,7 +3,7 @@
   --form-muted: var(--jb-neutral-5, oklch(0.53 0.035 258));
   --form-line: var(--jb-neutral-8, oklch(0.91 0.018 258));
   --form-surface: var(--jb-white, oklch(1 0 0));
-  --form-canvas: var(--jb-neutral-9, oklch(0.982 0.008 258));
+  --form-canvas: var(--jb-neutral-10, oklch(0.982 0.008 258));
   --form-accent: var(--jb-primary, oklch(0.58 0.21 259));
   --form-accent-strong: var(--jb-primary-dark, oklch(0.46 0.19 259));
   --form-accent-soft: var(--jb-primary-subtle, oklch(0.96 0.03 259));
@@ -39,40 +39,8 @@
   --jb-button-box-shadow: 0 0.4rem 1rem color-mix(in oklch, var(--form-accent) 24%, transparent);
 }
 
-.importError {
-  position: relative;
-  z-index: 2;
-  margin-inline: 1rem;
-  padding: 0.65rem 0.85rem;
-  border: 0;
-  border-radius: var(--form-radius-md);
-  color: var(--form-accent-strong);
-  background: color-mix(in oklch, var(--form-accent) 10%, var(--form-surface));
-  box-shadow: var(--shadow-drop);
-  font-size: 0.78rem;
-}
-
-.importError ul {
-  margin-block: 0.35rem 0;
-  padding-inline-start: 1.25rem;
-}
-
-.srOnly {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: 0.0625rem;
-  block-size: 0.0625rem;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 @media (max-width: 63.999rem) {
   .app {
       grid-template-rows: auto minmax(0, 1fr);
     }
    }
-

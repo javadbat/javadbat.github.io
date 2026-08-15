@@ -165,6 +165,9 @@
         },
         "type": {
           "enum": [
+            "text",
+            "image",
+            "voice",
             "jb-input",
             "jb-number-input",
             "jb-range-input",

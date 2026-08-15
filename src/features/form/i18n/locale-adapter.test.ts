@@ -12,13 +12,15 @@ describe("form application JBDictionary", () => {
   });
 
   it("resolves the active JB locale", () => {
-    i18n.setLocale(new Intl.Locale("fa"));
+    i18n.setLocale("fa");
 
     expect(formAppDictionary.get(i18n, "save")).toBe("ذخیره");
+    expect(i18n.locale.calendar).toBe("persian");
+    expect(i18n.locale.numberingSystem).toBe("latn");
   });
 
   it("uses the JBDictionary English fallback", () => {
-    i18n.setLocale(new Intl.Locale("de"));
+    i18n.setLocale("de");
 
     expect(formAppDictionary.get(i18n, "save")).toBe("Save");
   });

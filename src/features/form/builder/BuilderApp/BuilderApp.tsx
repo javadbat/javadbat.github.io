@@ -4,9 +4,10 @@ import { getCurrentFormRoute } from "../../application/form-route";
 import { useFormLocale } from "../../i18n/locale-adapter";
 import { BuilderHeader } from "../BuilderHeader/BuilderHeader";
 import { BuilderStatusScreen } from "../BuilderStatusScreen/BuilderStatusScreen";
-import { BuilderStoreProvider, useBuilderStore } from "../BuilderStoreContext";
+import { BuilderStoreProvider, useBuilderStore } from "../store/BuilderStoreContext";
 import { BuilderWorkspace } from "../BuilderWorkspace/BuilderWorkspace";
 import { FormSettingsModal } from "../FormSettingsModal/FormSettingsModal";
+import { ImportJsonModal } from "../ImportJsonModal/ImportJsonModal";
 import { useBuilderLifecycle } from "../useBuilderLifecycle";
 import { useBuilderAppActions, useHistoryShortcuts } from "./useBuilderAppActions";
 import styles from "./BuilderApp.module.css";
@@ -17,7 +18,7 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
   const { direction, setLocale, messages } = useFormLocale("en");
   const route = getCurrentFormRoute();
-  const actions = useBuilderAppActions(messages);
+  const actions = useBuilderAppActions();
 
   useBuilderLifecycle(route.slug);
   useHistoryShortcuts();
@@ -44,27 +45,10 @@ const BuilderAppContent = observer(function BuilderAppContent() {
         onRedo={store.redo}
         onExport={actions.openExport}
       />
-      <input
-        ref={actions.importInputRef}
-        className={styles.srOnly}
-        type="file"
-        accept="application/json,.json"
-        aria-label={messages.importJson}
-        onChange={event => void actions.handleImport(event)}
-      />
-      {actions.importIssues.length > 0 ? (
-        <div className={styles.importError} role="alert">
-          <strong>{messages.importFailure}</strong>
-          <ul>
-            {actions.importIssues.map(issue => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      <BuilderWorkspace messages={messages} />
+      <BuilderWorkspace messages={messages} onOpenFormNameSettings={actions.openSettingsForFormName} />
 
-      <FormSettingsModal isOpen={actions.settingsOpen} messages={messages} onClose={() => actions.setSettingsOpen(false)} />
+      <FormSettingsModal isOpen={actions.settingsOpen} focusFormName={actions.focusFormName} messages={messages} onClose={actions.closeSettings} />
+      <ImportJsonModal isOpen={actions.importOpen} messages={messages} onClose={actions.closeImport} />
       {actions.exportDocument ? (
         <Suspense fallback={null}>
           <ExportJsonModal document={actions.exportDocument} messages={messages} onClose={actions.closeExport} />

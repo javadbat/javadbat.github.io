@@ -3,7 +3,7 @@ import { localizedText } from "../domain/form-document";
 import { configurationByType, type CommonFieldSupport, type FormElementPropertyDefinition, type InitialValueKind } from "./form-element-configuration";
 import { adapterByType, type FormElementAdapter } from "./form-element-adapter";
 
-export type FormElementCategory = "Text" | "Date & time" | "Choice" | "Identity" | "Financial" | "File" | "Action";
+export type FormElementCategory = "Content" | "Text" | "Date & time" | "Choice" | "Identity" | "Financial" | "File" | "Action";
 
 export interface FormElementRegistryEntry extends FormElementAdapter {
   type: JBFormElementType;
@@ -20,6 +20,33 @@ export interface FormElementRegistryEntry extends FormElementAdapter {
 }
 
 const catalogEntries = [
+  {
+    type: "text",
+    displayName: "Text",
+    description: "Add explanatory text to the form.",
+    category: "Content",
+    keywords: ["text", "copy", "paragraph", "description"],
+    iconId: "content-text",
+    defaultName: "textBlock",
+  },
+  {
+    type: "image",
+    displayName: "Image",
+    description: "Display an image from a URL.",
+    category: "Content",
+    keywords: ["image", "photo", "picture", "url"],
+    iconId: "content-image",
+    defaultName: "imageBlock",
+  },
+  {
+    type: "voice",
+    displayName: "Voice",
+    description: "Play audio from a URL.",
+    category: "Content",
+    keywords: ["voice", "audio", "sound", "url"],
+    iconId: "content-voice",
+    defaultName: "voiceBlock",
+  },
   {
     type: "jb-input",
     displayName: "Text input",
@@ -201,6 +228,9 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
 const persianDisplayNames: Record<JBFormElementType, string> = {
+  text: "متن",
+  image: "تصویر",
+  voice: "صدا",
   "jb-input": "ورودی متن",
   "jb-number-input": "ورودی عدد",
   "jb-range-input": "ورودی بازه",

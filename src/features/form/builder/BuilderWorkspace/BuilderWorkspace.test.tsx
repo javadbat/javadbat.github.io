@@ -2,7 +2,7 @@
 
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { formAppDictionary } from "../../i18n/locale-adapter";
+import { formAppMessages } from "../../i18n/locale-adapter";
 import { BuilderWorkspace } from "./BuilderWorkspace";
 
 vi.mock("../ComponentCatalog/ComponentCatalog", () => ({
@@ -30,7 +30,7 @@ vi.mock("../ConfigurationPanel/ConfigurationPanel", () => ({ ConfigurationPanel:
 
 describe("BuilderWorkspace", () => {
   it("switches between the three mobile workspace panels", () => {
-    const view = render(<BuilderWorkspace messages={formAppDictionary.dictionary.en} />);
+    const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
     const mobileTabs = view.container.querySelector<HTMLElement>("nav[aria-label='Mobile workspace panels']");
     const buttons = mobileTabs?.querySelectorAll<HTMLElement>("jb-button");
@@ -48,7 +48,7 @@ describe("BuilderWorkspace", () => {
   });
 
   it("advances touch workflows after adding and configuring a field", () => {
-    const view = render(<BuilderWorkspace messages={formAppDictionary.dictionary.en} />);
+    const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
     const mobileButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Mobile workspace panels'] jb-button");
     const compactButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Side panels'] jb-button");
@@ -66,7 +66,7 @@ describe("BuilderWorkspace", () => {
   });
 
   it("keeps the mobile canvas open when a field is only selected", () => {
-    const view = render(<BuilderWorkspace messages={formAppDictionary.dictionary.en} />);
+    const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
 
     fireEvent.click(view.container.querySelectorAll<HTMLElement>("[data-panel='canvas'] button")[0]);

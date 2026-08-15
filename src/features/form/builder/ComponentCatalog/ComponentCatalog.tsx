@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useState, type DragEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { JBSearchbar } from "jb-searchbar/react";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "../../registry/form-element-registry";
 import type { FormMessages } from "../../i18n/locale-adapter";

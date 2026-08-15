@@ -18,7 +18,8 @@ export type RuntimeFormElement = HTMLElement & {
 export interface FormElementAdapterDefinition {
   type: JBFormElementType;
   packageName: string;
-  tagName: JBFormElementType;
+  tagName: string;
+  isContent: boolean;
   adapterVersion: 1;
   supportedSchemaVersions: readonly [1];
   valueType: FormElementValueType;
@@ -53,6 +54,9 @@ const rangedTextValidation = [...textValidation, "minValue", "maxValue"] as cons
 const allowedValuesValidation = ["allowedValues"] as const satisfies readonly ValidationRuleName[];
 
 const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
+  text: () => Promise.resolve(),
+  image: () => Promise.resolve(),
+  voice: () => Promise.resolve(),
   "jb-input": () => import("jb-input"),
   "jb-number-input": () => import("jb-number-input"),
   "jb-range-input": () => import("jb-range-input"),
@@ -77,6 +81,9 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
 };
 
 const definitions = [
+  contentAdapterDefinition("text", "p"),
+  contentAdapterDefinition("image", "img"),
+  contentAdapterDefinition("voice", "audio"),
   adapterDefinition("jb-input", "string", inputEvents, textValidation),
   adapterDefinition("jb-number-input", "number-string", inputEvents, rangedTextValidation),
   adapterDefinition("jb-range-input", "range", ["input", "change", "invalid"], []),
@@ -108,11 +115,27 @@ function adapterDefinition(
     type,
     packageName,
     tagName: type,
+    isContent: false,
     adapterVersion: 1,
     supportedSchemaVersions: [1],
     valueType,
     eventNames,
     validationRules,
+    loadComponent: componentLoaders[type],
+  };
+}
+
+function contentAdapterDefinition(type: "text" | "image" | "voice", tagName: "p" | "img" | "audio"): FormElementAdapterDefinition {
+  return {
+    type,
+    packageName: type,
+    tagName,
+    isContent: true,
+    adapterVersion: 1,
+    supportedSchemaVersions: [1],
+    valueType: "none",
+    eventNames: [],
+    validationRules: [],
     loadComponent: componentLoaders[type],
   };
 }
@@ -341,6 +364,86 @@ function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | unde
 }
 
 function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string, defaultLocale = "en"): void {
+  if (element.type === "text") {
+    const content = element.props.content;
+    target.textContent = content === undefined ? "" : String(resolveRuntimeValue(content, locale, defaultLocale));
+    const color = element.props.color;
+    const fontSize = element.props.fontSize;
+    const fontWeight = element.props.fontWeight;
+    const textAlign = element.props.textAlign;
+    const lineHeight = element.props.lineHeight;
+    if (typeof color === "string") target.style.color = color;
+    if (typeof fontSize === "number" && Number.isFinite(fontSize)) target.style.fontSize = `${fontSize}rem`;
+    if (fontWeight === "normal" || fontWeight === "medium" || fontWeight === "semibold" || fontWeight === "bold") {
+      target.style.fontWeight = fontWeight === "medium" ? "500" : fontWeight === "semibold" ? "600" : fontWeight === "bold" ? "700" : "400";
+    }
+    if (textAlign === "start" || textAlign === "center" || textAlign === "end") target.style.textAlign = textAlign;
+    if (typeof lineHeight === "number" && Number.isFinite(lineHeight)) target.style.lineHeight = String(lineHeight);
+    return;
+  }
+  if (element.type === "image") {
+    const url = element.props.url;
+    const alt = element.props.alt;
+    if (typeof url === "string" && url.trim().length > 0) {
+      target.setAttribute("src", url.trim());
+      delete target.dataset.placeholder;
+    } else {
+      target.setAttribute("src", "/form/image-placeholder.svg");
+      target.dataset.placeholder = "true";
+    }
+    target.setAttribute("alt", alt === undefined ? "" : String(resolveRuntimeValue(alt, locale, defaultLocale)));
+    target.setAttribute("loading", "lazy");
+    const size = element.props.size;
+    const sizeByName = { auto: "auto", sm: "16rem", md: "28rem", lg: "42rem", full: "100%" } as const;
+    if (typeof size === "string" && size in sizeByName) target.style.inlineSize = sizeByName[size as keyof typeof sizeByName];
+
+    const aspectRatio = element.props.aspectRatio;
+    const ratioByName = { auto: "auto", square: "1 / 1", landscape: "16 / 9", portrait: "4 / 5" } as const;
+    if (typeof aspectRatio === "string" && aspectRatio in ratioByName) target.style.aspectRatio = ratioByName[aspectRatio as keyof typeof ratioByName];
+
+    const objectFit = element.props.objectFit;
+    if (objectFit === "contain" || objectFit === "cover" || objectFit === "fill" || objectFit === "scale-down") target.style.objectFit = objectFit;
+    const objectPosition = element.props.objectPosition;
+    if (objectPosition === "center" || objectPosition === "top" || objectPosition === "bottom") target.style.objectPosition = objectPosition;
+
+    const alignment = element.props.alignment;
+    if (alignment === "start") {
+      target.style.marginInlineStart = "0";
+      target.style.marginInlineEnd = "auto";
+    } else if (alignment === "end") {
+      target.style.marginInlineStart = "auto";
+      target.style.marginInlineEnd = "0";
+    } else if (alignment === "center") {
+      target.style.marginInline = "auto";
+    }
+
+    const containerType = element.props.containerType;
+    if (containerType === "rounded") {
+      target.style.borderRadius = "0.875rem";
+    } else if (containerType === "circle") {
+      target.style.aspectRatio = "1 / 1";
+      target.style.borderRadius = "50%";
+      target.style.objectFit = "cover";
+    } else if (containerType === "framed") {
+      target.style.boxSizing = "border-box";
+      target.style.padding = "0.5rem";
+      target.style.border = "0.0625rem solid var(--jb-form-builder-line)";
+      target.style.borderRadius = "0.875rem";
+      target.style.background = "var(--jb-form-builder-surface)";
+    }
+    return;
+  }
+  if (element.type === "voice") {
+    const url = element.props.url;
+    if (typeof url === "string" && url.length > 0) {
+      target.setAttribute("src", url);
+    } else {
+      target.removeAttribute("src");
+    }
+    target.setAttribute("controls", "");
+    target.setAttribute("preload", "metadata");
+    return;
+  }
   setRuntimeValue(target, "name", element.name);
   setRuntimeValue(target, "required", element.required);
   setRuntimeValue(target, "disabled", element.disabled);

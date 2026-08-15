@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title description">
+  <title id="title">Image placeholder</title>
+  <desc id="description">A neutral landscape placeholder shown until an image URL is provided.</desc>
+  <rect width="1200" height="675" fill="#f1f5f9"/>
+  <rect x="2" y="2" width="1196" height="671" rx="36" fill="none" stroke="#cbd5e1" stroke-width="4"/>
+  <circle cx="430" cy="250" r="62" fill="#cbd5e1"/>
+  <path d="M250 520 470 330l145 124 105-92 230 158H250Z" fill="#94a3b8"/>
+  <path d="M390 520 610 320l235 200H390Z" fill="#64748b" fill-opacity=".52"/>
+</svg>

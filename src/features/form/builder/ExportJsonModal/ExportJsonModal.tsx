@@ -1,5 +1,6 @@
 import { JBButton } from "jb-button/react";
 import { ClientJBModal } from "../../../../components/react/components/modal/ClientJBModal";
+import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { CodeViewer } from "../../../../components/react/components/code-viewer/CodeViewer";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import { downloadFormExport, prepareFormExport } from "../../export/form-export";
@@ -22,12 +23,15 @@ export function ExportJsonModal({ document, messages, onClose }: ExportJsonModal
 
   return (
     <ClientJBModal isOpen label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
-      <div slot="header" className={styles.exportModalHeading}>
-        <div>
+      <div slot="header">
+        <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
           <h2>{messages.exportJson}</h2>
         </div>
-        {exportResult.valid ? <code className={styles.exportFileName}>{exportResult.fileName}</code> : null}
+        <div className={styles.exportModalHeaderActions}>
+          {exportResult.valid ? <code className={styles.exportFileName}>{exportResult.fileName}</code> : null}
+          <ModalCloseButton label={messages.close} onClick={onClose} />
+        </div>
       </div>
 
       <div slot="content" className={styles.exportModalContent}>

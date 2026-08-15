@@ -1,16 +1,15 @@
 import { JBButton } from "jb-button/react";
+import { JBTooltip } from "@jbui/tooltip/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
-import "jb-icons/arrow-tailed";
 import "jb-icons/eye";
 import "jb-icons/react";
 import { observer } from "mobx-react-lite";
 import { formRouteHref } from "../../application/form-route";
 import { inferLocaleDirection } from "../../domain/form-document";
 import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { BuilderTooltip } from "../BuilderTooltip";
 import styles from "./BuilderHeader.module.css";
 
 export type BuilderNavigationTarget = "designer" | "preview";
@@ -23,6 +22,26 @@ interface BuilderHeaderProps {
   onUndo: () => boolean;
   onRedo: () => boolean;
   onExport: () => void;
+}
+
+function SettingsIcon() {
+  return (
+    <svg className={styles.settingsIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <g transform="translate(3.5 2.5)">
+        <path d="M2.5 0A2.5 2.5 0 1 1 0 2.5 2.5 2.5 0 0 1 2.5 0Z" transform="translate(6 7)" />
+        <path d="M16.668 4.75a2.464 2.464 0 0 0-3.379-.912 1.543 1.543 0 0 1-2.314-1.346A2.484 2.484 0 0 0 8.5 0a2.484 2.484 0 0 0-2.475 2.492 1.543 1.543 0 0 1-2.313 1.347 2.465 2.465 0 0 0-3.38.912 2.5 2.5 0 0 0 .906 3.4 1.56 1.56 0 0 1 0 2.692 2.5 2.5 0 0 0-.906 3.4 2.465 2.465 0 0 0 3.379.913 1.542 1.542 0 0 1 2.313 1.345A2.484 2.484 0 0 0 8.5 19a2.484 2.484 0 0 0 2.474-2.492 1.543 1.543 0 0 1 2.314-1.345 2.465 2.465 0 0 0 3.379-.913 2.5 2.5 0 0 0-.905-3.4 1.56 1.56 0 0 1 0-2.692 2.5 2.5 0 0 0 .906-3.408Z" />
+      </g>
+    </svg>
+  );
+}
+
+function HistoryActionIcon({ action }: { action: "undo" | "redo" }) {
+  return (
+    <svg className={styles.historyIcon} data-action={action} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 7 4.5 11.5 9 16" />
+      <path d="M5 11.5h8.25a6.25 6.25 0 0 1 6.25 6.25V19" />
+    </svg>
+  );
 }
 
 /**
@@ -59,11 +78,11 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
 
       <div className={styles.documentIdentity}>
         <span className={styles.documentName}>{store.formName}</span>
-        <BuilderTooltip content={messages.formSettings} positionArea="bottom">
+        <JBTooltip content={messages.formSettings} positionArea="bottom" tail>
           <button type="button" className={styles.settingsButton} aria-label={messages.formSettings} onClick={onOpenSettings}>
-            <CatalogIcon iconId="settings" />
+            <SettingsIcon />
           </button>
-        </BuilderTooltip>
+        </JBTooltip>
         <span className={styles.identityBadge}>{store.linkedRecord ? messages.linkedNamedForm : messages.currentDraft}</span>
         <output
           className={styles.saveState}
@@ -93,16 +112,16 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
           </JBButton>
         </div>
         <div className={styles.historyActions}>
-          <BuilderTooltip content={messages.undo} positionArea="bottom">
+          <JBTooltip content={messages.undo} positionArea="bottom" tail>
             <JBButton square variant="ghost" size="sm" aria-label={messages.undo} disabled={!store.canUndo} onClick={onUndo}>
-              <jb-icon-arrow-tailed direction="inline-start" size="sm" />
+              <HistoryActionIcon action="undo" />
             </JBButton>
-          </BuilderTooltip>
-          <BuilderTooltip content={messages.redo} positionArea="bottom">
+          </JBTooltip>
+          <JBTooltip content={messages.redo} positionArea="bottom" tail>
             <JBButton square variant="ghost" size="sm" aria-label={messages.redo} disabled={!store.canRedo} onClick={onRedo}>
-              <jb-icon-arrow-tailed direction="inline-end" size="sm" />
+              <HistoryActionIcon action="redo" />
             </JBButton>
-          </BuilderTooltip>
+          </JBTooltip>
         </div>
         <JBButton variant="outline" size="sm" onClick={() => onNavigate("preview")}>
           <jb-icon-eye open size="sm" />

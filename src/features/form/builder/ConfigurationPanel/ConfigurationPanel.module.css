@@ -76,7 +76,8 @@
 }
 
 .configurationFields :global(jb-input),
-.configurationFields :global(jb-select) {
+.configurationFields :global(jb-select),
+.configurationFields :global(jb-textarea) {
   inline-size: 100%;
 }
 
@@ -181,4 +182,3 @@
       padding-inline-end: 0.2rem;
     }
    }
-

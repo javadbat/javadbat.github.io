@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { i18n } from "jb-core/i18n";
 import { createEmptyFormDocument, getLocalizedText, type JBFormElementType, type JBFormElementV1, type JSONValue, type LocalizedText } from "../../domain/form-document";
 import { configurationByType } from "../../registry/form-element-configuration";
 import { createDefaultElement, formElementRegistry, type FormElementRegistryEntry } from "../../registry/form-element-registry";
@@ -110,7 +111,8 @@ const initialValueByType: Partial<Record<JBFormElementType, string | number | bo
 // registrations are asserted below; their actual renderer behavior is covered
 // in the real-browser acceptance pass documented in COMPONENT-SUPPORT.md.
 const browserOnlyRenderTypes = new Set<JBFormElementType>(["jb-date-input", "jb-time-input"]);
-const happyDomRenderEntries = formElementRegistry.filter(entry => !browserOnlyRenderTypes.has(entry.type));
+const componentEntries = formElementRegistry.filter(entry => !entry.isContent);
+const happyDomRenderEntries = componentEntries.filter(entry => !browserOnlyRenderTypes.has(entry.type));
 let selectLoaderRegisteredOption = false;
 
 function createRenderer(element: JBFormElementV1): JBFormBuilderElement {
@@ -165,11 +167,12 @@ beforeAll(async () => {
 
   // Load the remaining independent packages concurrently, matching the
   // renderer's production dependency strategy.
-  await Promise.all(formElementRegistry.filter(entry => entry !== selectEntry).map(entry => entry.loadComponent()));
+  await Promise.all(componentEntries.filter(entry => entry !== selectEntry).map(entry => entry.loadComponent()));
 });
 
 beforeEach(() => {
   document.body.replaceChildren();
+  i18n.setLocale("en");
 });
 
 describe("real JB component Preview coverage", () => {
@@ -177,7 +180,7 @@ describe("real JB component Preview coverage", () => {
     expect(selectLoaderRegisteredOption).toBe(true);
   });
 
-  it.each(formElementRegistry)("loads and defines the $type package", (entry: FormElementRegistryEntry) => {
+  it.each(componentEntries)("loads and defines the $type package", (entry: FormElementRegistryEntry) => {
     expect(customElements.get(entry.tagName)).toBeDefined();
   });
 
@@ -213,6 +216,28 @@ describe("real JB component Preview coverage", () => {
       expect(runtime.getAttribute("name")).toBe(element.name);
     }
     expect(renderer.reportValidity()).toBe(true);
+  });
+
+  it("renders text, image, and voice content without component dependencies", async () => {
+    const formDocument = createEmptyFormDocument();
+    formDocument.elements = formElementRegistry.filter(entry => entry.isContent).map((entry, index) => createDefaultElement(entry, `content${index + 1}`));
+    formDocument.elements[0].props.content = { translations: { en: "Welcome" } };
+    formDocument.elements[1].props.url = "https://example.com/hero.jpg";
+    formDocument.elements[1].props.alt = { translations: { en: "Hero" } };
+    formDocument.elements[2].props.url = "https://example.com/welcome.mp3";
+    const renderer = document.createElement("jb-form-builder");
+    renderer.autoImport = false;
+    document.body.append(renderer);
+    renderer.formDocument = formDocument;
+
+    await renderer.updateComplete;
+
+    expect(renderer.state).toBe("ready");
+    expect(renderer.shadowRoot?.querySelector("p")?.textContent).toBe("Welcome");
+    expect(renderer.shadowRoot?.querySelector("img")?.getAttribute("src")).toBe("https://example.com/hero.jpg");
+    expect(renderer.shadowRoot?.querySelector("img")?.getAttribute("alt")).toBe("Hero");
+    expect(renderer.shadowRoot?.querySelector("audio")?.getAttribute("src")).toBe("https://example.com/welcome.mp3");
+    expect(renderer.shadowRoot?.querySelector("audio")?.hasAttribute("controls")).toBe(true);
   });
 
   it("keeps the real checkbox pointer and Space-key interactions boolean", async () => {
@@ -266,6 +291,21 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.initialValue).toEqual([2, 8]);
   });
 
+  it("updates jb-range-input digits from the shared i18n locale", async () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-range-input")!;
+    const element = createDefaultElement(entry, "localizedRange");
+    i18n.setLocale("fa-IR-u-nu-arabext");
+    const renderer = createRenderer(element);
+
+    await renderer.updateComplete;
+
+    const runtime = expectReadyRuntime(renderer, element);
+    expect(runtime.showPersianNumber).toBe(true);
+
+    i18n.setLocale("fa");
+    expect(runtime.showPersianNumber).toBe(false);
+  });
+
   it.each(happyDomRenderEntries.filter(entry => entry.commonFields.disabled))("applies the disabled state to $type", async (entry: FormElementRegistryEntry) => {
     const element = createDefaultElement(entry, `${entry.defaultName}DisabledField`);
     element.disabled = true;
@@ -279,8 +319,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(18);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(18);
-    expect(Object.keys(configurationByType)).toHaveLength(18);
+    expect(formElementRegistry).toHaveLength(21);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(21);
+    expect(Object.keys(configurationByType)).toHaveLength(21);
   });
 });

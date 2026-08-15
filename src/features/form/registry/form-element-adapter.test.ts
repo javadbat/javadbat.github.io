@@ -9,16 +9,16 @@ import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("JB element registry adapters", () => {
   it("declares complete adapter metadata for every inventory component", () => {
-    expect(formElementRegistry).toHaveLength(18);
+    expect(formElementRegistry).toHaveLength(21);
 
     for (const entry of formElementRegistry) {
       expect(entry.packageName).toBe(entry.type === "jb-listbox" ? "jb-select/listbox" : entry.type);
-      expect(entry.tagName).toBe(entry.type);
+      expect(entry.tagName).toBe(entry.type === "text" ? "p" : entry.type === "image" ? "img" : entry.type === "voice" ? "audio" : entry.type);
       expect(entry.adapterVersion).toBe(1);
       expect(entry.supportedSchemaVersions).toEqual([1]);
       expect(entry.valueType.length).toBeGreaterThan(0);
       expect(entry.iconId.length).toBeGreaterThan(0);
-      expect(entry.eventNames.length).toBeGreaterThan(0);
+      expect(entry.eventNames.length).toBeGreaterThanOrEqual(entry.isContent ? 0 : 1);
       expect(entry.loadComponent).toBeTypeOf("function");
       expect(entry.applyToRuntime).toBeTypeOf("function");
       expect(entry.validate).toBeTypeOf("function");
@@ -141,5 +141,61 @@ describe("JB element registry adapters", () => {
 
   it("keeps one isolated lazy loader per component", () => {
     expect(new Set(formElementRegistry.map(entry => entry.loadComponent)).size).toBe(formElementRegistry.length);
+  });
+
+  it("applies content elements to safe native HTML", () => {
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    const textElement = createDefaultElement(textEntry, "intro");
+    textElement.props.content = { translations: { en: "Welcome", fa: "خوش آمدید" } };
+    textElement.props.color = "rebeccapurple";
+    textElement.props.fontSize = 1.5;
+    textElement.props.fontWeight = "bold";
+    textElement.props.textAlign = "center";
+    textElement.props.lineHeight = 2;
+    const paragraph = document.createElement("p") as unknown as RuntimeFormElement;
+    textEntry.applyToRuntime(paragraph, textElement, "fa");
+    expect(paragraph.textContent).toBe("خوش آمدید");
+    expect(paragraph.hasAttribute("name")).toBe(false);
+    expect(paragraph.style.color).toBe("rebeccapurple");
+    expect(paragraph.style.fontSize).toBe("1.5rem");
+    expect(paragraph.style.fontWeight).toBe("700");
+    expect(paragraph.style.textAlign).toBe("center");
+    expect(paragraph.style.lineHeight).toBe("2");
+
+    const imageEntry = formElementRegistry.find(entry => entry.type === "image")!;
+    const imageElement = createDefaultElement(imageEntry, "hero");
+    imageElement.props.url = "https://example.com/hero.jpg";
+    imageElement.props.alt = { translations: { en: "Hero" } };
+    imageElement.props.size = "md";
+    imageElement.props.containerType = "rounded";
+    imageElement.props.aspectRatio = "landscape";
+    imageElement.props.objectFit = "cover";
+    imageElement.props.objectPosition = "top";
+    imageElement.props.alignment = "end";
+    const image = document.createElement("img") as unknown as RuntimeFormElement;
+    imageEntry.applyToRuntime(image, imageElement, "en");
+    expect(image.getAttribute("src")).toBe("https://example.com/hero.jpg");
+    expect(image.getAttribute("alt")).toBe("Hero");
+    expect(image.style.inlineSize).toBe("28rem");
+    expect(image.style.borderRadius).toBe("0.875rem");
+    expect(image.style.aspectRatio).toBe("16 / 9");
+    expect(image.style.objectFit).toBe("cover");
+    expect(image.style.objectPosition).toBe("top");
+    expect(image.style.marginInlineStart).toBe("auto");
+    expect(image.style.marginInlineEnd).toBe("0");
+
+    const emptyImageElement = createDefaultElement(imageEntry, "emptyImage");
+    const placeholderImage = document.createElement("img") as unknown as RuntimeFormElement;
+    imageEntry.applyToRuntime(placeholderImage, emptyImageElement, "en");
+    expect(placeholderImage.getAttribute("src")).toBe("/form/image-placeholder.svg");
+    expect(placeholderImage.dataset.placeholder).toBe("true");
+
+    const voiceEntry = formElementRegistry.find(entry => entry.type === "voice")!;
+    const voiceElement = createDefaultElement(voiceEntry, "welcomeAudio");
+    voiceElement.props.url = "https://example.com/welcome.mp3";
+    const audio = document.createElement("audio") as unknown as RuntimeFormElement;
+    voiceEntry.applyToRuntime(audio, voiceElement, "en");
+    expect(audio.getAttribute("src")).toBe("https://example.com/welcome.mp3");
+    expect(audio.hasAttribute("controls")).toBe(true);
   });
 });

@@ -89,7 +89,7 @@ function registerStubDependencies(): void {
     customElements.define("jb-form", StubJBForm);
   }
   for (const entry of formElementRegistry) {
-    if (!customElements.get(entry.tagName)) {
+    if (!entry.isContent && !customElements.get(entry.tagName)) {
       customElements.define(entry.tagName, class extends StubFormElement {});
     }
   }
@@ -144,10 +144,11 @@ describe("JBFormBuilderWebComponent", () => {
     expect(renderer.shadowRoot?.querySelectorAll("[data-form-element-id]")).toHaveLength(formElementRegistry.length);
     for (const element of documentValue.elements) {
       const runtime = renderer.shadowRoot?.querySelector(`[data-form-element-id="${element.id}"]`);
-      expect(runtime?.localName).toBe(element.type);
-      expect(runtime?.getAttribute("name")).toBe(element.name);
+      const entry = formElementRegistry.find(candidate => candidate.type === element.type)!;
+      expect(runtime?.localName).toBe(entry.tagName);
+      expect(runtime?.getAttribute("name")).toBe(entry.isContent ? null : element.name);
     }
-    expect(renderer.requiredDependencies).toHaveLength(formElementRegistry.length + 1);
+    expect(renderer.requiredDependencies).toHaveLength(formElementRegistry.filter(entry => !entry.isContent).length + 1);
   });
 
   it("preserves repeated names, forwards value events, and resets values", async () => {

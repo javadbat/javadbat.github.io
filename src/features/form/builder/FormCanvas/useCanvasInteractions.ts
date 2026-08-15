@@ -2,7 +2,7 @@ import { useCallback, useState, type DragEvent } from "react";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "../../registry/form-element-registry";
 import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE } from "../builder-drag";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 
 interface CanvasInteractionOptions {
   messages: FormMessages;

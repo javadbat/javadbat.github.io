@@ -1,5 +1,6 @@
 import type { JBFormDocumentV1, JBFormElementType } from "../../domain/form-document";
 import type { FormIssue } from "../../domain/form-issue";
+import type { CheckValidityAsyncResult } from "jb-form";
 
 /**
  * Keep the public contract in a DOM-light module. Framework wrappers and
@@ -23,7 +24,7 @@ export interface RuntimeJBForm extends HTMLElement {
   reset(): void;
   checkValidity(): boolean;
   reportValidity(): boolean;
-  jbCheckValidity(parameters: { showError: boolean }): Promise<{ isAllValid: boolean }>;
+  jbCheckValidity(parameters: { showError: boolean }): Promise<CheckValidityAsyncResult>;
 }
 
 export interface RendererReadyDetail {

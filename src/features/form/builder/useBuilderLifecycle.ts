@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useBuilderStore } from "./BuilderStoreContext";
+import { useBuilderStore } from "./store/BuilderStoreContext";
 
 /**
  * Groups browser lifecycle integration away from the visual component tree.

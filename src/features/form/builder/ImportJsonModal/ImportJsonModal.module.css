@@ -1,0 +1,134 @@
+.modalContent,
+.validStatus,
+.errorStatus,
+.invalidStatus,
+.invalidStatus li {
+  corner-shape: squircle;
+}
+
+.modalHeading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.25rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--form-accent);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modalContent {
+  display: grid;
+  gap: 1rem;
+  box-sizing: border-box;
+  inline-size: min(44rem, calc(100vw - 3rem));
+  max-block-size: min(48rem, calc(100dvh - 3rem));
+  overflow-y: auto;
+}
+
+.description {
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.jsonInput {
+  --jb-textarea-height: 15rem;
+  --jb-textarea-textarea-direction: ltr;
+  --jb-textarea-textarea-text-align: left;
+  --jb-textarea-value-font-size: 0.78rem;
+  inline-size: 100%;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.fileChooser {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.fileChooser span {
+  overflow: hidden;
+  color: var(--form-muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileInput {
+  position: absolute;
+  inline-size: 0.0625rem;
+  block-size: 0.0625rem;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.validStatus,
+.errorStatus,
+.invalidStatus {
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--form-radius-md);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.validStatus {
+  color: var(--form-success-ink);
+  background: var(--form-success-soft);
+}
+
+.errorStatus,
+.invalidStatus {
+  color: oklch(0.48 0.17 28);
+  background: oklch(0.96 0.035 28);
+}
+
+.invalidStatus ul {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invalidStatus li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.3fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.6rem;
+  background: color-mix(in oklch, var(--form-surface) 75%, transparent);
+}
+
+.invalidStatus code {
+  overflow: hidden;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 40rem) {
+  .modalContent {
+    inline-size: calc(100vw - 3rem);
+  }
+
+  .fileChooser,
+  .modalActions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .invalidStatus li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

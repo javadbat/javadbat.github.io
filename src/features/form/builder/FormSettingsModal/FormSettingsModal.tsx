@@ -4,6 +4,7 @@ import { JBInput } from "jb-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { ClientJBModal } from "../../../../components/react/components/modal/ClientJBModal";
+import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { LocaleEditor } from "./LocaleEditor";
 import { copyLocaleDefinitions, useFormSettings } from "./useFormSettings";
@@ -11,13 +12,14 @@ import styles from "./FormSettingsModal.module.css";
 
 interface FormSettingsModalProps {
   isOpen: boolean;
+  focusFormName?: boolean;
   messages: FormMessages;
   onClose: () => void;
 }
 
 export { copyLocaleDefinitions };
 
-export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, messages, onClose }: FormSettingsModalProps) {
+export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, focusFormName = false, messages, onClose }: FormSettingsModalProps) {
   const {
     store,
     name,
@@ -28,8 +30,6 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, m
     setLocales,
     newLocale,
     setNewLocale,
-    newLocaleDirection,
-    setNewLocaleDirection,
     localeError,
     slug,
     setSlug,
@@ -48,10 +48,17 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, m
           <p className={styles.eyebrow}>{messages.currentDraft}</p>
           <h2>{messages.formSettings}</h2>
         </div>
+        <ModalCloseButton label={messages.close} onClick={onClose} />
       </div>
       <div slot="content" className={styles.modalContent}>
         <section className={styles.settingsSection}>
-          <JBInput name="formName" label={messages.formName} value={name} onInput={event => setName(String((event.target as unknown as { value?: unknown }).value ?? ""))} />
+          <JBInput
+            name="formName"
+            label={messages.formName}
+            value={name}
+            autoFocus={focusFormName}
+            onInput={event => setName(String((event.target as unknown as { value?: unknown }).value ?? ""))}
+          />
           <JBInput
             name="formSlug"
             label={messages.slug}
@@ -62,7 +69,12 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, m
         </section>
 
         <section className={styles.settingsSection}>
-          <JBSelect<string> name="defaultLocale" label={messages.defaultLocale} value={defaultLocale} onChange={event => setDefaultLocale(event.target.value)}>
+          <JBSelect<string>
+            name="defaultLocale"
+            label={messages.defaultLocale}
+            value={defaultLocale}
+            onChange={event => setDefaultLocale(event.target.value)}
+          >
             {Object.keys(locales).map(locale => (
               <JBOption key={locale} value={locale}>
                 {locale}
@@ -73,12 +85,10 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, m
             locales={locales}
             defaultLocale={defaultLocale}
             newLocale={newLocale}
-            newLocaleDirection={newLocaleDirection}
             localeError={localeError}
             messages={messages}
             setLocales={setLocales}
             setNewLocale={setNewLocale}
-            setNewLocaleDirection={setNewLocaleDirection}
             onAdd={addLocale}
             onRemove={removeLocale}
           />

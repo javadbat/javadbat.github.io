@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName } from "../../registry/form-element-registry";
-import { useBuilderStore } from "../BuilderStoreContext";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { RemoveElementModal } from "../RemoveElementModal/RemoveElementModal";
 import { CanvasCard } from "./CanvasCard";
@@ -11,11 +11,12 @@ import { useCanvasInteractions } from "./useCanvasInteractions";
 
 interface FormCanvasProps {
   messages: FormMessages;
+  onOpenFormNameSettings?: () => void;
   onSelectElement?: (elementId: string) => void;
   onConfigureElement?: (elementId: string) => void;
 }
 
-export const FormCanvas = observer(function FormCanvas({ messages, onSelectElement, onConfigureElement }: FormCanvasProps) {
+export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNameSettings, onSelectElement, onConfigureElement }: FormCanvasProps) {
   const store = useBuilderStore();
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
@@ -36,7 +37,9 @@ export const FormCanvas = observer(function FormCanvas({ messages, onSelectEleme
         <div>
           <p className={styles.eyebrow}>{messages.currentDraft}</p>
           <h1 id="form-canvas-title" tabIndex={-1}>
-            {store.formName}
+            <button type="button" className={styles.titleButton} onClick={onOpenFormNameSettings}>
+              {store.formName}
+            </button>
           </h1>
         </div>
         <span className={styles.fieldCount}>

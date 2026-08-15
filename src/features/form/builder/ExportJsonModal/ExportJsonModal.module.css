@@ -29,14 +29,14 @@
   overflow: hidden;
 }
 
-.exportModalHeading {
+.exportModalHeaderActions {
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
+  min-inline-size: 0;
 }
 
-.exportModalHeading h2 {
+.modalHeading h2 {
   margin: 0.25rem 0 0;
   font-size: 1.25rem;
 }
@@ -158,4 +158,3 @@
       grid-row: 1;
     }
    }
-
