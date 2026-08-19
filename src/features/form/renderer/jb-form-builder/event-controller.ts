@@ -21,7 +21,7 @@ export class FormEventController {
     name: "input" | "change" | "submit";
     listener: EventListener;
   }>;
-
+  // TODO: Don't use  `private readonly` just setup with #host (native private property) in add class inside jb-form builder
   constructor(
     private readonly host: JBFormBuilderElement,
     private readonly form: RuntimeJBForm,

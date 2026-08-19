@@ -9,14 +9,13 @@ import { buildRuntimeForm, clearRenderedForm, commitRuntimeForm, createRendererS
 import { configureFormLocale, resolveFormLocale } from "./locale-controller";
 import { RenderStateController } from "./render-state";
 import type { FormValues, JBFormBuilderElement, RendererDependency, RendererState, RuntimeJBForm } from "./types";
-
+import {JBBaseComponent} from 'jb-core'
 /**
  * Current product routes instantiate the component only in a browser. The
  * guarded base prevents module evaluation from immediately reading an absent
  * HTMLElement, keeping a future SSR-safe package entry achievable without
  * rewriting the component's concern modules.
  */
-const HTMLElementBase = globalThis.HTMLElement ?? (class {} as unknown as typeof HTMLElement);
 
 function dependencyIssue(failure: DependencyFailure): FormIssue {
   return {
@@ -43,7 +42,7 @@ function unexpectedIssue(error: unknown): FormIssue {
   };
 }
 
-export class JBFormBuilderWebComponent extends HTMLElementBase implements JBFormBuilderElement {
+export class JBFormBuilderWebComponent extends JBBaseComponent implements JBFormBuilderElement {
   static get observedAttributes(): string[] {
     return ["auto-import", "locale"];
   }

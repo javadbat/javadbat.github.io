@@ -4,6 +4,10 @@ import { renderFormElement } from "./element-renderer";
 import rendererStyles from "./style.css?inline";
 import type { RendererDependency, RendererState, RuntimeJBForm } from "./types";
 
+ //TODO: create a folder `/render` and put this file there. separate this file
+ // TODO: for each interface add comment about what that interface represent(why interface exist).
+ // TODO: jb-select get an major update. update it to latest version.
+
 export interface RendererShell {
   root: ShadowRoot;
   status: HTMLElement;
