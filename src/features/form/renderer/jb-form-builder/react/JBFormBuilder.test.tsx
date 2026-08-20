@@ -12,13 +12,16 @@ describe("JBFormBuilder React wrapper", () => {
     const documentValue = createEmptyFormDocument();
     const ref = createRef<JBFormBuilderElement>();
     const onReady = vi.fn();
-    const { container } = render(<JBFormBuilder ref={ref} formDocument={documentValue} autoImport={false} locale="fa" onReady={onReady} aria-label="Wrapped form" />);
+    const loader = vi.fn(async () => ({ failures: [], missing: [] }));
+    const { container } = render(
+      <JBFormBuilder ref={ref} formDocument={documentValue} loadDependencies={loader} locale="fa" onReady={onReady} aria-label="Wrapped form" />,
+    );
 
     const host = container.querySelector("jb-form-builder") as JBFormBuilderElement;
     await waitFor(() => {
       expect(ref.current).toBe(host);
       expect(host.formDocument?.id).toBe(documentValue.id);
-      expect(host.autoImport).toBe(false);
+      expect(host.loadDependencies).toBe(loader);
       expect(host.locale).toBe("fa");
     });
 
@@ -34,6 +37,5 @@ describe("JBFormBuilder React wrapper", () => {
 
     expect(onReady).toHaveBeenCalledOnce();
     expect(host.getAttribute("aria-label")).toBe("Wrapped form");
-    expect(host.getAttribute("auto-import")).toBe("false");
   });
 });

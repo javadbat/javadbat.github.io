@@ -1,6 +1,6 @@
 import type { JBFormElementType, JSONValue } from "../domain/form-document";
 
-export type PropertyControl = "text" | "textarea" | "url" | "number" | "boolean" | "select" | "string-list" | "options";
+export type PropertyControl = "text" | "textarea" | "url" | "number" | "color" | "boolean" | "select" | "string-list" | "options";
 
 export interface PropertyLabel {
   en: string;
@@ -67,6 +67,12 @@ const numberProperty = (key: string, en: string, fa: string, options: Pick<FormE
   label: label(en, fa),
   control: "number",
   ...options,
+});
+
+const colorProperty = (key: string, en: string, fa: string): FormElementPropertyDefinition => ({
+  key,
+  label: label(en, fa),
+  control: "color",
 });
 
 const booleanProperty = (key: string, en: string, fa: string): FormElementPropertyDefinition => ({
@@ -193,7 +199,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     },
     [
       textareaProperty("content", "Text", "متن", true),
-      textProperty("color", "Color", "رنگ"),
+      colorProperty("color", "Color", "رنگ"),
       numberProperty("fontSize", "Font size (rem)", "اندازه متن (rem)", { min: 0.5, max: 6, step: 0.125 }),
       selectProperty("fontWeight", "Font weight", "ضخامت متن", [
         { value: "normal", label: label("Normal", "معمولی") },

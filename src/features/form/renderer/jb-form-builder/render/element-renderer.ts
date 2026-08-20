@@ -1,8 +1,9 @@
-import type { JBFormElementV1 } from "../../domain/form-document";
-import type { FormIssue } from "../../domain/form-issue";
-import { registryByType, type FormElementRegistryEntry } from "../../registry/form-element-registry";
-import type { RuntimeFormElement } from "../../registry/form-element-adapter";
+import type { JBFormElementV1 } from "../../../domain/form-document";
+import type { FormIssue } from "../../../domain/form-issue";
+import { registryByType, type FormElementRegistryEntry } from "../../../registry/form-element-registry";
+import type { RuntimeFormElement } from "../../../registry/form-element-adapter";
 
+/** One rendered document element wrapper plus an optional isolated failure. */
 export interface RenderedElement {
   wrapper: HTMLElement;
   issue?: FormIssue;

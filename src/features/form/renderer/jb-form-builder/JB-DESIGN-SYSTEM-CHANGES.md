@@ -13,8 +13,8 @@ The published component should retain this public behavior:
 - render the document inside `jb-form`;
 - expose value, reset, synchronous validity, and asynchronous validity APIs;
 - preserve repeated names;
-- lazy-load only used JB packages when `autoImport` is enabled;
-- perform no JB component imports when `autoImport` is disabled;
+- lazy-load only used JB packages when a loader callback is supplied;
+- perform no JB component imports when a loader callback is omitted;
 - provide the `jb-form-builder/react` wrapper as a separate export;
 - expose typed renderer events and stable Shadow DOM parts.
 
@@ -124,19 +124,16 @@ Scoped i18n becomes necessary when multilingual form support requires two simult
 
 ## Phase 1 requirement 1 — Standardize dependency-controlled custom-element registration
 
-`jb-form-builder` supports two modes:
+`jb-form-builder` supports an injected loading policy:
 
-```html
-<jb-form-builder auto-import="true"></jb-form-builder>
-<jb-form-builder auto-import="false"></jb-form-builder>
+```ts
+renderer.loadDependencies = loadDependencies;
 ```
 
-The property defaults to `true`. The attribute is enumerated rather than a native boolean attribute:
-
-- absent, empty, or `"true"` means automatic loading;
-- `"false"` means consumer-controlled loading.
-
-When automatic loading is disabled, the consumer registers `jb-form`, every used control, `jb-option` when needed, and configures `jb-core/i18n`. The renderer exposes missing packages/tags through `requiredDependencies` and `dependencies-required`.
+When no callback is supplied, the consumer registers `jb-form`, every used
+control, `jb-option` when needed, and configures `jb-core/i18n`. The renderer
+does not import packages: it renders a degraded result and exposes missing
+packages/tags through `requiredDependencies` and `dependencies-required`.
 
 For reliable package composition, every JB custom-element package should:
 
@@ -165,8 +162,11 @@ jb-form-builder/
 ├─ document-controller
 ├─ dependency-loader
 ├─ locale-controller
-├─ form-renderer
-├─ element-renderer
+├─ render/
+│  ├─ element-renderer
+│  ├─ renderer-shell
+│  ├─ runtime-form
+│  └─ types
 ├─ form-facade
 ├─ event-controller
 ├─ render-state

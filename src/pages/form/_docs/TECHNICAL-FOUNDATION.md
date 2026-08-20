@@ -400,12 +400,11 @@ Preview imports one adapter module, not the local or published renderer directly
 ```ts
 interface FormRendererElement extends HTMLElement {
   formDocument: JBFormDocument | null;
-  autoImport: boolean;
+  loadDependencies: DependencyLoader | null;
   locale: string | null;
   readonly state:
     | "empty"
     | "loading"
-    | "waiting-dependencies"
     | "ready"
     | "invalid"
     | "degraded"
@@ -434,7 +433,13 @@ The adapter:
 
 The application renderer is implemented under `src/features/form/renderer/jb-form-builder`. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency. Package publication is reserved for the final delivery step.
 
-Automatic dependency loading defaults to enabled and imports `jb-form` plus only the unique component packages used by the assigned document. Loads are memoized across instances. `auto-import="false"` performs no package loading or global i18n configuration; the consumer registers the reported `requiredDependencies`, configures i18n, and calls `retryRender()`.
+Dependency loading is host-controlled. Preview explicitly supplies the bundled
+lazy loader, which imports `jb-form` plus only the unique component packages
+used by the assigned document and memoizes loads across instances. Without a
+loader, the renderer performs no package loading or global i18n configuration;
+it builds a degraded form, reports undefined tags through
+`requiredDependencies` and `dependencies-required`, and lets the consumer
+register them before calling `retryRender()`.
 
 The React wrapper is a separate entry. It assigns the document as an object property, forwards the underlying element ref, installs one stable listener set with current callback refs, and adds no renderer state mirror.
 

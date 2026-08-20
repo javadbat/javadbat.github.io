@@ -45,7 +45,6 @@ function createValidationRenderer(): JBFormBuilderElement {
   const renderer = document.createElement("jb-form-builder");
   // Real dependencies are registered explicitly above. Manual mode keeps this
   // integration test deterministic and isolates validation from package loading.
-  renderer.autoImport = false;
   document.body.append(renderer);
   return renderer;
 }

@@ -1,6 +1,10 @@
 export { defineJBFormBuilder, JB_FORM_BUILDER_TAG_NAME } from "./define";
 export { JBFormBuilderWebComponent } from "./jb-form-builder";
+export { loadDependencies } from "./dependency-loader";
 export type {
+  DependencyFailure,
+  DependencyLoader,
+  DependencyLoadResult,
   FormValues,
   JBFormBuilderElement,
   JBFormBuilderEventMap,

@@ -13,9 +13,9 @@ export function resolveFormLocale(document: JBFormDocumentV1, override: string |
   return { locale, direction };
 }
 
-export async function configureFormLocale(activeLocale: ActiveFormLocale, autoImport: boolean): Promise<FormIssue[]> {
-  if (!autoImport) {
-    // Manual dependency mode means manual i18n ownership as well. The renderer
+export async function configureFormLocale(activeLocale: ActiveFormLocale, configureGlobalLocale: boolean): Promise<FormIssue[]> {
+  if (!configureGlobalLocale) {
+    // Consumer-owned dependency mode means consumer-owned i18n as well. The renderer
     // still applies lang/dir to its host, but it does not import or mutate the
     // global jb-core i18n singleton.
     return [];

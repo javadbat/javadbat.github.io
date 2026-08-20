@@ -9,13 +9,25 @@ import type { CheckValidityAsyncResult } from "jb-form";
  */
 export type FormValues = Record<string, unknown>;
 
-export type RendererState = "empty" | "loading" | "waiting-dependencies" | "ready" | "invalid" | "degraded" | "error";
+export type RendererState = "empty" | "loading" | "ready" | "invalid" | "degraded" | "error";
 
 export interface RendererDependency {
   packageName: string;
   tagNames: readonly string[];
   elementType?: JBFormElementType;
 }
+
+export interface DependencyFailure {
+  dependency: RendererDependency;
+  error: Error;
+}
+
+export interface DependencyLoadResult {
+  failures: DependencyFailure[];
+  missing: RendererDependency[];
+}
+
+export type DependencyLoader = (dependencies: readonly RendererDependency[]) => DependencyLoadResult | Promise<DependencyLoadResult>;
 
 export interface RuntimeJBForm extends HTMLElement {
   value: FormValues;
@@ -54,10 +66,10 @@ export interface JBFormBuilderElement extends HTMLElement {
    */
   formDocument: JBFormDocumentV1 | null;
   /**
-   * When false, the host application owns custom-element registration and the
-   * renderer performs no JB component package imports.
+   * Optional dependency-loading policy supplied by the host application. When
+   * omitted, the renderer performs no package imports and reports missing tags.
    */
-  autoImport: boolean;
+  loadDependencies: DependencyLoader | null;
   locale: string | null;
   readonly state: RendererState;
   readonly form: RuntimeJBForm | null;

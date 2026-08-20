@@ -119,9 +119,8 @@ function createRenderer(element: JBFormElementV1): JBFormBuilderElement {
   const formDocument = createEmptyFormDocument();
   formDocument.elements = [element];
   const renderer = document.createElement("jb-form-builder");
-  // Packages are registered once in beforeAll. Manual mode proves that the
-  // renderer consumes consumer-owned dependencies without performing imports.
-  renderer.autoImport = false;
+  // Packages are registered once in beforeAll. Omitting a loader proves that
+  // the renderer consumes consumer-owned dependencies without imports.
   document.body.append(renderer);
   renderer.formDocument = formDocument;
   return renderer;
@@ -202,7 +201,6 @@ describe("real JB component Preview coverage", () => {
     const formDocument = createEmptyFormDocument();
     formDocument.elements = happyDomRenderEntries.map((entry, index) => createDefaultElement(entry, `coverageField${index + 1}`));
     const renderer = document.createElement("jb-form-builder");
-    renderer.autoImport = false;
     document.body.append(renderer);
     renderer.formDocument = formDocument;
 
@@ -226,7 +224,6 @@ describe("real JB component Preview coverage", () => {
     formDocument.elements[1].props.alt = { translations: { en: "Hero" } };
     formDocument.elements[2].props.url = "https://example.com/welcome.mp3";
     const renderer = document.createElement("jb-form-builder");
-    renderer.autoImport = false;
     document.body.append(renderer);
     renderer.formDocument = formDocument;
 

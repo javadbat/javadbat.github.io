@@ -3,6 +3,7 @@ import { JBButton } from "jb-button/react";
 import type { JBFormDocumentV1 } from "../domain/form-document";
 import type { FormMessages } from "../i18n/locale-adapter";
 import { JBFormBuilder } from "../renderer/jb-form-builder/react";
+import { loadDependencies } from "../renderer/jb-form-builder/dependency-loader";
 import type { JBFormBuilderElement } from "../renderer/jb-form-builder/types";
 import styles from "../shell/RouteShell.module.css";
 
@@ -78,7 +79,7 @@ export function PreviewFormPanel({ document, accessibleName, messages }: Preview
         ref={rendererRef}
         formDocument={document}
         locale={document.localization.defaultLocale}
-        autoImport
+        loadDependencies={loadDependencies}
         onReady={() => setValidationState("idle")}
         onDocumentInvalid={() => setValidationState("error")}
         onRenderError={() => setValidationState("error")}

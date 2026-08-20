@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { JBCheckbox } from "jb-checkbox/react";
+import { JBColorInput } from "jb-color-input/react";
 import { JBInput } from "jb-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
@@ -84,6 +85,21 @@ export const PropertyField = observer(function PropertyField({ definition, local
           </JBOption>
         ))}
       </JBSelect>
+    );
+  }
+
+  if (definition.control === "color") {
+    return (
+      <JBColorInput
+        size="sm"
+        name={`prop-${definition.key}`}
+        label={label}
+        value={typeof value === "string" ? value : ""}
+        onInput={event => {
+          const nextValue = inputValue(event as unknown as Event);
+          store.updateSelectedProp(definition.key, nextValue === "" ? undefined : nextValue);
+        }}
+      />
     );
   }
 

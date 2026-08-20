@@ -18,7 +18,7 @@ export class RenderStateController {
     // State is reflected as attributes so CSS, automated tests, and assistive
     // tooling can observe it without reaching into private class fields.
     this.host.dataset.state = this.#state;
-    const busy = this.#state === "loading" || this.#state === "waiting-dependencies";
+    const busy = this.#state === "loading";
     this.host.setAttribute("aria-busy", String(busy));
     if (this.#state === "invalid" || this.#state === "error") {
       this.host.setAttribute("aria-invalid", "true");

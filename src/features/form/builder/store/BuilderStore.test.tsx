@@ -116,6 +116,24 @@ describe("Builder core editing", () => {
     expect(store.selectedElement?.props.content).toEqual({ translations: { en: "A longer introduction\nwith two lines." } });
   });
 
+  it("edits color properties with jb-color-input", () => {
+    const store = new BuilderStore();
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    store.addElement(textEntry);
+    const colorDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "color")!;
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <PropertyField definition={colorDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const colorInput = view.container.querySelector<HTMLElement>('jb-color-input[name="prop-color"]');
+
+    expect(colorDefinition.control).toBe("color");
+    expect(colorInput).toBeTruthy();
+    fireEvent.input(colorInput!, { target: { value: "oklch(0.6 0.2 250)" } });
+    expect(store.selectedElement?.props.color).toBe("oklch(0.6 0.2 250)");
+  });
+
   it("creates registry defaults without sharing mutable props", () => {
     const store = new BuilderStore();
 

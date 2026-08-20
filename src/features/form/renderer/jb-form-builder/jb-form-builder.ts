@@ -1,15 +1,17 @@
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import type { FormIssue } from "../../domain/form-issue";
-import { parseBooleanAttribute } from "jb-core";
+import { JBBaseComponent } from "jb-core";
 import { cloneFormDocument, prepareFormDocument } from "./document-controller";
-import { getMissingDependencies, getRequiredDependencies, loadDependencies, type DependencyFailure } from "./dependency-loader";
+import { getMissingDependencies, getRequiredDependencies } from "./dependency-loader";
 import { dispatchRendererEvent, FormEventController } from "./event-controller";
 import { checkRuntimeFormValidity, checkRuntimeFormValidityAsync, getRuntimeFormValues, resetRuntimeForm, setRuntimeFormValues } from "./form-facade";
-import { buildRuntimeForm, clearRenderedForm, commitRuntimeForm, createRendererShell, showRendererState, type RendererShell } from "./form-renderer";
+import { clearRenderedForm, createRendererShell, showRendererState } from "./render/renderer-shell";
+import { buildRuntimeForm, commitRuntimeForm } from "./render/runtime-form";
+import type { RendererShell } from "./render/types";
 import { configureFormLocale, resolveFormLocale } from "./locale-controller";
 import { RenderStateController } from "./render-state";
-import type { FormValues, JBFormBuilderElement, RendererDependency, RendererState, RuntimeJBForm } from "./types";
-import {JBBaseComponent} from 'jb-core'
+import type { DependencyFailure, DependencyLoader, FormValues, JBFormBuilderElement, RendererDependency, RendererState, RuntimeJBForm } from "./types";
+
 /**
  * Current product routes instantiate the component only in a browser. The
  * guarded base prevents module evaluation from immediately reading an absent
@@ -44,14 +46,14 @@ function unexpectedIssue(error: unknown): FormIssue {
 
 export class JBFormBuilderWebComponent extends JBBaseComponent implements JBFormBuilderElement {
   static get observedAttributes(): string[] {
-    return ["auto-import", "locale"];
+    return ["locale"];
   }
 
   #shell!: RendererShell;
   #stateController!: RenderStateController;
   #document: JBFormDocumentV1 | null = null;
   #assignmentIssues: FormIssue[] = [];
-  #autoImport = true;
+  #loadDependencies: DependencyLoader | null = null;
   #locale: string | null = null;
   #form: RuntimeJBForm | null = null;
   #eventController: FormEventController | null = null;
@@ -91,14 +93,6 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
     if (oldValue === newValue) {
       return;
     }
-    if (name === "auto-import") {
-      const nextValue = parseBooleanAttribute(newValue, true);
-      if (this.#autoImport !== nextValue) {
-        this.#autoImport = nextValue;
-        this.requestRender();
-      }
-      return;
-    }
     if (name === "locale" && this.#locale !== newValue) {
       this.#locale = newValue?.trim() || null;
       this.requestRender();
@@ -127,19 +121,16 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
     this.requestRender();
   }
 
-  get autoImport(): boolean {
-    return this.#autoImport;
+  get loadDependencies(): DependencyLoader | null {
+    return this.#loadDependencies;
   }
 
-  set autoImport(value: boolean) {
-    const nextValue = Boolean(value);
-    if (this.#autoImport === nextValue) {
+  set loadDependencies(value: DependencyLoader | null) {
+    const nextValue = typeof value === "function" ? value : null;
+    if (this.#loadDependencies === nextValue) {
       return;
     }
-    this.#autoImport = nextValue;
-    // This is an enumerated true/false attribute rather than a standard boolean
-    // attribute because automatic loading intentionally defaults to true.
-    this.setAttribute("auto-import", String(nextValue));
+    this.#loadDependencies = nextValue;
     this.requestRender();
   }
 
@@ -284,26 +275,17 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
         ),
       );
 
-      if (!this.#autoImport) {
-        // Manual mode fails fast with a deterministic package/tag list. It
-        // never invokes the dynamic import loaders on the user's behalf.
-        const missing = getMissingDependencies(dependencies);
-        if (missing.length > 0) {
-          this.clearForm();
-          this.setState("waiting-dependencies", [], missing);
-          dispatchRendererEvent(this, "dependencies-required", {
-            dependencies: missing,
-          });
-          return;
-        }
-      }
-
-      // Independent package imports start together inside loadDependencies.
-      // Manual mode supplies an empty result and proceeds only after registration.
-      const dependencyResult = this.#autoImport ? await loadDependencies(dependencies) : { failures: [], missing: [] };
+      // Dependency ownership belongs to the host. It may inject the bundled
+      // loader, a CDN/import-map loader, or no loader at all.
+      const dependencyResult = this.#loadDependencies
+        ? await this.#loadDependencies(dependencies)
+        : { failures: [], missing: getMissingDependencies(dependencies) };
       if (!this.isCurrent(generation)) {
         return;
       }
+      // A custom loader may return before definitions are registered. Always
+      // inspect the platform registry so warnings describe actual page state.
+      const missingDependencies = getMissingDependencies(dependencies);
 
       const dependencyIssues = dependencyResult.failures.map(dependencyIssue);
       const formUnavailable = dependencyResult.failures.some(({ dependency }) => dependency.packageName === "jb-form");
@@ -320,12 +302,16 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
       const activeLocale = resolveFormLocale(formDocument, this.#locale);
       this.lang = activeLocale.locale;
       this.dir = activeLocale.direction;
-      const localeIssues = await configureFormLocale(activeLocale, this.#autoImport);
+      const localeIssues = await configureFormLocale(activeLocale, Boolean(this.#loadDependencies));
       if (!this.isCurrent(generation)) {
         return;
       }
 
-      const unavailableTypes = new Set(dependencyResult.failures.flatMap(({ dependency }) => (dependency.elementType ? [dependency.elementType] : [])));
+      const unavailableTypes = new Set(
+        [...dependencyResult.failures.map(({ dependency }) => dependency), ...missingDependencies].flatMap(dependency =>
+          dependency.elementType ? [dependency.elementType] : [],
+        ),
+      );
       const runtime = buildRuntimeForm(formDocument, activeLocale.locale, unavailableTypes);
       if (!this.isCurrent(generation)) {
         return;
@@ -340,12 +326,19 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
       this.#eventController.connect();
 
       const issues = [...dependencyIssues, ...localeIssues, ...runtime.issues];
-      if (issues.length > 0) {
-        this.setState("degraded", issues);
-        dispatchRendererEvent(this, "render-error", {
-          documentId: formDocument.id,
-          issues,
+      if (missingDependencies.length > 0) {
+        dispatchRendererEvent(this, "dependencies-required", {
+          dependencies: missingDependencies,
         });
+      }
+      if (issues.length > 0 || missingDependencies.length > 0) {
+        this.setState("degraded", issues, missingDependencies);
+        if (issues.length > 0) {
+          dispatchRendererEvent(this, "render-error", {
+            documentId: formDocument.id,
+            issues,
+          });
+        }
       } else {
         this.setState("ready");
         dispatchRendererEvent(this, "ready", {

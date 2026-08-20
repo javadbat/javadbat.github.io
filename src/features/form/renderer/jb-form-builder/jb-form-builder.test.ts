@@ -107,7 +107,6 @@ function allElementsDocument(): JBFormDocumentV1 {
 
 function createRenderer(): JBFormBuilderElement {
   const renderer = document.createElement("jb-form-builder");
-  renderer.autoImport = false;
   document.body.append(renderer);
   return renderer;
 }
@@ -117,7 +116,7 @@ beforeEach(() => {
 });
 
 describe("JBFormBuilderWebComponent", () => {
-  it("waits with exact requirements when manual dependencies are absent", async () => {
+  it("renders and reports exact requirements when no dependency loader is supplied", async () => {
     const renderer = createRenderer();
     const required = vi.fn();
     renderer.addEventListener("dependencies-required", required);
@@ -125,7 +124,8 @@ describe("JBFormBuilderWebComponent", () => {
 
     await renderer.updateComplete;
 
-    expect(renderer.state).toBe("waiting-dependencies");
+    expect(renderer.state).toBe("degraded");
+    expect(renderer.form?.localName).toBe("jb-form");
     expect(renderer.requiredDependencies).toEqual([{ packageName: "jb-form", tagNames: ["jb-form"] }]);
     expect(required).toHaveBeenCalledOnce();
     expect(renderer.shadowRoot?.textContent).toContain("jb-form");
@@ -149,6 +149,20 @@ describe("JBFormBuilderWebComponent", () => {
       expect(runtime?.getAttribute("name")).toBe(entry.isContent ? null : element.name);
     }
     expect(renderer.requiredDependencies).toHaveLength(formElementRegistry.filter(entry => !entry.isContent).length + 1);
+  });
+
+  it("uses a host-provided dependency loader", async () => {
+    registerStubDependencies();
+    const loader = vi.fn(async () => ({ failures: [], missing: [] }));
+    const renderer = createRenderer();
+    renderer.loadDependencies = loader;
+    renderer.formDocument = createEmptyFormDocument();
+
+    await renderer.updateComplete;
+
+    expect(loader).toHaveBeenCalledOnce();
+    expect(loader).toHaveBeenCalledWith([{ packageName: "jb-form", tagNames: ["jb-form"] }]);
+    expect(renderer.state).toBe("ready");
   });
 
   it("preserves repeated names, forwards value events, and resets values", async () => {
@@ -199,16 +213,14 @@ describe("JBFormBuilderWebComponent", () => {
     expect(documentValue.elements[0].name).toBe("");
   });
 
-  it("reflects auto-import and locale properties to attributes", () => {
+  it("accepts a dependency loader property and reflects locale", () => {
     const renderer = document.createElement("jb-form-builder");
+    const loader = vi.fn(async () => ({ failures: [], missing: [] }));
 
-    renderer.autoImport = false;
+    renderer.loadDependencies = loader;
     renderer.locale = "fa";
 
-    expect(renderer.getAttribute("auto-import")).toBe("false");
+    expect(renderer.loadDependencies).toBe(loader);
     expect(renderer.getAttribute("locale")).toBe("fa");
-
-    renderer.setAttribute("auto-import", "true");
-    expect(renderer.autoImport).toBe(true);
   });
 });

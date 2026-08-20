@@ -17,20 +17,21 @@ export function dispatchRendererEvent<Name extends keyof JBFormBuilderEventMap>(
 }
 
 export class FormEventController {
+  readonly #host: JBFormBuilderElement;
+  readonly #form: RuntimeJBForm;
+  readonly #getValues: () => FormValues;
   readonly #listeners: Array<{
     name: "input" | "change" | "submit";
     listener: EventListener;
   }>;
-  // TODO: Don't use  `private readonly` just setup with #host (native private property) in add class inside jb-form builder
-  constructor(
-    private readonly host: JBFormBuilderElement,
-    private readonly form: RuntimeJBForm,
-    private readonly getValues: () => FormValues,
-  ) {
+  constructor(host: JBFormBuilderElement, form: RuntimeJBForm, getValues: () => FormValues) {
+    this.#host = host;
+    this.#form = form;
+    this.#getValues = getValues;
     this.#listeners = [
-      { name: "input", listener: this.forward.bind(this, "input") },
-      { name: "change", listener: this.forward.bind(this, "change") },
-      { name: "submit", listener: this.forward.bind(this, "submit") },
+      { name: "input", listener: this.#forward.bind(this, "input") },
+      { name: "change", listener: this.#forward.bind(this, "change") },
+      { name: "submit", listener: this.#forward.bind(this, "submit") },
     ];
   }
 
@@ -38,17 +39,17 @@ export class FormEventController {
     // Listeners live on the current jb-form rather than every child. This keeps
     // listener count constant as form size grows.
     for (const { name, listener } of this.#listeners) {
-      this.form.addEventListener(name, listener);
+      this.#form.addEventListener(name, listener);
     }
   }
 
   disconnect(): void {
     for (const { name, listener } of this.#listeners) {
-      this.form.removeEventListener(name, listener);
+      this.#form.removeEventListener(name, listener);
     }
   }
 
-  private forward(name: "input" | "change" | "submit", sourceEvent: Event): void {
+  #forward(name: "input" | "change" | "submit", sourceEvent: Event): void {
     // jb-form consumes a trusted submit, validates, and emits a synthetic valid
     // submit. Forward only that second event to avoid duplicate host submits.
     if (name === "submit" && sourceEvent.isTrusted) {
@@ -58,10 +59,10 @@ export class FormEventController {
     // composed host event whose target is always jb-form-builder.
     sourceEvent.stopPropagation();
     const detail: RendererValueDetail = {
-      value: this.getValues(),
+      value: this.#getValues(),
       sourceEvent,
     };
-    const accepted = dispatchRendererEvent(this.host, name, detail, sourceEvent.cancelable);
+    const accepted = dispatchRendererEvent(this.#host, name, detail, sourceEvent.cancelable);
     if (!accepted) {
       sourceEvent.preventDefault();
     }

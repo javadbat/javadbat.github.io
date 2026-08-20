@@ -7,6 +7,35 @@
 - web-component
 - ThreeJS
 
+## Form renderer dependencies
+
+`<jb-form-builder>` does not import custom-element packages unless its host
+provides a dependency loader. This keeps package versions and loading strategy
+under the application's control.
+
+For a bundler-based application, use the included lazy loader:
+
+```ts
+import { loadDependencies } from "./src/features/form/renderer/jb-form-builder";
+
+const renderer = document.querySelector("jb-form-builder");
+renderer.loadDependencies = loadDependencies;
+renderer.formDocument = formDocument;
+```
+
+The React wrapper exposes the same policy as a prop:
+
+```tsx
+<JBFormBuilder formDocument={formDocument} loadDependencies={loadDependencies} />
+```
+
+Applications using eager imports, import maps, a CDN, or server-injected
+scripts can omit the callback and register the required tags themselves. The
+renderer still builds the form, enters `degraded` state when definitions are
+missing, lists the undefined package/tag pairs, and emits
+`dependencies-required`. Read `requiredDependencies`, load or register those
+packages, then call `retryRender()`.
+
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
 [![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)

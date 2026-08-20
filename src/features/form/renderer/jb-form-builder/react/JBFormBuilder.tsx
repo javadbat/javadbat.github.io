@@ -2,7 +2,7 @@ import { createElement, forwardRef, useEffect, useImperativeHandle, useRef, type
 import { type JBElementStandardProps, useEvent } from "jb-core/react";
 import type { JBFormDocumentV1 } from "../../../domain/form-document";
 import { defineJBFormBuilder } from "../define";
-import type { JBFormBuilderElement, JBFormBuilderEventMap } from "../types";
+import type { DependencyLoader, JBFormBuilderElement, JBFormBuilderEventMap } from "../types";
 
 // React applications should not need a second registration import. The guarded
 // function is harmless during server module evaluation and registers in the
@@ -11,7 +11,7 @@ defineJBFormBuilder();
 
 interface JBFormBuilderOwnProps {
   formDocument: JBFormDocumentV1 | null;
-  autoImport?: boolean;
+  loadDependencies?: DependencyLoader | null;
   locale?: string | null;
   onReady?: (event: JBFormBuilderEventMap["ready"]) => void;
   onDocumentInvalid?: (event: JBFormBuilderEventMap["document-invalid"]) => void;
@@ -29,7 +29,7 @@ export type JBFormBuilderProps = PropsWithChildren<JBFormBuilderOwnProps> &
 export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps>(function JBFormBuilder(
   {
     formDocument,
-    autoImport = true,
+    loadDependencies = null,
     locale = null,
     onReady,
     onDocumentInvalid,
@@ -63,15 +63,14 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
     }
     // formDocument must be assigned as an object property; serializing it into
     // JSX attributes would lose types and create escaping/size problems.
-    currentElement.autoImport = autoImport;
+    currentElement.loadDependencies = loadDependencies;
     currentElement.locale = locale;
     currentElement.formDocument = formDocument;
-  }, [autoImport, formDocument, locale]);
+  }, [formDocument, loadDependencies, locale]);
 
   return createElement("jb-form-builder", {
     ...hostAttributes,
     ref: element,
-    "auto-import": String(autoImport),
     locale: locale ?? undefined,
   });
 });

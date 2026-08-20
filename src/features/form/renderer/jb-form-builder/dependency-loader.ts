@@ -1,16 +1,6 @@
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import { registryByType } from "../../registry/form-element-registry";
-import type { RendererDependency } from "./types";
-
-export interface DependencyFailure {
-  dependency: RendererDependency;
-  error: Error;
-}
-
-export interface DependencyLoadResult {
-  failures: DependencyFailure[];
-  missing: RendererDependency[];
-}
+import type { DependencyFailure, DependencyLoadResult, RendererDependency } from "./types";
 
 /**
  * Custom-element registration is global to the page. Cache the in-flight
@@ -96,7 +86,6 @@ export function getRequiredDependencies(document: JBFormDocumentV1): RendererDep
 export function getMissingDependencies(dependencies: readonly RendererDependency[]): RendererDependency[] {
   return dependencies.filter(dependency => !isRegistered(dependency));
 }
-//TODO: make this function as a prop(in react wrapper) or as a property in web-component. if user provide it. use it. if not we are not responsible for dependencies. we just show warning after form build that some tags are not defined. but in readme explain to user who he can handle it in different environment.
 export async function loadDependencies(dependencies: readonly RendererDependency[]): Promise<DependencyLoadResult> {
   // One broken field package must not prevent independent field packages from
   // loading. The renderer can then show a degraded placeholder for that field.
