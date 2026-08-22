@@ -23,17 +23,6 @@
   display: none;
 }
 
-.compactTabs :global(jb-button[aria-pressed="true"]),
-.mobileTabs :global(jb-button[aria-pressed="true"]) {
-  --jb-button-bg-color-ghost: var(--form-accent);
-  --jb-button-bg-color-ghost-hover: var(--form-accent-strong);
-  --jb-button-bg-color-ghost-pressed: var(--form-accent-strong);
-  --jb-button-color-ghost: var(--form-surface);
-  --jb-button-color-ghost-hover: var(--form-surface);
-  --jb-button-color-ghost-pressed: var(--form-surface);
-  --jb-button-box-shadow: 0 0.35rem 0.85rem color-mix(in oklch, var(--form-accent) 22%, transparent);
-}
-
 @media (max-width: 89.9375rem) {
   .workspace {
       grid-template-columns: minmax(15rem, 17rem) minmax(28rem, 1fr) minmax(16rem, 18rem);
@@ -42,15 +31,17 @@
 
 @media (max-width: 74.9375rem) and (min-width: 64rem) {
   .compactTabs {
-      display: flex;
-      gap: 0.5rem;
+      display:flex;
+      margin: 0.5rem 1rem 0 1rem;
       inline-size: max-content;
-      margin: 0.75rem 0.75rem 0;
-      padding: 0.3rem;
-      border-radius: var(--form-radius-md);
-      background: color-mix(in oklch, var(--form-surface) 92%, transparent);
-      box-shadow: var(--shadow-drop);
-      corner-shape: squircle;
+      --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
+      jb-tab-list::part(list){
+        corner-shape: squircle;
+        box-shadow: var(--shadow-drop);
+      }
+      jb-tab-list::part(indicator){
+        corner-shape: squircle;
+      }
     }
    }
 

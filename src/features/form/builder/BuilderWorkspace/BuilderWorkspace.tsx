@@ -5,7 +5,10 @@ import { ComponentCatalog } from "../ComponentCatalog/ComponentCatalog";
 import { ConfigurationPanel } from "../ConfigurationPanel/ConfigurationPanel";
 import { FormCanvas } from "../FormCanvas/FormCanvas";
 import styles from "./BuilderWorkspace.module.css";
-
+import {JBTab} from "jb-tab/react";
+import {JBTabList} from "jb-tab/list/react";
+import {JBTabTrigger} from "jb-tab/trigger/react";
+import type { JBTabWebComponent } from "jb-tab";
 type CompactPanel = "catalog" | "properties";
 type MobilePanel = "catalog" | "canvas" | "properties";
 
@@ -25,14 +28,12 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
 
   return (
     <div className={styles.builderShell}>
-      <nav className={styles.compactTabs} aria-label="Side panels">
-        <JBButton size="sm" variant="ghost" aria-pressed={compactPanel === "catalog" ? "true" : "false"} onClick={() => setCompactPanel("catalog")}>
-          {messages.componentCatalog}
-        </JBButton>
-        <JBButton size="sm" variant="ghost" aria-pressed={compactPanel === "properties" ? "true" : "false"} onClick={() => setCompactPanel("properties")}>
-          {messages.properties}
-        </JBButton>
-      </nav>
+      <JBTab value={compactPanel} onChange={(e)=>setCompactPanel((e.target as JBTabWebComponent).value as CompactPanel)} className={styles.compactTabs}>
+        <JBTabList>
+          <JBTabTrigger value="catalog" color="primary">{messages.componentCatalog}</JBTabTrigger>
+          <JBTabTrigger value="properties"  color="primary"> {messages.properties}</JBTabTrigger>
+        </JBTabList>
+      </JBTab>
       <nav className={styles.mobileTabs} aria-label="Mobile workspace panels">
         <JBButton size="sm" variant="ghost" aria-pressed={mobilePanel === "catalog" ? "true" : "false"} onClick={() => setMobilePanel("catalog")}>
           {messages.componentCatalog}
