@@ -256,7 +256,7 @@ The registry declares whether `label`, `placeholder`, `initialValue`, `required`
 
 ### Structural container elements
 
-Containers are a first-class registry family alongside `content` and `field`; structural children are never hidden inside generic `props`. Version 1 supports `jb-tab` as a one-level container. Its `tabs[].children` may contain content, fields, and actions, but may not contain another container.
+Containers are a first-class registry family alongside `content` and `field`; structural children are never hidden inside generic `props`. Version 1 supports `jb-tab` and `jb-condition` as one-level containers. Their children may contain content, fields, and actions, but may not contain another container.
 
 ```json
 {
@@ -286,6 +286,31 @@ Containers are a first-class registry family alongside `content` and `field`; st
 }
 ```
 
+A conditional container stores portable field-name rules and one ordered child list:
+
+```json
+{
+  "id": "ca64a580-c4b8-4c9d-b3a3-e4a42d945967",
+  "type": "jb-condition",
+  "adapterVersion": 1,
+  "name": "adultDetails",
+  "props": {},
+  "validation": [],
+  "conditions": {
+    "match": "all",
+    "rules": [
+      {
+        "id": "42fc807c-b8ee-48bf-8319-8dbbd1ea7fcf",
+        "fieldName": "age",
+        "operator": "greaterThanOrEqual",
+        "value": "18"
+      }
+    ]
+  },
+  "children": []
+}
+```
+
 Container rules:
 
 - Every container has a stable builder-owned `id` and `name`, but its name is not emitted as a form-control `name` attribute.
@@ -293,7 +318,11 @@ Container rules:
 - `validationScope: "all"` is the default and validates/collects fields in every panel.
 - `validationScope: "active"` disables inactive-panel controls at runtime so only the selected panel participates in validation and value collection.
 - A non-nullable container must have at least one enabled tab, and `props.defaultValue` must reference an existing tab value.
-- Future container types, such as conditional containers, receive their own structural branch rather than overloading the tab shape.
+- Conditional rules reference `jb-form` values by field `name`; fields inside tabs are valid sources.
+- `match: "all"` requires every rule and `match: "any"` requires at least one rule. An empty rule list is always visible.
+- Supported operators are `equals`, `notEquals`, `isEmpty`, `isNotEmpty`, `contains`, `notContains`, `containsAny`, `containsAll`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, and `lessThanOrEqual`.
+- A conditional container cannot reference one of its own child fields, and conditional-container dependency cycles are invalid.
+- When unmatched, `<jb-condition>` disconnects its children from `jb-form` but preserves their runtime state for the next match.
 
 ### Registry boundary
 
@@ -449,6 +478,8 @@ Version 1 supports these registry keys:
 - `jb-file-input`
 - `jb-image-input`
 - `jb-button`
+- `jb-tab`
+- `jb-condition`
 
 Adding a new type requires a registry adapter and a schema enum update. Existing documents remain valid.
 
@@ -518,6 +549,7 @@ Within each element:
 9. `placeholder` when present
 10. `props`
 11. `validation`
+12. `validationScope` and `tabs` for `jb-tab`, or `conditions` and `children` for `jb-condition`
 
 Export:
 
@@ -568,6 +600,7 @@ Builder application version belongs to the IndexedDB envelope, not the portable 
    - unique form/element IDs, including elements inside containers;
    - unique tab IDs and values within each tab container;
    - valid default-tab references and at least one enabled tab when non-nullable;
+   - valid conditional field references, required comparison values, unique rule IDs, and acyclic dependencies;
    - one-level-only container depth;
    - non-empty, syntactically valid element names;
    - default locale exists;

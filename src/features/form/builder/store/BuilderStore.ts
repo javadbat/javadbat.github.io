@@ -2,6 +2,8 @@ import { makeAutoObservable } from "mobx";
 import {
   createEmptyFormDocument,
   type FormLocalization,
+  type JBConditionMatch,
+  type JBConditionRuleV1,
   type JBFormDocumentV1,
   type JBFormElementV1,
   type JBFormLeafElementV1,
@@ -171,8 +173,11 @@ export class BuilderStore {
     if (!entry.isContainer && this.selectedElementId) {
       const parent = this.elements.getParentTab(this.selectedElementId);
       if (parent) return this.addElementToTab(parent.containerId, parent.tabId, entry) ?? this.addElement(entry);
+      const conditionalParent = this.elements.getParentCondition(this.selectedElementId);
+      if (conditionalParent) return this.addElementToCondition(conditionalParent.containerId, entry) ?? this.addElement(entry);
       const activeTabId = this.activeContainerTabs.get(this.selectedElementId);
       if (activeTabId) return this.addElementToTab(this.selectedElementId, activeTabId, entry) ?? this.addElement(entry);
+      if (this.selectedElement?.type === "jb-condition") return this.addElementToCondition(this.selectedElement.id, entry) ?? this.addElement(entry);
     }
     return this.addElement(entry);
   }
@@ -183,6 +188,10 @@ export class BuilderStore {
 
   addElementToTab(containerId: string, tabId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
     return this.elements.addToTab(containerId, tabId, entry, insertionIndex);
+  }
+
+  addElementToCondition(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    return this.elements.addToCondition(containerId, entry, insertionIndex);
   }
 
   addTab(containerId: string): string | null {
@@ -211,6 +220,22 @@ export class BuilderStore {
 
   updateSelectedContainerValidationScope(scope: "all" | "active"): void {
     this.elements.updateSelectedContainerValidationScope(scope);
+  }
+
+  updateSelectedConditionMatch(match: JBConditionMatch): void {
+    this.elements.updateSelectedConditionMatch(match);
+  }
+
+  addSelectedConditionRule(fieldName: string): string | null {
+    return this.elements.addSelectedConditionRule(fieldName);
+  }
+
+  updateSelectedConditionRule(ruleId: string, patch: Partial<Omit<JBConditionRuleV1, "id">>): void {
+    this.elements.updateSelectedConditionRule(ruleId, patch);
+  }
+
+  removeSelectedConditionRule(ruleId: string): void {
+    this.elements.removeSelectedConditionRule(ruleId);
   }
 
   addSelectedValidationRule(rule: ValidationRuleName, locale = "en"): string | null {
@@ -259,6 +284,10 @@ export class BuilderStore {
 
   moveElementToTabInsertionIndex(elementId: string, containerId: string, tabId: string, insertionIndex: number): number {
     return this.elements.moveToTabInsertionIndex(elementId, containerId, tabId, insertionIndex);
+  }
+
+  moveElementToConditionInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
+    return this.elements.moveToConditionInsertionIndex(elementId, containerId, insertionIndex);
   }
 
   findElement(elementId: string): JBFormElementV1 | null {

@@ -97,6 +97,16 @@
   background: var(--form-canvas);
 }
 
+.conditionSummary {
+  margin-inline: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--form-radius-sm);
+  color: var(--form-muted);
+  background: var(--form-accent-soft);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
 .tabChildList {
   display: grid;
   gap: 0.25rem;

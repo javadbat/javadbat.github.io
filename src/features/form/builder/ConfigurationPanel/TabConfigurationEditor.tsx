@@ -4,7 +4,7 @@ import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
-import { getLocalizedText, isContainerElement } from "../../domain/form-document";
+import { getLocalizedText, isTabElement } from "../../domain/form-document";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
 import { inputValue } from "./configuration-values";
@@ -20,7 +20,7 @@ const copy = (locale: string, en: string, fa: string) => locale.toLowerCase().st
 export const TabConfigurationEditor = observer(function TabConfigurationEditor({ locale, defaultLocale }: TabConfigurationEditorProps) {
   const store = useBuilderStore();
   const element = store.selectedElement;
-  if (!element || !isContainerElement(element)) return null;
+  if (!element || !isTabElement(element)) return null;
 
   return (
     <>

@@ -208,6 +208,8 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.localName).toBe("jb-tab");
     expect(runtime.querySelectorAll("jb-tab-trigger")).toHaveLength(2);
     expect(runtime.querySelectorAll("jb-tab-content")).toHaveLength(2);
+    expect(runtime.dataset.orientation).toBe("horizontal");
+    expect(runtime.querySelector('[part~="tab-panels"]')?.children).toHaveLength(2);
     expect(runtime.getAttribute("name")).toBeNull();
   });
 
@@ -230,6 +232,45 @@ describe("real JB component Preview coverage", () => {
     const secondInput = panels[1].querySelector<RuntimeField>("jb-input")!;
     expect(firstInput.disabled).toBe(false);
     expect(secondInput.disabled).toBe(true);
+  });
+
+  it("renders conditional content from jb-form values and preserves its field instance", async () => {
+    const inputEntry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;
+    const conditionEntry = formElementRegistry.find(candidate => candidate.type === "jb-condition")!;
+    const source = createDefaultElement(inputEntry, "gender");
+    source.initialValue = "female";
+    const condition = createDefaultElement(conditionEntry, "femaleFields");
+    if (condition.type !== "jb-condition") throw new Error("Expected conditional container");
+    condition.conditions.rules.push({ id: crypto.randomUUID(), fieldName: "gender", operator: "equals", value: "female" });
+    const child = createDefaultElement(inputEntry, "femaleName");
+    child.initialValue = "Alice";
+    condition.children.push(child as never);
+    const formDocument = createEmptyFormDocument();
+    formDocument.elements = [source, condition];
+    const renderer = document.createElement("jb-form-builder");
+    document.body.append(renderer);
+    renderer.formDocument = formDocument;
+
+    await renderer.updateComplete;
+    await Promise.resolve();
+    const runtimeCondition = renderer.shadowRoot?.querySelector<HTMLElement & { matched: boolean }>("jb-condition")!;
+    const sourceRuntime = renderer.shadowRoot?.querySelector<RuntimeField>(`[data-form-element-id="${source.id}"]`)!;
+    const childRuntime = runtimeCondition.querySelector<RuntimeField>(`[data-form-element-id="${child.id}"]`)!;
+    expect(runtimeCondition.matched).toBe(true);
+    expect(childRuntime.value).toBe("Alice");
+
+    sourceRuntime.value = "male";
+    sourceRuntime.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    await Promise.resolve();
+    expect(runtimeCondition.matched).toBe(false);
+    expect(runtimeCondition.querySelector(`[data-form-element-id="${child.id}"]`)).toBeNull();
+
+    sourceRuntime.value = "female";
+    sourceRuntime.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    await Promise.resolve();
+    expect(runtimeCondition.matched).toBe(true);
+    expect(runtimeCondition.querySelector(`[data-form-element-id="${child.id}"]`)).toBe(childRuntime);
+    expect(childRuntime.value).toBe("Alice");
   });
 
   it("renders every happy-dom-compatible real package together in one form", async () => {
@@ -349,8 +390,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(22);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(22);
-    expect(Object.keys(configurationByType)).toHaveLength(22);
+    expect(formElementRegistry).toHaveLength(23);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(23);
+    expect(Object.keys(configurationByType)).toHaveLength(23);
   });
 });

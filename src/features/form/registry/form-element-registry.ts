@@ -218,6 +218,15 @@ const catalogEntries = [
     iconId: "select",
     defaultName: "tabs",
   },
+  {
+    type: "jb-condition",
+    displayName: "Conditional container",
+    description: "Show fields when form-value conditions match.",
+    category: "Container",
+    keywords: ["condition", "conditional", "container", "show", "hide", "logic"],
+    iconId: "switch",
+    defaultName: "condition",
+  },
 ] as const satisfies readonly {
   type: JBFormElementType;
   displayName: string;
@@ -237,6 +246,7 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
 const persianDisplayNames: Record<JBFormElementType, string> = {
+  "jb-condition": "Conditional",
   "jb-tab": "تب‌ها",
   text: "متن",
   image: "تصویر",
@@ -279,6 +289,18 @@ export function createDefaultElement(entry: FormElementRegistryEntry, name: stri
         { id: crypto.randomUUID(), value: "tab_1", label: localizedText("Tab 1"), disabled: false, children: [] },
         { id: crypto.randomUUID(), value: "tab_2", label: localizedText("Tab 2"), disabled: false, children: [] },
       ],
+    };
+  }
+  if (entry.type === "jb-condition") {
+    return {
+      id: crypto.randomUUID(),
+      type: "jb-condition",
+      adapterVersion: entry.adapterVersion,
+      name,
+      props: {},
+      validation: [],
+      conditions: { match: "all", rules: [] },
+      children: [],
     };
   }
   const element: JBFormElementV1 = {

@@ -114,6 +114,35 @@
   gap: 0.75rem;
 }
 
+.conditionEditor {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.conditionRule {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--form-inner-line);
+  border-radius: var(--form-radius-md);
+  background: oklch(0.985 0.006 255);
+}
+
+.conditionRuleHeading {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.conditionHint {
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
 .tabEditorRow {
   display: grid;
   gap: 0.65rem;

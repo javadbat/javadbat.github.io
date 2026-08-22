@@ -295,6 +295,12 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       textProperty("ariaLabel", "Accessible tab-list label", "برچسب دسترس‌پذیری فهرست تب", true),
     ],
   ),
+  "jb-condition": configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    {},
+    [],
+  ),
   "jb-input": configuration(inputCommon, "string", inputDefaults, inputProperties),
   "jb-number-input": configuration(
     inputCommon,

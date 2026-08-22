@@ -51,11 +51,26 @@ export type JBFormElementType =
   | "jb-file-input"
   | "jb-image-input"
   | "jb-button"
-  | "jb-tab";
+  | "jb-tab"
+  | "jb-condition";
 
-export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab">;
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition">;
 export type JBFormElementKind = "content" | "field" | "container";
 export type ContainerValidationScope = "all" | "active";
+export type JBConditionMatch = "all" | "any";
+export type JBConditionOperator =
+  | "equals"
+  | "notEquals"
+  | "isEmpty"
+  | "isNotEmpty"
+  | "contains"
+  | "notContains"
+  | "containsAny"
+  | "containsAll"
+  | "greaterThan"
+  | "greaterThanOrEqual"
+  | "lessThan"
+  | "lessThanOrEqual";
 
 interface ValidationRuleBase<Rule extends string, Params extends Record<string, JSONValue>> {
   id: UUID;
@@ -110,15 +125,46 @@ export interface JBTabElementV1 extends JBFormElementBaseV1 {
   tabs: JBTabItemV1[];
 }
 
-/** Containers are deliberately one level deep in v1. */
-export type JBFormElementV1 = JBFormLeafElementV1 | JBTabElementV1;
+export interface JBConditionRuleV1 {
+  id: UUID;
+  fieldName: string;
+  operator: JBConditionOperator;
+  value?: JSONValue;
+}
 
-export function isContainerElement(element: JBFormElementV1): element is JBTabElementV1 {
+export interface JBConditionGroupV1 {
+  match: JBConditionMatch;
+  rules: JBConditionRuleV1[];
+}
+
+export interface JBConditionElementV1 extends JBFormElementBaseV1 {
+  type: "jb-condition";
+  conditions: JBConditionGroupV1;
+  children: JBFormLeafElementV1[];
+}
+
+/** Containers are deliberately one level deep in v1. */
+export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1;
+export type JBFormElementV1 = JBFormLeafElementV1 | JBFormContainerElementV1;
+
+export function isTabElement(element: JBFormElementV1): element is JBTabElementV1 {
   return element.type === "jb-tab";
 }
 
+export function isConditionElement(element: JBFormElementV1): element is JBConditionElementV1 {
+  return element.type === "jb-condition";
+}
+
+export function isContainerElement(element: JBFormElementV1): element is JBFormContainerElementV1 {
+  return isTabElement(element) || isConditionElement(element);
+}
+
+export function getContainerChildren(element: JBFormContainerElementV1): JBFormLeafElementV1[] {
+  return isTabElement(element) ? element.tabs.flatMap(tab => tab.children) : element.children;
+}
+
 export function walkFormElements(elements: readonly JBFormElementV1[]): JBFormElementV1[] {
-  return elements.flatMap(element => isContainerElement(element) ? [element, ...element.tabs.flatMap(tab => tab.children)] : [element]);
+  return elements.flatMap(element => isContainerElement(element) ? [element, ...getContainerChildren(element)] : [element]);
 }
 
 export interface JBFormDocumentV1 {

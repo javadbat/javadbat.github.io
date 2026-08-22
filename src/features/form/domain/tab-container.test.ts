@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BuilderStore } from "../builder/store/BuilderStore";
 import { validateFormDocument } from "./form-document-validation";
-import { isContainerElement } from "./form-document";
+import { isTabElement } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
 import { getRequiredDependencies } from "../renderer/jb-form-builder/dependency-loader";
 
@@ -12,8 +12,8 @@ describe("jb-tab container contract", () => {
     const inputEntry = registryByType.get("jb-input")!;
     const containerId = store.addElement(tabEntry);
     const container = store.findElement(containerId)!;
-    expect(isContainerElement(container)).toBe(true);
-    if (!isContainerElement(container)) return;
+    expect(isTabElement(container)).toBe(true);
+    if (!isTabElement(container)) return;
 
     const childId = store.addElementToTab(container.id, container.tabs[0].id, inputEntry);
     expect(childId).toBeTruthy();
@@ -28,7 +28,7 @@ describe("jb-tab container contract", () => {
   it("rejects duplicate tab values and a missing default tab", () => {
     const store = new BuilderStore();
     const container = store.findElement(store.addElement(registryByType.get("jb-tab")!))!;
-    if (!isContainerElement(container)) throw new Error("Expected tab container");
+    if (!isTabElement(container)) throw new Error("Expected tab container");
     container.tabs[1].value = container.tabs[0].value;
     container.props.defaultValue = "missing";
 

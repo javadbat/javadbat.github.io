@@ -9,7 +9,7 @@ import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("JB element registry adapters", () => {
   it("declares complete adapter metadata for every inventory component", () => {
-    expect(formElementRegistry).toHaveLength(22);
+    expect(formElementRegistry).toHaveLength(23);
 
     for (const entry of formElementRegistry) {
       expect(entry.packageName).toBe(entry.type === "jb-listbox" ? "jb-select/listbox" : entry.type);

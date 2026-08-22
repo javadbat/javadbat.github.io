@@ -48,6 +48,92 @@
   inline-size: 100%;
 }
 
+[part~="element"][data-element-type="jb-condition"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+[part~="element"][data-element-type="jb-tab"] > jb-tab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.875rem;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+[part~="element"][data-element-type="jb-tab"] > jb-tab[data-orientation="vertical"] {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+
+jb-tab[data-orientation="vertical"] > jb-tab-list {
+  position: sticky;
+  inset-block-start: 0.75rem;
+  align-self: start;
+  max-inline-size: min(16rem, 35vw);
+}
+
+[part~="tab-panels"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+[part~="tab-panels"] > jb-tab-content {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  min-inline-size: 0;
+  inline-size: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.25rem);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 0s linear 160ms;
+}
+
+[part~="tab-panels"] > jb-tab-content:not([hidden]) {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+@starting-style {
+  [part~="tab-panels"] > jb-tab-content:not([hidden]) {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@media (max-width: 40rem) {
+  [part~="element"][data-element-type="jb-tab"] > jb-tab[data-orientation="vertical"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.875rem;
+  }
+
+  jb-tab[data-orientation="vertical"] > jb-tab-list {
+    position: static;
+    max-inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [part~="tab-panels"] > jb-tab-content {
+    transition: none;
+  }
+}
+
 [part~="loading"],
 [part~="error-summary"],
 [part~="element-error"] {

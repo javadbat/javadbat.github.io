@@ -37,6 +37,7 @@ The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0
 | `jb-image-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-button` | ✅ | ✅ | N/A | N/A | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
 | `jb-tab` | ✅ | ✅ | Structural container | Scope: all/active | ✅ | ✅ | ✅ | ✅ | Real-browser drag/keyboard checks pending |
+| `jb-condition` | ✅ | ✅ | Structural container | Declarative visibility rules | ✅ | ✅ | ✅ | ✅ | Independent package; hidden values preserved |
 
 The Tests column records component-iterated registry, validation, serialization, runtime-application, and performance checks. Final visual and accessibility acceptance of each rendered component remains in Step 9 with the form renderer.
 
@@ -51,6 +52,7 @@ The Tests column records component-iterated registry, validation, serialization,
 - The real-package suite now includes an all-components-in-one-form case and real checkbox pointer/Space interaction coverage in addition to per-component defaults, validity, reset, and disabled checks.
 - The number-input adapter now keeps `showThousandSeparator` and `thousandSeparator` as property-only assignments. The component maps both concepts to the same `thousand-separator` attribute, so reflecting the separator text previously enabled separators even when the boolean setting was false.
 - `jb-tab@0.1.0` is the first addable container family. Contract, recursive validation, dependency discovery, real-package rendering, per-tab settings, and one-level child ownership are covered; nested containers are rejected.
+- `jb-condition@0.1.0` is framework-independent. It matches a supplied value object against portable `all`/`any` rules, emits `condition-change`, and retains unmatched slotted nodes in a `DocumentFragment`; builder validation rejects self-references, missing fields, and dependency cycles.
 
 These checks advance runtime integration confidence but do not complete the pending per-row visual, interaction, keyboard, accessibility, responsive, or cross-browser acceptance work.
 

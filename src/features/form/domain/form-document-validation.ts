@@ -1,7 +1,7 @@
 import Ajv2020, { type ErrorObject } from "ajv/dist/2020.js";
 import formDocumentSchema from "../../../pages/form/_docs/schema/v1/form-document.schema.json";
 import type { FormIssue } from "./form-issue";
-import { isContainerElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
+import { isConditionElement, isContainerElement, isTabElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
 
 export interface FormDocumentValidationResult {
@@ -63,11 +63,13 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
     ["/metadata/description", document.metadata.description],
   ];
   const visitLocalizedValues = (element: JBFormElementV1, path: string): void => {
-    if (isContainerElement(element)) {
+    if (isTabElement(element)) {
       element.tabs.forEach((tab, tabIndex) => {
         localizedValues.push([`${path}/tabs/${tabIndex}/label`, tab.label]);
         tab.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/tabs/${tabIndex}/children/${childIndex}`));
       });
+    } else if (isConditionElement(element)) {
+      element.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/children/${childIndex}`));
     } else {
       localizedValues.push([`${path}/label`, element.label], [`${path}/placeholder`, element.placeholder]);
     }
@@ -99,6 +101,10 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
       })),
     );
     if (!isContainerElement(element)) return;
+    if (isConditionElement(element)) {
+      element.children.forEach((child, childIndex) => validateElement(child, `${path}/children/${childIndex}`));
+      return;
+    }
     const tabIds = new Set<string>();
     const tabValues = new Set<string>();
     element.tabs.forEach((tab, tabIndex) => {
@@ -118,6 +124,60 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
     }
   };
   document.elements.forEach((element, index) => validateElement(element, `/elements/${index}`));
+
+  const conditionContainers = document.elements.filter(isConditionElement);
+  const ownersByFieldName = new Map<string, Set<string | null>>();
+  const addFieldOwner = (element: JBFormElementV1, owner: string | null): void => {
+    if (isContainerElement(element) || registryByType.get(element.type)?.valueType === "none") return;
+    const name = element.name;
+    const owners = ownersByFieldName.get(name) ?? new Set<string | null>();
+    owners.add(owner);
+    ownersByFieldName.set(name, owners);
+  };
+  for (const element of document.elements) {
+    if (isConditionElement(element)) {
+      element.children.forEach(child => addFieldOwner(child, element.id));
+    } else if (isTabElement(element)) {
+      element.tabs.forEach(tab => tab.children.forEach(child => addFieldOwner(child, null)));
+    } else {
+      addFieldOwner(element, null);
+    }
+  }
+  const dependencies = new Map(conditionContainers.map(container => [container.id, new Set<string>()]));
+  conditionContainers.forEach(container => {
+    const ruleIds = new Set<string>();
+    container.conditions.rules.forEach((rule, ruleIndex) => {
+      const rulePath = `/elements/${document.elements.indexOf(container)}/conditions/rules/${ruleIndex}`;
+      if (ruleIds.has(rule.id)) issues.push(semanticIssue("duplicate_condition_rule_id", `${rulePath}/id`, "Condition rule ids must be unique within their container.", container.id));
+      ruleIds.add(rule.id);
+      if (rule.operator !== "isEmpty" && rule.operator !== "isNotEmpty" && rule.value === undefined) {
+        issues.push(semanticIssue("missing_condition_value", `${rulePath}/value`, `${rule.operator} requires a comparison value.`, container.id));
+      }
+      const owners = ownersByFieldName.get(rule.fieldName);
+      if (!owners) {
+        issues.push(semanticIssue("unknown_condition_field", `${rulePath}/fieldName`, `${rule.fieldName} does not match a form field name.`, container.id));
+        return;
+      }
+      for (const owner of owners) {
+        if (owner === container.id) issues.push(semanticIssue("self_condition_reference", `${rulePath}/fieldName`, "A conditional container cannot depend on one of its own fields.", container.id));
+        else if (owner) dependencies.get(container.id)?.add(owner);
+      }
+    });
+  });
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visitDependency = (containerId: string): boolean => {
+    if (visiting.has(containerId)) return true;
+    if (visited.has(containerId)) return false;
+    visiting.add(containerId);
+    const cyclic = Array.from(dependencies.get(containerId) ?? []).some(visitDependency);
+    visiting.delete(containerId);
+    visited.add(containerId);
+    return cyclic;
+  };
+  for (const container of conditionContainers) {
+    if (visitDependency(container.id)) issues.push(semanticIssue("cyclic_condition_dependency", `/elements/${document.elements.indexOf(container)}/conditions`, "Conditional containers cannot form a dependency cycle.", container.id));
+  }
 
   return issues;
 }

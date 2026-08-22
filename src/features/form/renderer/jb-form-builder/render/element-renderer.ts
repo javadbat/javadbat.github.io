@@ -1,4 +1,5 @@
-import { getLocalizedText, isContainerElement, type JBFormElementV1, type JBTabElementV1 } from "../../../domain/form-document";
+import { getLocalizedText, isConditionElement, isContainerElement, type JBConditionElementV1, type JBFormElementV1, type JBTabElementV1 } from "../../../domain/form-document";
+import type { JBConditionGroup, JBConditionValue } from "jb-condition";
 import type { FormIssue } from "../../../domain/form-issue";
 import { registryByType, type FormElementRegistryEntry } from "../../../registry/form-element-registry";
 import type { RuntimeFormElement } from "../../../registry/form-element-adapter";
@@ -83,6 +84,7 @@ function renderTabElement(wrapper: HTMLElement, element: JBTabElementV1, locale:
   list.size = size;
   list.setAttribute("orientation", orientation);
   list.setAttribute("size", size);
+  tabRoot.dataset.orientation = orientation;
   const ariaLabel = element.props.ariaLabel;
   list.setAttribute("aria-label", typeof ariaLabel === "object" && ariaLabel !== null ? getLocalizedText(ariaLabel as never, locale, defaultLocale) : "Form sections");
 
@@ -98,6 +100,9 @@ function renderTabElement(wrapper: HTMLElement, element: JBTabElementV1, locale:
   }
   tabRoot.append(list);
 
+  const panelStage = document.createElement("div");
+  panelStage.setAttribute("part", "tab-panels");
+
   for (const tab of element.tabs) {
     const panel = document.createElement("jb-tab-content");
     panel.setAttribute("value", tab.value);
@@ -107,8 +112,9 @@ function renderTabElement(wrapper: HTMLElement, element: JBTabElementV1, locale:
       panel.append(rendered.wrapper);
       issues.push(...rendered.issues);
     }
-    tabRoot.append(panel);
+    panelStage.append(panel);
   }
+  tabRoot.append(panelStage);
   if (element.validationScope === "active") {
     const updateScope = () => applyActiveValidationScope(tabRoot, tabRoot.value ?? defaultValue);
     tabRoot.addEventListener("change", updateScope);
@@ -119,6 +125,25 @@ function renderTabElement(wrapper: HTMLElement, element: JBTabElementV1, locale:
     });
   }
   wrapper.append(tabRoot);
+  return issues;
+}
+
+function renderConditionElement(wrapper: HTMLElement, element: JBConditionElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale: string): FormIssue[] {
+  const issues: FormIssue[] = [];
+  const condition = document.createElement("jb-condition") as HTMLElement & {
+    conditions: JBConditionGroup;
+    value: JBConditionValue;
+  };
+  condition.id = element.id;
+  condition.dataset.formElementId = element.id;
+  condition.conditions = structuredClone(element.conditions) as JBConditionGroup;
+  condition.value = {};
+  for (const child of element.children) {
+    const rendered = renderFormElement(child, locale, unavailableTypes, defaultLocale);
+    condition.append(rendered.wrapper);
+    issues.push(...rendered.issues);
+  }
+  wrapper.append(condition);
   return issues;
 }
 
@@ -141,7 +166,12 @@ export function renderFormElement(element: JBFormElementV1, locale: string, unav
 
   try {
     if (isContainerElement(element)) {
-      return { wrapper, issues: renderTabElement(wrapper, element, locale, unavailableTypes, defaultLocale) };
+      return {
+        wrapper,
+        issues: isConditionElement(element)
+          ? renderConditionElement(wrapper, element, locale, unavailableTypes, defaultLocale)
+          : renderTabElement(wrapper, element, locale, unavailableTypes, defaultLocale),
+      };
     }
     renderRuntimeElement(wrapper, element, adapter, locale, defaultLocale);
     const runtime = wrapper.querySelector<HTMLElement>("[data-form-element-id]");

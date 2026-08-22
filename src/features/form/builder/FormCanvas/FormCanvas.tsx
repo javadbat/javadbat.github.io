@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { getLocalizedText, isContainerElement } from "../../domain/form-document";
+import { getLocalizedText, isConditionElement, isContainerElement, isTabElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName } from "../../registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
@@ -7,6 +7,7 @@ import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { RemoveElementModal } from "../RemoveElementModal/RemoveElementModal";
 import { CanvasCard } from "./CanvasCard";
 import { TabCanvasCard } from "./TabCanvasCard";
+import { ConditionCanvasCard } from "./ConditionCanvasCard";
 import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
 
@@ -65,7 +66,21 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 onDragOver={event => markDropTarget(event, index)}
                 onDrop={event => acceptDrop(event, index)}
               />
-              {isContainerElement(element) ? <TabCanvasCard
+              {isTabElement(element) ? <TabCanvasCard
+                element={element}
+                index={index}
+                count={count}
+                isSelected={element.id === store.selectedElementId}
+                locale={locale}
+                defaultLocale={defaultLocale}
+                messages={messages}
+                onSelect={interactions.selectElement}
+                onConfigure={interactions.configureElement}
+                onMove={interactions.moveElement}
+                onDuplicate={interactions.duplicateElement}
+                onRemove={interactions.requestRemoval}
+                onFocusOffset={interactions.focusOffset}
+              /> : isConditionElement(element) ? <ConditionCanvasCard
                 element={element}
                 index={index}
                 count={count}

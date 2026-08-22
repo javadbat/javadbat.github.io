@@ -10,6 +10,7 @@ import { buildRuntimeForm, commitRuntimeForm } from "./render/runtime-form";
 import type { RendererShell } from "./render/types";
 import { configureFormLocale, resolveFormLocale } from "./locale-controller";
 import { RenderStateController } from "./render-state";
+import { ConditionController } from "./condition-controller";
 import type { DependencyFailure, DependencyLoader, FormValues, JBFormBuilderElement, RendererDependency, RendererState, RuntimeJBForm } from "./types";
 
 /**
@@ -57,6 +58,7 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
   #locale: string | null = null;
   #form: RuntimeJBForm | null = null;
   #eventController: FormEventController | null = null;
+  #conditionController: ConditionController | null = null;
   #requiredDependencies: readonly RendererDependency[] = [];
   #renderGeneration = 0;
   #updateComplete: Promise<void> = Promise.resolve();
@@ -86,6 +88,8 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
     this.#renderGeneration += 1;
     this.#eventController?.disconnect();
     this.#eventController = null;
+    this.#conditionController?.disconnect();
+    this.#conditionController = null;
     this.#form = null;
   }
 
@@ -178,10 +182,12 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
 
   setFormValues(values: FormValues): void {
     setRuntimeFormValues(this.#form, values);
+    this.#conditionController?.sync();
   }
 
   reset(): void {
     resetRuntimeForm(this.#form);
+    this.#conditionController?.resetPreservedContent();
     dispatchRendererEvent(this, "reset", {
       value: this.getFormValues(),
     });
@@ -226,6 +232,8 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
   private clearForm(): void {
     this.#eventController?.disconnect();
     this.#eventController = null;
+    this.#conditionController?.disconnect();
+    this.#conditionController = null;
     this.#form = null;
     clearRenderedForm(this.#shell);
   }
@@ -322,6 +330,8 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
       this.#eventController?.disconnect();
       commitRuntimeForm(this.#shell, runtime);
       this.#form = runtime.form;
+      this.#conditionController = new ConditionController(runtime.form);
+      this.#conditionController.connect();
       this.#eventController = new FormEventController(this, runtime.form, () => this.getFormValues());
       this.#eventController.connect();
 

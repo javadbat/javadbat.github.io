@@ -1,5 +1,18 @@
 import { makeAutoObservable, toJS } from "mobx";
-import { isContainerElement, walkFormElements, type JBFormElementV1, type JBFormLeafElementV1, type JBTabElementV1, type JBValidationRule, type JSONValue } from "../../domain/form-document";
+import {
+  isConditionElement,
+  isContainerElement,
+  isTabElement,
+  walkFormElements,
+  type JBConditionElementV1,
+  type JBConditionMatch,
+  type JBConditionRuleV1,
+  type JBFormElementV1,
+  type JBFormLeafElementV1,
+  type JBTabElementV1,
+  type JBValidationRule,
+  type JSONValue,
+} from "../../domain/form-document";
 import { createDefaultElement, type FormElementRegistryEntry } from "../../registry/form-element-registry";
 import { createValidationRule, type ValidationRuleName } from "../../registry/validation-rule-registry";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
@@ -60,8 +73,21 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  addToCondition(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    if (entry.isContainer) return null;
+    const container = this.getConditionContainer(containerId);
+    if (!container) return null;
+    const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName));
+    if (isContainerElement(element)) return null;
+    const index = Math.max(0, Math.min(insertionIndex ?? container.children.length, container.children.length));
+    container.children.splice(index, 0, element);
+    this.selectedElementId = element.id;
+    this.draft.markChanged();
+    return element.id;
+  }
+
   addTab(containerId: string): string | null {
-    const container = this.getContainer(containerId);
+    const container = this.getTabContainer(containerId);
     if (!container) return null;
     const values = new Set(container.tabs.map(tab => tab.value));
     let suffix = container.tabs.length + 1;
@@ -73,7 +99,7 @@ export class BuilderElementStore {
   }
 
   updateTab(containerId: string, tabId: string, patch: Partial<Pick<JBTabElementV1["tabs"][number], "value" | "label" | "disabled" | "color">>): boolean {
-    const container = this.getContainer(containerId);
+    const container = this.getTabContainer(containerId);
     const tab = container?.tabs.find(candidate => candidate.id === tabId);
     if (!container || !tab) return false;
     const oldValue = tab.value;
@@ -84,7 +110,7 @@ export class BuilderElementStore {
   }
 
   removeTab(containerId: string, tabId: string): boolean {
-    const container = this.getContainer(containerId);
+    const container = this.getTabContainer(containerId);
     if (!container || container.tabs.length <= 1) return false;
     const index = container.tabs.findIndex(tab => tab.id === tabId);
     if (index < 0) return false;
@@ -96,7 +122,7 @@ export class BuilderElementStore {
   }
 
   moveTab(containerId: string, tabId: string, offset: -1 | 1): number {
-    const container = this.getContainer(containerId);
+    const container = this.getTabContainer(containerId);
     if (!container) return -1;
     const index = container.tabs.findIndex(tab => tab.id === tabId);
     if (index < 0) return -1;
@@ -110,12 +136,15 @@ export class BuilderElementStore {
 
   updateSelected(patch: Partial<Pick<JBFormLeafElementV1, "name" | "label" | "placeholder" | "required" | "disabled" | "initialValue">>): boolean {
     if (!this.selected) return false;
+    const previousName = this.selected.name;
+    const shouldUpdateReferences = patch.name !== undefined && this.all.filter(element => element.name === previousName).length === 1;
     if (isContainerElement(this.selected)) {
       if (patch.name !== undefined) this.selected.name = patch.name;
       this.draft.markChanged();
       return true;
     }
     Object.assign(this.selected, patch);
+    if (shouldUpdateReferences && patch.name !== undefined) this.replaceConditionFieldName(previousName, patch.name);
     this.draft.markChanged();
     return true;
   }
@@ -129,7 +158,7 @@ export class BuilderElementStore {
   }
 
   updateSelectedContainerValidationScope(scope: "all" | "active"): boolean {
-    if (!this.selected || !isContainerElement(this.selected)) return false;
+    if (!this.selected || !isTabElement(this.selected)) return false;
     this.selected.validationScope = scope;
     this.draft.markChanged();
     return true;
@@ -221,6 +250,61 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  moveToConditionInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
+    const location = this.findLocation(elementId);
+    const container = this.getConditionContainer(containerId);
+    if (!location || !container) return -1;
+    const element = location.collection[location.index];
+    if (!element || isContainerElement(element)) return -1;
+    const boundedIndex = Math.max(0, Math.min(insertionIndex, container.children.length));
+    const sameCollection = location.collection === container.children;
+    const nextIndex = sameCollection && boundedIndex > location.index ? boundedIndex - 1 : boundedIndex;
+    if (sameCollection && nextIndex === location.index) return location.index;
+    location.collection.splice(location.index, 1);
+    container.children.splice(nextIndex, 0, element);
+    this.selectedElementId = elementId;
+    this.draft.markChanged();
+    return nextIndex;
+  }
+
+  updateSelectedConditionMatch(match: JBConditionMatch): boolean {
+    if (!this.selected || !isConditionElement(this.selected)) return false;
+    this.selected.conditions.match = match;
+    this.draft.markChanged();
+    return true;
+  }
+
+  addSelectedConditionRule(fieldName: string): string | null {
+    if (!this.selected || !isConditionElement(this.selected)) return null;
+    const id = crypto.randomUUID();
+    this.selected.conditions.rules.push({ id, fieldName, operator: "equals", value: "" });
+    this.draft.markChanged();
+    return id;
+  }
+
+  updateSelectedConditionRule(ruleId: string, patch: Partial<Omit<JBConditionRuleV1, "id">>): boolean {
+    if (!this.selected || !isConditionElement(this.selected)) return false;
+    const rule = this.selected.conditions.rules.find(candidate => candidate.id === ruleId);
+    if (!rule) return false;
+    if (patch.fieldName !== undefined) rule.fieldName = patch.fieldName;
+    if (patch.operator !== undefined) rule.operator = patch.operator;
+    if ("value" in patch) {
+      if (patch.value === undefined) delete rule.value;
+      else rule.value = patch.value;
+    }
+    this.draft.markChanged();
+    return true;
+  }
+
+  removeSelectedConditionRule(ruleId: string): boolean {
+    if (!this.selected || !isConditionElement(this.selected)) return false;
+    const index = this.selected.conditions.rules.findIndex(rule => rule.id === ruleId);
+    if (index < 0) return false;
+    this.selected.conditions.rules.splice(index, 1);
+    this.draft.markChanged();
+    return true;
+  }
+
   find(elementId: string): JBFormElementV1 | null {
     return this.all.find(element => element.id === elementId) ?? null;
   }
@@ -228,6 +312,11 @@ export class BuilderElementStore {
   getParentTab(elementId: string): { containerId: string; tabId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId ? { containerId: location.containerId, tabId: location.tabId } : null;
+  }
+
+  getParentCondition(elementId: string): { containerId: string } | null {
+    const location = this.findLocation(elementId);
+    return location?.containerId && location.tabId === null && isConditionElement(this.find(location.containerId)!) ? { containerId: location.containerId } : null;
   }
 
   duplicate(elementId: string): string | null {
@@ -245,7 +334,7 @@ export class BuilderElementStore {
     const location = this.findLocation(elementId);
     if (!location) return this.selectedElementId;
     location.collection.splice(location.index, 1);
-    const nextSelection = location.collection[location.index] ?? location.collection[location.index - 1] ?? (location.containerId ? this.getContainer(location.containerId) : null);
+    const nextSelection = location.collection[location.index] ?? location.collection[location.index - 1] ?? (location.containerId ? this.find(location.containerId) : null);
     this.selectedElementId = nextSelection?.id ?? null;
     this.draft.markChanged();
     return this.selectedElementId;
@@ -263,20 +352,29 @@ export class BuilderElementStore {
     return `${baseName}_${suffix}`;
   }
 
-  private getContainer(containerId: string): JBTabElementV1 | null {
+  private getTabContainer(containerId: string): JBTabElementV1 | null {
     const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
-    return element && isContainerElement(element) ? element : null;
+    return element && isTabElement(element) ? element : null;
   }
 
   private getTab(containerId: string, tabId: string): JBTabElementV1["tabs"][number] | null {
-    return this.getContainer(containerId)?.tabs.find(tab => tab.id === tabId) ?? null;
+    return this.getTabContainer(containerId)?.tabs.find(tab => tab.id === tabId) ?? null;
+  }
+
+  private getConditionContainer(containerId: string): JBConditionElementV1 | null {
+    const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
+    return element && isConditionElement(element) ? element : null;
   }
 
   private findLocation(elementId: string): { collection: JBFormElementV1[] | JBFormLeafElementV1[]; index: number; containerId: string | null; tabId: string | null } | null {
     const topIndex = this.draft.document.elements.findIndex(element => element.id === elementId);
     if (topIndex >= 0) return { collection: this.draft.document.elements, index: topIndex, containerId: null, tabId: null };
     for (const element of this.draft.document.elements) {
-      if (!isContainerElement(element)) continue;
+      if (isConditionElement(element)) {
+        const index = element.children.findIndex(child => child.id === elementId);
+        if (index >= 0) return { collection: element.children, index, containerId: element.id, tabId: null };
+      }
+      if (!isTabElement(element)) continue;
       for (const tab of element.tabs) {
         const index = tab.children.findIndex(child => child.id === elementId);
         if (index >= 0) return { collection: tab.children, index, containerId: element.id, tabId: tab.id };
@@ -287,10 +385,23 @@ export class BuilderElementStore {
 
   private regenerateIds(element: JBFormElementV1): void {
     element.id = crypto.randomUUID();
-    if (!isContainerElement(element)) return;
+    if (isConditionElement(element)) {
+      element.conditions.rules.forEach(rule => { rule.id = crypto.randomUUID(); });
+      element.children.forEach(child => { child.id = crypto.randomUUID(); });
+      return;
+    }
+    if (!isTabElement(element)) return;
     element.tabs.forEach(tab => {
       tab.id = crypto.randomUUID();
       tab.children.forEach(child => { child.id = crypto.randomUUID(); });
+    });
+  }
+
+  private replaceConditionFieldName(previousName: string, nextName: string): void {
+    this.draft.document.elements.filter(isConditionElement).forEach(container => {
+      container.conditions.rules.forEach(rule => {
+        if (rule.fieldName === previousName) rule.fieldName = nextName;
+      });
     });
   }
 }

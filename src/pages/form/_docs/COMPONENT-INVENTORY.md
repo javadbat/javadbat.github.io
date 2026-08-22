@@ -21,7 +21,7 @@ An addable Phase 1 JB Form item must be either:
 - an action control needed to operate the generated form; or
 - a structural container that owns an explicitly bounded child-element collection.
 
-Validation foundations, embedded pickers, overlays, and editor-only controls are inventoried separately but are not addable form elements. `jb-tab` is the first addable structural container; it is limited to one level and cannot contain another container.
+Validation foundations, embedded pickers, overlays, and editor-only controls are inventoried separately but are not addable form elements. `jb-tab` and `jb-condition` are addable structural containers; both are limited to one level and cannot contain another container.
 
 ## Shared contracts
 
@@ -71,8 +71,9 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
 | Container | Tabs | `jb-tab@0.1.0` | None | Owns tab panels containing leaf elements | Yes |
+| Container | Conditional container | `jb-condition@0.1.0` | None | Shows an ordered child list when portable field-name rules match | Web component |
 
-Total: 17 value-producing controls, 1 action control, and 1 structural container.
+Total: 17 value-producing controls, 1 action control, and 2 structural containers.
 
 ## Minimum builder configuration and public API
 
@@ -141,8 +142,9 @@ Button variants:
 | Component | Minimum editable container configuration | Events |
 | --- | --- | --- |
 | `jb-tab` | `orientation`, `size`, `nullable`, initially active tab, accessible list label, validation scope; ordered tabs with stable value, localized label, disabled state, indicator color, and ordered leaf children | `change`; triggers emit `select` |
+| `jb-condition` | `all`/`any` matching; ordered rules with field name, operator, and portable comparison value; ordered leaf children | `condition-change` |
 
-The builder treats `jb-tab`, `jb-tab-list`, `jb-tab-trigger`, and `jb-tab-content` as one catalog component. It renders the package's required light-DOM composition, keeps triggers as direct list children, and forbids nested containers in `tabs[].children`.
+The builder treats `jb-tab`, `jb-tab-list`, `jb-tab-trigger`, and `jb-tab-content` as one catalog component. It renders the package's required light-DOM composition and keeps triggers as direct list children. The independent `<jb-condition>` component receives the complete `jb-form` value object and conditionally connects its slot content while preserving hidden control state. Nested containers are forbidden for both container types.
 
 ## Slots, parts, and styling-hook coverage
 

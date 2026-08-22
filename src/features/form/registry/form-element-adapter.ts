@@ -81,6 +81,7 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-image-input": () => import("jb-image-input"),
   "jb-button": () => import("jb-button"),
   "jb-tab": () => import("jb-tab"),
+  "jb-condition": () => import("jb-condition"),
 };
 
 const definitions = [
@@ -106,6 +107,7 @@ const definitions = [
   adapterDefinition("jb-image-input", "image", ["load", "init", "change", "imageSelected", "maxSizeExceed"], []),
   adapterDefinition("jb-button", "none", ["click"], []),
   containerAdapterDefinition("jb-tab", "jb-tab"),
+  containerAdapterDefinition("jb-condition", "jb-condition"),
 ] as const satisfies readonly FormElementAdapterDefinition[];
 
 function adapterDefinition(
@@ -148,7 +150,7 @@ function contentAdapterDefinition(type: "text" | "image" | "voice", tagName: "p"
   };
 }
 
-function containerAdapterDefinition(type: "jb-tab", tagName: "jb-tab"): FormElementAdapterDefinition {
+function containerAdapterDefinition(type: "jb-tab" | "jb-condition", tagName: "jb-tab" | "jb-condition"): FormElementAdapterDefinition {
   return {
     type,
     packageName: type,
@@ -159,7 +161,7 @@ function containerAdapterDefinition(type: "jb-tab", tagName: "jb-tab"): FormElem
     adapterVersion: 1,
     supportedSchemaVersions: [1],
     valueType: "none",
-    eventNames: ["change"],
+    eventNames: type === "jb-condition" ? ["condition-change"] : ["change"],
     validationRules: [],
     loadComponent: componentLoaders[type],
   };
@@ -288,7 +290,7 @@ function validateElement(definition: FormElementAdapterDefinition, element: JBFo
   if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(element.name)) {
     issues.push(issue(element, "invalid-name", "name", "Name must begin with a letter and contain at most 64 portable characters."));
   }
-  if (element.type === "jb-tab") {
+  if (element.type === "jb-tab" || element.type === "jb-condition") {
     const knownProps = new Set(context.propertyDefinitions.map(property => property.key));
     for (const key of Object.keys(element.props)) {
       if (!knownProps.has(key)) issues.push(issue(element, "unknown-property", `props.${key}`, `${key} is not an approved editable property for ${element.type}.`));

@@ -185,6 +185,19 @@
   align-items: center;
 }
 
+.previewLocaleControl {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--shell-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.previewLocaleControl jb-select {
+  min-inline-size: 5rem;
+}
+
 .hero,
 .placeholder {
   display: grid;

@@ -162,6 +162,9 @@
         },
         {
           "$ref": "#/$defs/tabElement"
+        },
+        {
+          "$ref": "#/$defs/conditionElement"
         }
       ]
     },
@@ -195,7 +198,8 @@
             "jb-file-input",
             "jb-image-input",
             "jb-button",
-            "jb-tab"
+            "jb-tab",
+            "jb-condition"
           ]
         },
         "adapterVersion": { "type": "integer", "minimum": 1 },
@@ -293,6 +297,63 @@
           "type": "array",
           "items": { "$ref": "#/$defs/leafElement" }
         }
+      }
+    },
+    "conditionElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "adapterVersion", "name", "props", "validation", "conditions", "children"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" },
+            "type": { "const": "jb-condition" },
+            "adapterVersion": { "type": "integer", "minimum": 1 },
+            "name": { "$ref": "#/$defs/elementName" },
+            "props": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+            },
+            "validation": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "conditions": { "$ref": "#/$defs/conditionGroup" },
+            "children": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/leafElement" }
+            }
+          }
+        }
+      ]
+    },
+    "conditionGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["match", "rules"],
+      "properties": {
+        "match": { "enum": ["all", "any"] },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/conditionRule" }
+        }
+      }
+    },
+    "conditionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fieldName", "operator"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "fieldName": { "$ref": "#/$defs/elementName" },
+        "operator": {
+          "enum": [
+            "equals", "notEquals", "isEmpty", "isNotEmpty", "contains", "notContains",
+            "containsAny", "containsAll", "greaterThan", "greaterThanOrEqual", "lessThan", "lessThanOrEqual"
+          ]
+        },
+        "value": { "$ref": "#/$defs/jsonValue" }
       }
     },
     "validationRule": {

@@ -26,6 +26,7 @@
     "astro": "^7.1.6",
     "jb-button": "^4.1.0",
     "jb-checkbox": "^1.5.0",
+    "jb-condition": "file:packages/jb-condition",
     "jb-color-input": "^0.1.0",
     "jb-core": "^0.34.0",
     "jb-date-input": "^6.5.0",

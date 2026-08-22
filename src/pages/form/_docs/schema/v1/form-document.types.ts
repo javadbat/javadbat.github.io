@@ -55,10 +55,13 @@ export type JBFormElementType =
   | "jb-file-input"
   | "jb-image-input"
   | "jb-button"
-  | "jb-tab";
+  | "jb-tab"
+  | "jb-condition";
 
-export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab">;
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition">;
 export type ContainerValidationScope = "all" | "active";
+export type JBConditionMatch = "all" | "any";
+export type JBConditionOperator = "equals" | "notEquals" | "isEmpty" | "isNotEmpty" | "contains" | "notContains" | "containsAny" | "containsAll" | "greaterThan" | "greaterThanOrEqual" | "lessThan" | "lessThanOrEqual";
 
 interface ValidationRuleBase<Rule extends string, Params extends Record<string, JSONValue>> {
   id: UUID;
@@ -125,7 +128,26 @@ export interface JBTabElementV1 extends JBFormElementBaseV1 {
   tabs: JBTabItemV1[];
 }
 
-export type JBFormElementV1 = JBFormLeafElementV1 | JBTabElementV1;
+export interface JBConditionRuleV1 {
+  id: UUID;
+  fieldName: string;
+  operator: JBConditionOperator;
+  value?: JSONValue;
+}
+
+export interface JBConditionGroupV1 {
+  match: JBConditionMatch;
+  rules: JBConditionRuleV1[];
+}
+
+export interface JBConditionElementV1 extends JBFormElementBaseV1 {
+  type: "jb-condition";
+  conditions: JBConditionGroupV1;
+  children: JBFormLeafElementV1[];
+}
+
+export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1;
+export type JBFormElementV1 = JBFormLeafElementV1 | JBFormContainerElementV1;
 
 export interface JBFormDocumentV1 {
   $schema: typeof JB_FORM_SCHEMA_V1;

@@ -11,6 +11,7 @@ type ValidationState = "preparing" | "idle" | "validating" | "valid" | "invalid"
 
 interface PreviewFormPanelProps {
   document: JBFormDocumentV1;
+  locale: string;
   accessibleName: string;
   messages: FormMessages;
 }
@@ -20,7 +21,7 @@ interface PreviewFormPanelProps {
  * keeps <jb-form-builder> framework-independent and lets any host application
  * choose its own validation and reset controls.
  */
-export function PreviewFormPanel({ document, accessibleName, messages }: PreviewFormPanelProps) {
+export function PreviewFormPanel({ document, locale, accessibleName, messages }: PreviewFormPanelProps) {
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>("preparing");
 
@@ -78,7 +79,7 @@ export function PreviewFormPanel({ document, accessibleName, messages }: Preview
       <JBFormBuilder
         ref={rendererRef}
         formDocument={document}
-        locale={document.localization.defaultLocale}
+        locale={locale}
         loadDependencies={loadDependencies}
         onReady={() => setValidationState("idle")}
         onDocumentInvalid={() => setValidationState("error")}
