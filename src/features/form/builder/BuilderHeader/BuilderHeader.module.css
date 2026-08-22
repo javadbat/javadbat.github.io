@@ -217,8 +217,6 @@
   border: 0;
   border-radius: var(--form-radius-sm);
   color: var(--form-muted);
-  background: var(--form-surface);
-  box-shadow: var(--shadow-box);
   corner-shape: squircle;
 }
 

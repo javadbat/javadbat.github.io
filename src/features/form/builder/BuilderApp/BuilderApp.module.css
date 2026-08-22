@@ -34,6 +34,9 @@
   --jb-button-border-width: 0;
   --jb-button-box-shadow: var(--shadow-drop);
 }
+.app :global(button) {
+  font-family: inherit;
+}
 
 .app :global(jb-button[color="primary"]) {
   --jb-button-box-shadow: 0 0.4rem 1rem color-mix(in oklch, var(--form-accent) 24%, transparent);

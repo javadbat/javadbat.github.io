@@ -3,7 +3,20 @@ import { createEmptyFormDocument } from "../../domain/form-document";
 import { formElementRegistry } from "../../registry/form-element-registry";
 import { BuilderDraftStore } from "./BuilderDraftStore";
 import { BuilderElementStore } from "./BuilderElementStore";
+import type { BuilderLocalePreferences } from "./BuilderLocalePreferences";
 import { BuilderLocalizationStore } from "./BuilderLocalizationStore";
+
+class MemoryLocalePreferences implements BuilderLocalePreferences {
+  readonly values = new Map<string, string>();
+
+  get(scope: string): string | null {
+    return this.values.get(scope) ?? null;
+  }
+
+  set(scope: string, locale: string): void {
+    this.values.set(scope, locale);
+  }
+}
 
 describe("BuilderLocalizationStore", () => {
   it("manages editing locale and localized element text", () => {
@@ -35,5 +48,39 @@ describe("BuilderLocalizationStore", () => {
     localization.setFormLocalization({ defaultLocale: "en", locales: { en: { direction: "ltr" } } });
 
     expect(elements.selected?.label?.translations).not.toHaveProperty("fa");
+  });
+
+  it("persists and restores the selected locale when a current draft gets a new id", () => {
+    const preferences = new MemoryLocalePreferences();
+    const firstDocument = createEmptyFormDocument();
+    firstDocument.localization.locales.fa = { direction: "rtl" };
+    const firstDraft = new BuilderDraftStore(firstDocument);
+    const firstElements = new BuilderElementStore(firstDraft);
+
+    const firstSession = new BuilderLocalizationStore(firstDraft, firstElements, preferences);
+    firstSession.setEditingLocale("fa");
+
+    const reloadedDraft = new BuilderDraftStore(createEmptyFormDocument());
+    const reloadedElements = new BuilderElementStore(reloadedDraft);
+    const nextSession = new BuilderLocalizationStore(reloadedDraft, reloadedElements, preferences);
+    nextSession.restoreForDocument();
+
+    expect(nextSession.editingLocale).toBe("fa");
+    expect(reloadedDraft.document.localization.locales.fa).toEqual({ direction: "rtl" });
+    expect(preferences.values.get("current")).toBe("fa");
+  });
+
+  it("falls back to the document default when a persisted locale is unavailable", () => {
+    const document = createEmptyFormDocument();
+    const draft = new BuilderDraftStore(document);
+    const elements = new BuilderElementStore(draft);
+    const preferences = new MemoryLocalePreferences();
+    preferences.set("current", "not a locale");
+
+    const localization = new BuilderLocalizationStore(draft, elements, preferences);
+    localization.restoreForDocument();
+
+    expect(localization.editingLocale).toBe("en");
+    expect(preferences.values.get("current")).toBe("en");
   });
 });

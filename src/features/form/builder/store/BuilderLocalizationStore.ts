@@ -1,7 +1,8 @@
 import { makeAutoObservable } from "mobx";
-import { getLocalizedText, type FormLocalization, type JSONValue } from "../../domain/form-document";
+import { canonicalizeLocaleCode, getLocalizedText, inferLocaleDirection, type FormLocalization, type JSONValue } from "../../domain/form-document";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 import type { BuilderElementStore } from "./BuilderElementStore";
+import { builderLocalePreferences, type BuilderLocalePreferences } from "./BuilderLocalePreferences";
 import { isLocalizedTextValue, patchLocalizedText, pruneLocalizedTranslations } from "./form-localization";
 
 /** Owns the active editing locale and all localized document mutations. */
@@ -9,24 +10,45 @@ export class BuilderLocalizationStore {
   editingLocale: string;
   private readonly draft: BuilderDraftStore;
   private readonly elements: BuilderElementStore;
+  private readonly preferences: BuilderLocalePreferences;
+  private preferenceScope = "current";
 
-  constructor(draft: BuilderDraftStore, elements: BuilderElementStore) {
+  constructor(draft: BuilderDraftStore, elements: BuilderElementStore, preferences: BuilderLocalePreferences = builderLocalePreferences) {
     this.draft = draft;
     this.elements = elements;
+    this.preferences = preferences;
     this.editingLocale = draft.document.localization.defaultLocale;
-    makeAutoObservable<this, "draft" | "elements">(this, { draft: false, elements: false }, { autoBind: true });
+    makeAutoObservable<this, "draft" | "elements" | "preferences" | "preferenceScope">(
+      this,
+      { draft: false, elements: false, preferences: false, preferenceScope: false },
+      { autoBind: true },
+    );
   }
 
   get formName(): string {
     return getLocalizedText(this.draft.document.metadata.name, this.draft.document.localization.defaultLocale) || "Untitled form";
   }
 
-  resetToDocumentDefault(): void {
-    this.editingLocale = this.draft.document.localization.defaultLocale;
+  restoreForDocument(scope = this.preferenceScope): void {
+    this.preferenceScope = scope;
+    const storedLocale = canonicalizeLocaleCode(this.preferences.get(scope) ?? "");
+    if (storedLocale && !this.draft.document.localization.locales[storedLocale]) {
+      this.setFormLocalization({
+        ...this.draft.document.localization,
+        locales: {
+          ...this.draft.document.localization.locales,
+          [storedLocale]: { direction: inferLocaleDirection(storedLocale) },
+        },
+      });
+    }
+    this.editingLocale = storedLocale ?? this.draft.document.localization.defaultLocale;
+    this.preferences.set(this.preferenceScope, this.editingLocale);
   }
 
   setEditingLocale(locale: string): void {
-    if (this.draft.document.localization.locales[locale]) this.editingLocale = locale;
+    if (!this.draft.document.localization.locales[locale]) return;
+    this.editingLocale = locale;
+    this.preferences.set(this.preferenceScope, locale);
   }
 
   updateSelectedLocalizedProp(key: string, value: string, locale = "en"): void {
@@ -56,5 +78,6 @@ export class BuilderLocalizationStore {
     pruneLocalizedTranslations(next as unknown as JSONValue, new Set(Object.keys(next.localization.locales)), next.localization.defaultLocale);
     this.draft.replaceForEdit(next);
     this.editingLocale = next.localization.locales[this.editingLocale] ? this.editingLocale : next.localization.defaultLocale;
+    this.preferences.set(this.preferenceScope, this.editingLocale);
   }
 }

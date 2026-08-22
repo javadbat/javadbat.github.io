@@ -161,7 +161,7 @@ const formAppDictionarySource = {
     retry: "Retry",
   },
   fa: {
-    productName: "فرم جی‌بی",
+    productName: "فرم ساز",
     builder: "فرم‌ساز",
     designer: "طراح",
     preview: "پیش‌نمایش",

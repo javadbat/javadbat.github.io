@@ -14,6 +14,7 @@ import type { FormRepository, LinkedFormReference, StorageIssue } from "../../st
 import { BuilderDraftStore } from "./BuilderDraftStore";
 import { BuilderElementStore, ELEMENT_NAME_PATTERN } from "./BuilderElementStore";
 import { BuilderHistoryStore } from "./BuilderHistoryStore";
+import { builderLocalePreferences, type BuilderLocalePreferences } from "./BuilderLocalePreferences";
 import { BuilderLocalizationStore } from "./BuilderLocalizationStore";
 import { BuilderPersistenceStore, type BuilderStatus } from "./BuilderPersistenceStore";
 
@@ -32,11 +33,15 @@ export class BuilderStore {
   readonly localization: BuilderLocalizationStore;
   readonly persistence: BuilderPersistenceStore;
 
-  constructor(document = createEmptyFormDocument(), repository: FormRepository = formRepository) {
+  constructor(
+    document = createEmptyFormDocument(),
+    repository: FormRepository = formRepository,
+    localePreferences: BuilderLocalePreferences = builderLocalePreferences,
+  ) {
     this.draft = new BuilderDraftStore(document);
     this.elements = new BuilderElementStore(this.draft);
     this.history = this.draft.history;
-    this.localization = new BuilderLocalizationStore(this.draft, this.elements);
+    this.localization = new BuilderLocalizationStore(this.draft, this.elements, localePreferences);
     this.persistence = new BuilderPersistenceStore(this.draft, repository);
     makeAutoObservable(
       this,
@@ -121,7 +126,7 @@ export class BuilderStore {
     const initialized = await this.persistence.initialize(slug);
     if (initialized) {
       this.elements.clearSelection();
-      this.localization.resetToDocumentDefault();
+      this.localization.restoreForDocument(slug ? `slug:${slug}` : "current");
     }
     return initialized;
   }
@@ -130,7 +135,7 @@ export class BuilderStore {
     if (this.status === "saving") return false;
     this.draft.import(document);
     this.elements.clearSelection();
-    this.localization.resetToDocumentDefault();
+    this.localization.restoreForDocument();
     this.persistence.resetForImport();
     return true;
   }
