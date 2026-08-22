@@ -36,6 +36,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
           aria-invalid={nameError !== null}
           aria-describedby={nameError ? `element-name-error-${element.id}` : undefined}
           onInput={event => store.updateSelectedElement({ name: inputValue(event as unknown as Event) })}
+          message={messages.elementNameDescription}
         />
         {nameError ? (
           <p id={`element-name-error-${element.id}`} className={styles.fieldError} role="alert">
