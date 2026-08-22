@@ -16,7 +16,7 @@ The form document is the portable source of truth shared by Builder, IndexedDB r
 - Stable form and element UUIDs.
 - Human-readable, deterministic export.
 - Non-empty element names. Repeated names are allowed intentionally so `jb-form` can collect grouped values as arrays.
-- Ordered single-column elements.
+- Ordered top-level elements plus one-level structural containers.
 - Component-specific properties stay inside `props`.
 - Localizable strings use locale-keyed values from version 1.
 - Validation uses approved declarative rule IDs, including portable regular expressions; no user-provided JavaScript functions.
@@ -68,7 +68,7 @@ The form document is the portable source of truth shared by Builder, IndexedDB r
 | `slug` | No | Route-safe unique slug for a named form. Unnamed working drafts omit it. |
 | `metadata` | Yes | Localized display metadata and portable timestamps. |
 | `localization` | Yes | Default locale and supported locale/direction declarations. |
-| `elements` | Yes | Ordered form-element array. Array order is form order. |
+| `elements` | Yes | Ordered top-level leaf/container array. Container-owned child arrays preserve their own form order. |
 | `theme` | Yes | Phase 1 writes `null`; the key reserves the Phase 2 Theme Builder boundary and later Phase 3 Designer work. |
 
 Top-level unknown fields are rejected in version 1.
@@ -253,6 +253,47 @@ Typical localized component properties include:
 Element order is represented only by array order. Version 1 has no row, column, span, or responsive layout fields.
 
 The registry declares whether `label`, `placeholder`, `initialValue`, `required`, and `disabled` apply to a component and maps supported fields to the component API. Unsupported common fields are rejected for that component rather than silently ignored.
+
+### Structural container elements
+
+Containers are a first-class registry family alongside `content` and `field`; structural children are never hidden inside generic `props`. Version 1 supports `jb-tab` as a one-level container. Its `tabs[].children` may contain content, fields, and actions, but may not contain another container.
+
+```json
+{
+  "id": "a8012254-f5a4-4ec0-9f06-8fd98370b3ac",
+  "type": "jb-tab",
+  "adapterVersion": 1,
+  "name": "audienceTabs",
+  "props": {
+    "orientation": "horizontal",
+    "size": "md",
+    "nullable": false,
+    "defaultValue": "female",
+    "ariaLabel": { "translations": { "en": "Audience" } }
+  },
+  "validation": [],
+  "validationScope": "all",
+  "tabs": [
+    {
+      "id": "8bf5fd11-e8a8-43fd-948f-22ea3170dd3f",
+      "value": "female",
+      "label": { "translations": { "en": "Female" } },
+      "disabled": false,
+      "color": "primary",
+      "children": []
+    }
+  ]
+}
+```
+
+Container rules:
+
+- Every container has a stable builder-owned `id` and `name`, but its name is not emitted as a form-control `name` attribute.
+- Every tab has a stable UUID, unique developer-facing `value`, localized `label`, `disabled` state, optional indicator `color`, and ordered `children`.
+- `validationScope: "all"` is the default and validates/collects fields in every panel.
+- `validationScope: "active"` disables inactive-panel controls at runtime so only the selected panel participates in validation and value collection.
+- A non-nullable container must have at least one enabled tab, and `props.defaultValue` must reference an existing tab value.
+- Future container types, such as conditional containers, receive their own structural branch rather than overloading the tab shape.
 
 ### Registry boundary
 
@@ -524,7 +565,10 @@ Builder application version belongs to the IndexedDB envelope, not the portable 
 1. JSON parsing.
 2. Structural JSON Schema.
 3. Semantic document validation:
-   - unique form/element IDs;
+   - unique form/element IDs, including elements inside containers;
+   - unique tab IDs and values within each tab container;
+   - valid default-tab references and at least one enabled tab when non-nullable;
+   - one-level-only container depth;
    - non-empty, syntactically valid element names;
    - default locale exists;
    - translation locale keys are declared;

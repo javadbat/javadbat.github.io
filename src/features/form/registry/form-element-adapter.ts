@@ -1,5 +1,5 @@
 import type { ValidationItem } from "jb-validation";
-import { getLocalizedText, type JBFormElementType, type JBFormElementV1, type JSONPrimitive, type JSONValue, type LocalizedText } from "../domain/form-document";
+import { getLocalizedText, type JBFormElementKind, type JBFormElementType, type JBFormElementV1, type JSONPrimitive, type JSONValue, type LocalizedText } from "../domain/form-document";
 import type { FormIssue } from "../domain/form-issue";
 import type { CommonFieldSupport, FormElementPropertyDefinition, InitialValueKind } from "./form-element-configuration";
 import { compileValidationRule, validatePortableValidationRule, type ValidationRuleName } from "./validation-rule-registry";
@@ -19,7 +19,9 @@ export interface FormElementAdapterDefinition {
   type: JBFormElementType;
   packageName: string;
   tagName: string;
+  elementKind: JBFormElementKind;
   isContent: boolean;
+  isContainer: boolean;
   adapterVersion: 1;
   supportedSchemaVersions: readonly [1];
   valueType: FormElementValueType;
@@ -78,6 +80,7 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-file-input": () => import("jb-file-input"),
   "jb-image-input": () => import("jb-image-input"),
   "jb-button": () => import("jb-button"),
+  "jb-tab": () => import("jb-tab"),
 };
 
 const definitions = [
@@ -102,6 +105,7 @@ const definitions = [
   adapterDefinition("jb-file-input", "file", ["load", "init", "change", "delete", "download"], []),
   adapterDefinition("jb-image-input", "image", ["load", "init", "change", "imageSelected", "maxSizeExceed"], []),
   adapterDefinition("jb-button", "none", ["click"], []),
+  containerAdapterDefinition("jb-tab", "jb-tab"),
 ] as const satisfies readonly FormElementAdapterDefinition[];
 
 function adapterDefinition(
@@ -115,7 +119,9 @@ function adapterDefinition(
     type,
     packageName,
     tagName: type,
+    elementKind: "field",
     isContent: false,
+    isContainer: false,
     adapterVersion: 1,
     supportedSchemaVersions: [1],
     valueType,
@@ -130,11 +136,30 @@ function contentAdapterDefinition(type: "text" | "image" | "voice", tagName: "p"
     type,
     packageName: type,
     tagName,
+    elementKind: "content",
     isContent: true,
+    isContainer: false,
     adapterVersion: 1,
     supportedSchemaVersions: [1],
     valueType: "none",
     eventNames: [],
+    validationRules: [],
+    loadComponent: componentLoaders[type],
+  };
+}
+
+function containerAdapterDefinition(type: "jb-tab", tagName: "jb-tab"): FormElementAdapterDefinition {
+  return {
+    type,
+    packageName: type,
+    tagName,
+    elementKind: "container",
+    isContent: false,
+    isContainer: true,
+    adapterVersion: 1,
+    supportedSchemaVersions: [1],
+    valueType: "none",
+    eventNames: ["change"],
     validationRules: [],
     loadComponent: componentLoaders[type],
   };
@@ -262,6 +287,14 @@ function validateElement(definition: FormElementAdapterDefinition, element: JBFo
   }
   if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(element.name)) {
     issues.push(issue(element, "invalid-name", "name", "Name must begin with a letter and contain at most 64 portable characters."));
+  }
+  if (element.type === "jb-tab") {
+    const knownProps = new Set(context.propertyDefinitions.map(property => property.key));
+    for (const key of Object.keys(element.props)) {
+      if (!knownProps.has(key)) issues.push(issue(element, "unknown-property", `props.${key}`, `${key} is not an approved editable property for ${element.type}.`));
+    }
+    for (const property of context.propertyDefinitions) issues.push(...validateProperty(element, property));
+    return issues;
   }
   for (const field of ["required", "disabled", "label", "placeholder"] as const) {
     if (element[field] !== undefined && !context.commonFields[field]) {

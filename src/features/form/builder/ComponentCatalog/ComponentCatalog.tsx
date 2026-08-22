@@ -49,7 +49,7 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
   const [query, setQuery] = useState("");
   const addElement = useCallback(
     (entry: FormElementRegistryEntry) => {
-      const elementId = store.addElement(entry);
+      const elementId = store.addCatalogElement(entry);
       const position = store.getElementPosition(elementId) + 1;
       store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${messages.addedAnnouncement} ${position} ${messages.of} ${store.document.elements.length}`);
       onElementAdded?.(elementId);

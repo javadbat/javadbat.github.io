@@ -112,7 +112,7 @@ const initialValueByType: Partial<Record<JBFormElementType, string | number | bo
 // in the real-browser acceptance pass documented in COMPONENT-SUPPORT.md.
 const browserOnlyRenderTypes = new Set<JBFormElementType>(["jb-date-input", "jb-time-input"]);
 const componentEntries = formElementRegistry.filter(entry => !entry.isContent);
-const happyDomRenderEntries = componentEntries.filter(entry => !browserOnlyRenderTypes.has(entry.type));
+const happyDomRenderEntries = componentEntries.filter(entry => !entry.isContainer && !browserOnlyRenderTypes.has(entry.type));
 let selectLoaderRegisteredOption = false;
 
 function createRenderer(element: JBFormElementV1): JBFormBuilderElement {
@@ -195,6 +195,41 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.getAttribute("name")).toBe(element.name);
     expectDefaultProperties(runtime, element);
     expect(renderer.reportValidity()).toBe(true);
+  });
+
+  it("renders jb-tab as a structural container with triggers and panels", async () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-tab")!;
+    const element = createDefaultElement(entry, "profileTabs");
+    const renderer = createRenderer(element);
+
+    await renderer.updateComplete;
+
+    const runtime = expectReadyRuntime(renderer, element);
+    expect(runtime.localName).toBe("jb-tab");
+    expect(runtime.querySelectorAll("jb-tab-trigger")).toHaveLength(2);
+    expect(runtime.querySelectorAll("jb-tab-content")).toHaveLength(2);
+    expect(runtime.getAttribute("name")).toBeNull();
+  });
+
+  it("renders fields inside tab panels and disables inactive fields for active-only validation", async () => {
+    const tabEntry = formElementRegistry.find(candidate => candidate.type === "jb-tab")!;
+    const inputEntry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;
+    const element = createDefaultElement(tabEntry, "audienceTabs");
+    if (element.type !== "jb-tab") throw new Error("Expected tab container");
+    element.validationScope = "active";
+    element.tabs[0].children.push(createDefaultElement(inputEntry, "femaleName") as never);
+    element.tabs[1].children.push(createDefaultElement(inputEntry, "maleName") as never);
+    const renderer = createRenderer(element);
+
+    await renderer.updateComplete;
+    await Promise.resolve();
+
+    const runtime = expectReadyRuntime(renderer, element);
+    const panels = runtime.querySelectorAll<HTMLElement>("jb-tab-content");
+    const firstInput = panels[0].querySelector<RuntimeField>("jb-input")!;
+    const secondInput = panels[1].querySelector<RuntimeField>("jb-input")!;
+    expect(firstInput.disabled).toBe(false);
+    expect(secondInput.disabled).toBe(true);
   });
 
   it("renders every happy-dom-compatible real package together in one form", async () => {
@@ -288,10 +323,10 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.initialValue).toEqual([2, 8]);
   });
 
-  it("updates jb-range-input digits from the shared i18n locale", async () => {
+  it("applies the portable jb-range-input digit configuration", async () => {
     const entry = formElementRegistry.find(candidate => candidate.type === "jb-range-input")!;
     const element = createDefaultElement(entry, "localizedRange");
-    i18n.setLocale("fa-IR-u-nu-arabext");
+    element.props.showPersianNumber = true;
     const renderer = createRenderer(element);
 
     await renderer.updateComplete;
@@ -299,8 +334,6 @@ describe("real JB component Preview coverage", () => {
     const runtime = expectReadyRuntime(renderer, element);
     expect(runtime.showPersianNumber).toBe(true);
 
-    i18n.setLocale("fa");
-    expect(runtime.showPersianNumber).toBe(false);
   });
 
   it.each(happyDomRenderEntries.filter(entry => entry.commonFields.disabled))("applies the disabled state to $type", async (entry: FormElementRegistryEntry) => {
@@ -316,8 +349,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(21);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(21);
-    expect(Object.keys(configurationByType)).toHaveLength(21);
+    expect(formElementRegistry).toHaveLength(22);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(22);
+    expect(Object.keys(configurationByType)).toHaveLength(22);
   });
 });

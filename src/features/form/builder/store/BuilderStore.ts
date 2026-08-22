@@ -4,6 +4,8 @@ import {
   type FormLocalization,
   type JBFormDocumentV1,
   type JBFormElementV1,
+  type JBFormLeafElementV1,
+  type JBTabElementV1,
   type JBValidationRule,
   type JSONValue,
 } from "../../domain/form-document";
@@ -27,6 +29,7 @@ export type { BuilderStatus } from "./BuilderPersistenceStore";
  */
 export class BuilderStore {
   announcement = "";
+  activeContainerTabs = new Map<string, string>();
   readonly draft: BuilderDraftStore;
   readonly elements: BuilderElementStore;
   readonly history: BuilderHistoryStore;
@@ -164,12 +167,50 @@ export class BuilderStore {
     return this.elements.add(entry, insertionIndex);
   }
 
-  updateSelectedElement(patch: Partial<Pick<JBFormElementV1, "name" | "label" | "placeholder" | "required" | "disabled" | "initialValue">>): void {
+  addCatalogElement(entry: FormElementRegistryEntry): string {
+    if (!entry.isContainer && this.selectedElementId) {
+      const parent = this.elements.getParentTab(this.selectedElementId);
+      if (parent) return this.addElementToTab(parent.containerId, parent.tabId, entry) ?? this.addElement(entry);
+      const activeTabId = this.activeContainerTabs.get(this.selectedElementId);
+      if (activeTabId) return this.addElementToTab(this.selectedElementId, activeTabId, entry) ?? this.addElement(entry);
+    }
+    return this.addElement(entry);
+  }
+
+  setActiveContainerTab(containerId: string, tabId: string): void {
+    this.activeContainerTabs.set(containerId, tabId);
+  }
+
+  addElementToTab(containerId: string, tabId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    return this.elements.addToTab(containerId, tabId, entry, insertionIndex);
+  }
+
+  addTab(containerId: string): string | null {
+    return this.elements.addTab(containerId);
+  }
+
+  updateTab(containerId: string, tabId: string, patch: Partial<Pick<JBTabElementV1["tabs"][number], "value" | "label" | "disabled" | "color">>): boolean {
+    return this.elements.updateTab(containerId, tabId, patch);
+  }
+
+  removeTab(containerId: string, tabId: string): boolean {
+    return this.elements.removeTab(containerId, tabId);
+  }
+
+  moveTab(containerId: string, tabId: string, offset: -1 | 1): number {
+    return this.elements.moveTab(containerId, tabId, offset);
+  }
+
+  updateSelectedElement(patch: Partial<Pick<JBFormLeafElementV1, "name" | "label" | "placeholder" | "required" | "disabled" | "initialValue">>): void {
     this.elements.updateSelected(patch);
   }
 
   updateSelectedProp(key: string, value: JSONValue | undefined): void {
     this.elements.updateSelectedProp(key, value);
+  }
+
+  updateSelectedContainerValidationScope(scope: "all" | "active"): void {
+    this.elements.updateSelectedContainerValidationScope(scope);
   }
 
   addSelectedValidationRule(rule: ValidationRuleName, locale = "en"): string | null {
@@ -214,6 +255,14 @@ export class BuilderStore {
 
   moveElementToInsertionIndex(elementId: string, insertionIndex: number): number {
     return this.elements.moveToInsertionIndex(elementId, insertionIndex);
+  }
+
+  moveElementToTabInsertionIndex(elementId: string, containerId: string, tabId: string, insertionIndex: number): number {
+    return this.elements.moveToTabInsertionIndex(elementId, containerId, tabId, insertionIndex);
+  }
+
+  findElement(elementId: string): JBFormElementV1 | null {
+    return this.elements.find(elementId);
   }
 
   duplicateElement(elementId: string): string | null {

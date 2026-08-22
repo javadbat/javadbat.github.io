@@ -31,7 +31,7 @@ export interface CommonFieldSupport {
   placeholder: boolean;
 }
 
-export type InitialValueKind = "string" | "boolean" | "select" | "range";
+export type InitialValueKind = "string" | "boolean" | "select" | "range" | "none";
 
 export interface FormElementConfiguration {
   commonFields: CommonFieldSupport;
@@ -273,6 +273,27 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "string",
     { url: "" },
     [urlProperty("url", "Audio URL", "نشانی صدا")],
+  ),
+  "jb-tab": configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    {
+      orientation: "horizontal",
+      size: "md",
+      nullable: false,
+      defaultValue: "tab_1",
+      ariaLabel: { translations: { en: "Form sections" } },
+    },
+    [
+      selectProperty("orientation", "Orientation", "جهت", [
+        { value: "horizontal", label: label("Horizontal", "افقی") },
+        { value: "vertical", label: label("Vertical", "عمودی") },
+      ]),
+      selectProperty("size", "Size", "اندازه", sizeOptions),
+      booleanProperty("nullable", "Allow no active tab", "اجازه بدون تب فعال"),
+      textProperty("defaultValue", "Initially active tab value", "مقدار تب فعال اولیه"),
+      textProperty("ariaLabel", "Accessible tab-list label", "برچسب دسترس‌پذیری فهرست تب", true),
+    ],
   ),
   "jb-input": configuration(inputCommon, "string", inputDefaults, inputProperties),
   "jb-number-input": configuration(

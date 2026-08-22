@@ -3,7 +3,7 @@ import { localizedText } from "../domain/form-document";
 import { configurationByType, type CommonFieldSupport, type FormElementPropertyDefinition, type InitialValueKind } from "./form-element-configuration";
 import { adapterByType, type FormElementAdapter } from "./form-element-adapter";
 
-export type FormElementCategory = "Content" | "Text" | "Date & time" | "Choice" | "Identity" | "Financial" | "File" | "Action";
+export type FormElementCategory = "Container" | "Content" | "Text" | "Date & time" | "Choice" | "Identity" | "Financial" | "File" | "Action";
 
 export interface FormElementRegistryEntry extends FormElementAdapter {
   type: JBFormElementType;
@@ -209,6 +209,15 @@ const catalogEntries = [
     iconId: "button",
     defaultName: "submit",
   },
+  {
+    type: "jb-tab",
+    displayName: "Tabs",
+    description: "Organize fields into one-level tab panels.",
+    category: "Container",
+    keywords: ["tab", "tabs", "container", "group", "panel"],
+    iconId: "select",
+    defaultName: "tabs",
+  },
 ] as const satisfies readonly {
   type: JBFormElementType;
   displayName: string;
@@ -228,6 +237,7 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
 const persianDisplayNames: Record<JBFormElementType, string> = {
+  "jb-tab": "تب‌ها",
   text: "متن",
   image: "تصویر",
   voice: "صدا",
@@ -256,6 +266,21 @@ export function getFormElementDisplayName(entry: FormElementRegistryEntry, local
 }
 
 export function createDefaultElement(entry: FormElementRegistryEntry, name: string): JBFormElementV1 {
+  if (entry.type === "jb-tab") {
+    return {
+      id: crypto.randomUUID(),
+      type: "jb-tab",
+      adapterVersion: entry.adapterVersion,
+      name,
+      props: structuredClone(entry.defaultProps),
+      validation: [],
+      validationScope: "all",
+      tabs: [
+        { id: crypto.randomUUID(), value: "tab_1", label: localizedText("Tab 1"), disabled: false, children: [] },
+        { id: crypto.randomUUID(), value: "tab_2", label: localizedText("Tab 2"), disabled: false, children: [] },
+      ],
+    };
+  }
   const element: JBFormElementV1 = {
     id: crypto.randomUUID(),
     type: entry.type,

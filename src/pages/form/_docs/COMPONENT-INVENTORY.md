@@ -18,9 +18,10 @@ The baseline package versions matched npm on 2026-07-28. The newer `jb-time-inpu
 An addable Phase 1 JB Form item must be either:
 
 - a value-producing form control intended to participate in `jb-form`; or
-- an action control needed to operate the generated form.
+- an action control needed to operate the generated form; or
+- a structural container that owns an explicitly bounded child-element collection.
 
-Containers, validation foundations, embedded pickers, overlays, and editor-only controls are inventoried separately but are not addable form elements.
+Validation foundations, embedded pickers, overlays, and editor-only controls are inventoried separately but are not addable form elements. `jb-tab` is the first addable structural container; it is limited to one level and cannot contain another container.
 
 ## Shared contracts
 
@@ -69,8 +70,9 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
 | File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
+| Container | Tabs | `jb-tab@0.1.0` | None | Owns tab panels containing leaf elements | Yes |
 
-Total: 17 value-producing controls and 1 action control.
+Total: 17 value-producing controls, 1 action control, and 1 structural container.
 
 ## Minimum builder configuration and public API
 
@@ -79,6 +81,7 @@ Every builder element receives a builder-owned stable `id`, ordered position, co
 ### Mandatory name and icon rules
 
 - Every addable value or action element must render with a non-empty `name` attribute.
+- Structural containers keep a non-empty portable builder name for identity and configuration, but do not emit it as a form-control `name` attribute.
 - The registry provides a valid default name for Add. Duplicate preserves the source name by default and receives a new element ID.
 - Missing or invalid name blocks Preview and export.
 - Names must be non-empty and syntactically valid. Repeated names are supported because `jb-form` returns an array when multiple controls share a name.
@@ -132,6 +135,14 @@ Button variants:
 - Colors: `primary`, `secondary`, `positive`, `danger`, `warning`, `light`, `dark`.
 - Styles: `solid`, `outline`, `ghost`, `text`.
 - Sizes: `xs`, `sm`, `md`, `lg`, `xl`.
+
+### Structural container
+
+| Component | Minimum editable container configuration | Events |
+| --- | --- | --- |
+| `jb-tab` | `orientation`, `size`, `nullable`, initially active tab, accessible list label, validation scope; ordered tabs with stable value, localized label, disabled state, indicator color, and ordered leaf children | `change`; triggers emit `select` |
+
+The builder treats `jb-tab`, `jb-tab-list`, `jb-tab-trigger`, and `jb-tab-content` as one catalog component. It renders the package's required light-DOM composition, keeps triggers as direct list children, and forbids nested containers in `tabs[].children`.
 
 ## Slots, parts, and styling-hook coverage
 

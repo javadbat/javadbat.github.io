@@ -16,9 +16,7 @@ export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string
   for (const element of documentValue.elements) {
     const rendered = renderFormElement(element, locale, unavailableTypes, documentValue.localization.defaultLocale);
     fragment.append(rendered.wrapper);
-    if (rendered.issue) {
-      issues.push(rendered.issue);
-    }
+    issues.push(...rendered.issues);
   }
   form.append(fragment);
   return { form, issues };

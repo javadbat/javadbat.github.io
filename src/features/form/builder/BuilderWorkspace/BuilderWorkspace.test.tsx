@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { formAppMessages } from "../../i18n/locale-adapter";
 import { BuilderWorkspace } from "./BuilderWorkspace";
@@ -47,11 +47,11 @@ describe("BuilderWorkspace", () => {
     expect(workspace?.dataset.mobilePanel).toBe("properties");
   });
 
-  it("advances touch workflows after adding and configuring a field", () => {
+  it("advances touch workflows after adding and configuring a field", async () => {
     const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
     const mobileButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Mobile workspace panels'] jb-button");
-    const compactButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Side panels'] jb-button");
+    const compactButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Side panels'] jb-tab-trigger");
 
     fireEvent.click(mobileButtons[0]);
     expect(workspace?.dataset.mobilePanel).toBe("catalog");
@@ -62,7 +62,7 @@ describe("BuilderWorkspace", () => {
     fireEvent.click(view.container.querySelectorAll<HTMLElement>("[data-panel='canvas'] button")[1]);
     expect(workspace?.dataset.mobilePanel).toBe("properties");
     expect(workspace?.dataset.sidePanel).toBe("properties");
-    expect(compactButtons[1].getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => expect(compactButtons[1].getAttribute("aria-selected")).toBe("true"));
   });
 
   it("keeps the mobile canvas open when a field is only selected", () => {

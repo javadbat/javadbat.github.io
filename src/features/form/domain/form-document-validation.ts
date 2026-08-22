@@ -1,7 +1,7 @@
 import Ajv2020, { type ErrorObject } from "ajv/dist/2020.js";
 import formDocumentSchema from "../../../pages/form/_docs/schema/v1/form-document.schema.json";
 import type { FormIssue } from "./form-issue";
-import type { JBFormDocumentV1, LocalizedText } from "./form-document";
+import { isContainerElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
 
 export interface FormDocumentValidationResult {
@@ -62,9 +62,17 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
     ["/metadata/name", document.metadata.name],
     ["/metadata/description", document.metadata.description],
   ];
-  document.elements.forEach((element, index) => {
-    localizedValues.push([`/elements/${index}/label`, element.label], [`/elements/${index}/placeholder`, element.placeholder]);
-  });
+  const visitLocalizedValues = (element: JBFormElementV1, path: string): void => {
+    if (isContainerElement(element)) {
+      element.tabs.forEach((tab, tabIndex) => {
+        localizedValues.push([`${path}/tabs/${tabIndex}/label`, tab.label]);
+        tab.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/tabs/${tabIndex}/children/${childIndex}`));
+      });
+    } else {
+      localizedValues.push([`${path}/label`, element.label], [`${path}/placeholder`, element.placeholder]);
+    }
+  };
+  document.elements.forEach((element, index) => visitLocalizedValues(element, `/elements/${index}`));
   for (const [path, value] of localizedValues) {
     for (const locale of localizedTextLocales(value)) {
       if (!declaredLocales.has(locale)) {
@@ -74,23 +82,42 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
   }
 
   const elementIds = new Set<string>();
-  document.elements.forEach((element, index) => {
+  const validateElement = (element: JBFormElementV1, path: string): void => {
     if (elementIds.has(element.id)) {
-      issues.push(semanticIssue("duplicate_element_id", `/elements/${index}/id`, "Element ids must be unique within a form.", element.id));
+      issues.push(semanticIssue("duplicate_element_id", `${path}/id`, "Element ids must be unique within a form.", element.id));
     }
     elementIds.add(element.id);
     const adapter = registryByType.get(element.type);
     if (!adapter) {
-      issues.push(semanticIssue("unknown_element_type", `/elements/${index}/type`, `${element.type} is not registered.`, element.id));
+      issues.push(semanticIssue("unknown_element_type", `${path}/type`, `${element.type} is not registered.`, element.id));
       return;
     }
     issues.push(
       ...adapter.validate(element, adapter).map(issue => ({
         ...issue,
-        path: `/elements/${index}${issue.path}`,
+        path: `${path}${issue.path}`,
       })),
     );
-  });
+    if (!isContainerElement(element)) return;
+    const tabIds = new Set<string>();
+    const tabValues = new Set<string>();
+    element.tabs.forEach((tab, tabIndex) => {
+      const tabPath = `${path}/tabs/${tabIndex}`;
+      if (tabIds.has(tab.id)) issues.push(semanticIssue("duplicate_tab_id", `${tabPath}/id`, "Tab ids must be unique within their container.", element.id));
+      if (tabValues.has(tab.value)) issues.push(semanticIssue("duplicate_tab_value", `${tabPath}/value`, "Tab values must be unique within their container.", element.id));
+      tabIds.add(tab.id);
+      tabValues.add(tab.value);
+      tab.children.forEach((child, childIndex) => validateElement(child, `${tabPath}/children/${childIndex}`));
+    });
+    const defaultValue = element.props.defaultValue;
+    if (typeof defaultValue === "string" && !tabValues.has(defaultValue)) {
+      issues.push(semanticIssue("unknown_default_tab", `${path}/props/defaultValue`, "The initially active tab must reference an existing tab value.", element.id));
+    }
+    if (!element.props.nullable && element.tabs.every(tab => tab.disabled)) {
+      issues.push(semanticIssue("no_enabled_tab", `${path}/tabs`, "A non-nullable tab container needs at least one enabled tab.", element.id));
+    }
+  };
+  document.elements.forEach((element, index) => validateElement(element, `/elements/${index}`));
 
   return issues;
 }

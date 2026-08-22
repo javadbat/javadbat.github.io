@@ -1,4 +1,4 @@
-import type { JBFormDocumentV1 } from "../../domain/form-document";
+import { walkFormElements, type JBFormDocumentV1 } from "../../domain/form-document";
 import { registryByType } from "../../registry/form-element-registry";
 import type { DependencyFailure, DependencyLoadResult, RendererDependency } from "./types";
 
@@ -58,7 +58,7 @@ async function loadDependency(dependency: RendererDependency): Promise<void> {
 export function getRequiredDependencies(document: JBFormDocumentV1): RendererDependency[] {
   const dependencies: RendererDependency[] = [formDependency];
   const seen = new Set<string>();
-  for (const element of document.elements) {
+  for (const element of walkFormElements(document.elements)) {
     if (seen.has(element.type)) {
       continue;
     }
@@ -72,7 +72,9 @@ export function getRequiredDependencies(document: JBFormDocumentV1): RendererDep
       // jb-option is registered by jb-select and is also created by the shared
       // adapter, so manual mode must verify both definitions.
       tagNames:
-        element.type === "jb-listbox"
+        element.type === "jb-tab"
+          ? ["jb-tab", "jb-tab-list", "jb-tab-trigger", "jb-tab-content"]
+          : element.type === "jb-listbox"
           ? [adapter.tagName, "jb-option", "jb-checkbox"]
           : element.type === "jb-select"
             ? [adapter.tagName, "jb-option"]

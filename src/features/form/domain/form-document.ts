@@ -50,7 +50,12 @@ export type JBFormElementType =
   | "jb-switch"
   | "jb-file-input"
   | "jb-image-input"
-  | "jb-button";
+  | "jb-button"
+  | "jb-tab";
+
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab">;
+export type JBFormElementKind = "content" | "field" | "container";
+export type ContainerValidationScope = "all" | "active";
 
 interface ValidationRuleBase<Rule extends string, Params extends Record<string, JSONValue>> {
   id: UUID;
@@ -67,18 +72,53 @@ export type JBValidationRule =
   | ValidationRuleBase<"maxValue", { value: number }>
   | ValidationRuleBase<"allowedValues", { values: JSONPrimitive[] }>;
 
-export interface JBFormElementV1 {
+export interface JBFormElementBaseV1 {
   id: UUID;
   type: JBFormElementType;
   adapterVersion: number;
   name: string;
+  props: Record<string, JSONValue>;
   required?: boolean;
   disabled?: boolean;
   initialValue?: JSONValue;
   label?: LocalizedText;
   placeholder?: LocalizedText;
-  props: Record<string, JSONValue>;
   validation: JBValidationRule[];
+}
+
+export interface JBFormLeafElementV1 extends JBFormElementBaseV1 {
+  type: JBFormLeafElementType;
+  required?: boolean;
+  disabled?: boolean;
+  initialValue?: JSONValue;
+  label?: LocalizedText;
+  placeholder?: LocalizedText;
+}
+
+export interface JBTabItemV1 {
+  id: UUID;
+  value: string;
+  label: LocalizedText;
+  disabled: boolean;
+  color?: string;
+  children: JBFormLeafElementV1[];
+}
+
+export interface JBTabElementV1 extends JBFormElementBaseV1 {
+  type: "jb-tab";
+  validationScope: ContainerValidationScope;
+  tabs: JBTabItemV1[];
+}
+
+/** Containers are deliberately one level deep in v1. */
+export type JBFormElementV1 = JBFormLeafElementV1 | JBTabElementV1;
+
+export function isContainerElement(element: JBFormElementV1): element is JBTabElementV1 {
+  return element.type === "jb-tab";
+}
+
+export function walkFormElements(elements: readonly JBFormElementV1[]): JBFormElementV1[] {
+  return elements.flatMap(element => isContainerElement(element) ? [element, ...element.tabs.flatMap(tab => tab.children)] : [element]);
 }
 
 export interface JBFormDocumentV1 {

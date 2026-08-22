@@ -22,7 +22,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
   const count = store.document.elements.length;
-  const pendingRemoval = pendingRemovalId ? (store.document.elements.find(element => element.id === pendingRemovalId) ?? null) : null;
+  const pendingRemoval = pendingRemovalId ? store.findElement(pendingRemovalId) : null;
   const pendingRemovalEntry = pendingRemoval ? registryByType.get(pendingRemoval.type) : undefined;
 
   const announcePosition = useCallback(
@@ -51,7 +51,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
 
   const moveElement = useCallback(
     (elementId: string, offset: -1 | 1) => {
-      const element = store.document.elements.find(candidate => candidate.id === elementId);
+      const element = store.findElement(elementId);
       if (!element) return;
       const nextIndex = store.moveElementBy(elementId, offset);
       if (nextIndex === -1) return;
@@ -66,7 +66,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
     (elementId: string) => {
       const duplicateId = store.duplicateElement(elementId);
       if (!duplicateId) return;
-      const duplicate = store.document.elements.find(element => element.id === duplicateId);
+      const duplicate = store.findElement(duplicateId);
       const entry = duplicate ? registryByType.get(duplicate.type) : undefined;
       if (entry) announcePosition(entry, messages.duplicatedAnnouncement, store.getElementPosition(duplicateId) + 1);
       focusElementCard(duplicateId);
@@ -111,7 +111,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
         return;
       }
       const elementId = event.dataTransfer.getData(CANVAS_DRAG_TYPE);
-      const element = store.document.elements.find(candidate => candidate.id === elementId);
+      const element = store.findElement(elementId);
       if (!element) return;
       const nextIndex = store.moveElementToInsertionIndex(elementId, insertionIndex);
       const entry = registryByType.get(element.type);

@@ -3,14 +3,14 @@ import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBTooltip } from "@jbui/tooltip/react";
 import type { JBFormElementV1 } from "../../domain/form-document";
-import { getLocalizedText } from "../../domain/form-document";
+import { getLocalizedText, isContainerElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType } from "../../registry/form-element-registry";
 import { CANVAS_DRAG_TYPE } from "../builder-drag";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./FormCanvas.module.css";
 
-interface CanvasCardProps {
+export interface CanvasCardProps {
   element: JBFormElementV1;
   index: number;
   count: number;
@@ -87,8 +87,8 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
   const entry = registryByType.get(element.type);
   if (!entry) return null;
   const componentName = getFormElementDisplayName(entry, locale);
-  const fallbackLabel = getLocalizedText(element.label, locale, defaultLocale);
-  const label = !element.label?.translations[locale] && fallbackLabel === entry.displayName ? componentName : fallbackLabel || componentName;
+  const fallbackLabel = isContainerElement(element) ? element.name : getLocalizedText(element.label, locale, defaultLocale);
+  const label = !isContainerElement(element) && !element.label?.translations[locale] && fallbackLabel === entry.displayName ? componentName : fallbackLabel || componentName;
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.altKey && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
       event.preventDefault();

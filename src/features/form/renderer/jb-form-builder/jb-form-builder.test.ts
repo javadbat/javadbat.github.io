@@ -96,6 +96,9 @@ function registerStubDependencies(): void {
   if (!customElements.get("jb-option")) {
     customElements.define("jb-option", class extends HTMLElement {});
   }
+  for (const tagName of ["jb-tab-list", "jb-tab-trigger", "jb-tab-content"]) {
+    if (!customElements.get(tagName)) customElements.define(tagName, class extends HTMLElement {});
+  }
 }
 
 function allElementsDocument(): JBFormDocumentV1 {
@@ -146,7 +149,7 @@ describe("JBFormBuilderWebComponent", () => {
       const runtime = renderer.shadowRoot?.querySelector(`[data-form-element-id="${element.id}"]`);
       const entry = formElementRegistry.find(candidate => candidate.type === element.type)!;
       expect(runtime?.localName).toBe(entry.tagName);
-      expect(runtime?.getAttribute("name")).toBe(entry.isContent ? null : element.name);
+      expect(runtime?.getAttribute("name")).toBe(entry.isContent || entry.isContainer ? null : element.name);
     }
     expect(renderer.requiredDependencies).toHaveLength(formElementRegistry.filter(entry => !entry.isContent).length + 1);
   });

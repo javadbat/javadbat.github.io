@@ -51,6 +51,75 @@
   list-style: none;
 }
 
+.tabContainerCard {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--form-inner-line);
+  border-radius: var(--form-radius-lg);
+  background: color-mix(in oklch, var(--form-surface) 82%, var(--form-canvas));
+}
+
+.builderTabList {
+  display: flex;
+  gap: 0.25rem;
+  align-items: end;
+  overflow-x: auto;
+  padding-inline: 0.5rem;
+}
+
+.builderTabTrigger {
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  border-block-end: 0.15rem solid transparent;
+  color: var(--form-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.builderTabTrigger[data-active="true"] {
+  border-block-end-color: var(--form-accent);
+  color: var(--form-accent-strong);
+}
+
+.builderTabTrigger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tabPanel {
+  padding: 0.5rem;
+  border-radius: var(--form-radius-md);
+  background: var(--form-canvas);
+}
+
+.tabChildList {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabEmptyDrop {
+  display: grid;
+  place-items: center;
+  min-block-size: 7rem;
+  border: 0.0625rem dashed var(--form-inner-line);
+  border-radius: var(--form-radius-md);
+  color: var(--form-muted);
+  font-size: 0.75rem;
+}
+
+.tabEmptyDrop[data-drop-active="true"] {
+  border-color: var(--form-accent);
+  background: var(--form-accent-soft);
+}
+
 .canvasCardIcon {
   display: inline-grid;
   place-items: center;

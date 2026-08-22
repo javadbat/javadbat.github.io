@@ -54,7 +54,11 @@ export type JBFormElementType =
   | "jb-switch"
   | "jb-file-input"
   | "jb-image-input"
-  | "jb-button";
+  | "jb-button"
+  | "jb-tab";
+
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab">;
+export type ContainerValidationScope = "all" | "active";
 
 interface ValidationRuleBase<Rule extends string, Params extends Record<string, JSONValue>> {
   id: UUID;
@@ -83,19 +87,45 @@ export type JBValidationRule =
   | MaxValueValidationRule
   | AllowedValuesValidationRule;
 
-export interface JBFormElementV1 {
+export interface JBFormElementBaseV1 {
   id: UUID;
   type: JBFormElementType;
   adapterVersion: number;
   name: string;
+  props: Record<string, JSONValue>;
   required?: boolean;
   disabled?: boolean;
   initialValue?: JSONValue;
   label?: LocalizedText;
   placeholder?: LocalizedText;
-  props: Record<string, JSONValue>;
   validation: JBValidationRule[];
 }
+
+export interface JBFormLeafElementV1 extends JBFormElementBaseV1 {
+  type: JBFormLeafElementType;
+  required?: boolean;
+  disabled?: boolean;
+  initialValue?: JSONValue;
+  label?: LocalizedText;
+  placeholder?: LocalizedText;
+}
+
+export interface JBTabItemV1 {
+  id: UUID;
+  value: string;
+  label: LocalizedText;
+  disabled: boolean;
+  color?: string;
+  children: JBFormLeafElementV1[];
+}
+
+export interface JBTabElementV1 extends JBFormElementBaseV1 {
+  type: "jb-tab";
+  validationScope: ContainerValidationScope;
+  tabs: JBTabItemV1[];
+}
+
+export type JBFormElementV1 = JBFormLeafElementV1 | JBTabElementV1;
 
 export interface JBFormDocumentV1 {
   $schema: typeof JB_FORM_SCHEMA_V1;

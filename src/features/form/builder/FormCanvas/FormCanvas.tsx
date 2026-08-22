@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
-import { getLocalizedText } from "../../domain/form-document";
+import { getLocalizedText, isContainerElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName } from "../../registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { RemoveElementModal } from "../RemoveElementModal/RemoveElementModal";
 import { CanvasCard } from "./CanvasCard";
+import { TabCanvasCard } from "./TabCanvasCard";
 import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
 
@@ -64,7 +65,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 onDragOver={event => markDropTarget(event, index)}
                 onDrop={event => acceptDrop(event, index)}
               />
-              <CanvasCard
+              {isContainerElement(element) ? <TabCanvasCard
                 element={element}
                 index={index}
                 count={count}
@@ -78,7 +79,21 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 onDuplicate={interactions.duplicateElement}
                 onRemove={interactions.requestRemoval}
                 onFocusOffset={interactions.focusOffset}
-              />
+              /> : <CanvasCard
+                element={element}
+                index={index}
+                count={count}
+                isSelected={element.id === store.selectedElementId}
+                locale={locale}
+                defaultLocale={defaultLocale}
+                messages={messages}
+                onSelect={interactions.selectElement}
+                onConfigure={interactions.configureElement}
+                onMove={interactions.moveElement}
+                onDuplicate={interactions.duplicateElement}
+                onRemove={interactions.requestRemoval}
+                onFocusOffset={interactions.focusOffset}
+              />}
               {index === count - 1 ? (
                 <div
                   className={styles.insertionTarget}
@@ -98,7 +113,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
         isOpen={pendingRemoval !== null}
         elementLabel={
           pendingRemoval
-            ? getLocalizedText(pendingRemoval.label, locale, defaultLocale) || (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
+            ? (isContainerElement(pendingRemoval) ? pendingRemoval.name : getLocalizedText(pendingRemoval.label, locale, defaultLocale)) || (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
             : ""
         }
         messages={messages}

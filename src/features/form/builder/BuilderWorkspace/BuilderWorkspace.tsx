@@ -28,12 +28,14 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
 
   return (
     <div className={styles.builderShell}>
-      <JBTab value={compactPanel} onChange={(e)=>setCompactPanel((e.target as JBTabWebComponent).value as CompactPanel)} className={styles.compactTabs}>
-        <JBTabList>
+      <nav aria-label="Side panels">
+        <JBTab value={compactPanel} onChange={(e)=>setCompactPanel((e.target as JBTabWebComponent).value as CompactPanel)} className={styles.compactTabs}>
+        <JBTabList aria-label="Side panels">
           <JBTabTrigger value="catalog" color="primary">{messages.componentCatalog}</JBTabTrigger>
           <JBTabTrigger value="properties"  color="primary"> {messages.properties}</JBTabTrigger>
         </JBTabList>
-      </JBTab>
+        </JBTab>
+      </nav>
       <nav className={styles.mobileTabs} aria-label="Mobile workspace panels">
         <JBButton size="sm" variant="ghost" aria-pressed={mobilePanel === "catalog" ? "true" : "false"} onClick={() => setMobilePanel("catalog")}>
           {messages.componentCatalog}

@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { canonicalizeLocaleCode, getLocalizedText, inferLocaleDirection, type FormLocalization, type JSONValue } from "../../domain/form-document";
+import { canonicalizeLocaleCode, getLocalizedText, inferLocaleDirection, isContainerElement, type FormLocalization, type JSONValue } from "../../domain/form-document";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 import type { BuilderElementStore } from "./BuilderElementStore";
 import { builderLocalePreferences, type BuilderLocalePreferences } from "./BuilderLocalePreferences";
@@ -58,7 +58,8 @@ export class BuilderLocalizationStore {
   }
 
   updateSelectedText(key: "label" | "placeholder", value: string, locale = "en"): void {
-    const current = this.elements.selected?.[key];
+    if (!this.elements.selected || isContainerElement(this.elements.selected)) return;
+    const current = this.elements.selected[key];
     this.elements.updateSelected({ [key]: patchLocalizedText(current, value, locale) });
   }
 

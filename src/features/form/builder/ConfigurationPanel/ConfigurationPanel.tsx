@@ -7,6 +7,8 @@ import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSect
 import { ValidationRulesEditor } from "../ValidationRulesEditor/ValidationRulesEditor";
 import { CommonFieldsEditor } from "./CommonFieldsEditor";
 import { PropertyField } from "./PropertyField";
+import { TabConfigurationEditor } from "./TabConfigurationEditor";
+import { isContainerElement } from "../../domain/form-document";
 import styles from "./ConfigurationPanel.module.css";
 
 interface ConfigurationPanelProps {
@@ -42,6 +44,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
       ) : (
         <div className={styles.configurationFields}>
           <CommonFieldsEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+          {isContainerElement(element) ? <TabConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
           {entry.propertyDefinitions.length > 0 ? (
             <CollapsibleConfigurationSection title={messages.componentSettings}>
               {entry.propertyDefinitions.map(definition => (
@@ -49,7 +52,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
               ))}
             </CollapsibleConfigurationSection>
           ) : null}
-          <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} />
+          {!isContainerElement(element) ? <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} /> : null}
         </div>
       )}
     </aside>
