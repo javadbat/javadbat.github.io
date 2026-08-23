@@ -431,7 +431,7 @@ The adapter:
 - forwards typed renderer events;
 - contains no route or IndexedDB logic.
 
-The application renderer is implemented under `src/features/form/renderer/jb-form-builder`. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency. Package publication is reserved for the final delivery step.
+The renderer is implemented as the local `packages/jb-form-builder` package. The main custom-element class coordinates dedicated document, dependency, locale, element-rendering, form-rendering, event, facade, state, type, and styling modules. It has no IndexedDB or route dependency.
 
 Dependency loading is host-controlled. Preview explicitly supplies the bundled
 lazy loader, which imports `jb-form` plus only the unique component packages

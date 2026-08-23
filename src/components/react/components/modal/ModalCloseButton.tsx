@@ -9,7 +9,7 @@ interface ModalCloseButtonProps {
 
 export function ModalCloseButton({ label, onClick }: ModalCloseButtonProps) {
   return (
-    <JBButton className="modal-close-button" type="button" variant="ghost" size="sm" square aria-label={label} onClick={onClick}>
+    <JBButton type="button" variant="ghost" size="sm" square aria-label={label} onClick={onClick} tabIndex={-1}>
       <jb-icon-close size="sm" />
     </JBButton>
   );

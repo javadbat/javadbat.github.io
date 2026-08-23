@@ -16,7 +16,7 @@ under the application's control.
 For a bundler-based application, use the included lazy loader:
 
 ```ts
-import { loadDependencies } from "./src/features/form/renderer/jb-form-builder";
+import { loadDependencies } from "jb-form-builder/dependency-loader";
 
 const renderer = document.querySelector("jb-form-builder");
 renderer.loadDependencies = loadDependencies;

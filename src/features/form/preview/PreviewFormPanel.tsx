@@ -2,9 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import type { JBFormDocumentV1 } from "../domain/form-document";
 import type { FormMessages } from "../i18n/locale-adapter";
-import { JBFormBuilder } from "../renderer/jb-form-builder/react";
-import { loadDependencies } from "../renderer/jb-form-builder/dependency-loader";
-import type { JBFormBuilderElement } from "../renderer/jb-form-builder/types";
+import { JBFormBuilder } from "jb-form-builder/react";
+import { loadDependencies } from "jb-form-builder/dependency-loader";
+import type { JBFormBuilderElement } from "jb-form-builder/types";
 import styles from "../shell/RouteShell.module.css";
 
 type ValidationState = "preparing" | "idle" | "validating" | "valid" | "invalid" | "error";

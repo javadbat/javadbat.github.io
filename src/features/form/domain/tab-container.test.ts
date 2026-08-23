@@ -3,7 +3,7 @@ import { BuilderStore } from "../builder/store/BuilderStore";
 import { validateFormDocument } from "./form-document-validation";
 import { isTabElement } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
-import { getRequiredDependencies } from "../renderer/jb-form-builder/dependency-loader";
+import { getRequiredDependencies } from "jb-form-builder/dependency-loader";
 
 describe("jb-tab container contract", () => {
   it("owns one level of leaf children and validates recursively", () => {
