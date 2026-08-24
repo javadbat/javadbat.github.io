@@ -59,6 +59,7 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   text: () => Promise.resolve(),
   image: () => Promise.resolve(),
   voice: () => Promise.resolve(),
+  link: () => Promise.resolve(),
   "jb-input": () => import("jb-input"),
   "jb-number-input": () => import("jb-number-input"),
   "jb-range-input": () => import("jb-range-input"),
@@ -88,6 +89,7 @@ const definitions = [
   contentAdapterDefinition("text", "p"),
   contentAdapterDefinition("image", "img"),
   contentAdapterDefinition("voice", "audio"),
+  contentAdapterDefinition("link", "a"),
   adapterDefinition("jb-input", "string", inputEvents, textValidation),
   adapterDefinition("jb-number-input", "number-string", inputEvents, rangedTextValidation),
   adapterDefinition("jb-range-input", "range", ["input", "change", "invalid"], []),
@@ -133,7 +135,7 @@ function adapterDefinition(
   };
 }
 
-function contentAdapterDefinition(type: "text" | "image" | "voice", tagName: "p" | "img" | "audio"): FormElementAdapterDefinition {
+function contentAdapterDefinition(type: "text" | "image" | "voice" | "link", tagName: "p" | "img" | "audio" | "a"): FormElementAdapterDefinition {
   return {
     type,
     packageName: type,
@@ -356,6 +358,17 @@ function resolveRuntimeValue(value: JSONValue, locale: string, defaultLocale: st
   return isLocalizedText(value) ? getLocalizedText(value, locale, defaultLocale) : value;
 }
 
+function isSafeLinkUrl(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return false;
+  if (/^(?:[/?#]|\.\.?\/)/.test(trimmed)) return true;
+  try {
+    return ["http:", "https:", "mailto:", "tel:"].includes(new URL(trimmed).protocol);
+  } catch {
+    return false;
+  }
+}
+
 function setNumberSeparatorRuntimeValue(target: RuntimeFormElement, key: "showThousandSeparator" | "thousandSeparator", value: unknown): void {
   // jb-number-input uses the same `thousand-separator` attribute both as a
   // boolean switch and as the separator text. Mirroring the separate builder
@@ -477,6 +490,24 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
     }
     target.setAttribute("controls", "");
     target.setAttribute("preload", "metadata");
+    return;
+  }
+  if (element.type === "link") {
+    const content = element.props.content;
+    target.textContent = content === undefined ? "" : String(resolveRuntimeValue(content, locale, defaultLocale));
+    const url = element.props.url;
+    if (typeof url === "string" && isSafeLinkUrl(url)) {
+      target.setAttribute("href", url.trim());
+    } else {
+      target.removeAttribute("href");
+    }
+    if (element.props.openInNewTab === true) {
+      target.setAttribute("target", "_blank");
+      target.setAttribute("rel", "noopener noreferrer");
+    } else {
+      target.removeAttribute("target");
+      target.removeAttribute("rel");
+    }
     return;
   }
   setRuntimeValue(target, "name", element.name);

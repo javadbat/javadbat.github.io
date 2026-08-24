@@ -9,11 +9,11 @@ import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("JB element registry adapters", () => {
   it("declares complete adapter metadata for every inventory component", () => {
-    expect(formElementRegistry).toHaveLength(23);
+    expect(formElementRegistry).toHaveLength(24);
 
     for (const entry of formElementRegistry) {
       expect(entry.packageName).toBe(entry.type === "jb-listbox" ? "jb-select/listbox" : entry.type);
-      expect(entry.tagName).toBe(entry.type === "text" ? "p" : entry.type === "image" ? "img" : entry.type === "voice" ? "audio" : entry.type);
+      expect(entry.tagName).toBe(entry.type === "text" ? "p" : entry.type === "image" ? "img" : entry.type === "voice" ? "audio" : entry.type === "link" ? "a" : entry.type);
       expect(entry.adapterVersion).toBe(1);
       expect(entry.supportedSchemaVersions).toEqual([1]);
       expect(entry.valueType.length).toBeGreaterThan(0);
@@ -197,5 +197,21 @@ describe("JB element registry adapters", () => {
     voiceEntry.applyToRuntime(audio, voiceElement, "en");
     expect(audio.getAttribute("src")).toBe("https://example.com/welcome.mp3");
     expect(audio.hasAttribute("controls")).toBe(true);
+
+    const linkEntry = formElementRegistry.find(entry => entry.type === "link")!;
+    const linkElement = createDefaultElement(linkEntry, "learnMore");
+    linkElement.props.content = { translations: { en: "Learn more", fa: "بیشتر بدانید" } };
+    linkElement.props.url = "https://example.com/details";
+    linkElement.props.openInNewTab = true;
+    const link = document.createElement("a") as unknown as RuntimeFormElement;
+    linkEntry.applyToRuntime(link, linkElement, "fa");
+    expect(link.textContent).toBe("بیشتر بدانید");
+    expect(link.getAttribute("href")).toBe("https://example.com/details");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+
+    linkElement.props.url = "javascript:alert(1)";
+    linkEntry.applyToRuntime(link, linkElement, "en");
+    expect(link.hasAttribute("href")).toBe(false);
   });
 });

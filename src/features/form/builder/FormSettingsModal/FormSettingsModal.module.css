@@ -23,6 +23,7 @@
   color: oklch(0.5 0.18 28);
   font-size: 0.7rem;
   line-height: 1.45;
+  white-space: pre-line;
 }
 
 .modalContent {

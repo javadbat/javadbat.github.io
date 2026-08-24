@@ -47,6 +47,15 @@ const catalogEntries = [
     defaultName: "voiceBlock",
   },
   {
+    type: "link",
+    displayName: "Link",
+    description: "Add a link to a web page or resource.",
+    category: "Content",
+    keywords: ["link", "anchor", "url", "website"],
+    iconId: "content-link",
+    defaultName: "linkBlock",
+  },
+  {
     type: "jb-input",
     displayName: "Text input",
     description: "A flexible single-line text field.",
@@ -250,6 +259,7 @@ const persianDisplayNames: Record<JBFormElementType, string> = {
   text: "متن",
   image: "تصویر",
   voice: "صدا",
+  link: "پیوند",
   "jb-input": "ورودی متن",
   "jb-number-input": "ورودی عدد",
   "jb-range-input": "ورودی بازه",

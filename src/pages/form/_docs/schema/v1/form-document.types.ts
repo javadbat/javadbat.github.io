@@ -37,6 +37,7 @@ export type JBFormElementType =
   | "text"
   | "image"
   | "voice"
+  | "link"
   | "jb-input"
   | "jb-number-input"
   | "jb-range-input"

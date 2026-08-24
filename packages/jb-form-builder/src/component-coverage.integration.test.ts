@@ -292,13 +292,15 @@ describe("real JB component Preview coverage", () => {
     expect(renderer.reportValidity()).toBe(true);
   });
 
-  it("renders text, image, and voice content without component dependencies", async () => {
+  it("renders text, image, voice, and link content without component dependencies", async () => {
     const formDocument = createEmptyFormDocument();
     formDocument.elements = formElementRegistry.filter(entry => entry.isContent).map((entry, index) => createDefaultElement(entry, `content${index + 1}`));
     formDocument.elements[0].props.content = { translations: { en: "Welcome" } };
     formDocument.elements[1].props.url = "https://example.com/hero.jpg";
     formDocument.elements[1].props.alt = { translations: { en: "Hero" } };
     formDocument.elements[2].props.url = "https://example.com/welcome.mp3";
+    formDocument.elements[3].props.content = { translations: { en: "Learn more" } };
+    formDocument.elements[3].props.url = "https://example.com/details";
     const renderer = document.createElement("jb-form-builder");
     document.body.append(renderer);
     renderer.formDocument = formDocument;
@@ -311,6 +313,8 @@ describe("real JB component Preview coverage", () => {
     expect(renderer.shadowRoot?.querySelector("img")?.getAttribute("alt")).toBe("Hero");
     expect(renderer.shadowRoot?.querySelector("audio")?.getAttribute("src")).toBe("https://example.com/welcome.mp3");
     expect(renderer.shadowRoot?.querySelector("audio")?.hasAttribute("controls")).toBe(true);
+    expect(renderer.shadowRoot?.querySelector("a")?.textContent).toBe("Learn more");
+    expect(renderer.shadowRoot?.querySelector("a")?.getAttribute("href")).toBe("https://example.com/details");
   });
 
   it("keeps the real checkbox pointer and Space-key interactions boolean", async () => {
@@ -390,8 +394,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(23);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(23);
-    expect(Object.keys(configurationByType)).toHaveLength(23);
+    expect(formElementRegistry).toHaveLength(24);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(24);
+    expect(Object.keys(configurationByType)).toHaveLength(24);
   });
 });

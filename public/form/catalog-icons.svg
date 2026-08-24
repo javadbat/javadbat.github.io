@@ -11,6 +11,11 @@
     <symbol id="content-voice" viewBox="0 0 24 24">
       <path d="M5 9v6M9 6v12M13 3v18M17 7v10M21 10v4"/>
     </symbol>
+    <symbol id="content-link" viewBox="0 0 24 24">
+      <path d="m9.5 14.5 5-5"/>
+      <path d="M7.25 16.75 5.5 18.5a3.54 3.54 0 0 1-5-5l3.25-3.25a3.54 3.54 0 0 1 5 0" transform="translate(2.25 -2.25)"/>
+      <path d="m16.75 7.25 1.75-1.75a3.54 3.54 0 0 1 5 5l-3.25 3.25a3.54 3.54 0 0 1-5 0" transform="translate(-2.25 2.25)"/>
+    </symbol>
     <symbol id="text-input" viewBox="0 0 24 24">
       <rect x="2.75" y="5.5" width="18.5" height="13" rx="4"/>
       <path d="M7 9.75h8.5M7 14.25h5.25" opacity=".42"/>

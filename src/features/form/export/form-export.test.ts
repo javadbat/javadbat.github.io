@@ -63,4 +63,22 @@ describe("form JSON export", () => {
       expect(result.fileName).toBe("untitled-form.jb-form.json");
     }
   });
+
+  it("omits unset optional text presentation so the renderer can inherit the theme", () => {
+    const document = createEmptyFormDocument();
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    document.elements.push(createDefaultElement(textEntry, "intro"));
+
+    const result = prepareFormExport(document);
+
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      const parsed = JSON.parse(result.json);
+      expect(parsed.elements[0].props).not.toHaveProperty("color");
+      expect(parsed.elements[0].props).not.toHaveProperty("fontSize");
+      expect(parsed.elements[0].props).not.toHaveProperty("fontWeight");
+      expect(parsed.elements[0].props).not.toHaveProperty("lineHeight");
+      expect(parsed.elements[0].props).not.toHaveProperty("textAlign");
+    }
+  });
 });

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { getCurrentFormRoute } from "../../application/form-route";
 import { useFormLocale } from "../../i18n/locale-adapter";
@@ -17,12 +17,18 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
-  const { direction, messages } = useFormLocale("en");
+  const { locale, direction, setLocale, messages } = useFormLocale("en");
   const route = getCurrentFormRoute();
   const actions = useBuilderAppActions();
+  const editingAppLocale = store.editingLocale.toLowerCase().split("-")[0] === "fa" ? "fa" : "en";
 
   useBuilderLifecycle(route.slug);
   useHistoryShortcuts();
+
+  useEffect(() => {
+    if (store.status === "loading" || locale === editingAppLocale) return;
+    setLocale(editingAppLocale);
+  }, [editingAppLocale, locale, setLocale, store.status]);
 
   if (store.status === "loading" || store.status === "load-error") {
     return <BuilderStatusScreen messages={messages} slug={route.slug} />;

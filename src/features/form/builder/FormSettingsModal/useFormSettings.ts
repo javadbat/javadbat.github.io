@@ -2,10 +2,20 @@ import { useEffect, useState } from "react";
 import { canonicalizeLocaleCode, inferLocaleDirection, type LocaleDefinition } from "../../domain/form-document";
 import { isValidFormSlug, normalizeFormSlug } from "../../application/form-slug";
 import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
+import type { StorageIssue } from "../../storage/storage-types";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
 export function copyLocaleDefinitions(locales: Record<string, LocaleDefinition>): Record<string, LocaleDefinition> {
   return Object.fromEntries(Object.entries(locales).map(([locale, definition]) => [locale, { direction: definition.direction }]));
+}
+
+export function getFormSettingsSaveError(messages: FormMessages, issue: StorageIssue | null): string {
+  const summary = getStorageIssueMessage(messages, issue);
+  if (!issue || issue.code !== "validation-failed") return summary;
+  if (issue.formIssues?.length) {
+    return [summary, ...issue.formIssues.map(formIssue => `${formIssue.path}: ${formIssue.message}`)].join("\n");
+  }
+  return issue.message && issue.message !== summary ? `${summary}\n${issue.message}` : summary;
 }
 
 export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose: () => void) {
@@ -50,7 +60,7 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
     store.setEditingLocale(defaultLocale);
     const saved = await store.save({ slug: normalizedSlug || undefined, saveAs });
     if (saved) onClose();
-    else setSaveError(getStorageIssueMessage(messages, store.storageIssue));
+    else setSaveError(getFormSettingsSaveError(messages, store.storageIssue));
   };
 
   return {

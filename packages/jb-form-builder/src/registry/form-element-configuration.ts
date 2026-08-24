@@ -193,11 +193,6 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "string",
     {
       content: localizedDefault("Text", "متن"),
-      color: "#243247",
-      fontSize: 1,
-      fontWeight: "normal",
-      textAlign: "start",
-      lineHeight: 1.6,
     },
     [
       textareaProperty("content", "Text", "متن", true),
@@ -275,6 +270,20 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "string",
     { url: "" },
     [urlProperty("url", "Audio URL", "نشانی صدا")],
+  ),
+  link: configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    {
+      content: localizedDefault("Link", "پیوند"),
+      url: "",
+      openInNewTab: false,
+    },
+    [
+      textProperty("content", "Text", "متن", true),
+      urlProperty("url", "URL", "نشانی"),
+      booleanProperty("openInNewTab", "Open in new tab", "باز کردن در زبانه جدید"),
+    ],
   ),
   "jb-tab": configuration(
     { required: false, disabled: false, initialValue: false, label: false, placeholder: false },

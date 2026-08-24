@@ -5,6 +5,7 @@ import { IDBFactory } from "fake-indexeddb";
 import { autorun } from "mobx";
 import { describe, expect, it, vi } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
+import { validateFormDocument } from "../../domain/form-document-validation";
 import { formAppMessages } from "../../i18n/locale-adapter";
 import { formElementRegistry } from "../../registry/form-element-registry";
 import { IndexedDbFormRepository } from "../../storage/form-repository";
@@ -71,6 +72,7 @@ describe("Builder shell performance baseline", () => {
     expect(store.document.elements).toHaveLength(100);
     expect(ids.size).toBe(100);
     expect(store.document.elements.every(element => element.name.length > 0)).toBe(true);
+    expect(validateFormDocument(store.createDocumentSnapshot())).toMatchObject({ valid: true, issues: [] });
     expect(duration).toBeLessThan(1_000);
   });
 
