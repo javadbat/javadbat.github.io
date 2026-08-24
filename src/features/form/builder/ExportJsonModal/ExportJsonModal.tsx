@@ -1,11 +1,11 @@
 import { JBButton } from "jb-button/react";
-import { ClientJBModal } from "../../../../components/react/components/modal/ClientJBModal";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { CodeViewer } from "../../../../components/react/components/code-viewer/CodeViewer";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import { downloadFormExport, prepareFormExport } from "../../export/form-export";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import styles from "./ExportJsonModal.module.css";
+import { JBModal } from "jb-modal/react";
 
 interface ExportJsonModalProps {
   document: JBFormDocumentV1;
@@ -22,7 +22,7 @@ export function ExportJsonModal({ document, messages, onClose }: ExportJsonModal
   const exportResult = prepareFormExport(document);
 
   return (
-    <ClientJBModal isOpen label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal isOpen label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
@@ -75,6 +75,6 @@ export function ExportJsonModal({ document, messages, onClose }: ExportJsonModal
           </JBButton>
         )}
       </div>
-    </ClientJBModal>
+    </JBModal>
   );
 }

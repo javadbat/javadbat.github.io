@@ -3,12 +3,12 @@ import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
-import { ClientJBModal } from "../../../../components/react/components/modal/ClientJBModal";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { LocaleEditor } from "./LocaleEditor";
 import { copyLocaleDefinitions, useFormSettings } from "./useFormSettings";
 import styles from "./FormSettingsModal.module.css";
+import { JBModal } from "jb-modal/react";
 
 interface FormSettingsModalProps {
   isOpen: boolean;
@@ -42,7 +42,7 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
   } = useFormSettings(isOpen, messages, onClose);
 
   return (
-    <ClientJBModal isOpen={isOpen} label={messages.formSettings} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal isOpen={isOpen} label={messages.formSettings} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.currentDraft}</p>
@@ -111,6 +111,6 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
           {store.status === "saving" ? messages.saving : messages.save}
         </JBButton>
       </div>
-    </ClientJBModal>
+    </JBModal>
   );
 });
