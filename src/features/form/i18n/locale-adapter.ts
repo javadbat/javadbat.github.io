@@ -1,366 +1,79 @@
-import { useCallback, useEffect, useState } from "react";
-import { i18n, JBDictionary, type JBI18N } from "jb-core/i18n";
+import { useCallback, useEffect, useMemo } from "react";
+import i18next, { type TFunction } from "i18next";
+import { initReactI18next, useTranslation } from "react-i18next";
+import { i18n as jbI18n } from "jb-core/i18n";
 import type { StorageIssue } from "../storage/storage-types";
+
+import { builderHeaderTranslations } from "../builder/BuilderHeader/translations";
+import { builderStatusScreenTranslations } from "../builder/BuilderStatusScreen/translations";
+import { builderWorkspaceTranslations } from "../builder/BuilderWorkspace/translations";
+import { componentCatalogTranslations } from "../builder/ComponentCatalog/translations";
+import { configurationPanelTranslations } from "../builder/ConfigurationPanel/translations";
+import { designerPlaceholderAppTranslations } from "../designer/translations";
+import { exportJsonModalTranslations } from "../builder/ExportJsonModal/translations";
+import { formCanvasTranslations } from "../builder/FormCanvas/translations";
+import { formLandingAppTranslations } from "../landing/translations";
+import { formResultModalTranslations } from "../preview/FormResultModal.translations";
+import { formSettingsModalTranslations } from "../builder/FormSettingsModal/translations";
+import { importJsonModalTranslations } from "../builder/ImportJsonModal/translations";
+import { previewAppTranslations } from "../preview/PreviewApp.translations";
+import { previewFormPanelTranslations } from "../preview/PreviewFormPanel.translations";
+import { removeElementModalTranslations } from "../builder/RemoveElementModal/translations";
+import { validationRulesEditorTranslations } from "../builder/ValidationRulesEditor/translations";
+import { commonTranslations } from "./common.translations";
 
 export type FormAppLocale = "en" | "fa";
 export type FormAppDirection = "ltr" | "rtl";
 
 const FORM_APP_LOCALE_STORAGE_KEY = "jb-form:locale";
 
+const formTranslationModules = [
+  builderHeaderTranslations,
+  builderStatusScreenTranslations,
+  builderWorkspaceTranslations,
+  componentCatalogTranslations,
+  configurationPanelTranslations,
+  designerPlaceholderAppTranslations,
+  exportJsonModalTranslations,
+  formCanvasTranslations,
+  formLandingAppTranslations,
+  formResultModalTranslations,
+  formSettingsModalTranslations,
+  importJsonModalTranslations,
+  previewAppTranslations,
+  previewFormPanelTranslations,
+  removeElementModalTranslations,
+  validationRulesEditorTranslations,
+  commonTranslations,
+] as const;
+
 const formAppDictionarySource = {
-  en: {
-    productName: "JB Form",
-    builder: "Builder",
-    designer: "Designer",
-    preview: "Preview",
-    componentCatalog: "Components",
-    catalogDescription: "Choose a field and add it to your form.",
-    searchComponents: "Search components",
-    formCanvas: "Form canvas",
-    emptyFormTitle: "Your form is ready for its first field",
-    emptyFormDescription: "Choose a component from the catalog. Fields stay in one clear column.",
-    properties: "Properties",
-    propertiesDescription: "Select a field to configure its shared settings.",
-    noSelection: "Nothing selected",
-    noSelectionDescription: "Select a field on the canvas to edit its name, label, and placeholder.",
-    add: "Add",
-    save: "Save",
-    saveAs: "Save As",
-    saving: "Saving…",
-    saved: "Saved",
-    saveFailed: "Save failed",
-    storageBlocked: "Close other JB Form tabs and retry.",
-    quotaExceeded: "Browser storage is full. Export the form or free space.",
-    slugCollision: "Another saved form already uses this slug.",
-    revisionConflict: "This form changed in another tab. Reload it before saving.",
-    invalidForm: "Fix the form validation issues before saving.",
-    corruptForm: "The saved form is corrupt or incompatible.",
-    storageError: "The form could not be read or saved.",
-    importJson: "Import JSON",
-    importSuccess: "JSON imported into the draft. Save to persist it.",
-    importFailure: "JSON import failed.",
-    importDescription: "Paste a portable form document or choose a JSON file. The document is checked against the current form schema before import.",
-    pasteJson: "Paste form JSON",
-    pasteJsonPlaceholder: "Paste the exported form JSON here…",
-    chooseJsonFile: "Choose JSON file",
-    jsonSchemaValid: "Valid JSON — the document matches the form schema.",
-    importDocument: "Import document",
-    undo: "Undo",
-    redo: "Redo",
-    exportJson: "Export JSON",
-    portableFormDocument: "Portable form document",
-    exportDescription: "Review or copy the validated form JSON, then download the exact portable document.",
-    exportCodeLabel: "Validated form JSON",
-    copyCode: "Copy JSON",
-    copiedCode: "JSON copied",
-    downloadJson: "Download JSON",
-    close: "Close",
-    exportInvalidDescription: "This document cannot be exported until the following validation issues are fixed.",
-    currentDraft: "Current draft",
-    unsavedChanges: "Unsaved changes",
-    untitledForm: "Untitled form",
-    formSettings: "Form settings",
-    formName: "Form name",
-    slug: "Form slug",
-    slugPreview: "Saved URL slug",
-    slugOptional: "Optional. Leave empty to save only the current working draft.",
-    slugInvalid: "Use an English route-safe slug.",
-    linkedNamedForm: "Linked named form",
-    unnamedDraft: "Not saved as a named form",
-    settings: "Settings",
-    cancel: "Cancel",
-    locale: "Language",
-    contentLocale: "Form content language",
-    defaultLocale: "Default form language",
-    supportedLocales: "Supported form languages",
-    addLocale: "Add language",
-    removeLocale: "Remove",
-    direction: "Direction",
-    ltr: "LTR",
-    rtl: "RTL",
-    localeCodeHint: "Use a BCP 47 code such as de or ar-EG.",
-    localeInvalid: "Enter a valid BCP 47 language code.",
-    localeAlreadyAdded: "That language is already supported.",
-    english: "English",
-    persian: "Persian",
-    elementName: "Field name",
-    elementNameDescription:"name of the field used in Data",
-    label: "Label",
-    placeholder: "Placeholder",
-    required: "Required",
-    disabled: "Disabled",
-    initialValue: "Initial value",
-    commonSettings: "Common settings",
-    componentSettings: "Component settings",
-    configure: "Configure",
-    moveUp: "Move up",
-    moveDown: "Move down",
-    duplicate: "Duplicate",
-    remove: "Remove",
-    dragToReorder: "Drag to reorder",
-    dropHere: "Drop here",
-    confirmRemoveTitle: "Remove this field?",
-    confirmRemoveDescription: "The field configuration will be removed from the current draft. You can restore it with Undo.",
-    confirmRemove: "Remove field",
-    nameRequired: "Field name is required.",
-    nameInvalid: "Use 1–64 English characters. Start with an English letter; then use only English letters, numbers, underscores, or hyphens.",
-    addOption: "Add option",
-    removeOption: "Remove option",
-    optionLabel: "Option label",
-    optionValue: "Option value",
-    optionDisabled: "Option disabled",
-    commaSeparated: "Separate multiple values with commas.",
-    validationRules: "Validation rules",
-    validationDescription: "Choose a simple rule such as minimum length, or use a regular expression for a custom format.",
-    ruleType: "Rule type",
-    ruleValue: "Value",
-    validationMessage: "Validation message",
-    patternSource: "Pattern source",
-    patternFlags: "Flags",
-    regexHelp: "Regular expressions describe the text format this field should accept.",
-    openRegexBuilder: "Learn and build one in Regex101",
-    allowedValues: "Allowed values",
-    addRule: "Add rule",
-    addValidation: "Add validation",
-    manageValidation: "Manage validation",
-    currentValidationRules: "Current rules",
-    removeRule: "Remove rule",
-    noValidationRules: "No custom validation rules.",
-    done: "Done",
-    addedAnnouncement: "added at position",
-    movedAnnouncement: "moved to position",
-    duplicatedAnnouncement: "duplicated at position",
-    removedAnnouncement: "removed",
-    of: "of",
-    comingNext: "Persistence is added in the next implementation step.",
-    desktopRequired: "Builder editing needs a larger screen",
-    desktopRequiredDescription: "Use a viewport at least 64rem wide. Preview remains available on this device.",
-    emptyDesigner: "Theme Designer comes in Phase 3",
-    emptyDesignerDescription: "This route already preserves form identity and will become the theme workspace.",
-    previewPending: "Preview renderer is the next route milestone",
-    previewPendingDescription: "This page will reload saved JSON from IndexedDB and render it responsively.",
-    previewReadyTitle: "Saved form preview",
-    previewReadyDescription: "This is a private preview of your form. Only you can see it; other people on the internet cannot access or submit it.",
-    submitForm: "Submit",
-    resetForm: "Reset form",
-    formPreparing: "Preparing the form…",
-    validatingForm: "Checking the form…",
-    validationReady: "Ready to submit.",
-    formIsValid: "Everything looks good. The form is valid.",
-    formHasErrors: "Some fields need your attention.",
-    validationFailed: "Validation could not be completed.",
-    submissionSuccessful: "Submission successful",
-    formResult: "Form result",
-    formResultDescription: "The submitted form values are shown below as JSON.",
-    formResultJson: "Submitted form values in JSON",
-    backToForms: "All forms",
-    createForm: "Create a form",
-    continueDraft: "Continue current draft",
-    savedForms: "Saved forms",
-    noSavedForms: "No named forms have been saved yet.",
-    loadingForms: "Loading saved forms…",
-    storageUnavailable: "Browser storage is unavailable. You can still build in memory.",
-    unknownForm: "This saved form could not be found.",
-    noSavedDraft: "Save the current draft before opening this page.",
-    loadForm: "Load",
-    updated: "Updated",
-    formHomeTitle: "Build forms with the JB Design System",
-    formHomeDescription: "Compose accessible JB fields, configure portable JSON, and preview the exact saved result.",
-    editorReady: "Core editing",
-    phaseOne: "Phase 1",
-    selected: "Selected",
-    fields: "fields",
-    field: "field",
-    loading: "Loading builder",
-    loadingModal: "Loading dialog…",
-    retry: "Retry",
-  },
-  fa: {
-    productName: "فرم ساز",
-    builder: "فرم‌ساز",
-    designer: "طراح",
-    preview: "پیش‌نمایش",
-    componentCatalog: "اجزای فرم",
-    catalogDescription: "یک فیلد را انتخاب و به فرم اضافه کنید.",
-    searchComponents: "جستجوی اجزا",
-    formCanvas: "بوم فرم",
-    emptyFormTitle: "فرم شما برای اولین فیلد آماده است",
-    emptyFormDescription: "یک جزء از فهرست انتخاب کنید. فیلدها در یک ستون قرار می‌گیرند.",
-    properties: "ویژگی‌ها",
-    propertiesDescription: "یک فیلد را برای تنظیم ویژگی‌های مشترک انتخاب کنید.",
-    noSelection: "چیزی انتخاب نشده",
-    noSelectionDescription: "یک فیلد را از بوم انتخاب کنید تا نام و برچسب آن را ویرایش کنید.",
-    add: "افزودن",
-    save: "ذخیره",
-    saveAs: "ذخیره به‌عنوان",
-    saving: "در حال ذخیره…",
-    saved: "ذخیره‌شده",
-    saveFailed: "ذخیره ناموفق بود",
-    storageBlocked: "سایر زبانه‌های فرم جی‌بی را ببندید و دوباره تلاش کنید.",
-    quotaExceeded: "فضای مرورگر پر است. از فرم خروجی بگیرید یا فضا آزاد کنید.",
-    slugCollision: "فرم ذخیره‌شده دیگری از این شناسه نشانی استفاده می‌کند.",
-    revisionConflict: "این فرم در زبانه دیگری تغییر کرده است. پیش از ذخیره آن را دوباره بارگذاری کنید.",
-    invalidForm: "پیش از ذخیره، خطاهای اعتبارسنجی فرم را برطرف کنید.",
-    corruptForm: "فرم ذخیره‌شده خراب یا ناسازگار است.",
-    storageError: "فرم خوانده یا ذخیره نشد.",
-    importJson: "ورود JSON",
-    importSuccess: "JSON در پیش‌نویس وارد شد. برای ذخیره‌سازی، ذخیره را بزنید.",
-    importFailure: "ورود JSON ناموفق بود.",
-    importDescription: "JSON فرم را جای‌گذاری کنید یا یک فایل JSON انتخاب کنید. سند پیش از ورود با ساختار فعلی فرم بررسی می‌شود.",
-    pasteJson: "جای‌گذاری JSON فرم",
-    pasteJsonPlaceholder: "JSON خروجی فرم را اینجا جای‌گذاری کنید…",
-    chooseJsonFile: "انتخاب فایل JSON",
-    jsonSchemaValid: "JSON معتبر است و با ساختار فرم مطابقت دارد.",
-    importDocument: "ورود سند",
-    undo: "واگرد",
-    redo: "بازانجام",
-    exportJson: "خروجی JSON",
-    portableFormDocument: "سند قابل‌انتقال فرم",
-    exportDescription: "JSON اعتبارسنجی‌شده فرم را بررسی یا کپی کنید و سپس همان سند قابل‌انتقال را دانلود کنید.",
-    exportCodeLabel: "JSON اعتبارسنجی‌شده فرم",
-    copyCode: "کپی JSON",
-    copiedCode: "JSON کپی شد",
-    downloadJson: "دانلود JSON",
-    close: "بستن",
-    exportInvalidDescription: "تا زمانی که خطاهای اعتبارسنجی زیر برطرف نشوند، این سند قابل خروجی‌گرفتن نیست.",
-    currentDraft: "پیش‌نویس فعلی",
-    unsavedChanges: "تغییرات ذخیره‌نشده",
-    untitledForm: "فرم بدون عنوان",
-    formSettings: "تنظیمات فرم",
-    formName: "نام فرم",
-    slug: "شناسه نشانی فرم",
-    slugPreview: "شناسه نشانی ذخیره‌شده",
-    slugOptional: "اختیاری است. برای ذخیره فقط به‌عنوان پیش‌نویس فعلی، خالی بگذارید.",
-    slugInvalid: "یک شناسه انگلیسی مناسب نشانی وارد کنید.",
-    linkedNamedForm: "متصل به فرم نام‌دار",
-    unnamedDraft: "به‌عنوان فرم نام‌دار ذخیره نشده",
-    settings: "تنظیمات",
-    cancel: "انصراف",
-    locale: "زبان",
-    contentLocale: "زبان محتوای فرم",
-    defaultLocale: "زبان پیش‌فرض فرم",
-    supportedLocales: "زبان‌های پشتیبانی‌شده فرم",
-    addLocale: "افزودن زبان",
-    removeLocale: "حذف",
-    direction: "جهت",
-    ltr: "چپ به راست",
-    rtl: "راست به چپ",
-    localeCodeHint: "کد BCP 47 مانند de یا ar-EG را وارد کنید.",
-    localeInvalid: "یک کد زبان معتبر BCP 47 وارد کنید.",
-    localeAlreadyAdded: "این زبان قبلاً اضافه شده است.",
-    english: "انگلیسی",
-    persian: "فارسی",
-    elementName: "نام فیلد",
-    elementNameDescription:"این نام در خروجی داده مورد استفاده قرار می‌ گیرد",
-    label: "برچسب(لیبل)",
-    placeholder: "راهنما داخل کادر (placeholder)",
-    required: "الزامی",
-    disabled: "غیرفعال",
-    initialValue: "مقدار اولیه",
-    commonSettings: "تنظیمات مشترک",
-    componentSettings: "تنظیمات جزء",
-    configure: "تنظیم",
-    moveUp: "انتقال به بالا",
-    moveDown: "انتقال به پایین",
-    duplicate: "تکثیر",
-    remove: "حذف",
-    dragToReorder: "برای جابه‌جایی بکشید",
-    dropHere: "اینجا رها کنید",
-    confirmRemoveTitle: "این فیلد حذف شود؟",
-    confirmRemoveDescription: "تنظیمات فیلد از پیش‌نویس فعلی حذف می‌شود. می‌توانید آن را با واگردانی برگردانید.",
-    confirmRemove: "حذف فیلد",
-    nameRequired: "نام فیلد الزامی است.",
-    nameInvalid: "نام را با یک حرف انگلیسی آغاز کنید و در ادامه فقط از حروف انگلیسی، عدد، خط زیر یا خط تیره استفاده کنید (حداکثر ۶۴ نویسه).",
-    addOption: "افزودن گزینه",
-    removeOption: "حذف گزینه",
-    optionLabel: "برچسب گزینه",
-    optionValue: "مقدار گزینه",
-    optionDisabled: "گزینه غیرفعال",
-    commaSeparated: "چند مقدار را با ویرگول جدا کنید.",
-    validationRules: "قواعد اعتبارسنجی",
-    validationDescription: "یک قاعده ساده مانند کمترین طول انتخاب کنید، یا برای قالب دلخواه عبارت منظم بنویسید.",
-    ruleType: "نوع قاعده",
-    ruleValue: "مقدار",
-    validationMessage: "پیام اعتبارسنجی",
-    patternSource: "الگوی عبارت منظم",
-    patternFlags: "پرچم‌ها",
-    regexHelp: "عبارت منظم قالب متنی را که این فیلد باید بپذیرد مشخص می‌کند.",
-    openRegexBuilder: "آموزش و ساخت عبارت در Regex101",
-    allowedValues: "مقادیر مجاز",
-    addRule: "افزودن قاعده",
-    addValidation: "افزودن اعتبارسنجی",
-    manageValidation: "مدیریت اعتبارسنجی",
-    currentValidationRules: "قواعد فعلی",
-    removeRule: "حذف قاعده",
-    noValidationRules: "قاعده اعتبارسنجی سفارشی وجود ندارد.",
-    done: "تمام",
-    addedAnnouncement: "در جایگاه افزوده شد",
-    movedAnnouncement: "به جایگاه منتقل شد",
-    duplicatedAnnouncement: "در جایگاه تکثیر شد",
-    removedAnnouncement: "حذف شد",
-    of: "از",
-    comingNext: "ذخیره‌سازی در مرحله بعدی پیاده‌سازی اضافه می‌شود.",
-    desktopRequired: "ویرایش فرم به نمایشگر بزرگ‌تر نیاز دارد",
-    desktopRequiredDescription: "از عرض حداقل ۶۴rem استفاده کنید. پیش‌نمایش روی این دستگاه در دسترس است.",
-    emptyDesigner: "طراح پوسته در فاز سوم اضافه می‌شود",
-    emptyDesignerDescription: "این مسیر هویت فرم را حفظ می‌کند و فضای طراحی پوسته خواهد شد.",
-    previewPending: "رندر پیش‌نمایش، مرحله بعدی مسیرها است",
-    previewPendingDescription: "این صفحه JSON ذخیره‌شده را از IndexedDB می‌خواند و واکنش‌گرا نمایش می‌دهد.",
-    previewReadyTitle: "پیش‌نمایش فرم ذخیره‌شده",
-    previewReadyDescription: "این فقط پیش‌نمایش خصوصی فرم شماست. تنها شما می‌توانید آن را ببینید؛ دیگر کاربران اینترنت به این فرم دسترسی ندارند و نمی‌توانند آن را ارسال کنند.",
-    submitForm: "ارسال",
-    resetForm: "بازنشانی فرم",
-    formPreparing: "در حال آماده‌سازی فرم…",
-    validatingForm: "در حال بررسی فرم…",
-    validationReady: "آماده ارسال است.",
-    formIsValid: "همه‌چیز درست است. فرم معتبر است.",
-    formHasErrors: "برخی فیلدها نیاز به بررسی دارند.",
-    validationFailed: "اعتبارسنجی کامل نشد.",
-    submissionSuccessful: "ارسال موفق",
-    formResult: "نتیجه فرم",
-    formResultDescription: "مقادیر ارسال‌شده فرم در قالب JSON در ادامه نمایش داده می‌شوند.",
-    formResultJson: "مقادیر ارسال‌شده فرم در قالب JSON",
-    backToForms: "همه فرم‌ها",
-    createForm: "ساخت فرم",
-    continueDraft: "ادامه پیش‌نویس",
-    savedForms: "فرم‌های ذخیره‌شده",
-    noSavedForms: "هنوز فرم نام‌داری ذخیره نشده است.",
-    loadingForms: "در حال بارگذاری فرم‌ها…",
-    storageUnavailable: "فضای ذخیره مرورگر در دسترس نیست. همچنان می‌توانید در حافظه فرم بسازید.",
-    unknownForm: "این فرم ذخیره‌شده پیدا نشد.",
-    noSavedDraft: "پیش از بازکردن این صفحه، پیش‌نویس فعلی را ذخیره کنید.",
-    loadForm: "بارگذاری",
-    updated: "به‌روزرسانی",
-    formHomeTitle: "فرم‌سازی با سیستم طراحی JB",
-    formHomeDescription: "فیلدهای دسترس‌پذیر JB را بچینید، JSON را تنظیم کنید و نتیجه ذخیره‌شده را ببینید.",
-    editorReady: "ویرایش فرم",
-    phaseOne: "فاز اول",
-    selected: "انتخاب‌شده",
-    fields: "فیلد",
-    field: "فیلد",
-    loading: "در حال بارگذاری فرم‌ساز",
-    loadingModal: "در حال بارگذاری پنجره…",
-    retry: "تلاش دوباره",
-  },
+  en: Object.assign({}, ...formTranslationModules.map(module => module.en)),
+  fa: Object.assign({}, ...formTranslationModules.map(module => module.fa)),
 } as const;
 
-export type FormMessageKey = keyof (typeof formAppDictionarySource)["en"];
+export type FormMessageKey = Extract<keyof (typeof formAppDictionarySource)["en"], string>;
 export type FormMessages = Record<FormMessageKey, string>;
 export const formAppMessages: Record<FormAppLocale, FormMessages> = formAppDictionarySource;
 
 const formMessageKeys = Object.keys(formAppDictionarySource.en) as FormMessageKey[];
 
-/**
- * The form application routes are client-only islands, so this adapter follows
- * the documented JB pattern and owns one long-lived dictionary instance.
- *
- * The framework-independent renderer has a separate lazy i18n boundary because
- * its module must remain safe to evaluate while preparing for future SSR.
- */
-export const formAppDictionary = new JBDictionary<FormMessages>(formAppDictionarySource);
+export const formAppI18n = i18next.createInstance();
 
-function resolveFormMessages(dictionary: JBDictionary<FormMessages>, i18n: JBI18N): FormMessages {
-  return Object.fromEntries(formMessageKeys.map(key => [key, dictionary.get(i18n, key)])) as FormMessages;
+void formAppI18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: formAppDictionarySource.en },
+    fa: { translation: formAppDictionarySource.fa },
+  },
+  lng: readStoredFormAppLocale("en"),
+  fallbackLng: "en",
+  supportedLngs: ["en", "fa"],
+  interpolation: { escapeValue: false },
+  initAsync: false,
+});
+
+function resolveFormMessages(t: TFunction): FormMessages {
+  return Object.fromEntries(formMessageKeys.map(key => [key, t(key)])) as FormMessages;
 }
 
 export function getStorageIssueMessage(messages: FormMessages, issue: StorageIssue | null): string {
@@ -409,7 +122,7 @@ function persistFormAppLocale(locale: FormAppLocale): void {
   }
 }
 
-function configureJBI18n(locale: FormAppLocale): FormMessages {
+function configureJBI18n(locale: FormAppLocale): void {
   const direction = localeDirection(locale);
 
   document.documentElement.lang = locale;
@@ -417,31 +130,28 @@ function configureJBI18n(locale: FormAppLocale): FormMessages {
   // jb-core resolves the calendar, region, and numbering-system defaults.
   // Passing the locale string also ensures every locale-aware JB component,
   // including jb-range-input, receives the same canonical configuration.
-  i18n.setLocale(locale);
-
-  return resolveFormMessages(formAppDictionary, i18n);
+  jbI18n.setLocale(locale);
 }
 
 export function useFormLocale(initialLocale: FormAppLocale = "en") {
-  const [locale, setLocaleState] = useState<FormAppLocale>(() => readStoredFormAppLocale(initialLocale));
-  const [messages, setMessages] = useState<FormMessages>(() => formAppMessages[locale]);
+  const { t, i18n } = useTranslation(undefined, { i18n: formAppI18n });
+  const locale = (i18n.resolvedLanguage === "fa" ? "fa" : "en") satisfies FormAppLocale;
+  const messages = useMemo(() => resolveFormMessages(t), [t, locale]);
 
   const setLocale = useCallback((nextLocale: FormAppLocale) => {
     persistFormAppLocale(nextLocale);
-    setLocaleState(nextLocale);
-  }, []);
+    void i18n.changeLanguage(nextLocale);
+  }, [i18n]);
 
   useEffect(() => {
-    setMessages(configureJBI18n(locale));
+    configureJBI18n(locale);
   }, [locale]);
-
-  const t = useCallback((key: FormMessageKey) => messages[key], [messages]);
 
   return {
     locale,
     direction: localeDirection(locale),
     setLocale,
     messages,
-    t,
+    t: (key: FormMessageKey) => t(key),
   };
 }

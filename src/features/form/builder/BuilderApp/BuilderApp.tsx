@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getCurrentFormRoute } from "../../application/form-route";
 import { useFormLocale } from "../../i18n/locale-adapter";
@@ -17,20 +17,12 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
-  const { direction, setLocale, messages } = useFormLocale("en");
+  const { direction, messages } = useFormLocale("en");
   const route = getCurrentFormRoute();
   const actions = useBuilderAppActions();
 
   useBuilderLifecycle(route.slug);
   useHistoryShortcuts();
-
-  useEffect(() => {
-    if (store.status === "loading" || store.status === "load-error") return;
-    // The selected form-content locale is also the builder UI locale. The UI
-    // currently has English and Persian dictionaries; other form locales use
-    // the English interface while their content remains editable as selected.
-    setLocale(store.editingLocale.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
-  }, [setLocale, store.editingLocale, store.status]);
 
   if (store.status === "loading" || store.status === "load-error") {
     return <BuilderStatusScreen messages={messages} slug={route.slug} />;

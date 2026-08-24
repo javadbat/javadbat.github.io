@@ -1,4 +1,7 @@
-import "@mantine/core/styles.css";
+import "@mantine/core/styles/ActionIcon.css";
+import "@mantine/core/styles/ScrollArea.css";
+import "@mantine/core/styles/Tooltip.css";
+import "@mantine/core/styles/UnstyledButton.css";
 import "@mantine/code-highlight/styles.css";
 
 import { CodeHighlight, CodeHighlightAdapterProvider, createShikiAdapter, type CodeHighlightStylesNames } from "@mantine/code-highlight";
@@ -49,20 +52,26 @@ const codeHighlightClasses = {
  */
 export const CodeViewer = memo(function CodeViewer({ code, language, copyLabel = "Copy", copiedLabel = "Copied", ariaLabel }: CodeViewerProps) {
   return (
-    <MantineProvider forceColorScheme="light">
-      <CodeHighlightAdapterProvider adapter={shikiAdapter}>
-{        <CodeHighlight
-          aria-label={ariaLabel}
-          classNames={codeHighlightClasses}
-          code={code}
-          language={language}
-          codeColorScheme="light"
-          copyLabel={copyLabel}
-          copiedLabel={copiedLabel}
-
-          withBorder
-        />}
-      </CodeHighlightAdapterProvider>
+    <MantineProvider
+      cssVariablesSelector={`.${styles.scope}`}
+      deduplicateCssVariables={false}
+      getRootElement={() => undefined}
+      withGlobalClasses={false}
+    >
+      <div className={styles.scope} data-mantine-color-scheme="light">
+        <CodeHighlightAdapterProvider adapter={shikiAdapter}>
+          <CodeHighlight
+            aria-label={ariaLabel}
+            classNames={codeHighlightClasses}
+            code={code}
+            language={language}
+            codeColorScheme="light"
+            copyLabel={copyLabel}
+            copiedLabel={copiedLabel}
+            withBorder
+          />
+        </CodeHighlightAdapterProvider>
+      </div>
     </MantineProvider>
   );
 });

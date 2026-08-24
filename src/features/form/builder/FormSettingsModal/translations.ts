@@ -1,0 +1,38 @@
+export const formSettingsModalTranslations = {
+  en: {
+    "saveAs": "Save As",
+    "slug": "Form slug",
+    "slugPreview": "Saved URL slug",
+    "slugOptional": "Optional. Leave empty to save only the current working draft.",
+    "slugInvalid": "Use an English route-safe slug.",
+    "unnamedDraft": "Not saved as a named form",
+    "defaultLocale": "Default form language",
+    "supportedLocales": "Supported form languages",
+    "addLocale": "Add language",
+    "removeLocale": "Remove",
+    "direction": "Direction",
+    "ltr": "LTR",
+    "rtl": "RTL",
+    "localeCodeHint": "Use a BCP 47 code such as de or ar-EG.",
+    "localeInvalid": "Enter a valid BCP 47 language code.",
+    "localeAlreadyAdded": "That language is already supported."
+  },
+  fa: {
+    "saveAs": "ذخیره به‌عنوان",
+    "slug": "شناسه نشانی فرم",
+    "slugPreview": "شناسه نشانی ذخیره‌شده",
+    "slugOptional": "اختیاری است. برای ذخیره فقط به‌عنوان پیش‌نویس فعلی، خالی بگذارید.",
+    "slugInvalid": "یک شناسه انگلیسی مناسب نشانی وارد کنید.",
+    "unnamedDraft": "به‌عنوان فرم نام‌دار ذخیره نشده",
+    "defaultLocale": "زبان پیش‌فرض فرم",
+    "supportedLocales": "زبان‌های پشتیبانی‌شده فرم",
+    "addLocale": "افزودن زبان",
+    "removeLocale": "حذف",
+    "direction": "جهت",
+    "ltr": "چپ به راست",
+    "rtl": "راست به چپ",
+    "localeCodeHint": "کد BCP 47 مانند de یا ar-EG را وارد کنید.",
+    "localeInvalid": "یک کد زبان معتبر BCP 47 وارد کنید.",
+    "localeAlreadyAdded": "این زبان قبلاً اضافه شده است."
+  },
+} as const;

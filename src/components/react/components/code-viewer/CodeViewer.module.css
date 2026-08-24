@@ -1,3 +1,7 @@
+.scope {
+  min-block-size: 0;
+}
+
 .viewer {
   --code-viewer-ink: oklch(0.3 0.035 255);
   --code-viewer-muted: oklch(0.56 0.025 255);
@@ -55,4 +59,3 @@
   color: var(--code-viewer-accent);
   background: oklch(1 0 0);
 }
-
