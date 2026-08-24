@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
 import { autorun } from "mobx";
 import { describe, expect, it, vi } from "vitest";
@@ -13,6 +13,7 @@ import { BuilderStoreProvider } from "./BuilderStoreContext";
 import { CATALOG_DRAG_TYPE } from "../builder-drag";
 import { FormCanvas } from "../FormCanvas/FormCanvas";
 import { PropertyField } from "../ConfigurationPanel/PropertyField";
+import { CommonFieldsEditor } from "../ConfigurationPanel/CommonFieldsEditor";
 
 // Happy DOM lacks the ElementInternals API used by jb-tooltip. Real supported
 // browsers provide it; this shim keeps these component tests on the real UI path.
@@ -25,6 +26,9 @@ if (typeof HTMLElement.prototype.attachInternals !== "function") {
       setFormValue: () => undefined,
       setValidity: () => undefined,
     }) as unknown as ElementInternals;
+}
+if (typeof Element.prototype.animate !== "function") {
+  Element.prototype.animate = () => ({ cancel: () => undefined }) as Animation;
 }
 
 function createDataTransfer(): DataTransfer {
@@ -99,6 +103,62 @@ describe("Builder shell performance baseline", () => {
 });
 
 describe("Builder core editing", () => {
+  it("keeps a required name empty while editing and restores it on blur", () => {
+    const store = new BuilderStore();
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    store.addElement(inputEntry);
+    const originalName = store.selectedElement!.name;
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={inputEntry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
+
+    fireEvent.input(nameInput, { target: { value: "" } });
+    expect(store.selectedElement?.name).toBe("");
+
+    fireEvent.blur(nameInput, { target: { value: "" } });
+    expect(store.selectedElement?.name).toBe(originalName);
+  });
+
+  it("uses the field's built-in error UI for invalid English-only names", () => {
+    const store = new BuilderStore();
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    store.addElement(inputEntry);
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={inputEntry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+      </BuilderStoreProvider>,
+    );
+    const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
+
+    fireEvent.input(nameInput, { target: { value: "سیب" } });
+
+    expect(store.getElementNameError(store.selectedElement!.id)).toBe("invalid");
+    expect(nameInput.getAttribute("error")).toContain("حرف انگلیسی");
+    expect(view.container.querySelector('[id^="element-name-error-"]')).toBeNull();
+  });
+
+  it("keeps an explicitly cleared optional localized field empty", () => {
+    const store = new BuilderStore();
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    store.addElement(inputEntry);
+    store.updateSelectedText("label", "English label", "en");
+    store.updateSelectedText("label", "برچسب فارسی", "fa");
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={inputEntry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+      </BuilderStoreProvider>,
+    );
+    const labelInput = view.container.querySelector<HTMLElement>('jb-input[name="elementLabel"]')!;
+
+    fireEvent.input(labelInput, { target: { value: "" } });
+
+    expect(store.selectedElement?.label).toEqual({ translations: { en: "English label", fa: "" } });
+    expect((labelInput as unknown as { value: string }).value).toBe("");
+  });
+
   it("edits static text content with jb-textarea", () => {
     const store = new BuilderStore();
     const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
@@ -346,13 +406,16 @@ describe("Builder core editing", () => {
     expect(canvasHandle).toBeTruthy();
     expect(canvasHandle?.hasAttribute("draggable")).toBe(true);
     expect(firstInsertionTarget).toBeTruthy();
+    expect(firstInsertionTarget?.textContent).toContain("Drop here");
     fireEvent.dragStart(canvasHandle!, { dataTransfer: canvasTransfer });
+    expect(document.body.dataset.formBuilderDragging).toBe("true");
     fireEvent.dragOver(firstInsertionTarget!, {
       dataTransfer: canvasTransfer,
     });
     fireEvent.drop(firstInsertionTarget!, { dataTransfer: canvasTransfer });
 
     expect(store.document.elements.map(element => element.id)).toEqual([secondId, firstId]);
+    expect(document.body.dataset.formBuilderDragging).toBeUndefined();
   });
 
   it("reorders selected fields through explicit touch-safe controls", () => {
@@ -390,6 +453,29 @@ describe("Builder core editing", () => {
     expect(onSelectElement).toHaveBeenCalledWith(firstId);
   });
 
+  it("shows card actions when a field inside a tab is selected", () => {
+    const store = new BuilderStore();
+    const tabEntry = formElementRegistry.find(entry => entry.type === "jb-tab")!;
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    store.addElement(tabEntry);
+    const tabElement = store.selectedElement;
+    if (!tabElement || tabElement.type !== "jb-tab") throw new Error("Expected a selected tab container.");
+    const childId = store.addElementToTab(tabElement.id, tabElement.tabs[0].id, inputEntry);
+    if (!childId) throw new Error("Expected a child element to be added to the tab.");
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+
+    fireEvent.click(view.container.querySelector<HTMLElement>(`#element-select-${childId}`)!);
+
+    const childCard = view.container.querySelector<HTMLElement>(`#element-card-${childId}`)!;
+    expect(store.selectedElementId).toBe(childId);
+    expect(childCard.dataset.selected).toBe("true");
+    expect(childCard.querySelector("jb-button[aria-label='Configure']")).toBeTruthy();
+  });
+
   it("opens form-name settings when the canvas title is clicked", () => {
     const store = new BuilderStore();
     const onOpenFormNameSettings = vi.fn();
@@ -402,6 +488,32 @@ describe("Builder core editing", () => {
     fireEvent.click(view.container.querySelector<HTMLElement>("#form-canvas-title button")!);
 
     expect(onOpenFormNameSettings).toHaveBeenCalledOnce();
+  });
+
+  it("focuses and scrolls to a tab's properties row when its canvas tab is clicked", async () => {
+    const store = new BuilderStore();
+    const tabEntry = formElementRegistry.find(entry => entry.type === "jb-tab")!;
+    store.addElement(tabEntry);
+    const tabElement = store.selectedElement;
+    if (!tabElement || tabElement.type !== "jb-tab") throw new Error("Expected a selected tab container.");
+    const targetTab = tabElement.tabs[1];
+
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppMessages.en} />
+        <section id={`tab-editor-${targetTab.id}`} tabIndex={-1} />
+      </BuilderStoreProvider>,
+    );
+    const editorRow = view.container.querySelector<HTMLElement>(`#tab-editor-${targetTab.id}`)!;
+    editorRow.scrollIntoView = vi.fn();
+    const canvasTabs = view.container.querySelectorAll<HTMLElement>("[role='tab']");
+
+    fireEvent.click(canvasTabs[1]);
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(editorRow);
+      expect(editorRow.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    });
   });
 });
 

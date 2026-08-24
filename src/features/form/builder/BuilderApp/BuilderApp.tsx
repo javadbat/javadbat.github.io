@@ -6,12 +6,13 @@ import { BuilderHeader } from "../BuilderHeader/BuilderHeader";
 import { BuilderStatusScreen } from "../BuilderStatusScreen/BuilderStatusScreen";
 import { BuilderStoreProvider, useBuilderStore } from "../store/BuilderStoreContext";
 import { BuilderWorkspace } from "../BuilderWorkspace/BuilderWorkspace";
-import { FormSettingsModal } from "../FormSettingsModal/FormSettingsModal";
-import { ImportJsonModal } from "../ImportJsonModal/ImportJsonModal";
+import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { useBuilderLifecycle } from "../useBuilderLifecycle";
 import { useBuilderAppActions, useHistoryShortcuts } from "./useBuilderAppActions";
 import styles from "./BuilderApp.module.css";
 
+const FormSettingsModal = lazy(() => import("../FormSettingsModal/FormSettingsModal").then(module => ({ default: module.FormSettingsModal })));
+const ImportJsonModal = lazy(() => import("../ImportJsonModal/ImportJsonModal").then(module => ({ default: module.ImportJsonModal })));
 const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").then(module => ({ default: module.ExportJsonModal })));
 
 const BuilderAppContent = observer(function BuilderAppContent() {
@@ -24,11 +25,12 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   useHistoryShortcuts();
 
   useEffect(() => {
+    if (store.status === "loading" || store.status === "load-error") return;
     // The selected form-content locale is also the builder UI locale. The UI
     // currently has English and Persian dictionaries; other form locales use
     // the English interface while their content remains editable as selected.
     setLocale(store.editingLocale.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
-  }, [setLocale, store.editingLocale]);
+  }, [setLocale, store.editingLocale, store.status]);
 
   if (store.status === "loading" || store.status === "load-error") {
     return <BuilderStatusScreen messages={messages} slug={route.slug} />;
@@ -47,11 +49,19 @@ const BuilderAppContent = observer(function BuilderAppContent() {
       />
       <BuilderWorkspace messages={messages} onOpenFormNameSettings={actions.openSettingsForFormName} />
 
-      <FormSettingsModal isOpen={actions.settingsOpen} focusFormName={actions.focusFormName} messages={messages} onClose={actions.closeSettings} />
-      <ImportJsonModal isOpen={actions.importOpen} messages={messages} onClose={actions.closeImport} />
+      {actions.settingsOpen ? (
+        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+          <FormSettingsModal isOpen focusFormName={actions.focusFormName} messages={messages} onClose={actions.closeSettings} />
+        </Suspense>
+      ) : null}
+      {actions.importOpen ? (
+        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+          <ImportJsonModal isOpen messages={messages} onClose={actions.closeImport} />
+        </Suspense>
+      ) : null}
       {actions.exportDocument ? (
-        <Suspense fallback={null}>
-          <ExportJsonModal document={actions.exportDocument} messages={messages} onClose={actions.closeExport} />
+        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+          <ExportJsonModal document={actions.exportDocument} isOpen={actions.exportOpen} messages={messages} onClose={actions.closeExport} />
         </Suspense>
       ) : null}
     </div>

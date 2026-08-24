@@ -25,6 +25,33 @@ describe("BuilderElementStore", () => {
     expect(elements.select("missing-id")).toBe(false);
   });
 
+  it("creates new element defaults in the form default locale", () => {
+    const document = createEmptyFormDocument();
+    document.localization = { defaultLocale: "fa", locales: { fa: { direction: "rtl" } } };
+    const elements = new BuilderElementStore(new BuilderDraftStore(document));
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    const buttonEntry = formElementRegistry.find(entry => entry.type === "jb-button")!;
+
+    elements.add(inputEntry);
+    expect(elements.selected?.label?.translations).toEqual({ fa: "ورودی متن" });
+    expect(elements.selected?.placeholder?.translations).toEqual({ fa: "ورودی متن را وارد کنید" });
+
+    elements.add(buttonEntry);
+    expect(elements.selected?.props.content).toEqual({ translations: { fa: "ارسال" } });
+    expect(elements.selected?.props.loadingText).toEqual({ translations: { fa: "لطفاً صبر کنید" } });
+  });
+
+  it("creates localized component defaults for every supported locale", () => {
+    const document = createEmptyFormDocument();
+    document.localization.locales.fa = { direction: "rtl" };
+    const elements = new BuilderElementStore(new BuilderDraftStore(document));
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+
+    elements.add(textEntry);
+
+    expect((elements.selected?.props.content as { translations: Record<string, string> }).translations).toEqual({ en: "Text", fa: "متن" });
+  });
+
   it("updates the selected element and its component properties", () => {
     const { elements } = createStores();
     elements.add(formElementRegistry[0]);

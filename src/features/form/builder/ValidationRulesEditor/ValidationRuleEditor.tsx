@@ -17,6 +17,11 @@ interface ValidationRuleEditorProps {
 }
 const inputValue = (event: Event) => String((event.target as unknown as { value?: unknown }).value ?? "");
 const updateMessage = (message: LocalizedText, locale: string, value: string): LocalizedText => ({ translations: { ...message.translations, [locale]: value } });
+const regexBuilderUrl = "https://regex101.com/?flavor=javascript";
+
+function regexHelpMessage(messages: FormMessages): string {
+  return `${messages.regexHelp} <a href="${regexBuilderUrl}" target="_blank" rel="noopener noreferrer">${messages.openRegexBuilder}</a>`;
+}
 
 export const ValidationRuleEditor = observer(function ValidationRuleEditor({ rule, index, locale, messages, supportedRules }: ValidationRuleEditorProps) {
   const store = useBuilderStore();
@@ -37,6 +42,7 @@ export const ValidationRuleEditor = observer(function ValidationRuleEditor({ rul
             name={`validation-source-${rule.id}`}
             label={messages.patternSource}
             value={rule.params.source}
+            message={regexHelpMessage(messages)}
             onInput={event => commit({ ...rule, params: { ...rule.params, source: inputValue(event as unknown as Event) } })}
           />
           <JBInput

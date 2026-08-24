@@ -81,18 +81,6 @@
   inline-size: 100%;
 }
 
-.fieldWithError {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.fieldError {
-  margin: 0;
-  color: oklch(0.5 0.18 28);
-  font-size: 0.7rem;
-  line-height: 1.45;
-}
-
 .checkboxGroup {
   display: grid;
   gap: 0.75rem;
@@ -150,6 +138,11 @@
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
   background: oklch(0.985 0.006 255);
+}
+
+.tabEditorRow:focus-visible {
+  outline: 0.125rem solid var(--form-accent);
+  outline-offset: 0.125rem;
 }
 
 .tabEditorHeading,

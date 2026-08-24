@@ -13,7 +13,7 @@ import {
   type JBValidationRule,
   type JSONValue,
 } from "../../domain/form-document";
-import { createDefaultElement, type FormElementRegistryEntry } from "../../registry/form-element-registry";
+import { addMissingElementDefaultTranslations, createDefaultElement, type FormElementRegistryEntry } from "../../registry/form-element-registry";
 import { createValidationRule, type ValidationRuleName } from "../../registry/validation-rule-registry";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 
@@ -52,7 +52,7 @@ export class BuilderElementStore {
   }
 
   add(entry: FormElementRegistryEntry, insertionIndex = this.draft.document.elements.length): string {
-    const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName));
+    const element = this.createElement(entry);
     const index = Math.max(0, Math.min(insertionIndex, this.draft.document.elements.length));
     this.draft.document.elements.splice(index, 0, element);
     this.selectedElementId = element.id;
@@ -64,7 +64,7 @@ export class BuilderElementStore {
     if (entry.isContainer) return null;
     const tab = this.getTab(containerId, tabId);
     if (!tab) return null;
-    const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName));
+    const element = this.createElement(entry);
     if (isContainerElement(element)) return null;
     const index = Math.max(0, Math.min(insertionIndex ?? tab.children.length, tab.children.length));
     tab.children.splice(index, 0, element);
@@ -77,13 +77,22 @@ export class BuilderElementStore {
     if (entry.isContainer) return null;
     const container = this.getConditionContainer(containerId);
     if (!container) return null;
-    const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName));
+    const element = this.createElement(entry);
     if (isContainerElement(element)) return null;
     const index = Math.max(0, Math.min(insertionIndex ?? container.children.length, container.children.length));
     container.children.splice(index, 0, element);
     this.selectedElementId = element.id;
     this.draft.markChanged();
     return element.id;
+  }
+
+  private createElement(entry: FormElementRegistryEntry): JBFormElementV1 {
+    const defaultLocale = this.draft.document.localization.defaultLocale;
+    const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName), defaultLocale);
+    for (const locale of Object.keys(this.draft.document.localization.locales)) {
+      if (locale !== defaultLocale) addMissingElementDefaultTranslations(element, defaultLocale, locale);
+    }
+    return element;
   }
 
   addTab(containerId: string): string | null {
@@ -93,7 +102,9 @@ export class BuilderElementStore {
     let suffix = container.tabs.length + 1;
     while (values.has(`tab_${suffix}`)) suffix += 1;
     const id = crypto.randomUUID();
-    container.tabs.push({ id, value: `tab_${suffix}`, label: { translations: { en: `Tab ${suffix}` } }, disabled: false, children: [] });
+    const locale = this.draft.document.localization.defaultLocale;
+    const label = locale.toLowerCase().split("-")[0] === "fa" ? `تب ${suffix}` : `Tab ${suffix}`;
+    container.tabs.push({ id, value: `tab_${suffix}`, label: { translations: { [locale]: label } }, disabled: false, children: [] });
     this.draft.markChanged();
     return id;
   }

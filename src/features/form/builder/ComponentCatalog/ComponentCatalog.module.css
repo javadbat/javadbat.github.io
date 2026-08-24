@@ -125,6 +125,27 @@
   cursor: grabbing;
 }
 
+.dragPreview {
+  position: fixed !important;
+  inset-block-start: -1000rem;
+  inset-inline-start: -1000rem;
+  z-index: 10000;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-block-size: 4rem;
+  padding: 0.65rem 0.8rem;
+  border: 0.0625rem solid color-mix(in oklch, var(--form-accent) 42%, transparent);
+  background: var(--form-surface);
+  box-shadow: var(--shadow-float);
+  pointer-events: none;
+  opacity: 0.96;
+  transform: rotate(-0.75deg);
+}
+
+.dragPreview .iconTile {
+  color: var(--form-accent);
+  background: var(--form-accent-soft);
+}
+
 .iconTile {
   display: inline-grid;
   place-items: center;
@@ -195,4 +216,3 @@
       transition: none;
     }
    }
-

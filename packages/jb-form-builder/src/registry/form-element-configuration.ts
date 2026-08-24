@@ -42,6 +42,8 @@ export interface FormElementConfiguration {
 
 const label = (en: string, fa: string): PropertyLabel => ({ en, fa });
 
+const localizedDefault = (en: string, fa: string): JSONValue => ({ translations: { en, fa } });
+
 const textProperty = (key: string, en: string, fa: string, localized = false): FormElementPropertyDefinition => ({
   key,
   label: label(en, fa),
@@ -119,7 +121,7 @@ const inputTypeOptions = [
 ] as const;
 
 const inputProperties = [
-  textProperty("message", "Helper message", "پیام راهنما", true),
+  textProperty("message", "Helper message", " (زیر کادر)پیام راهنما", true),
   selectProperty("size", "Size", "اندازه", sizeOptions),
   selectProperty(
     "type",
@@ -190,7 +192,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
     "string",
     {
-      content: { translations: { en: "Text" } },
+      content: localizedDefault("Text", "متن"),
       color: "#243247",
       fontSize: 1,
       fontWeight: "normal",
@@ -220,7 +222,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "string",
     {
       url: "",
-      alt: { translations: { en: "" } },
+      alt: localizedDefault("", ""),
       size: "full",
       containerType: "plain",
       aspectRatio: "auto",
@@ -282,7 +284,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       size: "md",
       nullable: false,
       defaultValue: "tab_1",
-      ariaLabel: { translations: { en: "Form sections" } },
+      ariaLabel: localizedDefault("Form sections", "بخش‌های فرم"),
     },
     [
       selectProperty("orientation", "Orientation", "جهت", [
@@ -461,7 +463,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
         {
           id: "option_1",
           value: "option_1",
-          label: { translations: { en: "Option 1" } },
+          label: localizedDefault("Option 1", "گزینه ۱"),
           disabled: false,
         },
       ],
@@ -496,7 +498,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
         {
           id: "option_1",
           value: "option_1",
-          label: { translations: { en: "Option 1" } },
+          label: localizedDefault("Option 1", "گزینه ۱"),
           disabled: false,
         },
       ],
@@ -538,7 +540,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       placeholder: false,
     },
     "string",
-    { acceptTypes: [], placeholderTitle: { translations: { en: "Choose a file" } } },
+    { acceptTypes: [], placeholderTitle: localizedDefault("Choose a file", "انتخاب فایل") },
     [stringListProperty("acceptTypes", "Accepted file types", "نوع فایل‌های مجاز"), textProperty("placeholderTitle", "Placeholder title", "عنوان جای‌نگهدار", true)],
   ),
   "jb-image-input": configuration(
@@ -567,13 +569,13 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     },
     "string",
     {
-      content: { translations: { en: "Submit" } },
+      content: localizedDefault("Submit", "ارسال"),
       type: "submit",
       color: "primary",
       variant: "solid",
       size: "md",
       isLoading: false,
-      loadingText: { translations: { en: "Please wait" } },
+      loadingText: localizedDefault("Please wait", "لطفاً صبر کنید"),
       square: false,
     },
     [

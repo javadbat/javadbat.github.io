@@ -4,6 +4,7 @@ import { JBTextarea } from "jb-textarea/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { prepareFormImport } from "../../import/form-import";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import modalStyles from "../../shell/FormModal.module.css";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./ImportJsonModal.module.css";
 import {JBModal} from 'jb-modal/react'
@@ -50,7 +51,7 @@ export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalPr
   };
 
   return (
-    <JBModal isOpen={isOpen} label={messages.importJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.importJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.portableFormDocument}</p>

@@ -30,7 +30,7 @@ export const validationRuleDefinitions: readonly ValidationRuleDefinition[] = [
   },
   {
     rule: "pattern",
-    label: { en: "Regular expression", fa: "عبارت منظم" },
+    label: { en: "Regular expression", fa: "Regex الگو" },
     defaultMessage: {
       en: "Use the required format.",
       fa: "از قالب موردنیاز استفاده کنید.",

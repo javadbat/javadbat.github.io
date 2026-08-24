@@ -37,6 +37,50 @@ describe("BuilderLocalizationStore", () => {
     expect(draft.isDirty).toBe(true);
   });
 
+  it("adds translated Farsi text for untouched built-in field defaults", () => {
+    const document = createEmptyFormDocument();
+    const draft = new BuilderDraftStore(document);
+    const elements = new BuilderElementStore(draft);
+    const localization = new BuilderLocalizationStore(draft, elements, new MemoryLocalePreferences());
+    const passwordEntry = formElementRegistry.find(entry => entry.type === "jb-password-input")!;
+
+    elements.add(passwordEntry);
+    localization.setFormLocalization({
+      defaultLocale: "en",
+      locales: { en: { direction: "ltr" }, fa: { direction: "rtl" } },
+    });
+
+    expect(elements.selected?.label?.translations).toEqual({ en: "Password input", fa: "ورودی رمز عبور" });
+    expect(elements.selected?.placeholder?.translations).toEqual({ en: "Enter password input", fa: "ورودی رمز عبور را وارد کنید" });
+
+    localization.setFormLocalization({ defaultLocale: "en", locales: { en: { direction: "ltr" } } });
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    elements.add(textEntry);
+    localization.setFormLocalization({
+      defaultLocale: "en",
+      locales: { en: { direction: "ltr" }, fa: { direction: "rtl" } },
+    });
+
+    expect((elements.selected?.props.content as { translations: Record<string, string> }).translations).toEqual({ en: "Text", fa: "متن" });
+  });
+
+  it("does not translate user-authored field text when adding Farsi", () => {
+    const document = createEmptyFormDocument();
+    const draft = new BuilderDraftStore(document);
+    const elements = new BuilderElementStore(draft);
+    const localization = new BuilderLocalizationStore(draft, elements, new MemoryLocalePreferences());
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+
+    elements.add(inputEntry);
+    localization.updateSelectedText("label", "Account name", "en");
+    localization.setFormLocalization({
+      defaultLocale: "en",
+      locales: { en: { direction: "ltr" }, fa: { direction: "rtl" } },
+    });
+
+    expect(elements.selected?.label?.translations).toEqual({ en: "Account name" });
+  });
+
   it("prunes translations when supported locales are removed", () => {
     const draft = new BuilderDraftStore(createEmptyFormDocument());
     const elements = new BuilderElementStore(draft);

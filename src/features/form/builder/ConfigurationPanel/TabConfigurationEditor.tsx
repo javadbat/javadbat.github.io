@@ -43,7 +43,13 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
           {element.tabs.map((tab, index) => {
             const valueIsDuplicate = element.tabs.some((candidate, candidateIndex) => candidateIndex !== index && candidate.value === tab.value);
             return (
-              <section className={styles.tabEditorRow} key={tab.id} aria-label={`${copy(locale, "Tab", "تب")} ${index + 1}`}>
+              <section
+                id={`tab-editor-${tab.id}`}
+                className={styles.tabEditorRow}
+                key={tab.id}
+                tabIndex={-1}
+                aria-label={`${copy(locale, "Tab", "تب")} ${index + 1}`}
+              >
                 <div className={styles.tabEditorHeading}>
                   <strong>{getLocalizedText(tab.label, locale, defaultLocale) || `${copy(locale, "Tab", "تب")} ${index + 1}`}</strong>
                   <div>

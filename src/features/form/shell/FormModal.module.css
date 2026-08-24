@@ -1,0 +1,70 @@
+.formModal {
+  --form-modal-animation-duration: 300ms;
+  transition: display var(--form-modal-animation-duration) allow-discrete;
+}
+
+.modalLoading {
+  display: grid;
+  grid-template-rows: auto auto;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  inline-size: min(26rem, calc(100vw - 3rem));
+  min-block-size: 14rem;
+  padding: 2rem;
+  color: var(--form-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.modalLoading :global(jb-loading) {
+  --jb-loading-width: 2.75rem;
+  --jb-loading-height: 2.75rem;
+  --jb-loading-color: var(--form-accent);
+}
+
+@media (min-width: 48.0625rem) {
+  .formModal::part(background) {
+    opacity: 0;
+    backdrop-filter: blur(10px) contrast(1.35);
+    transition: opacity var(--form-modal-animation-duration) ease;
+    will-change: opacity;
+  }
+
+  .formModal:state(open)::part(background) {
+    opacity: 1;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  .formModal::part(content-box) {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.8);
+    transition:
+      opacity var(--form-modal-animation-duration) ease,
+      transform var(--form-modal-animation-duration)
+        cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  .formModal:state(open)::part(content-box) {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(0.75rem) scale(0.98);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formModal,
+  .formModal::part(background),
+  .formModal::part(content-box) {
+    transition: none;
+  }
+}

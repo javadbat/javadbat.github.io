@@ -4,12 +4,15 @@ import { formRouteHref } from "../../application/form-route";
 import type { BuilderNavigationTarget } from "../BuilderHeader/BuilderHeader";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
+const EXPORT_MODAL_EXIT_DURATION_MS = 300;
+
 export function useBuilderAppActions() {
   const store = useBuilderStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusFormName, setFocusFormName] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [exportDocument, setExportDocument] = useState<JBFormDocumentV1 | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const openSettings = useCallback(() => {
     setFocusFormName(false);
@@ -33,16 +36,29 @@ export function useBuilderAppActions() {
     },
     [openSettings, store],
   );
-  const openExport = useCallback(() => setExportDocument(store.createDocumentSnapshot()), [store]);
-  const closeExport = useCallback(() => setExportDocument(null), []);
+  const openExport = useCallback(() => {
+    setExportDocument(store.createDocumentSnapshot());
+    setExportOpen(true);
+  }, [store]);
+  const closeExport = useCallback(() => setExportOpen(false), []);
   const openImport = useCallback(() => setImportOpen(true), []);
   const closeImport = useCallback(() => setImportOpen(false), []);
+
+  useEffect(() => {
+    if (exportOpen || exportDocument === null) return;
+    const cleanupTimer = window.setTimeout(
+      () => setExportDocument(null),
+      EXPORT_MODAL_EXIT_DURATION_MS,
+    );
+    return () => window.clearTimeout(cleanupTimer);
+  }, [exportDocument, exportOpen]);
 
   return {
     settingsOpen,
     focusFormName,
     importOpen,
     exportDocument,
+    exportOpen,
     navigate,
     openSettings,
     openSettingsForFormName,

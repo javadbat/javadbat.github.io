@@ -44,12 +44,13 @@ export const SelectOptionsEditor = observer(function SelectOptionsEditor({ local
 
   const addOption = () => {
     const position = options.length + 1;
+    const optionLabel = locale.toLowerCase().split("-")[0] === "fa" ? `گزینه ${position}` : `Option ${position}`;
     commit([
       ...options,
       {
         id: crypto.randomUUID(),
         value: `option_${position}`,
-        label: { translations: { [locale]: `Option ${position}` } },
+        label: { translations: { [locale]: optionLabel } },
         disabled: false,
       },
     ]);

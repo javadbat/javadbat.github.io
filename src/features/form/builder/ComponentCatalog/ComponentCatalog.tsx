@@ -6,7 +6,7 @@ import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "../../registry/form-element-registry";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import styles from "./ComponentCatalog.module.css";
-import { CATALOG_DRAG_TYPE } from "../builder-drag";
+import { beginBuilderDrag, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import "jb-icons/search"
 interface ComponentCatalogProps {
   messages: FormMessages;
@@ -28,7 +28,9 @@ const CatalogRow = memo(function CatalogRow({ entry, displayName, addLabel, onAd
       onDragStart={(event: DragEvent<HTMLLIElement>) => {
         event.dataTransfer.effectAllowed = "copy";
         event.dataTransfer.setData(CATALOG_DRAG_TYPE, entry.type);
+        beginBuilderDrag(event.dataTransfer, event.currentTarget, styles.dragPreview, ["jb-button"]);
       }}
+      onDragEnd={endBuilderDrag}
     >
       <span className={styles.iconTile}>
         <CatalogIcon iconId={entry.iconId} />

@@ -2,12 +2,135 @@
   corner-shape: squircle;
 }
 
-.sectionDescription,
 .emptyRules {
   margin: 0;
   color: var(--form-muted);
   font-size: 0.7rem;
   line-height: 1.55;
+}
+
+.validationSummaryList {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.validationSummaryList li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  padding: 0.55rem 0.65rem;
+  border: 0.0625rem solid var(--form-inner-line);
+  border-radius: var(--form-radius-sm);
+  background: oklch(0.985 0.006 255);
+  font-size: 0.72rem;
+}
+
+.validationSummaryList span {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.validationSummaryList code {
+  overflow: hidden;
+  max-inline-size: 45%;
+  color: var(--form-muted);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manageButton {
+  inline-size: 100%;
+}
+
+.modalHeading h2,
+.modalIntro h3,
+.currentRulesHeading h3 {
+  margin: 0;
+}
+
+.modalHeading h2 {
+  margin-block-start: 0.25rem;
+  font-size: 1.25rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--form-accent);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modalContent {
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.34fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  box-sizing: border-box;
+  inline-size: min(68rem, calc(100vw - 3rem));
+  min-block-size: min(34rem, calc(100dvh - 10rem));
+  max-block-size: calc(100dvh - 3rem);
+  overflow-y: auto;
+}
+
+.modalIntro,
+.currentRules {
+  min-inline-size: 0;
+}
+
+.modalIntro {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem;
+  border: 0.0625rem solid var(--form-inner-line);
+  border-radius: var(--form-radius-md);
+  background: oklch(0.975 0.01 255);
+}
+
+.modalIntro h3,
+.currentRulesHeading h3 {
+  font-size: 0.9rem;
+}
+
+.modalIntro p {
+  margin: 0.4rem 0 0;
+  color: var(--form-muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.currentRules {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+}
+
+.currentRulesHeading {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.currentRulesHeading span {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.8rem;
+  block-size: 1.8rem;
+  border-radius: 999px;
+  color: var(--form-accent-strong);
+  background: var(--form-accent-soft);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .addValidationRule {
@@ -19,17 +142,45 @@
 
 .validationRuleList {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
 .validationRule {
   display: grid;
+  align-content: start;
   gap: 0.65rem;
-  padding: 0.75rem;
+  padding: 1rem;
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
   background: oklch(0.985 0.006 255);
   box-shadow: none;
+}
+
+.modalContent :global(jb-input),
+.modalContent :global(jb-select) {
+  inline-size: 100%;
+}
+
+.modalEmptyState {
+  display: grid;
+  place-items: center;
+  min-block-size: 12rem;
+  padding: 1.5rem;
+  border: 0.0625rem dashed var(--form-inner-line);
+  border-radius: var(--form-radius-md);
+  text-align: center;
+}
+
+.modalEmptyState p {
+  margin: 0;
+  color: var(--form-muted);
+  font-size: 0.78rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .validationRuleHeader {
@@ -59,10 +210,20 @@
   line-height: 1.45;
 }
 
+@media (max-width: 58rem) {
+  .modalContent {
+    grid-template-columns: minmax(0, 1fr);
+    inline-size: calc(100vw - 1.5rem);
+  }
+
+  .validationRuleList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 30rem) {
   .validationParameterGrid,
   .addValidationRule {
       grid-template-columns: minmax(0, 1fr);
     }
    }
-

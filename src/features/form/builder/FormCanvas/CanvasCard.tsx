@@ -6,7 +6,7 @@ import type { JBFormElementV1 } from "../../domain/form-document";
 import { getLocalizedText, isContainerElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE } from "../builder-drag";
+import { beginBuilderDrag, CANVAS_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./FormCanvas.module.css";
 
@@ -110,7 +110,10 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
         onDragStart={event => {
           event.dataTransfer.effectAllowed = "move";
           event.dataTransfer.setData(CANVAS_DRAG_TYPE, element.id);
+          const card = event.currentTarget.closest<HTMLElement>(`#element-card-${element.id}`);
+          if (card) beginBuilderDrag(event.dataTransfer, card, styles.dragPreview, [`.${styles.dragHandle}`, `.${styles.cardActions}`]);
         }}
+        onDragEnd={endBuilderDrag}
       >
         <CatalogIcon iconId="drag" />
       </JBButton>

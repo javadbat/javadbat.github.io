@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { canonicalizeLocaleCode, getLocalizedText, inferLocaleDirection, isContainerElement, type FormLocalization, type JSONValue } from "../../domain/form-document";
+import { addMissingElementDefaultTranslations } from "../../registry/form-element-registry";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 import type { BuilderElementStore } from "./BuilderElementStore";
 import { builderLocalePreferences, type BuilderLocalePreferences } from "./BuilderLocalePreferences";
@@ -72,10 +73,18 @@ export class BuilderLocalizationStore {
 
   setFormLocalization(localization: FormLocalization): void {
     const next = this.draft.snapshot();
+    const previousLocales = new Set(Object.keys(next.localization.locales));
+    const sourceLocale = next.localization.defaultLocale;
     next.localization = {
       defaultLocale: localization.defaultLocale,
       locales: Object.fromEntries(Object.entries(localization.locales).map(([locale, definition]) => [locale, { direction: definition.direction }])),
     };
+    for (const locale of Object.keys(next.localization.locales)) {
+      if (previousLocales.has(locale)) continue;
+      for (const element of next.elements) {
+        addMissingElementDefaultTranslations(element, sourceLocale, locale);
+      }
+    }
     pruneLocalizedTranslations(next as unknown as JSONValue, new Set(Object.keys(next.localization.locales)), next.localization.defaultLocale);
     this.draft.replaceForEdit(next);
     this.editingLocale = next.localization.locales[this.editingLocale] ? this.editingLocale : next.localization.defaultLocale;

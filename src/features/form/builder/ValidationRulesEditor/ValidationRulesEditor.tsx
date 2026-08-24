@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
-import { JBOption } from "jb-select/option/react";
-import { JBSelect } from "jb-select/react";
+import type { JBValidationRule } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import type { ValidationRuleName } from "../../registry/validation-rule-registry";
+import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
-import { ValidationRuleEditor } from "./ValidationRuleEditor";
 import { ruleLabel } from "./validation-rule-label";
 import styles from "./ValidationRulesEditor.module.css";
+
+const ValidationRulesModal = lazy(() => import("./ValidationRulesModal").then(module => ({ default: module.ValidationRulesModal })));
 
 interface ValidationRulesEditorProps {
   locale: string;
@@ -17,44 +18,49 @@ interface ValidationRulesEditorProps {
   supportedRules: readonly ValidationRuleName[];
 }
 
+function ruleSummary(rule: JBValidationRule): string {
+  switch (rule.rule) {
+    case "pattern":
+      return `/${rule.params.source}/${rule.params.flags}`;
+    case "allowedValues":
+      return rule.params.values.map(String).join(", ");
+    default:
+      return String(rule.params.value);
+  }
+}
+
 export const ValidationRulesEditor = observer(function ValidationRulesEditor({ locale, messages, supportedRules }: ValidationRulesEditorProps) {
   const store = useBuilderStore();
-  const [nextRule, setNextRule] = useState<ValidationRuleName>(supportedRules[0] ?? "pattern");
-  const rules = store.selectedElement?.validation ?? [];
+  const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const element = store.selectedElement;
+  const rules = element?.validation ?? [];
   if (supportedRules.length === 0) return null;
-  const selectedRule = supportedRules.includes(nextRule) ? nextRule : supportedRules[0];
+  const isOpen = editingElementId !== null && editingElementId === element?.id;
   return (
-    <CollapsibleConfigurationSection title={messages.validationRules}>
-      <p className={styles.sectionDescription}>{messages.validationDescription}</p>
-      <div className={styles.addValidationRule}>
-        <JBSelect<ValidationRuleName>
-          size="sm"
-          popoverPosition="fixed"
-          name="newValidationRule"
-          label={messages.ruleType}
-          value={selectedRule}
-          hideClear
-          onChange={event => setNextRule(event.target.value)}
-        >
-          {supportedRules.map(rule => (
-            <JBOption key={rule} value={rule}>
-              {ruleLabel(rule, locale)}
-            </JBOption>
-          ))}
-        </JBSelect>
-        <JBButton size="sm" variant="outline" onClick={() => store.addSelectedValidationRule(selectedRule, locale)}>
-          {messages.addRule}
+    <>
+      <CollapsibleConfigurationSection title={messages.validationRules}>
+        {rules.length === 0 ? (
+          <p className={styles.emptyRules}>{messages.noValidationRules}</p>
+        ) : (
+          <ul className={styles.validationSummaryList} aria-label={messages.validationRules}>
+            {rules.map(rule => (
+              <li key={rule.id}>
+                <span>{ruleLabel(rule.rule, locale)}</span>
+                <code>{ruleSummary(rule)}</code>
+              </li>
+            ))}
+          </ul>
+        )}
+        <JBButton className={styles.manageButton} size="sm" variant="outline" onClick={() => setEditingElementId(element?.id ?? null)}>
+          {rules.length === 0 ? messages.addValidation : messages.manageValidation}
         </JBButton>
-      </div>
-      {rules.length === 0 ? (
-        <p className={styles.emptyRules}>{messages.noValidationRules}</p>
-      ) : (
-        <div className={styles.validationRuleList}>
-          {rules.map((rule, index) => (
-            <ValidationRuleEditor key={rule.id} rule={rule} index={index} locale={locale} messages={messages} supportedRules={supportedRules} />
-          ))}
-        </div>
-      )}
-    </CollapsibleConfigurationSection>
+      </CollapsibleConfigurationSection>
+
+      {isOpen ? (
+        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+          <ValidationRulesModal locale={locale} messages={messages} supportedRules={supportedRules} onClose={() => setEditingElementId(null)} />
+        </Suspense>
+      ) : null}
+    </>
   );
 });

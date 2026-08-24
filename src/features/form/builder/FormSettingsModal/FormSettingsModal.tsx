@@ -5,6 +5,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import modalStyles from "../../shell/FormModal.module.css";
 import { LocaleEditor } from "./LocaleEditor";
 import { copyLocaleDefinitions, useFormSettings } from "./useFormSettings";
 import styles from "./FormSettingsModal.module.css";
@@ -42,7 +43,7 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
   } = useFormSettings(isOpen, messages, onClose);
 
   return (
-    <JBModal isOpen={isOpen} label={messages.formSettings} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.formSettings} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.currentDraft}</p>

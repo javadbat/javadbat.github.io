@@ -1,15 +1,18 @@
+import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getLocalizedText, isConditionElement, isContainerElement, isTabElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName } from "../../registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { RemoveElementModal } from "../RemoveElementModal/RemoveElementModal";
+import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { CanvasCard } from "./CanvasCard";
 import { TabCanvasCard } from "./TabCanvasCard";
 import { ConditionCanvasCard } from "./ConditionCanvasCard";
 import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
+
+const RemoveElementModal = lazy(() => import("../RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
 
 interface FormCanvasProps {
   messages: FormMessages;
@@ -65,7 +68,9 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 data-active={dragOverIndex === index}
                 onDragOver={event => markDropTarget(event, index)}
                 onDrop={event => acceptDrop(event, index)}
-              />
+              >
+                <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
+              </div>
               {isTabElement(element) ? <TabCanvasCard
                 element={element}
                 index={index}
@@ -115,7 +120,9 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                   data-active={dragOverIndex === count}
                   onDragOver={event => markDropTarget(event, count)}
                   onDrop={event => acceptDrop(event, count)}
-                />
+                >
+                  <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
+                </div>
               ) : null}
             </li>
           ))}
@@ -124,17 +131,20 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
       <p className={styles.srOnly} aria-live="polite" aria-atomic="true">
         {store.announcement}
       </p>
-      <RemoveElementModal
-        isOpen={pendingRemoval !== null}
-        elementLabel={
-          pendingRemoval
-            ? (isContainerElement(pendingRemoval) ? pendingRemoval.name : getLocalizedText(pendingRemoval.label, locale, defaultLocale)) || (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
-            : ""
-        }
-        messages={messages}
-        onCancel={interactions.cancelRemoval}
-        onConfirm={interactions.confirmRemoval}
-      />
+      {pendingRemoval ? (
+        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+          <RemoveElementModal
+            isOpen
+            elementLabel={
+              (isContainerElement(pendingRemoval) ? pendingRemoval.name : getLocalizedText(pendingRemoval.label, locale, defaultLocale)) ||
+              (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
+            }
+            messages={messages}
+            onCancel={interactions.cancelRemoval}
+            onConfirm={interactions.confirmRemoval}
+          />
+        </Suspense>
+      ) : null}
     </main>
   );
 });

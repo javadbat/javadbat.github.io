@@ -4,11 +4,13 @@ import { CodeViewer } from "../../../../components/react/components/code-viewer/
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import { downloadFormExport, prepareFormExport } from "../../export/form-export";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import modalStyles from "../../shell/FormModal.module.css";
 import styles from "./ExportJsonModal.module.css";
 import { JBModal } from "jb-modal/react";
 
 interface ExportJsonModalProps {
   document: JBFormDocumentV1;
+  isOpen: boolean;
   messages: FormMessages;
   onClose: () => void;
 }
@@ -18,11 +20,11 @@ interface ExportJsonModalProps {
  * and Shiki are useful here but should not increase the Builder's initial
  * editing bundle or initialization work.
  */
-export function ExportJsonModal({ document, messages, onClose }: ExportJsonModalProps) {
+export function ExportJsonModal({ document, isOpen, messages, onClose }: ExportJsonModalProps) {
   const exportResult = prepareFormExport(document);
 
   return (
-    <JBModal isOpen label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
           <p className={styles.eyebrow}>{messages.portableFormDocument}</p>

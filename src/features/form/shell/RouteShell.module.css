@@ -308,6 +308,57 @@
   animation: validationPulse 1.2s ease-in-out infinite;
 }
 
+.resultModalHeader {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: min(36rem, calc(100vw - 3rem));
+}
+
+.resultModalHeader h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.25rem;
+}
+
+.resultModalContent {
+  display: grid;
+  gap: 1rem;
+  inline-size: min(42rem, calc(100vw - 3rem));
+  max-block-size: min(38rem, calc(100dvh - 10rem));
+}
+
+.resultModalContent > p {
+  margin: 0;
+  color: var(--shell-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.resultModalContent pre {
+  min-block-size: 8rem;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  border: 0.0625rem solid var(--shell-line);
+  border-radius: 0.85rem;
+  color: var(--shell-ink);
+  background: var(--shell-canvas);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  direction: ltr;
+  text-align: start;
+  white-space: pre;
+  corner-shape: squircle;
+}
+
+.resultModalActions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
 .hero {
   grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
   gap: clamp(2rem, 7vw, 6rem);

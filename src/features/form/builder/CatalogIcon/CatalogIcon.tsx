@@ -2,6 +2,7 @@ import { memo } from "react";
 import "jb-icons/arrow";
 import "jb-icons/delete";
 import "jb-icons/edit";
+import "jb-icons/plus";
 import "jb-icons/react";
 import styles from "./CatalogIcon.module.css";
 
@@ -23,6 +24,8 @@ export const CatalogIcon = memo(function CatalogIcon({ iconId, className, active
       return <jb-icon-arrow className={classes} direction="down" />;
     case "remove":
       return <jb-icon-delete className={classes} isOpen={active} />;
+    case "drop":
+      return <jb-icon-plus className={classes} />;
     default:
       break;
   }

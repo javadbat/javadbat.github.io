@@ -1,7 +1,7 @@
 import { useCallback, useState, type DragEvent } from "react";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE } from "../builder-drag";
+import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
 interface CanvasInteractionOptions {
@@ -101,6 +101,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
   const acceptDrop = useCallback(
     (event: DragEvent, insertionIndex: number) => {
       event.preventDefault();
+      endBuilderDrag();
       setDragOverIndex(null);
       const elementType = event.dataTransfer.getData(CATALOG_DRAG_TYPE);
       const registryEntry = registryByType.get(elementType as FormElementRegistryEntry["type"]);

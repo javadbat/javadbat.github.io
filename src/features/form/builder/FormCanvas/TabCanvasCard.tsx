@@ -3,13 +3,26 @@ import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { getLocalizedText, type JBTabElementV1 } from "../../domain/form-document";
 import { registryByType } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE } from "../builder-drag";
+import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
+import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { CanvasCard, type CanvasCardProps } from "./CanvasCard";
 import styles from "./FormCanvas.module.css";
 
 interface TabCanvasCardProps extends Omit<CanvasCardProps, "element"> {
   element: JBTabElementV1;
+}
+
+function focusTabEditorRow(tabId: string): void {
+  // Let selection and responsive panel changes render before moving focus.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const editorRow = document.getElementById(`tab-editor-${tabId}`);
+      if (!editorRow) return;
+      editorRow.focus({ preventScroll: true });
+      editorRow.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    });
+  });
 }
 
 export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCardProps) {
@@ -26,6 +39,7 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
 
   const acceptDrop = (event: DragEvent, insertionIndex: number) => {
     event.preventDefault();
+    endBuilderDrag();
     setDragOverIndex(null);
     if (!activeTab) return;
     const catalogType = event.dataTransfer.getData(CATALOG_DRAG_TYPE);
@@ -67,6 +81,8 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
             onClick={() => {
               setActiveTabId(tab.id);
               store.setActiveContainerTab(element.id, tab.id);
+              props.onConfigure(element.id);
+              focusTabEditorRow(tab.id);
             }}
           >
             {getLocalizedText(tab.label, locale, defaultLocale)}
@@ -87,19 +103,24 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
             <ol className={styles.tabChildList}>
               {activeTab.children.map((child, index) => (
                 <li key={child.id}>
-                  <div className={styles.insertionTarget} data-active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)} />
+                  <div className={styles.insertionTarget} data-active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}>
+                    <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
+                  </div>
                   <CanvasCard
                     {...props}
                     element={child}
                     index={index}
                     count={activeTab.children.length}
+                    isSelected={child.id === store.selectedElementId}
                     onFocusOffset={(currentIndex, offset) => {
                       const target = activeTab.children[Math.max(0, Math.min(currentIndex + offset, activeTab.children.length - 1))];
                       if (target) document.getElementById(`element-select-${target.id}`)?.focus();
                     }}
                   />
                   {index === activeTab.children.length - 1 ? (
-                    <div className={styles.insertionTarget} data-active={dragOverIndex === activeTab.children.length} onDragOver={event => markDropTarget(event, activeTab.children.length)} onDrop={event => acceptDrop(event, activeTab.children.length)} />
+                    <div className={styles.insertionTarget} data-active={dragOverIndex === activeTab.children.length} onDragOver={event => markDropTarget(event, activeTab.children.length)} onDrop={event => acceptDrop(event, activeTab.children.length)}>
+                      <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
+                    </div>
                   ) : null}
                 </li>
               ))}

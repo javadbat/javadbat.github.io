@@ -1,5 +1,4 @@
-import type { JBFormElementType, JBFormElementV1 } from "../contract/form-document";
-import { localizedText } from "../contract/form-document";
+import { isContainerElement, type JBFormElementType, type JBFormElementV1, type JSONValue } from "../contract/form-document";
 import { configurationByType, type CommonFieldSupport, type FormElementPropertyDefinition, type InitialValueKind } from "./form-element-configuration";
 import { adapterByType, type FormElementAdapter } from "./form-element-adapter";
 
@@ -246,7 +245,7 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
 const persianDisplayNames: Record<JBFormElementType, string> = {
-  "jb-condition": "Conditional",
+  "jb-condition": "شرط",
   "jb-tab": "تب‌ها",
   text: "متن",
   image: "تصویر",
@@ -275,19 +274,33 @@ export function getFormElementDisplayName(entry: FormElementRegistryEntry, local
   return locale.toLowerCase().split("-")[0] === "fa" ? persianDisplayNames[entry.type] : entry.displayName;
 }
 
-export function createDefaultElement(entry: FormElementRegistryEntry, name: string): JBFormElementV1 {
+function defaultsForLocale(value: JSONValue, locale: string): JSONValue {
+  if (Array.isArray(value)) return value.map(item => defaultsForLocale(item, locale));
+  if (value === null || typeof value !== "object") return value;
+  if ("translations" in value && value.translations && typeof value.translations === "object" && !Array.isArray(value.translations)) {
+    const translations = value.translations as Record<string, JSONValue>;
+    const language = locale.toLowerCase().split("-")[0];
+    const translation = translations[locale] ?? translations[language] ?? translations.en ?? Object.values(translations)[0] ?? "";
+    return { translations: { [locale]: translation } };
+  }
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, defaultsForLocale(child, locale)]));
+}
+
+export function createDefaultElement(entry: FormElementRegistryEntry, name: string, locale = "en"): JBFormElementV1 {
+  const defaultProps = defaultsForLocale(structuredClone(entry.defaultProps) as JSONValue, locale) as Record<string, JSONValue>;
   if (entry.type === "jb-tab") {
+    const isFarsi = locale.toLowerCase().split("-")[0] === "fa";
     return {
       id: crypto.randomUUID(),
       type: "jb-tab",
       adapterVersion: entry.adapterVersion,
       name,
-      props: structuredClone(entry.defaultProps),
+      props: defaultProps,
       validation: [],
       validationScope: "all",
       tabs: [
-        { id: crypto.randomUUID(), value: "tab_1", label: localizedText("Tab 1"), disabled: false, children: [] },
-        { id: crypto.randomUUID(), value: "tab_2", label: localizedText("Tab 2"), disabled: false, children: [] },
+        { id: crypto.randomUUID(), value: "tab_1", label: { translations: { [locale]: isFarsi ? "تب ۱" : "Tab 1" } }, disabled: false, children: [] },
+        { id: crypto.randomUUID(), value: "tab_2", label: { translations: { [locale]: isFarsi ? "تب ۲" : "Tab 2" } }, disabled: false, children: [] },
       ],
     };
   }
@@ -308,7 +321,7 @@ export function createDefaultElement(entry: FormElementRegistryEntry, name: stri
     type: entry.type,
     adapterVersion: entry.adapterVersion,
     name,
-    props: structuredClone(entry.defaultProps),
+    props: defaultProps,
     validation: [],
   };
   if (entry.commonFields.required) {
@@ -318,10 +331,68 @@ export function createDefaultElement(entry: FormElementRegistryEntry, name: stri
     element.disabled = false;
   }
   if (entry.commonFields.label) {
-    element.label = localizedText(entry.displayName);
+    element.label = { translations: { [locale]: getFormElementDisplayName(entry, locale) } };
   }
   if (entry.commonFields.placeholder) {
-    element.placeholder = localizedText(`Enter ${entry.displayName.toLowerCase()}`);
+    const isFarsi = locale.toLowerCase().split("-")[0] === "fa";
+    const displayName = getFormElementDisplayName(entry, locale);
+    element.placeholder = {
+      translations: {
+        [locale]: isFarsi ? `${displayName} را وارد کنید` : `Enter ${displayName.toLowerCase()}`,
+      },
+    };
   }
   return element;
+}
+
+function addDefaultLocalizedValue(
+  current: { translations: Record<string, string> } | undefined,
+  source: { translations: Record<string, string> } | undefined,
+  target: { translations: Record<string, string> } | undefined,
+  sourceLocale: string,
+  targetLocale: string,
+): boolean {
+  if (!current || !source || !target || targetLocale in current.translations) return false;
+  if (current.translations[sourceLocale] !== source.translations[sourceLocale]) return false;
+  const targetValue = target.translations[targetLocale];
+  if (targetValue === undefined) return false;
+  current.translations[targetLocale] = targetValue;
+  return true;
+}
+
+function localizedValue(value: JSONValue | undefined): { translations: Record<string, string> } | undefined {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const translations = value.translations;
+  if (translations === null || typeof translations !== "object" || Array.isArray(translations)) return undefined;
+  if (!Object.values(translations).every(translation => typeof translation === "string")) return undefined;
+  return value as { translations: Record<string, string> };
+}
+
+/** Adds translated built-in label defaults without replacing user-authored content. */
+export function addMissingElementDefaultTranslations(element: JBFormElementV1, sourceLocale: string, targetLocale: string): boolean {
+  const targetLanguage = targetLocale.toLowerCase().split("-")[0];
+  if (targetLanguage !== "en" && targetLanguage !== "fa") return false;
+  const entry = registryByType.get(element.type);
+  if (!entry) return false;
+
+  const sourceDefault = createDefaultElement(entry, element.name, sourceLocale);
+  const targetDefault = createDefaultElement(entry, element.name, targetLocale);
+  let changed = false;
+
+  if (!isContainerElement(element) && !isContainerElement(sourceDefault) && !isContainerElement(targetDefault)) {
+    changed = addDefaultLocalizedValue(element.label, sourceDefault.label, targetDefault.label, sourceLocale, targetLocale) || changed;
+    changed = addDefaultLocalizedValue(element.placeholder, sourceDefault.placeholder, targetDefault.placeholder, sourceLocale, targetLocale) || changed;
+    for (const definition of entry.propertyDefinitions) {
+      if (!definition.localized) continue;
+      changed = addDefaultLocalizedValue(
+        localizedValue(element.props[definition.key]),
+        localizedValue(sourceDefault.props[definition.key]),
+        localizedValue(targetDefault.props[definition.key]),
+        sourceLocale,
+        targetLocale,
+      ) || changed;
+    }
+  }
+
+  return changed;
 }

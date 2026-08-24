@@ -35,7 +35,6 @@ export function isLocalizedTextValue(value: JSONValue | undefined): value is JSO
 
 export function patchLocalizedText(value: LocalizedText | undefined, text: string, locale: string): LocalizedText | undefined {
   const translations = { ...(value?.translations ?? {}) };
-  if (text) translations[locale] = text;
-  else delete translations[locale];
-  return Object.keys(translations).length > 0 ? { translations } : undefined;
+  translations[locale] = text;
+  return { translations };
 }

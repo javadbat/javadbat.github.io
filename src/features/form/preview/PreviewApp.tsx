@@ -17,7 +17,7 @@ function getRequestedLanguage(): string | null {
 }
 
 export function PreviewApp() {
-  const { locale, direction, messages } = useFormLocale("en");
+  const { locale, direction, setLocale, messages } = useFormLocale("en");
   const { slug } = getCurrentFormRoute();
   const resolution = useStoredForm(slug);
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
@@ -25,7 +25,9 @@ export function PreviewApp() {
   const selectedLanguage = useMemo(() => {
     if (resolution.status !== "ready") return requestedLanguage ?? locale;
     const requested = requestedLanguage?.toLowerCase();
-    return supportedLanguages.find(language => language.toLowerCase() === requested) ?? resolution.document.localization.defaultLocale;
+    return supportedLanguages.find(language => language.toLowerCase() === requested)
+      ?? supportedLanguages.find(language => language.toLowerCase() === locale)
+      ?? resolution.document.localization.defaultLocale;
   }, [locale, requestedLanguage, resolution, supportedLanguages]);
   const formName = resolution.status === "ready"
     ? getLocalizedText(resolution.document.metadata.name, selectedLanguage, resolution.document.localization.defaultLocale)
@@ -33,11 +35,13 @@ export function PreviewApp() {
 
   useEffect(() => {
     if (resolution.status !== "ready") return;
+    const appLocale = selectedLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en";
+    if (locale !== appLocale) setLocale(appLocale);
     const url = new URL(window.location.href);
     if (url.searchParams.get(PREVIEW_LANGUAGE_QUERY_PARAMETER) === selectedLanguage) return;
     url.searchParams.set(PREVIEW_LANGUAGE_QUERY_PARAMETER, selectedLanguage);
     window.history.replaceState(window.history.state, "", url);
-  }, [resolution.status, selectedLanguage]);
+  }, [locale, resolution.status, selectedLanguage, setLocale]);
   const unresolvedMessage =
     resolution.status === "loading"
       ? messages.loadingForms
@@ -69,7 +73,11 @@ export function PreviewApp() {
                 size="sm"
                 value={selectedLanguage}
                 hideClear
-                onChange={event => setRequestedLanguage(event.target.value)}
+                onChange={event => {
+                  const nextLanguage = event.target.value;
+                  setRequestedLanguage(nextLanguage);
+                  setLocale(nextLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
+                }}
               >
                 {supportedLanguages.map(language => (
                   <JBOption key={language} value={language}>

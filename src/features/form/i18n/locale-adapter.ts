@@ -5,6 +5,8 @@ import type { StorageIssue } from "../storage/storage-types";
 export type FormAppLocale = "en" | "fa";
 export type FormAppDirection = "ltr" | "rtl";
 
+const FORM_APP_LOCALE_STORAGE_KEY = "jb-form:locale";
+
 const formAppDictionarySource = {
   en: {
     productName: "JB Form",
@@ -96,11 +98,12 @@ const formAppDictionarySource = {
     duplicate: "Duplicate",
     remove: "Remove",
     dragToReorder: "Drag to reorder",
+    dropHere: "Drop here",
     confirmRemoveTitle: "Remove this field?",
     confirmRemoveDescription: "The field configuration will be removed from the current draft. You can restore it with Undo.",
     confirmRemove: "Remove field",
     nameRequired: "Field name is required.",
-    nameInvalid: "Start with a letter and use up to 64 letters, numbers, underscores, or hyphens.",
+    nameInvalid: "Use 1–64 English characters. Start with an English letter; then use only English letters, numbers, underscores, or hyphens.",
     addOption: "Add option",
     removeOption: "Remove option",
     optionLabel: "Option label",
@@ -108,16 +111,22 @@ const formAppDictionarySource = {
     optionDisabled: "Option disabled",
     commaSeparated: "Separate multiple values with commas.",
     validationRules: "Validation rules",
-    validationDescription: "Portable rules are stored as JSON. Regular expressions are compiled only by the trusted renderer.",
+    validationDescription: "Choose a simple rule such as minimum length, or use a regular expression for a custom format.",
     ruleType: "Rule type",
     ruleValue: "Value",
     validationMessage: "Validation message",
     patternSource: "Pattern source",
     patternFlags: "Flags",
+    regexHelp: "Regular expressions describe the text format this field should accept.",
+    openRegexBuilder: "Learn and build one in Regex101",
     allowedValues: "Allowed values",
     addRule: "Add rule",
+    addValidation: "Add validation",
+    manageValidation: "Manage validation",
+    currentValidationRules: "Current rules",
     removeRule: "Remove rule",
     noValidationRules: "No custom validation rules.",
+    done: "Done",
     addedAnnouncement: "added at position",
     movedAnnouncement: "moved to position",
     duplicatedAnnouncement: "duplicated at position",
@@ -131,7 +140,7 @@ const formAppDictionarySource = {
     previewPending: "Preview renderer is the next route milestone",
     previewPendingDescription: "This page will reload saved JSON from IndexedDB and render it responsively.",
     previewReadyTitle: "Saved form preview",
-    previewReadyDescription: "This form was reloaded independently from IndexedDB and rendered from its portable JSON.",
+    previewReadyDescription: "This is a private preview of your form. Only you can see it; other people on the internet cannot access or submit it.",
     submitForm: "Submit",
     resetForm: "Reset form",
     formPreparing: "Preparing the form…",
@@ -140,6 +149,10 @@ const formAppDictionarySource = {
     formIsValid: "Everything looks good. The form is valid.",
     formHasErrors: "Some fields need your attention.",
     validationFailed: "Validation could not be completed.",
+    submissionSuccessful: "Submission successful",
+    formResult: "Form result",
+    formResultDescription: "The submitted form values are shown below as JSON.",
+    formResultJson: "Submitted form values in JSON",
     backToForms: "All forms",
     createForm: "Create a form",
     continueDraft: "Continue current draft",
@@ -159,6 +172,7 @@ const formAppDictionarySource = {
     fields: "fields",
     field: "field",
     loading: "Loading builder",
+    loadingModal: "Loading dialog…",
     retry: "Retry",
   },
   fa: {
@@ -239,7 +253,7 @@ const formAppDictionarySource = {
     elementName: "نام فیلد",
     elementNameDescription:"این نام در خروجی داده مورد استفاده قرار می‌ گیرد",
     label: "برچسب(لیبل)",
-    placeholder: "متن راهنما",
+    placeholder: "راهنما داخل کادر (placeholder)",
     required: "الزامی",
     disabled: "غیرفعال",
     initialValue: "مقدار اولیه",
@@ -251,11 +265,12 @@ const formAppDictionarySource = {
     duplicate: "تکثیر",
     remove: "حذف",
     dragToReorder: "برای جابه‌جایی بکشید",
+    dropHere: "اینجا رها کنید",
     confirmRemoveTitle: "این فیلد حذف شود؟",
     confirmRemoveDescription: "تنظیمات فیلد از پیش‌نویس فعلی حذف می‌شود. می‌توانید آن را با واگردانی برگردانید.",
     confirmRemove: "حذف فیلد",
     nameRequired: "نام فیلد الزامی است.",
-    nameInvalid: "نام را با حرف آغاز کنید و حداکثر از ۶۴ حرف، عدد، خط زیر یا خط تیره استفاده کنید.",
+    nameInvalid: "نام را با یک حرف انگلیسی آغاز کنید و در ادامه فقط از حروف انگلیسی، عدد، خط زیر یا خط تیره استفاده کنید (حداکثر ۶۴ نویسه).",
     addOption: "افزودن گزینه",
     removeOption: "حذف گزینه",
     optionLabel: "برچسب گزینه",
@@ -263,16 +278,22 @@ const formAppDictionarySource = {
     optionDisabled: "گزینه غیرفعال",
     commaSeparated: "چند مقدار را با ویرگول جدا کنید.",
     validationRules: "قواعد اعتبارسنجی",
-    validationDescription: "قواعد قابل‌انتقال به‌صورت JSON ذخیره می‌شوند. عبارت منظم فقط در رندرکننده امن کامپایل می‌شود.",
+    validationDescription: "یک قاعده ساده مانند کمترین طول انتخاب کنید، یا برای قالب دلخواه عبارت منظم بنویسید.",
     ruleType: "نوع قاعده",
     ruleValue: "مقدار",
     validationMessage: "پیام اعتبارسنجی",
     patternSource: "الگوی عبارت منظم",
     patternFlags: "پرچم‌ها",
+    regexHelp: "عبارت منظم قالب متنی را که این فیلد باید بپذیرد مشخص می‌کند.",
+    openRegexBuilder: "آموزش و ساخت عبارت در Regex101",
     allowedValues: "مقادیر مجاز",
     addRule: "افزودن قاعده",
+    addValidation: "افزودن اعتبارسنجی",
+    manageValidation: "مدیریت اعتبارسنجی",
+    currentValidationRules: "قواعد فعلی",
     removeRule: "حذف قاعده",
     noValidationRules: "قاعده اعتبارسنجی سفارشی وجود ندارد.",
+    done: "تمام",
     addedAnnouncement: "در جایگاه افزوده شد",
     movedAnnouncement: "به جایگاه منتقل شد",
     duplicatedAnnouncement: "در جایگاه تکثیر شد",
@@ -286,7 +307,7 @@ const formAppDictionarySource = {
     previewPending: "رندر پیش‌نمایش، مرحله بعدی مسیرها است",
     previewPendingDescription: "این صفحه JSON ذخیره‌شده را از IndexedDB می‌خواند و واکنش‌گرا نمایش می‌دهد.",
     previewReadyTitle: "پیش‌نمایش فرم ذخیره‌شده",
-    previewReadyDescription: "این فرم به‌طور مستقل از IndexedDB خوانده و از JSON قابل‌انتقال آن رندر شده است.",
+    previewReadyDescription: "این فقط پیش‌نمایش خصوصی فرم شماست. تنها شما می‌توانید آن را ببینید؛ دیگر کاربران اینترنت به این فرم دسترسی ندارند و نمی‌توانند آن را ارسال کنند.",
     submitForm: "ارسال",
     resetForm: "بازنشانی فرم",
     formPreparing: "در حال آماده‌سازی فرم…",
@@ -295,6 +316,10 @@ const formAppDictionarySource = {
     formIsValid: "همه‌چیز درست است. فرم معتبر است.",
     formHasErrors: "برخی فیلدها نیاز به بررسی دارند.",
     validationFailed: "اعتبارسنجی کامل نشد.",
+    submissionSuccessful: "ارسال موفق",
+    formResult: "نتیجه فرم",
+    formResultDescription: "مقادیر ارسال‌شده فرم در قالب JSON در ادامه نمایش داده می‌شوند.",
+    formResultJson: "مقادیر ارسال‌شده فرم در قالب JSON",
     backToForms: "همه فرم‌ها",
     createForm: "ساخت فرم",
     continueDraft: "ادامه پیش‌نویس",
@@ -314,6 +339,7 @@ const formAppDictionarySource = {
     fields: "فیلد",
     field: "فیلد",
     loading: "در حال بارگذاری فرم‌ساز",
+    loadingModal: "در حال بارگذاری پنجره…",
     retry: "تلاش دوباره",
   },
 } as const;
@@ -366,6 +392,23 @@ function localeDirection(locale: FormAppLocale): FormAppDirection {
   return locale === "fa" ? "rtl" : "ltr";
 }
 
+function readStoredFormAppLocale(fallback: FormAppLocale): FormAppLocale {
+  try {
+    const storedLocale = globalThis.localStorage?.getItem(FORM_APP_LOCALE_STORAGE_KEY);
+    return storedLocale === "en" || storedLocale === "fa" ? storedLocale : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function persistFormAppLocale(locale: FormAppLocale): void {
+  try {
+    globalThis.localStorage?.setItem(FORM_APP_LOCALE_STORAGE_KEY, locale);
+  } catch {
+    // All /form routes still work when browser storage is unavailable.
+  }
+}
+
 function configureJBI18n(locale: FormAppLocale): FormMessages {
   const direction = localeDirection(locale);
 
@@ -380,8 +423,13 @@ function configureJBI18n(locale: FormAppLocale): FormMessages {
 }
 
 export function useFormLocale(initialLocale: FormAppLocale = "en") {
-  const [locale, setLocale] = useState<FormAppLocale>(initialLocale);
-  const [messages, setMessages] = useState<FormMessages>(formAppMessages[initialLocale]);
+  const [locale, setLocaleState] = useState<FormAppLocale>(() => readStoredFormAppLocale(initialLocale));
+  const [messages, setMessages] = useState<FormMessages>(() => formAppMessages[locale]);
+
+  const setLocale = useCallback((nextLocale: FormAppLocale) => {
+    persistFormAppLocale(nextLocale);
+    setLocaleState(nextLocale);
+  }, []);
 
   useEffect(() => {
     setMessages(configureJBI18n(locale));
