@@ -5,7 +5,6 @@ import IntroSection from "./intro-section/IntroSection";
 import SkillsSection from "./skills-section/SkillsSection";
 import { useEffect } from "react";
 import styles from "./styles.module.css";
-import ProductsSection from "./products-section/ProductsSection";
 
 export function IndexPage() {
   useEffect(() => {
@@ -16,7 +15,6 @@ export function IndexPage() {
       <IntroSection></IntroSection>
       <SkillsSection ></SkillsSection>
       <ExperiencesSection></ExperiencesSection>
-      <ProductsSection></ProductsSection>
       <FeedbackSection></FeedbackSection>
     </main>
   );
