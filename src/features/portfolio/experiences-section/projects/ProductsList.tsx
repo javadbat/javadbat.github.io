@@ -3,6 +3,7 @@ import styles from "./styles.module.css";
 import cardStyles from "@react-components/card/RoundCard.module.css";
 import agileverseImage from "./agileverse.jpg";
 import formBuilderImage from "./form-builder.png";
+import designSystemImage from "./banner-small.jpg";
 export default function ProductsList() {
   return (
     <div className={styles.productsSectionWrapper}>
@@ -10,7 +11,7 @@ export default function ProductsList() {
       <div className={styles.productList}>
         <a className={styles.productLink} href="/design-system" target="_blank" rel="noopener">
           <div className={`${cardStyles.roundCard} ${styles.productCard}`}>
-            <img className={styles.productImage} src="https://github.com/javadbat/design-system/raw/main/public/images/banner-small.jpg" alt="JB Design System" />
+            <img className={styles.productImage} src={designSystemImage.src} alt="JB Design System" />
             <h3 className={styles.productTitle}>JB Design System</h3>
             <p className={styles.productDescription}>Web-Component Based Design System that Works With Every Framework Like (React, Angular, Vue,...)</p>
           </div>
