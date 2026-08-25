@@ -11,7 +11,8 @@ import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-ada
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./BuilderHeader.module.css";
-
+import DesignIcon from './design.svg?react'
+import SaveIcon from './save.svg?react'
 export type BuilderNavigationTarget = "designer" | "preview";
 
 interface BuilderHeaderProps {
@@ -128,7 +129,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
           {messages.preview}
         </JBButton>
         <JBButton variant="outline" size="sm" onClick={() => onNavigate("designer")}>
-          <span className={styles.artboardIcon} aria-hidden="true" />
+          <DesignIcon/>
           {messages.designer}
         </JBButton>
         <div className={styles.localeControls}>
@@ -149,6 +150,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
           </JBSelect>
         </div>
         <JBButton color="primary" size="sm" disabled={store.status === "saving"} onClick={() => void store.save()}>
+          <SaveIcon/>
           {store.status === "saving" ? messages.saving : messages.save}
         </JBButton>
       </nav>

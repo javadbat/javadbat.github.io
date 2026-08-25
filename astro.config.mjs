@@ -1,7 +1,9 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
-
+import sitemap from "@astrojs/sitemap";
+import svgr from "vite-plugin-svgr";
 // The preview renderer discovers its field packages only after a saved form
 // has been resolved from IndexedDB. Vite's initial crawl therefore cannot see
 // these literal dynamic imports on routes that do not yet have a document.
@@ -48,7 +50,7 @@ const formBuilderRuntimeImports = ["mobx", "mobx-react-lite"];
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  integrations: [react(), mdx(), sitemap()],
   server: {
     open: true,
     port: 8080,
@@ -57,6 +59,14 @@ export default defineConfig({
     optimizeDeps: {
       include: [...formRendererAutoImports, ...formBuilderRuntimeImports, ...formBuilderExportImports],
     },
+    plugins: [
+      svgr({
+        include: "**/*.svg?react", // Only process imports with the ?react suffix
+        svgrOptions: {
+          plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx"],
+        },
+      }),
+    ],
   },
   site: "https://javadbat.github.io",
 });

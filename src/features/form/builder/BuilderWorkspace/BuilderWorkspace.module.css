@@ -31,15 +31,15 @@
 
 @media (max-width: 74.9375rem) and (min-width: 64rem) {
   .compactTabs {
-      display:flex;
+      display: flex;
       margin: 0.5rem 1rem 0 1rem;
       inline-size: max-content;
       --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
-      jb-tab-list::part(list){
+      jb-tab-list::part(list) {
         corner-shape: squircle;
         box-shadow: var(--shadow-drop);
       }
-      jb-tab-list::part(indicator){
+      jb-tab-list::part(indicator) {
         corner-shape: squircle;
       }
     }
@@ -75,13 +75,6 @@
    }
 
 @media (max-width: 63.999rem) {
-  .mobileTabs :global(jb-button) {
-      --jb-button-height: 2.75rem;
-      --jb-button-height-sm: 2.75rem;
-    }
-   }
-
-@media (max-width: 63.999rem) {
   .builderShell {
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
@@ -96,19 +89,34 @@
 
 @media (max-width: 63.999rem) {
   .mobileTabs {
+      display: block;
+      padding: 0.5rem 0.5rem 0;
+      --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
+      --jb-tab-trigger-padding: 0.65rem 0.35rem;
+    }
+
+  .mobileTabs :global(jb-tab-list) {
+      display: block;
+      inline-size: 100%;
+    }
+
+  .mobileTabs :global(jb-tab-list)::part(list) {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.35rem;
-      padding: 0.5rem 0.5rem 0;
-      background: transparent;
+      inline-size: 100%;
+      corner-shape: squircle;
+      box-shadow: var(--shadow-drop);
+    }
+
+  .mobileTabs :global(jb-tab-list)::part(indicator) {
+      corner-shape: squircle;
     }
    }
 
 @media (max-width: 63.999rem) {
-  .mobileTabs :global(jb-button) {
+  .mobileTabs :global(jb-tab-trigger) {
       min-inline-size: 0;
-      --jb-button-font-size-sm: 0.78rem;
-      --jb-button-inline-padding-sm: 0.35rem;
+      font-size: 0.78rem;
     }
    }
 
@@ -132,4 +140,3 @@
       display: none;
     }
    }
-

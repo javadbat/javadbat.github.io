@@ -29,31 +29,31 @@ vi.mock("../FormCanvas/FormCanvas", () => ({
 vi.mock("../ConfigurationPanel/ConfigurationPanel", () => ({ ConfigurationPanel: () => <aside data-panel="properties" /> }));
 
 describe("BuilderWorkspace", () => {
-  it("switches between the three mobile workspace panels", () => {
+  it("switches between the three mobile workspace panels", async () => {
     const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
     const mobileTabs = view.container.querySelector<HTMLElement>("nav[aria-label='Mobile workspace panels']");
-    const buttons = mobileTabs?.querySelectorAll<HTMLElement>("jb-button");
+    const tabs = mobileTabs?.querySelectorAll<HTMLElement>("jb-tab-trigger");
 
     expect(workspace?.dataset.mobilePanel).toBe("canvas");
-    expect(buttons).toHaveLength(3);
-    expect(buttons?.[1].getAttribute("aria-pressed")).toBe("true");
+    expect(tabs).toHaveLength(3);
+    await waitFor(() => expect(tabs?.[1].getAttribute("aria-selected")).toBe("true"));
 
-    fireEvent.click(buttons![0]);
+    fireEvent.click(tabs![0]);
     expect(workspace?.dataset.mobilePanel).toBe("catalog");
-    expect(buttons?.[0].getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => expect(tabs?.[0].getAttribute("aria-selected")).toBe("true"));
 
-    fireEvent.click(buttons![2]);
+    fireEvent.click(tabs![2]);
     expect(workspace?.dataset.mobilePanel).toBe("properties");
   });
 
   it("advances touch workflows after adding and configuring a field", async () => {
     const view = render(<BuilderWorkspace messages={formAppMessages.en} />);
     const workspace = view.container.querySelector<HTMLElement>("[data-mobile-panel]");
-    const mobileButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Mobile workspace panels'] jb-button");
+    const mobileTabs = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Mobile workspace panels'] jb-tab-trigger");
     const compactButtons = view.container.querySelectorAll<HTMLElement>("nav[aria-label='Side panels'] jb-tab-trigger");
 
-    fireEvent.click(mobileButtons[0]);
+    fireEvent.click(mobileTabs[0]);
     expect(workspace?.dataset.mobilePanel).toBe("catalog");
 
     fireEvent.click(view.container.querySelector<HTMLElement>("[data-panel='catalog'] button")!);

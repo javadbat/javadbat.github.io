@@ -1,0 +1,19 @@
+---
+import { SITE } from "../config/site";
+
+interface Props {
+  active?: "home" | "articles";
+}
+
+const { active } = Astro.props;
+---
+
+<header class="articles-site-header">
+  <nav class="articles-site-nav" aria-label="Primary">
+    <a class="articles-wordmark" href="/">{SITE.name}</a>
+    <div class="articles-nav-links">
+      <a href="/" aria-current={active === "home" ? "page" : undefined}>Home</a>
+      <a href="/articles/" aria-current={active === "articles" ? "page" : undefined}>Articles</a>
+    </div>
+  </nav>
+</header>

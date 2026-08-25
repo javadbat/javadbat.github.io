@@ -1,0 +1,57 @@
+---
+title: Designing Resilient Frontend Systems
+description: Practical patterns for interfaces that stay understandable as products grow.
+publishedAt: 2026-08-18
+updatedAt: 2026-08-25
+tags:
+  - Frontend Architecture
+  - TypeScript
+  - Product Engineering
+coverImage: /images/articles/designing-resilient-frontend-systems.png
+coverAlt: Abstract layered blue system boundaries connected by precise pathways.
+draft: false
+featured: true
+lang: en
+---
+
+import Callout from "../components/Callout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+
+As frontend applications grow, complexity does not arrive all at once. It seeps in through small, reasonable decisions. Resilience is not a single technique—it is the outcome of consistent boundaries, explicit contracts, and systems that fail in ways we can predict and observe.
+
+## Start with boundaries
+
+Boundaries keep change localized. They let teams evolve features without accidentally coupling unrelated parts of the application.
+
+Define clear entry points for each domain. Everything outside interacts through those entry points, never through internal details.
+
+<CodeBlock
+  filename="boundary.ts"
+  language="typescript"
+  code={`export interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  save(user: User): Promise<void>;
+}`}
+/>
+
+<Callout title="Key idea">
+  A boundary is valuable when it makes the safe path easier than reaching into an implementation detail.
+</Callout>
+
+## Design the contract
+
+A good contract communicates what a capability promises without exposing how it works. Prefer small interfaces with names drawn from the product domain.
+
+Contracts also give tests a stable seam. Test observable behavior at the boundary instead of recreating every internal step.
+
+## Build for failure
+
+Failure states are part of the interface. Model loading, empty, partial, offline, and error states before the happy path becomes the only path the design can express.
+
+Use errors that carry context, recovery guidance, and a stable identifier. The person debugging the failure should not have to reconstruct the original request from scattered logs.
+
+## Keep it observable
+
+Resilient software explains what it is doing. Connect user-visible states to structured events so product behavior and operational behavior tell the same story.
+
+Good observability is selective. Measure the transitions that answer a real question, and avoid collecting noise simply because the instrumentation is available.

@@ -1,0 +1,43 @@
+---
+import type { ArticleEntry } from "../lib/articles";
+import { formatArticleDate, getArticleUrl, getReadingTime } from "../lib/articles";
+
+interface Props {
+  article: ArticleEntry;
+}
+
+const { article } = Astro.props;
+const { data } = article;
+---
+
+<article
+  class:list={{ "article-list-item": true, "article-list-item-has-cover": Boolean(data.coverImage) }}
+  data-article-item
+  data-search={`${data.title} ${data.description} ${data.tags.join(" ")}`.toLocaleLowerCase()}
+  data-tags={data.tags.map((tag) => tag.toLocaleLowerCase()).join("|")}
+>
+  {data.coverImage && (
+    <a class="article-list-cover" href={getArticleUrl(article)} aria-label={`Read ${data.title}`} tabindex="-1">
+      <img
+        src={data.coverImage}
+        alt={data.coverAlt ?? ""}
+        width="420"
+        height="280"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  )}
+  <div class="article-list-main">
+    <div class="article-list-tags">
+      {data.tags.map((tag) => <span>{tag}</span>)}
+      {data.draft && <span class="article-draft-badge">Draft</span>}
+    </div>
+    <h2><a href={getArticleUrl(article)}>{data.title}</a></h2>
+    <p>{data.description}</p>
+  </div>
+  <div class="article-list-meta">
+    <time datetime={data.publishedAt.toISOString()}>{formatArticleDate(data.publishedAt)}</time>
+    <span>{getReadingTime(article.body ?? "")} min read</span>
+  </div>
+</article>

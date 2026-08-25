@@ -1,0 +1,31 @@
+---
+import { codeToHtml, type BundledLanguage } from "shiki";
+
+interface Props {
+  code: string;
+  language?: string;
+  filename?: string;
+}
+
+const { code, language = "text", filename } = Astro.props;
+const highlightedCode = await codeToHtml(code.trim(), {
+  lang: language as BundledLanguage,
+  themes: {
+    light: "github-light",
+    dark: "github-dark",
+  },
+  defaultColor: false,
+});
+---
+
+<article-code-copy class="article-code-shell">
+  <div class="article-code-toolbar">
+    <span>{filename ?? "Code"}</span>
+    <div class="article-code-actions">
+      <span>{language === "typescript" ? "TypeScript" : language}</span>
+      <button type="button" data-copy-code>Copy</button>
+    </div>
+  </div>
+  <div class="article-code-highlight" set:html={highlightedCode} />
+  <span class="sr-only" aria-live="polite" data-copy-status></span>
+</article-code-copy>

@@ -1,0 +1,25 @@
+---
+import { AUTHOR } from "../config/site";
+import { formatArticleDate } from "../lib/articles";
+
+interface Props {
+  publishedAt: Date;
+  updatedAt?: Date;
+  readingMinutes: number;
+}
+
+const { publishedAt, updatedAt, readingMinutes } = Astro.props;
+---
+
+<div class="article-byline">
+  <img class="article-author-avatar" src={AUTHOR.avatar} alt={`${AUTHOR.name} avatar`} width="56" height="56" />
+  <div class="article-byline-copy">
+    <a class="article-author-name" href={AUTHOR.sameAs[0]} rel="author me" target="_blank">{AUTHOR.name}</a>
+    <div class="article-byline-meta">
+      <time datetime={publishedAt.toISOString()}>{formatArticleDate(publishedAt)}</time>
+      <span aria-hidden="true">•</span>
+      <span>{readingMinutes} min read</span>
+      {updatedAt && <span class="article-updated">Updated <time datetime={updatedAt.toISOString()}>{formatArticleDate(updatedAt)}</time></span>}
+    </div>
+  </div>
+</div>

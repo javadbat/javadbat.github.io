@@ -1,0 +1,153 @@
+---
+import { render } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import { AUTHOR, SITE } from "../config/site";
+import {
+  formatArticleDate,
+  getArticleUrl,
+  getPublishedArticles,
+  getReadingTime,
+  type ArticleEntry,
+} from "../lib/articles";
+import "../styles/articles.css";
+import ArticleCard from "./ArticleCard.astro";
+import AuthorByline from "./AuthorByline.astro";
+import SiteHeader from "./SiteHeader.astro";
+import TableOfContents from "./TableOfContents.astro";
+
+interface Props {
+  entry: ArticleEntry;
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const h2Headings = headings.filter(({ depth }) => depth === 2);
+const readingMinutes = getReadingTime(entry.body ?? "");
+const articleUrl = new URL(getArticleUrl(entry), SITE.url).href;
+const coverImageUrl = entry.data.coverImage ? new URL(entry.data.coverImage, SITE.url).href : undefined;
+const relatedArticles = (await getPublishedArticles({ includeDrafts: false }))
+  .filter((article) => article.id !== entry.id && article.data.tags.some((tag) => entry.data.tags.includes(tag)))
+  .slice(0, 2);
+const lang = entry.data.lang;
+const dir = lang === "fa" ? "rtl" : "ltr";
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.publishedAt.toISOString(),
+  dateModified: (entry.data.updatedAt ?? entry.data.publishedAt).toISOString(),
+  mainEntityOfPage: articleUrl,
+  inLanguage: lang,
+  keywords: entry.data.tags,
+  ...(coverImageUrl ? { image: [coverImageUrl] } : {}),
+  author: {
+    "@type": "Person",
+    name: AUTHOR.name,
+    url: AUTHOR.url,
+    image: new URL(AUTHOR.avatar, SITE.url).href,
+    sameAs: AUTHOR.sameAs,
+  },
+  publisher: {
+    "@type": "Person",
+    name: AUTHOR.name,
+    url: AUTHOR.url,
+  },
+};
+---
+
+<Layout title={`${entry.data.title} — ${SITE.name}`} description={entry.data.description} lang={lang} dir={dir}>
+  <Fragment slot="head">
+    <link rel="canonical" href={articleUrl} />
+    <meta name="author" content={AUTHOR.name} />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={entry.data.title} />
+    <meta property="og:description" content={entry.data.description} />
+    <meta property="og:url" content={articleUrl} />
+    <meta property="article:published_time" content={entry.data.publishedAt.toISOString()} />
+    <meta property="article:modified_time" content={(entry.data.updatedAt ?? entry.data.publishedAt).toISOString()} />
+    {entry.data.tags.map((tag) => <meta property="article:tag" content={tag} />)}
+    {coverImageUrl && <meta property="og:image" content={coverImageUrl} />}
+    {entry.data.coverAlt && <meta property="og:image:alt" content={entry.data.coverAlt} />}
+    <meta name="twitter:card" content={coverImageUrl ? "summary_large_image" : "summary"} />
+    <link rel="alternate" type="text/markdown" href={`${articleUrl.slice(0, -1)}.md`} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+  </Fragment>
+
+  <div class="articles-app">
+    <a class="article-skip-link" href="#article-content">Skip to article</a>
+    <article-toc>
+      <div class="article-reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+      <SiteHeader active="articles" />
+
+      <header class="article-masthead">
+        <div class="articles-container article-masthead-inner">
+          <p class="article-eyebrow">{entry.data.tags[0] ?? "Article"}</p>
+          <h1>{entry.data.title}</h1>
+          <p class="article-dek">{entry.data.description}</p>
+          <AuthorByline
+            publishedAt={entry.data.publishedAt}
+            updatedAt={entry.data.updatedAt}
+            readingMinutes={readingMinutes}
+          />
+        </div>
+      </header>
+
+      {entry.data.coverImage && (
+        <figure class="article-cover articles-container">
+          <img
+            src={entry.data.coverImage}
+            alt={entry.data.coverAlt ?? ""}
+            width="1536"
+            height="1024"
+            fetchpriority="high"
+          />
+        </figure>
+      )}
+
+      <div class="articles-container article-mobile-toc-wrap">
+        <TableOfContents headings={h2Headings} mobile />
+      </div>
+
+      <main class="articles-container article-reader-grid">
+        <article-code-enhancer>
+          <article id="article-content" class="article-prose">
+            <Content />
+          </article>
+        </article-code-enhancer>
+        <TableOfContents headings={h2Headings} />
+      </main>
+
+      <footer class="article-end articles-container">
+        <section class="article-author-card" aria-labelledby="about-author">
+          <img src={AUTHOR.avatar} alt={`${AUTHOR.name} avatar`} width="72" height="72" />
+          <div>
+            <h2 id="about-author">Written by {AUTHOR.name}</h2>
+            <p>{AUTHOR.description}</p>
+            <a href={AUTHOR.sameAs[0]} rel="author me" target="_blank">Connect on LinkedIn</a>
+          </div>
+        </section>
+
+        {relatedArticles.length > 0 && (
+          <section class="article-related" aria-labelledby="related-heading">
+            <h2 id="related-heading">Continue reading</h2>
+            <div class="article-list">
+              {relatedArticles.map((article) => <ArticleCard article={article} />)}
+            </div>
+          </section>
+        )}
+
+        <div class="article-end-links">
+          <a href="/articles/">All articles</a>
+          <span>{formatArticleDate(entry.data.publishedAt)}</span>
+        </div>
+      </footer>
+    </article-toc>
+  </div>
+</Layout>
+
+<script>
+  import "../elements/article-code";
+  import "../elements/article-toc";
+</script>

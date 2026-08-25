@@ -1,0 +1,18 @@
+---
+import type { GetStaticPaths } from "astro";
+import ArticlePage from "../../features/articles/components/ArticlePage.astro";
+import { getPublishedArticles, type ArticleEntry } from "../../features/articles/lib/articles";
+
+export const getStaticPaths = (async () => {
+  const articles = await getPublishedArticles({ includeDrafts: false });
+  return articles.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: ArticleEntry;
+}
+
+const { entry } = Astro.props;
+---
+
+<ArticlePage entry={entry} />

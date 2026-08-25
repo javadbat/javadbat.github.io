@@ -146,32 +146,6 @@
   flex: 0 0 auto;
 }
 
-.artboardIcon {
-  position: relative;
-  display: inline-block;
-  inline-size: 1rem;
-  block-size: 1rem;
-  flex: 0 0 auto;
-}
-
-.artboardIcon::before {
-  position: absolute;
-  inset: 0.2rem;
-  border: 0.1rem solid currentcolor;
-  border-radius: 0.12rem;
-  content: "";
-}
-
-.artboardIcon::after {
-  position: absolute;
-  inset: 0.08rem;
-  background:
-    linear-gradient(currentcolor 0 0) left top / 0.2rem 0.2rem no-repeat,
-    linear-gradient(currentcolor 0 0) right top / 0.2rem 0.2rem no-repeat,
-    linear-gradient(currentcolor 0 0) left bottom / 0.2rem 0.2rem no-repeat,
-    linear-gradient(currentcolor 0 0) right bottom / 0.2rem 0.2rem no-repeat;
-  content: "";
-}
 
 .documentActions,
 .historyActions,
@@ -332,12 +306,6 @@
       --jb-button-content-gap: 0.3rem;
       --jb-button-font-size-sm: 0.75rem;
       --jb-button-inline-padding-sm: 0.4rem;
-    }
-   }
-
-@media (max-width: 63.999rem) {
-  .headerActions .artboardIcon {
-      display: none;
     }
    }
 

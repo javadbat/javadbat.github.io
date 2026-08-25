@@ -1,0 +1,76 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { SITE } from "../config/site";
+import { getAllTags, getPublishedArticles } from "../lib/articles";
+import "../styles/articles.css";
+import ArticleCard from "./ArticleCard.astro";
+import SiteHeader from "./SiteHeader.astro";
+
+const articles = await getPublishedArticles();
+const tags = getAllTags(articles);
+---
+
+<Layout title={SITE.title} description={SITE.description}>
+  <Fragment slot="head">
+    <link rel="canonical" href={`${SITE.url}/articles/`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={SITE.title} />
+    <meta property="og:description" content={SITE.description} />
+    <meta property="og:url" content={`${SITE.url}/articles/`} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+  </Fragment>
+
+  <div class="articles-app">
+    <a class="article-skip-link" href="#articles-list">Skip to articles</a>
+    <SiteHeader active="articles" />
+
+    <header class="articles-index-hero">
+      <div class="articles-container articles-index-heading">
+        <p class="article-eyebrow">Notes on building for the web</p>
+        <h1>Articles</h1>
+        <p>{SITE.description}</p>
+      </div>
+    </header>
+
+    <main class="articles-container articles-index-main">
+      <article-explorer data-page-size="9">
+        <section class="article-explorer-controls" aria-label="Find articles">
+          <label class="article-search-field">
+            <span class="sr-only">Search articles</span>
+            <jb-icon-search size="sm" aria-hidden="true"></jb-icon-search>
+            <input type="search" name="article-search" placeholder="Search articles" autocomplete="off" data-article-search />
+          </label>
+
+          <div class="article-tag-filters" aria-label="Filter by topic">
+            <button type="button" data-tag="all" aria-pressed="true">All</button>
+            {tags.map((tag) => <button type="button" data-tag={tag.toLocaleLowerCase()} aria-pressed="false">{tag}</button>)}
+          </div>
+        </section>
+
+        <div class="article-list-summary" aria-live="polite" data-article-status></div>
+
+        <section id="articles-list" class="article-list" aria-label="Articles">
+          {articles.map((article) => <ArticleCard article={article} />)}
+        </section>
+
+        <div class="article-empty-state" data-article-empty hidden>
+          <h2>No articles found</h2>
+          <p>Try another search or clear the selected topic.</p>
+          <button type="button" data-clear-articles>Clear filters</button>
+        </div>
+
+        <nav class="article-pagination" aria-label="Article pages" data-article-pagination></nav>
+      </article-explorer>
+    </main>
+
+    <footer class="articles-footer articles-container">
+      <p>© {new Date().getFullYear()} {SITE.name}</p>
+      <a href="/rss.xml">RSS</a>
+    </footer>
+  </div>
+</Layout>
+
+<script>
+  import "jb-icons/search";
+  import "../elements/article-explorer";
+</script>

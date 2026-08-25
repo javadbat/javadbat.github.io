@@ -1,0 +1,44 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  mobile?: boolean;
+}
+
+const { headings, mobile = false } = Astro.props;
+---
+
+{
+  headings.length > 1 && mobile && (
+    <details class="article-toc-mobile">
+      <summary>On this page</summary>
+      <nav aria-label="Table of contents">
+        <ol>
+          {headings.map((heading) => (
+            <li><a data-toc-link href={`#${heading.slug}`}>{heading.text}</a></li>
+          ))}
+        </ol>
+      </nav>
+    </details>
+  )
+}
+
+{
+  headings.length > 1 && !mobile && (
+    <aside class="article-toc-desktop">
+      <nav aria-label="Table of contents">
+        <h2>On this page</h2>
+        <ol>
+          {headings.map((heading) => (
+            <li><a data-toc-link href={`#${heading.slug}`}>{heading.text}</a></li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+  )
+}

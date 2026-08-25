@@ -1,6 +1,5 @@
 .formModal {
-  --form-modal-animation-duration: 300ms;
-  transition: display var(--form-modal-animation-duration) allow-discrete;
+  --jb-modal-z-index: 20;
 }
 
 .modalLoading {
@@ -25,6 +24,11 @@
 }
 
 @media (min-width: 48.0625rem) {
+  .formModal {
+    --form-modal-animation-duration: 300ms;
+    transition: display var(--form-modal-animation-duration) allow-discrete;
+  }
+
   .formModal::part(background) {
     opacity: 0;
     backdrop-filter: blur(10px) contrast(1.35);
