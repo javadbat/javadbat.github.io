@@ -5,6 +5,13 @@ export interface FormRoute {
   slug?: string;
 }
 
+const FORM_ROUTE_TITLES: Record<FormSurface, string> = {
+  landing: "JB Form",
+  builder: "JB Form Builder",
+  designer: "JB Form Designer",
+  preview: "JB Form Preview",
+};
+
 const FORM_ROUTE_PATTERN = /^\/form(?:\/(builder|designer|preview)(?:\/([a-z0-9]+(?:-[a-z0-9]+)*))?)?\/?$/;
 
 export function parseFormRoute(pathname: string): FormRoute | null {
@@ -28,6 +35,10 @@ export function formRouteHref(surface: FormSurface, slug?: string): string {
   }
 
   return `/form/${surface}${slug ? `/${encodeURIComponent(slug)}` : ""}`;
+}
+
+export function formRouteTitle(surface: FormSurface): string {
+  return FORM_ROUTE_TITLES[surface];
 }
 
 export function getCurrentFormRoute(): FormRoute {
