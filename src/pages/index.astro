@@ -1,9 +1,30 @@
 ---
-import { IndexPage } from "../features/portfolio/IndexPage.js";
+import ExperiencesSection from "../features/portfolio/experiences-section/ExperiencesSection.js";
+import FeedbackSection from "../features/portfolio/feedback-section/FeedbackSection.js";
+import IntroSection from "../features/portfolio/intro-section/IntroSection.js";
+import SkillsSection from "../features/portfolio/skills-section/SkillsSection.js";
+import styles from "../features/portfolio/styles.module.css";
 import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
   <link rel="stylesheet" href="/styles/fonts.css" />
-  <IndexPage client:load />
+  <main class={styles.mainSectionsWrapper}>
+    <IntroSection />
+    <SkillsSection client:load />
+    <ExperiencesSection />
+    <FeedbackSection />
+  </main>
 </Layout>
+
+<script>
+  import "agileverse-feedback";
+  import { fixMobileHeightVH } from "../utils/helpers/layout-helper";
+
+  fixMobileHeightVH();
+
+  const feedbackForm = document.querySelector<HTMLElement & { key: string }>("agileverse-feedback");
+  if (feedbackForm) {
+    feedbackForm.key = "a45dc156a66f344f8e4e9c2649da2785";
+  }
+</script>

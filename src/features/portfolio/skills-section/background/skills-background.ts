@@ -7,7 +7,8 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import type { Shapes } from "./types";
 import earthShapeURL from "./shapes/earth2.glb?url";
 import jupiterShapeURL from "./shapes/jupiter.glb?url";
-export class SkillsBackground extends HTMLElement {
+import { JBBaseComponent,  } from "jb-core";
+export class SkillsBackground extends JBBaseComponent {
   get #width() {
     return this.clientWidth || window.innerWidth;
   }
@@ -298,7 +299,7 @@ export class SkillsBackground extends HTMLElement {
     return pixels / ppu;
   }
 }
-const myElementNotExists = !customElements.get("skills-background");
+const myElementNotExists = ! globalThis.customElements.get("skills-background");
 if (myElementNotExists) {
-  window.customElements.define("skills-background", SkillsBackground);
+  globalThis.customElements.define("skills-background", SkillsBackground);
 }

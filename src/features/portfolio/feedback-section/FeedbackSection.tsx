@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import styles from "./styles.module.css";
 
 interface AgileverseFeedbackElement extends HTMLElement {
@@ -27,15 +27,6 @@ declare module "react" {
 }
 
 function FeedbackSection() {
-  React.useEffect(() => {
-    import("agileverse-feedback").then(() => {
-      const feedbackForm = document.querySelector<AgileverseFeedbackElement>("agileverse-feedback");
-      if (feedbackForm) {
-        feedbackForm.key = "a45dc156a66f344f8e4e9c2649da2785";
-      }
-    });
-  }, []);
-
   return (
     <section className={styles.feedbackSectionWrapper}>
       <div className={styles.feedbackGrid}>
