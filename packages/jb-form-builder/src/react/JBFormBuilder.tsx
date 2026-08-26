@@ -19,7 +19,7 @@ interface JBFormBuilderOwnProps {
   onDependenciesRequired?: (event: JBFormBuilderEventMap["dependencies-required"]) => void;
   onInputValue?: (event: JBFormBuilderEventMap["input"]) => void;
   onChangeValue?: (event: JBFormBuilderEventMap["change"]) => void;
-  onSubmitValue?: (event: JBFormBuilderEventMap["submit"]) => void;
+  onAction?: (event: JBFormBuilderEventMap["action"]) => void;
   onResetValue?: (event: JBFormBuilderEventMap["reset"]) => void;
 }
 
@@ -37,7 +37,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
     onDependenciesRequired,
     onInputValue,
     onChangeValue,
-    onSubmitValue,
+    onAction,
     onResetValue,
     ...hostAttributes
   },
@@ -53,7 +53,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
   useEvent(element, "dependencies-required", onDependenciesRequired);
   useEvent(element, "input", onInputValue);
   useEvent(element, "change", onChangeValue);
-  useEvent(element, "submit", onSubmitValue);
+  useEvent(element, "action", onAction);
   useEvent(element, "reset", onResetValue);
 
   useEffect(() => {

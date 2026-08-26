@@ -77,7 +77,8 @@
 @media (max-width: 63.999rem) {
   .builderShell {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: minmax(3.25rem, auto) minmax(0, 1fr);
+      block-size: 100%;
     }
    }
 
@@ -90,6 +91,7 @@
 @media (max-width: 63.999rem) {
   .mobileTabs {
       display: block;
+      grid-row: 1;
       padding: 0.5rem 0.5rem 0;
       --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
       --jb-tab-trigger-padding: 0.65rem 0.35rem;
@@ -122,6 +124,7 @@
 
 @media (max-width: 63.999rem) {
   .workspace {
+      grid-row: 2;
       grid-template-columns: minmax(0, 1fr);
       gap: 0;
       inline-size: 100%;

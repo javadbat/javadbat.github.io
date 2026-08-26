@@ -21,7 +21,7 @@ export class FormEventController {
   readonly #form: RuntimeJBForm;
   readonly #getValues: () => FormValues;
   readonly #listeners: Array<{
-    name: "input" | "change" | "submit";
+    name: "input" | "change" | "click";
     listener: EventListener;
   }>;
   constructor(host: JBFormBuilderElement, form: RuntimeJBForm, getValues: () => FormValues) {
@@ -31,7 +31,7 @@ export class FormEventController {
     this.#listeners = [
       { name: "input", listener: this.#forward.bind(this, "input") },
       { name: "change", listener: this.#forward.bind(this, "change") },
-      { name: "submit", listener: this.#forward.bind(this, "submit") },
+      { name: "click", listener: this.#forward.bind(this, "click") },
     ];
   }
 
@@ -49,10 +49,24 @@ export class FormEventController {
     }
   }
 
-  #forward(name: "input" | "change" | "submit", sourceEvent: Event): void {
-    // jb-form consumes a trusted submit, validates, and emits a synthetic valid
-    // submit. Forward only that second event to avoid duplicate host submits.
-    if (name === "submit" && sourceEvent.isTrusted) {
+  #forward(name: "input" | "change" | "click", sourceEvent: Event): void {
+    if (name === "click") {
+      const button = sourceEvent.target instanceof HTMLElement ? sourceEvent.target.closest<HTMLElement>("jb-button") : null;
+      const action = button?.getAttribute("action");
+      if (!button || (action !== "next" && action !== "previous" && action !== "custom")) {
+        return;
+      }
+      sourceEvent.stopPropagation();
+      const accepted = dispatchRendererEvent(this.#host, "action", {
+        action,
+        buttonId: button.dataset.formElementId ?? button.id,
+        buttonName: button.getAttribute("name") ?? "",
+        value: this.#getValues(),
+        sourceEvent,
+      }, true);
+      if (accepted && (action === "next" || action === "previous")) {
+        moveWithinTab(button, action === "next" ? 1 : -1);
+      }
       return;
     }
     // Stop the internal event at the Shadow boundary, then publish one stable,
@@ -66,5 +80,17 @@ export class FormEventController {
     if (!accepted) {
       sourceEvent.preventDefault();
     }
+  }
+}
+
+function moveWithinTab(button: HTMLElement, offset: 1 | -1): void {
+  const tab = button.closest<HTMLElement>("jb-tab") as (HTMLElement & { value?: string | null }) | null;
+  if (!tab) return;
+  const triggers = Array.from(tab.querySelectorAll<HTMLElement>("jb-tab-list > jb-tab-trigger"))
+    .filter(trigger => trigger.closest("jb-tab") === tab && !trigger.hasAttribute("disabled"));
+  const currentIndex = triggers.findIndex(trigger => trigger.getAttribute("value") === tab.value);
+  const nextTrigger = triggers[currentIndex + offset];
+  if (nextTrigger) {
+    tab.value = nextTrigger.getAttribute("value");
   }
 }

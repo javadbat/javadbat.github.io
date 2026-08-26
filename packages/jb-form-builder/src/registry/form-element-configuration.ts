@@ -578,8 +578,9 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     },
     "string",
     {
-      content: localizedDefault("Submit", "ارسال"),
-      type: "submit",
+      content: localizedDefault("Next", "بعدی"),
+      type: "button",
+      action: "next",
       color: "primary",
       variant: "solid",
       size: "md",
@@ -591,8 +592,11 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       textProperty("content", "Content", "متن دکمه", true),
       selectProperty("type", "Button type", "نوع دکمه", [
         { value: "button", label: label("Button", "دکمه") },
-        { value: "submit", label: label("Submit", "ارسال") },
-        { value: "reset", label: label("Reset", "بازنشانی") },
+      ]),
+      selectProperty("action", "Action", "عملکرد", [
+        { value: "next", label: label("Next tab", "تب بعدی") },
+        { value: "previous", label: label("Previous tab", "تب قبلی") },
+        { value: "custom", label: label("Custom (handled by programmer)", "سفارشی (توسط برنامه‌نویس)") },
       ]),
       selectProperty("color", "Color", "رنگ", [
         { value: "primary", label: label("Primary", "اصلی") },

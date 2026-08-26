@@ -10,6 +10,7 @@ export type {
   JBFormBuilderEventMap,
   RendererDependenciesDetail,
   RendererDependency,
+  RendererActionDetail,
   RendererIssuesDetail,
   RendererReadyDetail,
   RendererState,

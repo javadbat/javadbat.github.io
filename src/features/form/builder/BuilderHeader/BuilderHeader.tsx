@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBTooltip } from "@jbui/tooltip/react";
 import { JBOption } from "jb-select/option/react";
@@ -45,6 +46,16 @@ function HistoryActionIcon({ action }: { action: "undo" | "redo" }) {
   );
 }
 
+function OverflowMenuIcon() {
+  return (
+    <svg className={styles.overflowMenuIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  );
+}
+
 /**
  * Owns document identity, locale selection, and primary builder actions.
  *
@@ -53,6 +64,8 @@ function HistoryActionIcon({ action }: { action: "undo" | "redo" }) {
  */
 export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   const store = useBuilderStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const selectableLocales = [...new Set(["en", "fa", ...Object.keys(store.document.localization.locales)])];
   const selectLocale = (nextLocale: string) => {
     if (!store.document.localization.locales[nextLocale]) {
@@ -65,6 +78,30 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
       });
     }
     store.setEditingLocale(nextLocale);
+    setMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (event.target instanceof Node && !menuRef.current?.contains(event.target)) setMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [menuOpen]);
+
+  const runMenuAction = (action: () => void) => {
+    setMenuOpen(false);
+    action();
   };
 
   return (
@@ -104,54 +141,74 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
       </div>
 
       <nav className={styles.headerActions} aria-label="Form actions">
-        <div className={styles.documentActions}>
-          <JBButton variant="ghost" size="sm" onClick={onImport}>
-            {messages.importJson}
-          </JBButton>
-          <JBButton variant="ghost" size="sm" onClick={onExport}>
-            {messages.exportJson}
-          </JBButton>
-        </div>
-        <div className={styles.historyActions}>
-          <JBTooltip content={messages.undo} positionArea="bottom" tail>
-            <JBButton square variant="ghost" size="sm" aria-label={messages.undo} disabled={!store.canUndo} onClick={onUndo}>
-              <HistoryActionIcon action="undo" />
-            </JBButton>
-          </JBTooltip>
-          <JBTooltip content={messages.redo} positionArea="bottom" tail>
-            <JBButton square variant="ghost" size="sm" aria-label={messages.redo} disabled={!store.canRedo} onClick={onRedo}>
-              <HistoryActionIcon action="redo" />
-            </JBButton>
-          </JBTooltip>
-        </div>
-        <JBButton variant="outline" size="sm" onClick={() => onNavigate("preview")}>
-          <jb-icon-eye open size="sm" />
-          {messages.preview}
-        </JBButton>
-        <JBButton variant="outline" size="sm" onClick={() => onNavigate("designer")}>
-          <DesignIcon/>
-          {messages.designer}
-        </JBButton>
-        <div className={styles.localeControls}>
-          <CatalogIcon iconId="language" />
-          <JBSelect<string>
-            name="contentLocale"
-            aria-label={messages.contentLocale}
-            size="sm"
-            value={store.editingLocale}
-            hideClear
-            onChange={event => selectLocale(event.target.value)}
+        <div className={styles.overflowMenu} ref={menuRef}>
+          <button
+            type="button"
+            className={styles.overflowMenuToggle}
+            aria-label="More form actions"
+            aria-expanded={menuOpen}
+            aria-controls="builder-mobile-actions"
+            onClick={() => setMenuOpen(open => !open)}
           >
-            {selectableLocales.map(contentLocale => (
-              <JBOption key={contentLocale} value={contentLocale}>
-                {contentLocale.toUpperCase()}
-              </JBOption>
-            ))}
-          </JBSelect>
+            <OverflowMenuIcon />
+          </button>
+          <div id="builder-mobile-actions" className={styles.overflowMenuPanel} hidden={!menuOpen}>
+            <JBTooltip content={messages.formSettings} positionArea="bottom" tail>
+              <button type="button" className={styles.menuSettingsButton} onClick={() => runMenuAction(onOpenSettings)}>
+                <SettingsIcon />
+                {messages.formSettings}
+              </button>
+            </JBTooltip>
+            <div className={styles.documentActions}>
+              <JBButton variant="ghost" size="sm" onClick={() => runMenuAction(onImport)}>
+                {messages.importJson}
+              </JBButton>
+              <JBButton variant="ghost" size="sm" onClick={() => runMenuAction(onExport)}>
+                {messages.exportJson}
+              </JBButton>
+            </div>
+            <div className={styles.historyActions}>
+              <JBTooltip content={messages.undo} positionArea="bottom" tail>
+                <JBButton square variant="ghost" size="sm" aria-label={messages.undo} disabled={!store.canUndo} onClick={() => runMenuAction(onUndo)}>
+                  <HistoryActionIcon action="undo" />
+                </JBButton>
+              </JBTooltip>
+              <JBTooltip content={messages.redo} positionArea="bottom" tail>
+                <JBButton square variant="ghost" size="sm" aria-label={messages.redo} disabled={!store.canRedo} onClick={() => runMenuAction(onRedo)}>
+                  <HistoryActionIcon action="redo" />
+                </JBButton>
+              </JBTooltip>
+            </div>
+            <JBButton variant="outline" size="sm" onClick={() => runMenuAction(() => onNavigate("preview"))}>
+              <jb-icon-eye open size="sm" />
+              {messages.preview}
+            </JBButton>
+            <JBButton variant="outline" size="sm" onClick={() => runMenuAction(() => onNavigate("designer"))}>
+              <DesignIcon />
+              {messages.designer}
+            </JBButton>
+            <div className={styles.localeControls}>
+              <CatalogIcon iconId="language" />
+              <JBSelect<string>
+                name="contentLocale"
+                aria-label={messages.contentLocale}
+                size="sm"
+                value={store.editingLocale}
+                hideClear
+                onChange={event => selectLocale(event.target.value)}
+              >
+                {selectableLocales.map(contentLocale => (
+                  <JBOption key={contentLocale} value={contentLocale}>
+                    {contentLocale.toUpperCase()}
+                  </JBOption>
+                ))}
+              </JBSelect>
+            </div>
+          </div>
         </div>
-        <JBButton color="primary" size="sm" disabled={store.status === "saving"} onClick={() => void store.save()}>
-          <SaveIcon/>
-          {store.status === "saving" ? messages.saving : messages.save}
+        <JBButton className={styles.saveButton} square color="primary" size="sm" disabled={store.status === "saving"} onClick={() => void store.save()}>
+          <SaveIcon />
+          <span className={styles.saveLabel}>{store.status === "saving" ? messages.saving : messages.save}</span>
         </JBButton>
       </nav>
     </header>

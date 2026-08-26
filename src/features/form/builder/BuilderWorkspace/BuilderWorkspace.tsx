@@ -28,20 +28,36 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
 
   return (
     <div className={styles.builderShell}>
-      <nav aria-label="Side panels">
-        <JBTab value={compactPanel} onChange={(event: JBTabChangeEvent) => setCompactPanel(event.detail.value as CompactPanel)} className={styles.compactTabs}>
+      <nav className={styles.compactTabs} aria-label="Side panels">
+        <JBTab
+          value={compactPanel}
+          onChange={(event: JBTabChangeEvent) => setCompactPanel(event.detail.value as CompactPanel)}
+        >
           <JBTabList aria-label="Side panels">
-            <JBTabTrigger value="catalog" color="primary">{messages.componentCatalog}</JBTabTrigger>
-            <JBTabTrigger value="properties" color="primary">{messages.properties}</JBTabTrigger>
+            <JBTabTrigger value="catalog" color="primary">
+              {messages.componentCatalog}
+            </JBTabTrigger>
+            <JBTabTrigger value="properties" color="primary">
+              {messages.properties}
+            </JBTabTrigger>
           </JBTabList>
         </JBTab>
       </nav>
-      <nav aria-label="Mobile workspace panels">
-        <JBTab value={mobilePanel} onChange={(event: JBTabChangeEvent) => setMobilePanel(event.detail.value as MobilePanel)} className={styles.mobileTabs}>
+      <nav className={styles.mobileTabs} aria-label="Mobile workspace panels">
+        <JBTab
+          value={mobilePanel}
+          onChange={(event: JBTabChangeEvent) => setMobilePanel(event.detail.value as MobilePanel)}
+        >
           <JBTabList aria-label="Mobile workspace panels" size="sm">
-            <JBTabTrigger value="catalog" color="primary">{messages.componentCatalog}</JBTabTrigger>
-            <JBTabTrigger value="canvas" color="primary">{messages.formCanvas}</JBTabTrigger>
-            <JBTabTrigger value="properties" color="primary">{messages.properties}</JBTabTrigger>
+            <JBTabTrigger value="catalog" color="dark">
+              {messages.componentCatalog}
+            </JBTabTrigger>
+            <JBTabTrigger value="canvas" color="secondary-subtle">
+              {messages.formCanvas}
+            </JBTabTrigger>
+            <JBTabTrigger value="properties" color="positive-subtle">
+              {messages.properties}
+            </JBTabTrigger>
           </JBTabList>
         </JBTab>
       </nav>

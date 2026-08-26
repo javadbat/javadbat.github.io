@@ -230,3 +230,10 @@
       padding-inline-end: 0.2rem;
     }
    }
+
+@media (max-width: 63.999rem) {
+  .noSelection {
+      place-items: start center;
+      align-content: start;
+    }
+   }

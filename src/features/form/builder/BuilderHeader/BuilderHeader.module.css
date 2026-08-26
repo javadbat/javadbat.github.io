@@ -173,6 +173,54 @@
   transform: scaleX(-1);
 }
 
+.overflowMenu {
+  display: contents;
+}
+
+.overflowMenuToggle {
+  display: none;
+}
+
+.overflowMenuPanel {
+  display: contents;
+}
+
+.overflowMenuPanel[hidden] {
+  display: none;
+}
+
+.overflowMenuIcon {
+  inline-size: 1.3rem;
+  block-size: 1.3rem;
+  fill: currentcolor;
+}
+
+.menuSettingsButton {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.6rem 0.7rem;
+  border: 0;
+  border-radius: var(--form-radius-sm);
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.menuSettingsButton:hover,
+.menuSettingsButton:focus-visible {
+  color: var(--form-accent);
+  background: var(--form-accent-soft);
+  outline: none;
+}
+
+.menuSettingsButton .settingsIcon {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+}
+
 .historyIcon:dir(rtl)[data-action="undo"] {
   transform: scaleX(-1);
 }
@@ -237,9 +285,10 @@
 
 @media (max-width: 63.999rem) {
   .header {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 0.5rem 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
       min-block-size: 0;
       margin: 0.5rem 0.5rem 0;
       padding: 0.5rem 0.625rem;
@@ -248,13 +297,8 @@
    }
 
 @media (max-width: 63.999rem) {
-  .brandMark {
-      inline-size: 2.25rem;
-      block-size: 2.25rem;
-    }
-   }
-
-@media (max-width: 63.999rem) {
+  .brand,
+  .brandMark,
   .brand>span:last-child,
   .identityBadge {
       display: none;
@@ -263,7 +307,9 @@
 
 @media (max-width: 63.999rem) {
   .documentIdentity {
-      justify-content: flex-end;
+      flex: 0 1 auto;
+      justify-content: flex-start;
+      max-inline-size: calc(100% - 6rem);
       min-inline-size: 0;
     }
    }
@@ -275,78 +321,128 @@
    }
 
 @media (max-width: 63.999rem) {
+  .settingsButton,
   .saveState {
-      padding-inline: 0.45rem;
-      font-size: 0.62rem;
+      display: none;
     }
    }
 
 @media (max-width: 63.999rem) {
   .headerActions {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      display: flex;
+      flex: 0 0 auto;
       gap: 0.35rem;
-      grid-column: 1 / -1;
+      align-items: center;
       min-inline-size: 0;
-      padding-block-end: 0;
       overflow: visible;
     }
    }
 
 @media (max-width: 63.999rem) {
-  .headerActions :global(jb-button),
-  .headerActions :global(jb-select) {
-      min-inline-size: 0;
+  .overflowMenu {
+      position: relative;
+      display: block;
+    }
+
+  .overflowMenuToggle {
+      display: inline-grid;
+      place-items: center;
+      inline-size: 2.5rem;
+      block-size: 2.5rem;
+      padding: 0;
+      border: 0;
+      border-radius: var(--form-radius-sm);
+      color: var(--form-muted);
+      background: var(--form-neutral-soft);
+      cursor: pointer;
+    }
+
+  .overflowMenuToggle:hover,
+  .overflowMenuToggle:focus-visible,
+  .overflowMenuToggle[aria-expanded="true"] {
+      color: var(--form-accent);
+      background: var(--form-accent-soft);
+      outline: none;
+    }
+
+  .overflowMenuPanel {
+      position: absolute;
+      inset-block-start: calc(100% + 0.5rem);
+      inset-inline-end: 0;
+      z-index: 30;
+      display: grid;
+      gap: 0.35rem;
+      inline-size: min(18rem, calc(100vw - 1.5rem));
+      padding: 0.5rem;
+      border: 0.0625rem solid var(--form-line);
+      border-radius: var(--form-radius-md);
+      background: var(--form-surface);
+      box-shadow: var(--shadow-float);
+      corner-shape: squircle;
+    }
+
+  .overflowMenuPanel[hidden] {
+      display: none;
+    }
+
+  .overflowMenuPanel :global(jb-button) {
       inline-size: 100%;
+      justify-content: flex-start;
+      min-inline-size: 0;
     }
-   }
 
-@media (max-width: 63.999rem) {
-  .headerActions :global(jb-button) {
-      --jb-button-content-gap: 0.3rem;
-      --jb-button-font-size-sm: 0.75rem;
-      --jb-button-inline-padding-sm: 0.4rem;
+  .overflowMenuPanel .documentActions {
+      display: grid;
+      gap: 0.2rem;
     }
-   }
 
-@media (max-width: 63.999rem) {
-  .localeControls {
+  .overflowMenuPanel .historyActions {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0;
+    }
+
+  .overflowMenuPanel .historyActions :global(jb-button) {
+      inline-size: 2.5rem;
+    }
+
+  .overflowMenuPanel .localeControls {
       box-sizing: border-box;
       inline-size: 100%;
       min-inline-size: 0;
       padding-inline: 0.35rem 0.15rem;
     }
-   }
 
-@media (max-width: 63.999rem) {
-  .localeControls > :global(svg) {
-      display: none;
+  .overflowMenuPanel .localeControls > :global(svg) {
+      display: block;
     }
-   }
 
-@media (max-width: 63.999rem) {
-  .localeControls :global(jb-select) {
+  .overflowMenuPanel .localeControls :global(jb-select) {
       inline-size: 100%;
     }
-   }
 
-@media (max-width: 63.999rem) {
-  .historyActions {
-      display: none;
+  .overflowMenuPanel .menuSettingsButton {
+      inline-size: 100%;
+      justify-content: flex-start;
     }
-   }
 
-@media (max-width: 63.999rem) {
   .headerActions :global(jb-button) {
-      --jb-button-height: 2.75rem;
-      --jb-button-height-sm: 2.75rem;
+      --jb-button-content-gap: 0.3rem;
+      --jb-button-font-size-sm: 0.75rem;
+      --jb-button-inline-padding-sm: 0.4rem;
+    }
+
+  .headerActions > .saveButton {
+      --jb-button-height: 2.5rem;
+      --jb-button-height-sm: 2.5rem;
+      inline-size: 2.5rem;
+      min-inline-size: 2.5rem;
     }
    }
 
 @media (max-width: 63.999rem) {
-  .settingsButton {
-      inline-size: 2.25rem;
-      block-size: 2.25rem;
+  .saveLabel {
+      display: none;
     }
    }
 

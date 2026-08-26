@@ -59,6 +59,12 @@ export interface RendererValueDetail {
   sourceEvent: Event;
 }
 
+export interface RendererActionDetail extends RendererValueDetail {
+  action: "next" | "previous" | "custom";
+  buttonId: string;
+  buttonName: string;
+}
+
 export interface JBFormBuilderElement extends HTMLElement {
   /**
    * Documents are assigned as objects because JSON attributes lose types and
@@ -96,7 +102,7 @@ export interface JBFormBuilderEventMap {
   "dependencies-required": CustomEvent<RendererDependenciesDetail>;
   input: CustomEvent<RendererValueDetail>;
   change: CustomEvent<RendererValueDetail>;
-  submit: CustomEvent<RendererValueDetail>;
+  action: CustomEvent<RendererActionDetail>;
   reset: CustomEvent<{ value: FormValues }>;
 }
 
