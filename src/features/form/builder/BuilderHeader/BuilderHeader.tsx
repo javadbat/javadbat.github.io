@@ -64,6 +64,7 @@ function OverflowMenuIcon() {
  */
 export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   const store = useBuilderStore();
+  const showMobilePreview = store.status === "ready" && store.hasSavedDraft && !store.isDirty;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const selectableLocales = [...new Set(["en", "fa", ...Object.keys(store.document.localization.locales)])];
@@ -206,10 +207,32 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
             </div>
           </div>
         </div>
-        <JBButton className={styles.saveButton} square color="primary" size="sm" disabled={store.status === "saving"} onClick={() => void store.save()}>
+        <JBButton
+          className={styles.saveButton}
+          data-mobile-hidden={showMobilePreview}
+          square
+          color="primary"
+          size="sm"
+          aria-label={messages.save}
+          disabled={store.status === "saving"}
+          onClick={() => void store.save()}
+        >
           <SaveIcon />
           <span className={styles.saveLabel}>{store.status === "saving" ? messages.saving : messages.save}</span>
         </JBButton>
+        {showMobilePreview ? (
+          <JBButton
+            className={styles.mobilePreviewButton}
+            square
+            color="primary"
+            size="sm"
+            aria-label={messages.preview}
+            onClick={() => onNavigate("preview")}
+          >
+            <jb-icon-eye open size="sm" />
+            <span className={styles.saveLabel}>{messages.preview}</span>
+          </JBButton>
+        ) : null}
       </nav>
     </header>
   );

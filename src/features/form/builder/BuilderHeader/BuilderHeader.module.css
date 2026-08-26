@@ -146,6 +146,10 @@
   flex: 0 0 auto;
 }
 
+.mobilePreviewButton {
+  display: none;
+}
+
 
 .documentActions,
 .historyActions,
@@ -187,6 +191,12 @@
 
 .overflowMenuPanel[hidden] {
   display: none;
+}
+
+@media (min-width: 64rem) {
+  .overflowMenuPanel[hidden] {
+    display: contents;
+  }
 }
 
 .overflowMenuIcon {
@@ -435,6 +445,18 @@
   .headerActions > .saveButton {
       --jb-button-height: 2.5rem;
       --jb-button-height-sm: 2.5rem;
+      inline-size: 2.5rem;
+      min-inline-size: 2.5rem;
+    }
+
+  .headerActions > .saveButton[data-mobile-hidden="true"] {
+      display: none;
+    }
+
+  .headerActions > .mobilePreviewButton {
+      --jb-button-height: 2.5rem;
+      --jb-button-height-sm: 2.5rem;
+      display: inline-flex;
       inline-size: 2.5rem;
       min-inline-size: 2.5rem;
     }
