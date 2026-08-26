@@ -117,7 +117,7 @@ export function FormLandingApp() {
             {forms.map(record => (
               <li className={styles.savedFormCard} key={record.id}>
                 <div>
-                  <strong>{getLocalizedText(record.document.metadata.name, locale)}</strong>
+                  <strong>{getLocalizedText(record.document.metadata.name, locale, record.document.localization.defaultLocale)}</strong>
                   <code>{record.slug}</code>
                 </div>
                 <p>

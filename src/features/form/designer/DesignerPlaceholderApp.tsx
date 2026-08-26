@@ -9,7 +9,9 @@ export function DesignerPlaceholderApp() {
   const { locale, direction, messages } = useFormLocale("en");
   const { slug } = getCurrentFormRoute();
   const resolution = useStoredForm(slug);
-  const formName = resolution.status === "ready" ? getLocalizedText(resolution.document.metadata.name, locale) : "";
+  const formName = resolution.status === "ready"
+    ? getLocalizedText(resolution.document.metadata.name, locale, resolution.document.localization.defaultLocale)
+    : "";
 
   return (
     <div className={styles.page} dir={direction}>

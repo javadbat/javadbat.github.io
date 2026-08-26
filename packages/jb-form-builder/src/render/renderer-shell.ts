@@ -17,6 +17,7 @@ export function createRendererShell(host: HTMLElement): RendererShell {
   status.setAttribute("aria-live", "polite");
 
   const errors = document.createElement("div");
+  errors.id = "jb-form-builder-error-summary";
   errors.setAttribute("part", "error-summary");
   errors.setAttribute("role", "alert");
   errors.setAttribute("aria-live", "assertive");

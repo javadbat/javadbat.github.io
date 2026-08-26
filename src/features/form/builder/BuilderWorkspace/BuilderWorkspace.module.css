@@ -43,17 +43,11 @@
         corner-shape: squircle;
       }
     }
-   }
-
-@media (max-width: 74.9375rem) and (min-width: 64rem) {
   .workspace {
       grid-template-columns: 18rem minmax(28rem, 1fr);
       min-block-size: 0;
       padding-block-start: 0.5rem;
     }
-   }
-
-@media (max-width: 74.9375rem) and (min-width: 64rem) {
   .workspace[data-side-panel="catalog"] > :global([data-builder-panel="properties"]),
   .workspace[data-side-panel="properties"] > :global([data-builder-panel="catalog"]) {
       display: none;
@@ -72,7 +66,7 @@
       grid-column: 2;
       grid-row: 1;
     }
-   }
+}
 
 @media (max-width: 63.999rem) {
   .builderShell {
@@ -80,15 +74,9 @@
       grid-template-rows: minmax(3.25rem, auto) minmax(0, 1fr);
       block-size: 100%;
     }
-   }
-
-@media (max-width: 63.999rem) {
   .compactTabs {
       display: none;
     }
-   }
-
-@media (max-width: 63.999rem) {
   .mobileTabs {
       display: block;
       grid-row: 1;
@@ -113,16 +101,10 @@
   .mobileTabs :global(jb-tab-list)::part(indicator) {
       corner-shape: squircle;
     }
-   }
-
-@media (max-width: 63.999rem) {
   .mobileTabs :global(jb-tab-trigger) {
       min-inline-size: 0;
       font-size: 0.78rem;
     }
-   }
-
-@media (max-width: 63.999rem) {
   .workspace {
       grid-row: 2;
       grid-template-columns: minmax(0, 1fr);
@@ -131,9 +113,6 @@
       max-inline-size: none;
       padding: 0.5rem;
     }
-   }
-
-@media (max-width: 63.999rem) {
   .workspace[data-mobile-panel="catalog"] > :global([data-builder-panel="canvas"]),
   .workspace[data-mobile-panel="catalog"] > :global([data-builder-panel="properties"]),
   .workspace[data-mobile-panel="canvas"] > :global([data-builder-panel="catalog"]),
@@ -142,4 +121,4 @@
   .workspace[data-mobile-panel="properties"] > :global([data-builder-panel="canvas"]) {
       display: none;
     }
-   }
+}

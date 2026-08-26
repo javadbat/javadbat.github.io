@@ -1,4 +1,4 @@
-import { useEffect, useState, type DragEvent } from "react";
+import { useEffect, useState, type DragEvent, type KeyboardEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { getLocalizedText, type JBTabElementV1 } from "../../domain/form-document";
@@ -32,6 +32,34 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
   const [activeTabId, setActiveTabId] = useState(initialTab?.id ?? "");
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const activeTab = element.tabs.find(tab => tab.id === activeTabId) ?? initialTab;
+
+  const activateTab = (tabId: string) => {
+    setActiveTabId(tabId);
+    store.setActiveContainerTab(element.id, tabId);
+    props.onConfigure(element.id);
+    focusTabEditorRow(tabId);
+  };
+
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, tabIndex: number) => {
+    const enabledTabs = element.tabs.filter(tab => !tab.disabled);
+    if (enabledTabs.length < 2) return;
+
+    const direction = getComputedStyle(event.currentTarget).direction;
+    const offset = direction === "rtl"
+      ? event.key === "ArrowRight" ? -1 : 1
+      : event.key === "ArrowRight" ? 1 : -1;
+    const currentEnabledIndex = enabledTabs.findIndex(tab => tab.id === element.tabs[tabIndex]?.id);
+    let nextIndex = currentEnabledIndex;
+    if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = enabledTabs.length - 1;
+    else if (event.key === "ArrowLeft" || event.key === "ArrowRight") nextIndex = (currentEnabledIndex + offset + enabledTabs.length) % enabledTabs.length;
+    else return;
+
+    event.preventDefault();
+    const nextTab = enabledTabs[nextIndex];
+    activateTab(nextTab.id);
+    requestAnimationFrame(() => document.getElementById(`builder-tab-trigger-${nextTab.id}`)?.focus());
+  };
 
   useEffect(() => {
     if (!element.tabs.some(tab => tab.id === activeTabId && !tab.disabled)) setActiveTabId(initialTab?.id ?? "");
@@ -68,22 +96,21 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
     <div className={styles.tabContainerCard}>
       <CanvasCard {...props} element={element} />
       <div className={styles.builderTabList} role="tablist" aria-label={typeof element.props.ariaLabel === "object" ? getLocalizedText(element.props.ariaLabel as never, locale, defaultLocale) : "Form sections"}>
-        {element.tabs.map(tab => (
+        {element.tabs.map((tab, tabIndex) => (
           <button
             key={tab.id}
             type="button"
             role="tab"
+            id={`builder-tab-trigger-${tab.id}`}
             aria-selected={tab.id === activeTab?.id}
+            aria-controls={`builder-tab-panel-${tab.id}`}
+            tabIndex={tab.id === activeTab?.id ? 0 : -1}
             disabled={tab.disabled}
             className={styles.builderTabTrigger}
             data-active={tab.id === activeTab?.id}
             style={tab.color ? { borderBlockEndColor: tab.color } : undefined}
-            onClick={() => {
-              setActiveTabId(tab.id);
-              store.setActiveContainerTab(element.id, tab.id);
-              props.onConfigure(element.id);
-              focusTabEditorRow(tab.id);
-            }}
+            onClick={() => activateTab(tab.id)}
+            onKeyDown={event => handleTabKeyDown(event, tabIndex)}
           >
             {getLocalizedText(tab.label, locale, defaultLocale)}
           </button>
@@ -94,7 +121,13 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
         }}>+</JBButton>
       </div>
       {activeTab ? (
-        <div className={styles.tabPanel} role="tabpanel">
+        <div
+          className={styles.tabPanel}
+          id={`builder-tab-panel-${activeTab.id}`}
+          role="tabpanel"
+          aria-labelledby={`builder-tab-trigger-${activeTab.id}`}
+          tabIndex={0}
+        >
           {activeTab.children.length === 0 ? (
             <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>
               Drop form elements into this tab

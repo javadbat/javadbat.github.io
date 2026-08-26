@@ -110,6 +110,7 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages }:
         ref={rendererRef}
         formDocument={document}
         locale={locale}
+        aria-label={accessibleName}
         loadDependencies={loadDependencies}
         onReady={() => setValidationState("idle")}
         onDocumentInvalid={() => setValidationState("error")}

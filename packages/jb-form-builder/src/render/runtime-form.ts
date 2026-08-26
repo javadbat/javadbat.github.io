@@ -6,6 +6,10 @@ import type { RendererShell, RuntimeFormRender } from "./types";
 export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string, unavailableTypes: ReadonlySet<string>): RuntimeFormRender {
   const form = document.createElement("jb-form") as RuntimeJBForm;
   form.setAttribute("part", "form");
+  // ElementInternals supplies the role in supporting browsers. Keep an
+  // attribute fallback so the generated form retains semantics everywhere.
+  form.setAttribute("role", "form");
+  form.setAttribute("aria-describedby", "jb-form-builder-error-summary");
   if (documentValue.slug) {
     form.setAttribute("name", documentValue.slug);
   }

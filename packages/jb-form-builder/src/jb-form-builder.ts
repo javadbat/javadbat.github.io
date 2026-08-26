@@ -47,7 +47,7 @@ function unexpectedIssue(error: unknown): FormIssue {
 
 export class JBFormBuilderWebComponent extends JBBaseComponent implements JBFormBuilderElement {
   static get observedAttributes(): string[] {
-    return ["locale"];
+    return ["locale", "aria-label", "aria-labelledby", "aria-describedby"];
   }
 
   #shell!: RendererShell;
@@ -99,6 +99,10 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
     }
     if (name === "locale" && this.#locale !== newValue) {
       this.#locale = newValue?.trim() || null;
+      this.requestRender();
+      return;
+    }
+    if (name === "aria-label" || name === "aria-labelledby" || name === "aria-describedby") {
       this.requestRender();
     }
   }
@@ -323,6 +327,17 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
       const runtime = buildRuntimeForm(formDocument, activeLocale.locale, unavailableTypes);
       if (!this.isCurrent(generation)) {
         return;
+      }
+
+      for (const attribute of ["aria-label", "aria-labelledby", "aria-describedby"] as const) {
+        const value = this.getAttribute(attribute);
+        if (attribute === "aria-describedby") {
+          runtime.form.setAttribute(attribute, ["jb-form-builder-error-summary", value].filter(Boolean).join(" "));
+        } else if (value === null) {
+          runtime.form.removeAttribute(attribute);
+        } else {
+          runtime.form.setAttribute(attribute, value);
+        }
       }
 
       // Commit once after every async prerequisite succeeds. The previous form

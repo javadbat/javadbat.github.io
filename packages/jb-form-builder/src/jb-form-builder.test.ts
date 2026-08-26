@@ -144,6 +144,8 @@ describe("JBFormBuilderWebComponent", () => {
 
     expect(renderer.state).toBe("ready");
     expect(renderer.form).toBeInstanceOf(StubJBForm);
+    expect(renderer.form?.getAttribute("role")).toBe("form");
+    expect(renderer.form?.getAttribute("aria-describedby")).toBe("jb-form-builder-error-summary");
     expect(renderer.shadowRoot?.querySelectorAll("[data-form-element-id]")).toHaveLength(formElementRegistry.length);
     for (const element of documentValue.elements) {
       const runtime = renderer.shadowRoot?.querySelector(`[data-form-element-id="${element.id}"]`);
@@ -152,6 +154,17 @@ describe("JBFormBuilderWebComponent", () => {
       expect(runtime?.getAttribute("name")).toBe(entry.isContent || entry.isContainer ? null : element.name);
     }
     expect(renderer.requiredDependencies).toHaveLength(formElementRegistry.filter(entry => !entry.isContent).length + 1);
+  });
+
+  it("forwards the host accessible name to the generated form", async () => {
+    registerStubDependencies();
+    const renderer = createRenderer();
+    renderer.setAttribute("aria-label", "Registration form");
+    renderer.formDocument = createEmptyFormDocument();
+
+    await renderer.updateComplete;
+
+    expect(renderer.form?.getAttribute("aria-label")).toBe("Registration form");
   });
 
   it("uses a host-provided dependency loader", async () => {

@@ -517,6 +517,31 @@ describe("Builder core editing", () => {
       expect(editorRow.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "nearest", inline: "nearest" });
     });
   });
+
+  it("implements keyboard navigation and relationships for builder tabs", () => {
+    const store = new BuilderStore();
+    const tabEntry = formElementRegistry.find(entry => entry.type === "jb-tab")!;
+    store.addElement(tabEntry);
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+
+    const tabs = view.container.querySelectorAll<HTMLButtonElement>("[role='tab']");
+    const panel = view.container.querySelector<HTMLElement>("[role='tabpanel']");
+
+    expect(tabs).toHaveLength(2);
+    expect(tabs[0].tabIndex).toBe(0);
+    expect(tabs[1].tabIndex).toBe(-1);
+    expect(tabs[0].getAttribute("aria-controls")).toBe(panel?.id);
+    expect(panel?.getAttribute("aria-labelledby")).toBe(tabs[0].id);
+
+    fireEvent.keyDown(tabs[0], { key: "ArrowRight" });
+
+    expect(tabs[1].getAttribute("aria-selected")).toBe("true");
+    expect(tabs[1].tabIndex).toBe(0);
+  });
 });
 
 describe("Builder explicit persistence", () => {
