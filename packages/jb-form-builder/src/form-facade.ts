@@ -1,7 +1,17 @@
 import type { FormValues, RuntimeJBForm } from "./types";
 
 export function getRuntimeFormValues(form: RuntimeJBForm | null): FormValues {
-  return form && typeof form.getFormValues === "function" ? form.getFormValues() : {};
+  return form && typeof form.getFormValues === "function" ? normalizeFormValue(form.getFormValues()) as FormValues : {};
+}
+
+/** Convert jb-form's internal repeated-name Map collection into JSON-friendly arrays. */
+function normalizeFormValue(value: unknown): unknown {
+  if (value instanceof Map) return Array.from(value.values(), normalizeFormValue);
+  if (Array.isArray(value)) return value.map(normalizeFormValue);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, normalizeFormValue(child)]));
+  }
+  return value;
 }
 
 export function setRuntimeFormValues(form: RuntimeJBForm | null, values: FormValues): void {

@@ -87,6 +87,10 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-condition": () => import("jb-condition"),
   "jb-form-wizard": () => import("jb-form-wizard"),
   "jb-repeatable-group": async () => {
+    // Repeatable controls are rendered by the framework rather than by a
+    // document child, so load their design-system buttons alongside the
+    // lightweight group host.
+    await import("jb-button");
     if (!customElements.get("jb-repeatable-group")) customElements.define("jb-repeatable-group", class extends HTMLElement {});
   },
 };

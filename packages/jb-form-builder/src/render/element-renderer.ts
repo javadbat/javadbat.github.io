@@ -188,6 +188,11 @@ function repeatableNumber(element: JBRepeatableGroupElementV1, key: string, fall
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : fallback;
 }
 
+function repeatableText(element: JBRepeatableGroupElementV1, key: string, fallback: string): string {
+  const value = element.props[key];
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
 function cloneLeafForRepeat(element: JBFormElementV1): JBFormElementV1 {
   const clone = structuredClone(element);
   clone.id = crypto.randomUUID();
@@ -199,43 +204,81 @@ function renderRepeatableGroup(wrapper: HTMLElement, element: JBRepeatableGroupE
   const minItems = repeatableNumber(element, "minItems", 1);
   const maxItems = Math.max(minItems, repeatableNumber(element, "maxItems", 10));
   const initialCount = Math.min(maxItems, Math.max(minItems, repeatableNumber(element, "repeatCount", minItems)));
+  const itemBackground = repeatableText(element, "itemBackground", "#f8fafc");
+  const itemBackgroundHover = repeatableText(element, "itemBackgroundHover", "#eef4ff");
+  const itemBorderColor = repeatableText(element, "itemBorderColor", "#d9e2f0");
+  const configuredBorderType = repeatableText(element, "itemBorderType", "solid");
+  const itemBorderType = ["solid", "dashed", "dotted", "none"].includes(configuredBorderType) ? configuredBorderType : "solid";
   const group = document.createElement("jb-repeatable-group");
   group.setAttribute("part", "repeatable-group");
   group.dataset.formElementId = element.id;
   group.dataset.repeatableGroup = element.name;
   const instances = document.createElement("div");
   instances.setAttribute("part", "repeatable-items");
-  const addButton = document.createElement("button");
-  addButton.type = "button";
-  addButton.textContent = "Add item";
-  const removeButton = document.createElement("button");
-  removeButton.type = "button";
-  removeButton.textContent = "Remove item";
+  const addButton = document.createElement("jb-button");
+  addButton.setAttribute("type", "button");
+  addButton.setAttribute("color", "primary");
+  addButton.setAttribute("variant", "outline");
+  addButton.setAttribute("size", "sm");
+  addButton.textContent = locale.toLowerCase().startsWith("fa") ? "افزودن مورد" : "Add item";
+  const controls = document.createElement("div");
+  controls.setAttribute("part", "repeatable-controls");
+  controls.style.display = "flex";
+  controls.style.justifyContent = "center";
+  controls.style.marginBlockStart = "1rem";
   const updateButtons = () => {
-    removeButton.disabled = instances.children.length <= minItems;
-    addButton.disabled = instances.children.length >= maxItems;
+    addButton.toggleAttribute("disabled", instances.children.length >= maxItems);
+    instances.querySelectorAll<HTMLElement>('[data-repeatable-delete]').forEach(button => {
+      button.toggleAttribute("disabled", instances.children.length <= minItems);
+    });
   };
   const addInstance = () => {
     if (instances.children.length >= maxItems) return;
     const subForm = document.createElement("jb-form");
     subForm.setAttribute("name", element.name);
     subForm.setAttribute("role", "group");
+    const item = document.createElement("div");
+    item.setAttribute("part", "repeatable-item");
+    item.dataset.repeatableItem = String(instances.children.length + 1);
+    item.style.backgroundColor = itemBackground;
+    item.style.border = itemBorderType === "none" ? "none" : `1px ${itemBorderType} ${itemBorderColor}`;
+    item.style.borderRadius = "0.85rem";
+    item.style.padding = "1rem";
+    item.style.transition = "background-color 160ms ease, border-color 160ms ease";
+    item.addEventListener("mouseenter", () => { item.style.backgroundColor = itemBackgroundHover; });
+    item.addEventListener("mouseleave", () => { item.style.backgroundColor = itemBackground; });
     for (const child of element.children) {
       const rendered = renderFormElement(cloneLeafForRepeat(child), locale, unavailableTypes, defaultLocale);
       subForm.append(rendered.wrapper);
       issues.push(...rendered.issues);
     }
-    instances.append(subForm);
+    item.append(subForm);
+    const deleteButton = document.createElement("jb-button");
+    deleteButton.setAttribute("type", "button");
+    deleteButton.setAttribute("color", "danger");
+    deleteButton.setAttribute("variant", "ghost");
+    deleteButton.setAttribute("size", "sm");
+    deleteButton.setAttribute("data-repeatable-delete", "true");
+    deleteButton.setAttribute("aria-label", locale.toLowerCase().startsWith("fa") ? "حذف این مورد" : "Delete this item");
+    deleteButton.textContent = locale.toLowerCase().startsWith("fa") ? "حذف مورد" : "Delete item";
+    deleteButton.addEventListener("click", () => {
+      if (instances.children.length <= minItems) return;
+      item.remove();
+      updateButtons();
+    });
+    const itemActions = document.createElement("div");
+    itemActions.setAttribute("part", "repeatable-item-actions");
+    itemActions.style.display = "flex";
+    itemActions.style.justifyContent = "flex-end";
+    itemActions.style.marginBlockStart = "0.75rem";
+    itemActions.append(deleteButton);
+    item.append(itemActions);
+    instances.append(item);
     updateButtons();
   };
   for (let index = 0; index < initialCount; index += 1) addInstance();
-  const controls = document.createElement("div");
   addButton.addEventListener("click", addInstance);
-  removeButton.addEventListener("click", () => {
-    if (instances.children.length > minItems) instances.lastElementChild?.remove();
-    updateButtons();
-  });
-  controls.append(addButton, removeButton);
+  controls.append(addButton);
   if (element.props.allowAdd === true) group.append(instances, controls);
   else group.append(instances);
   wrapper.append(group);
