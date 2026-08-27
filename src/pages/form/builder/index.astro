@@ -8,5 +8,31 @@ import { BuilderApp } from "../../../features/form/builder/BuilderApp/BuilderApp
   description="Compose and configure a portable JB form."
 >
   <link rel="stylesheet" href="/styles/fonts.css" />
-  <BuilderApp client:only="react" />
+  <BuilderApp client:only="react">
+    <div slot="fallback" class="builder-page-loading" role="status" aria-live="polite" aria-busy="true">
+      <p>Loading builder…</p>
+    </div>
+  </BuilderApp>
 </Layout>
+
+<style>
+  .builder-page-loading {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1rem;
+    min-block-size: 100dvh;
+    padding: 2rem;
+    box-sizing: border-box;
+    color: oklch(0.29 0.055 255);
+    background: oklch(0.975 0.01 255);
+    text-align: center;
+  }
+
+  .builder-page-loading p {
+    margin: 0;
+    color: oklch(0.56 0.035 255);
+    font: 500 1rem/1.5 system-ui, sans-serif;
+  }
+
+</style>

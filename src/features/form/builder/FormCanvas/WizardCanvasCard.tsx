@@ -3,11 +3,12 @@ import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { getLocalizedText, type JBFormWizardElementV1 } from "../../domain/form-document";
 import { registryByType } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
+import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { CanvasCard, type CanvasCardProps } from "./CanvasCard";
 import styles from "./FormCanvas.module.css";
+import { InsertionTarget } from "./InsertionTarget";
 
 interface WizardCanvasCardProps extends Omit<CanvasCardProps, "element"> {
   element: JBFormWizardElementV1;
@@ -19,6 +20,12 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
   const [activeStepId, setActiveStepId] = useState(element.steps[0]?.id ?? "");
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const activeStep = element.steps.find(step => step.id === activeStepId) ?? element.steps[0];
+
+  useEffect(() => {
+    const clearDropTarget = () => setDragOverIndex(null);
+    window.addEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+    return () => window.removeEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+  }, []);
 
   useEffect(() => {
     if (!element.steps.some(step => step.id === activeStepId)) setActiveStepId(element.steps[0]?.id ?? "");
@@ -89,9 +96,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
             <ol className={styles.tabChildList}>
               {activeStep.children.map((child, index) => (
                 <li key={child.id}>
-                  <div className={styles.insertionTarget} data-active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}>
-                    <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-                  </div>
+                  <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
                   <CanvasCard
                     {...props}
                     element={child}
@@ -104,9 +109,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
                     }}
                   />
                   {index === activeStep.children.length - 1 ? (
-                    <div className={styles.insertionTarget} data-active={dragOverIndex === activeStep.children.length} onDragOver={event => markDropTarget(event, activeStep.children.length)} onDrop={event => acceptDrop(event, activeStep.children.length)}>
-                      <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-                    </div>
+                    <InsertionTarget active={dragOverIndex === activeStep.children.length} onDragOver={event => markDropTarget(event, activeStep.children.length)} onDrop={event => acceptDrop(event, activeStep.children.length)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
                   ) : null}
                 </li>
               ))}

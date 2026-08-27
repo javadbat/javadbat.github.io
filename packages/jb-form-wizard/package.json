@@ -7,6 +7,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist", "README.md"],
+  "dependencies": {
+    "jb-button": "^4.2.0",
+    "jb-icons": "^2.3.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

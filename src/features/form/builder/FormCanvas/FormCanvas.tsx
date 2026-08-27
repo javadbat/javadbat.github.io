@@ -13,6 +13,7 @@ import { WizardCanvasCard } from "./WizardCanvasCard";
 import { RepeatableGroupCanvasCard } from "./RepeatableGroupCanvasCard";
 import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
+import { InsertionTarget } from "./InsertionTarget";
 
 const RemoveElementModal = lazy(() => import("../RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
 
@@ -54,7 +55,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
         </span>
       </div>
       {count === 0 ? (
-        <div className={styles.emptyCanvas} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>
+          <div className={styles.emptyCanvas} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>
           <span className={styles.emptyIllustration}>
             <CatalogIcon iconId="text-input" />
           </span>
@@ -65,14 +66,9 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
         <ol className={styles.canvasList}>
           {store.document.elements.map((element, index) => (
             <li className={styles.canvasListItem} key={element.id}>
-              <div
-                className={styles.insertionTarget}
-                data-active={dragOverIndex === index}
-                onDragOver={event => markDropTarget(event, index)}
-                onDrop={event => acceptDrop(event, index)}
-              >
-                <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-              </div>
+              <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}>
+                <CatalogIcon iconId="drop" />{messages.dropHere}
+              </InsertionTarget>
               {isTabElement(element) ? <TabCanvasCard
                 element={element}
                 index={index}
@@ -145,14 +141,9 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 onFocusOffset={interactions.focusOffset}
               />}
               {index === count - 1 ? (
-                <div
-                  className={styles.insertionTarget}
-                  data-active={dragOverIndex === count}
-                  onDragOver={event => markDropTarget(event, count)}
-                  onDrop={event => acceptDrop(event, count)}
-                >
-                  <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-                </div>
+                <InsertionTarget active={dragOverIndex === count} onDragOver={event => markDropTarget(event, count)} onDrop={event => acceptDrop(event, count)}>
+                  <CatalogIcon iconId="drop" />{messages.dropHere}
+                </InsertionTarget>
               ) : null}
             </li>
           ))}

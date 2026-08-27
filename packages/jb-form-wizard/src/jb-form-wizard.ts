@@ -4,6 +4,8 @@ import type {
   JBFormWizardCompleteDetail,
   JBFormWizardValidationMode,
 } from "./types.js";
+import "jb-button";
+import "jb-icons/arrow";
 
 export const JB_FORM_WIZARD_TAG_NAME = "jb-form-wizard" as const;
 
@@ -15,15 +17,22 @@ type ValidatableElement = HTMLElement & {
 export class JBFormWizardWebComponent extends HTMLElement {
   #activeStep = 0;
   #observer: MutationObserver;
+  #heading: HTMLElement;
   #progress: HTMLOutputElement;
-  #previousButton: HTMLButtonElement;
-  #nextButton: HTMLButtonElement;
+  #previousButton: HTMLElementTagNameMap["jb-button"];
+  #nextButton: HTMLElementTagNameMap["jb-button"];
+  #previousLabel: HTMLSpanElement;
+  #nextLabel: HTMLSpanElement;
+  #completionBadge: HTMLSpanElement;
 
   constructor() {
     super();
     const root = this.attachShadow({ mode: "open" });
     const style = document.createElement("style");
-    style.textContent = `:host{display:block}.progress{display:flex;gap:.35rem;align-items:baseline;margin-block-end:1rem;color:var(--jb-form-wizard-muted,currentColor)}.progress strong{color:var(--jb-form-wizard-color,currentColor)}.navigation{display:flex;gap:.75rem;justify-content:space-between;margin-block-start:1rem}.navigation button{min-block-size:2.75rem;min-inline-size:2.75rem;border:.0625rem solid var(--jb-form-wizard-border,currentColor);border-radius:var(--jb-radius,.75rem);padding:.5rem 1rem;color:inherit;background:var(--jb-form-wizard-background,transparent);font:inherit;cursor:pointer}.navigation button[data-primary]{border-color:var(--jb-primary,currentColor);color:var(--jb-form-wizard-primary-contrast,currentColor);background:var(--jb-form-wizard-primary-background,transparent)}.navigation button:focus-visible{outline:.2rem solid var(--jb-primary,currentColor);outline-offset:.15rem}.navigation button:disabled{cursor:not-allowed;opacity:.5}`;
+    style.textContent = `:host{display:block}.step-heading{display:block;margin-block-end:1rem;color:var(--jb-form-wizard-color,currentColor)}.step-heading[hidden]{display:none}.progress{display:flex;flex:1;align-items:baseline;justify-content:center;margin:0;color:var(--jb-form-wizard-muted,currentColor)}.navigation{display:flex;gap:.75rem;align-items:center;margin-block-start:1rem}.navigation jb-button{flex:none}.navigation jb-button[hidden]{display:none}.navigation jb-button jb-icon-arrow{flex:none;transition:transform .2s ease}.navigation jb-button.previous:hover jb-icon-arrow{transform:translateX(-.2rem)}.navigation jb-button.next:hover jb-icon-arrow{transform:translateX(.2rem)}:host-context([dir=rtl]) .navigation jb-button.previous:hover jb-icon-arrow{transform:translateX(.2rem)}:host-context([dir=rtl]) .navigation jb-button.next:hover jb-icon-arrow{transform:translateX(-.2rem)}.completion-badge{display:inline-flex;align-items:center;min-block-size:2.25rem;border:.0625rem dashed color-mix(in srgb,var(--jb-primary,currentColor) 38%,transparent);border-radius:999px;padding:.35rem .75rem;color:color-mix(in srgb,var(--jb-primary,currentColor) 72%,currentColor);background:color-mix(in srgb,var(--jb-primary,currentColor) 8%,transparent);font-size:.875em;font-weight:600}.completion-badge[hidden]{display:none}@media (prefers-reduced-motion:reduce){.navigation jb-button jb-icon-arrow{transition:none}}`;
+    this.#heading = document.createElement("strong");
+    this.#heading.className = "step-heading";
+    this.#heading.setAttribute("part", "step-heading");
     this.#progress = document.createElement("output");
     this.#progress.className = "progress";
     this.#progress.setAttribute("part", "progress");
@@ -33,25 +42,48 @@ export class JBFormWizardWebComponent extends HTMLElement {
     navigation.className = "navigation";
     navigation.setAttribute("part", "navigation");
     navigation.setAttribute("aria-label", "Wizard navigation");
-    this.#previousButton = document.createElement("button");
-    this.#previousButton.type = "button";
+    this.#previousButton = document.createElement("jb-button");
+    this.#previousButton.setAttribute("type", "button");
+    this.#previousButton.setAttribute("variant", "outline");
+    this.#previousButton.setAttribute("color", "secondary");
+    this.#previousButton.className = "previous";
     this.#previousButton.setAttribute("part", "previous-button");
     this.#previousButton.addEventListener("click", () => this.previous());
-    this.#nextButton = document.createElement("button");
-    this.#nextButton.type = "button";
+    this.#previousLabel = document.createElement("span");
+    const previousIcon = document.createElement("jb-icon-arrow");
+    previousIcon.setAttribute("direction", "inline-start");
+    previousIcon.setAttribute("size", "sm");
+    previousIcon.setAttribute("aria-hidden", "true");
+    this.#previousButton.append(previousIcon, this.#previousLabel);
+    this.#nextButton = document.createElement("jb-button");
+    this.#nextButton.setAttribute("type", "button");
+    this.#nextButton.setAttribute("variant", "solid");
+    this.#nextButton.setAttribute("color", "primary");
+    this.#nextButton.className = "next";
     this.#nextButton.dataset.primary = "";
     this.#nextButton.setAttribute("part", "next-button");
     this.#nextButton.addEventListener("click", () => {
       if (this.#activeStep === this.stepCount - 1) this.complete();
       else this.next();
     });
-    navigation.append(this.#previousButton, this.#nextButton);
-    root.append(style, this.#progress, slot, navigation);
+    this.#nextLabel = document.createElement("span");
+    const nextIcon = document.createElement("jb-icon-arrow");
+    nextIcon.setAttribute("direction", "inline-end");
+    nextIcon.setAttribute("size", "sm");
+    nextIcon.setAttribute("aria-hidden", "true");
+    this.#nextButton.append(this.#nextLabel, nextIcon);
+    this.#completionBadge = document.createElement("span");
+    this.#completionBadge.className = "completion-badge";
+    this.#completionBadge.setAttribute("part", "completion-badge");
+    this.#completionBadge.setAttribute("role", "status");
+    this.#completionBadge.hidden = true;
+    navigation.append(this.#previousButton, this.#progress, this.#nextButton, this.#completionBadge);
+    root.append(style, this.#heading, slot, navigation);
     this.#observer = new MutationObserver(() => this.#sync());
   }
 
   static get observedAttributes(): string[] {
-    return ["active-step", "validation-mode", "previous-label", "next-label", "complete-label"];
+    return ["active-step", "validation-mode", "previous-label", "next-label", "complete-label", "completion-display"];
   }
 
   connectedCallback(): void {
@@ -182,19 +214,19 @@ export class JBFormWizardWebComponent extends HTMLElement {
       this.#setStepEnabled(step, active);
     });
     const currentLabel = steps[this.#activeStep]?.dataset.stepLabel || `Step ${this.#activeStep + 1}`;
-    this.#progress.replaceChildren();
-    if (steps.length > 0) {
-      const label = document.createElement("strong");
-      label.textContent = currentLabel;
-      const position = document.createElement("span");
-      position.textContent = `${this.#activeStep + 1} / ${steps.length}`;
-      this.#progress.append(label, position);
-    }
-    this.#previousButton.textContent = this.getAttribute("previous-label") ?? "Previous";
+    this.#heading.textContent = steps.length > 0 ? currentLabel : "";
+    this.#heading.hidden = steps.length === 0;
+    this.#progress.textContent = steps.length > 0 ? `${this.#activeStep + 1} / ${steps.length}` : "";
+    this.#previousLabel.textContent = this.getAttribute("previous-label") ?? "Previous";
     this.#previousButton.disabled = this.#activeStep === 0 || steps.length === 0;
     const isLast = steps.length > 0 && this.#activeStep === steps.length - 1;
-    this.#nextButton.textContent = isLast ? this.getAttribute("complete-label") ?? "Complete" : this.getAttribute("next-label") ?? "Next";
-    this.#nextButton.disabled = steps.length === 0;
+    const completeLabel = this.getAttribute("complete-label") ?? "Complete";
+    const statusCompletion = isLast && this.getAttribute("completion-display") === "status";
+    this.#nextLabel.textContent = isLast ? completeLabel : this.getAttribute("next-label") ?? "Next";
+    this.#nextButton.hidden = statusCompletion;
+    this.#nextButton.disabled = steps.length === 0 || statusCompletion;
+    this.#completionBadge.textContent = completeLabel;
+    this.#completionBadge.hidden = !statusCompletion;
     const serializedActiveStep = String(this.#activeStep);
     if (this.getAttribute("active-step") !== serializedActiveStep) {
       this.setAttribute("active-step", serializedActiveStep);

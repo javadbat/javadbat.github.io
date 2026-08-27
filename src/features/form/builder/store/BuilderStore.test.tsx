@@ -403,18 +403,20 @@ describe("Builder core editing", () => {
     const secondId = store.document.elements[1].id;
     const canvasHandle = view.container.querySelector<HTMLElement>("[data-selected='true'] jb-button[aria-label='Drag to reorder']");
     const firstInsertionTarget = view.container.querySelectorAll<HTMLElement>("div[data-active='false']")[0];
+    const firstInsertionHitArea = firstInsertionTarget?.querySelector<HTMLElement>("[aria-hidden='true']");
     const canvasTransfer = createDataTransfer();
 
     expect(canvasHandle).toBeTruthy();
     expect(canvasHandle?.hasAttribute("draggable")).toBe(true);
     expect(firstInsertionTarget).toBeTruthy();
+    expect(firstInsertionHitArea).toBeTruthy();
     expect(firstInsertionTarget?.textContent).toContain("Drop here");
     fireEvent.dragStart(canvasHandle!, { dataTransfer: canvasTransfer });
     expect(document.body.dataset.formBuilderDragging).toBe("true");
-    fireEvent.dragOver(firstInsertionTarget!, {
+    fireEvent.dragOver(firstInsertionHitArea!, {
       dataTransfer: canvasTransfer,
     });
-    fireEvent.drop(firstInsertionTarget!, { dataTransfer: canvasTransfer });
+    fireEvent.drop(firstInsertionHitArea!, { dataTransfer: canvasTransfer });
 
     expect(store.document.elements.map(element => element.id)).toEqual([secondId, firstId]);
     expect(document.body.dataset.formBuilderDragging).toBeUndefined();

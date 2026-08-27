@@ -324,7 +324,9 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
           dependency.elementType ? [dependency.elementType] : [],
         ),
       );
-      const runtime = buildRuntimeForm(formDocument, activeLocale.locale, unavailableTypes);
+      const runtime = buildRuntimeForm(formDocument, activeLocale.locale, unavailableTypes, {
+        completionDisplay: this.getAttribute("completion-display") ?? undefined,
+      });
       if (!this.isCurrent(generation)) {
         return;
       }

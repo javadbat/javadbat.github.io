@@ -3,7 +3,7 @@ import { renderFormElement } from "./element-renderer";
 import type { RuntimeJBForm } from "../types";
 import type { RendererShell, RuntimeFormRender } from "./types";
 
-export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string, unavailableTypes: ReadonlySet<string>): RuntimeFormRender {
+export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string, unavailableTypes: ReadonlySet<string>, options: { completionDisplay?: string } = {}): RuntimeFormRender {
   const form = document.createElement("jb-form") as RuntimeJBForm;
   form.setAttribute("part", "form");
   // ElementInternals supplies the role in supporting browsers. Keep an
@@ -23,6 +23,9 @@ export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string
     issues.push(...rendered.issues);
   }
   form.append(fragment);
+  if (options.completionDisplay) {
+    form.querySelectorAll<HTMLElement>("jb-form-wizard").forEach(wizard => wizard.setAttribute("completion-display", options.completionDisplay!));
+  }
   return { form, issues };
 }
 

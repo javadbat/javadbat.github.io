@@ -53,6 +53,13 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages }:
     return () => window.clearTimeout(cleanupTimer);
   }, [resultModalOpen, submittedValues]);
 
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer || typeof renderer.setAttribute !== "function" || typeof renderer.retryRender !== "function") return;
+    renderer.setAttribute("completion-display", "status");
+    void renderer.retryRender();
+  }, [locale]);
+
   const submit = useCallback(async () => {
     const renderer = rendererRef.current;
     if (!renderer) {

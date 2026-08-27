@@ -103,6 +103,7 @@ export function PreviewApp() {
             <p>{messages.previewReadyDescription}</p>
           </header>
           <PreviewFormPanel
+            key={selectedLanguage}
             document={resolution.document}
             locale={selectedLanguage}
             accessibleName={formName || messages.previewReadyTitle}

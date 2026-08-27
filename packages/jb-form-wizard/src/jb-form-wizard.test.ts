@@ -31,6 +31,53 @@ describe("jb-form-wizard", () => {
     expect(wizard.activeStep).toBe(0);
   });
 
+  it("places progress between the navigation buttons", () => {
+    const wizard = createWizard();
+    const navigation = wizard.shadowRoot?.querySelector(".navigation");
+
+    expect(Array.from(navigation?.children ?? []).map(child => child.getAttribute("part"))).toEqual([
+      "previous-button",
+      "progress",
+      "next-button",
+      "completion-badge",
+    ]);
+  });
+
+  it("keeps the step heading above the content and only the position in navigation", () => {
+    const wizard = createWizard();
+    const heading = wizard.shadowRoot?.querySelector("strong[part='step-heading']");
+    const slot = wizard.shadowRoot?.querySelector("slot");
+    const progress = wizard.shadowRoot?.querySelector("[part='progress']");
+
+    expect(heading?.textContent).toBe("Profile");
+    expect(heading?.nextElementSibling).toBe(slot);
+    expect(progress?.textContent).toBe("1 / 2");
+    expect(progress?.querySelector("strong")).toBeNull();
+  });
+
+  it("renders direction-aware arrow icons in both navigation buttons", () => {
+    const wizard = createWizard();
+    const previousIcon = wizard.shadowRoot?.querySelector(".previous jb-icon-arrow");
+    const nextIcon = wizard.shadowRoot?.querySelector(".next jb-icon-arrow");
+
+    expect(previousIcon?.getAttribute("direction")).toBe("inline-start");
+    expect(nextIcon?.getAttribute("direction")).toBe("inline-end");
+    expect(previousIcon?.getAttribute("aria-hidden")).toBe("true");
+    expect(nextIcon?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("can show completion as a status badge instead of a button", () => {
+    const wizard = createWizard();
+    wizard.setAttribute("validation-mode", "none");
+    wizard.setAttribute("completion-display", "status");
+    wizard.next();
+
+    expect((wizard.shadowRoot?.querySelector(".next") as HTMLElement | null)?.hidden).toBe(true);
+    expect(wizard.shadowRoot?.querySelector(".next")?.hasAttribute("hidden")).toBe(true);
+    expect(wizard.shadowRoot?.querySelector(".completion-badge")?.textContent).toBe("Complete");
+    expect((wizard.shadowRoot?.querySelector(".completion-badge") as HTMLElement | null)?.hidden).toBe(false);
+  });
+
   it("blocks forward navigation when the active step is invalid", () => {
     const wizard = createWizard();
     const control = document.createElement("input");

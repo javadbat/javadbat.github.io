@@ -1,12 +1,13 @@
-import { useState, type DragEvent } from "react";
+import { useEffect, useState, type DragEvent } from "react";
 import { observer } from "mobx-react-lite";
 import type { JBConditionElementV1 } from "../../domain/form-document";
 import { registryByType } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
+import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { CanvasCard, type CanvasCardProps } from "./CanvasCard";
 import styles from "./FormCanvas.module.css";
+import { InsertionTarget } from "./InsertionTarget";
 
 interface ConditionCanvasCardProps extends Omit<CanvasCardProps, "element"> {
   element: JBConditionElementV1;
@@ -16,6 +17,12 @@ export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: 
   const { element, messages } = props;
   const store = useBuilderStore();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const clearDropTarget = () => setDragOverIndex(null);
+    window.addEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+    return () => window.removeEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+  }, []);
 
   const acceptDrop = (event: DragEvent, insertionIndex: number) => {
     event.preventDefault();
@@ -59,9 +66,7 @@ export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: 
           <ol className={styles.tabChildList}>
             {element.children.map((child, index) => (
               <li key={child.id}>
-                <div className={styles.insertionTarget} data-active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}>
-                  <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-                </div>
+                <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
                 <CanvasCard
                   {...props}
                   element={child}
@@ -73,9 +78,7 @@ export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: 
                   }}
                 />
                 {index === element.children.length - 1 ? (
-                  <div className={styles.insertionTarget} data-active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}>
-                    <span><CatalogIcon iconId="drop" />{messages.dropHere}</span>
-                  </div>
+                  <InsertionTarget active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
                 ) : null}
               </li>
             ))}

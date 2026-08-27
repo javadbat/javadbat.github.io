@@ -1,5 +1,6 @@
 export const CATALOG_DRAG_TYPE = "application/x-jb-form-element-type";
 export const CANVAS_DRAG_TYPE = "application/x-jb-form-element-id";
+export const BUILDER_DRAG_END_EVENT = "jb-form-builder-drag-end";
 
 export function beginBuilderDrag(dataTransfer: DataTransfer, source: HTMLElement, previewClassName: string, removeSelectors: string[] = []): void {
   document.body.dataset.formBuilderDragging = "true";
@@ -20,4 +21,5 @@ export function beginBuilderDrag(dataTransfer: DataTransfer, source: HTMLElement
 
 export function endBuilderDrag(): void {
   delete document.body.dataset.formBuilderDragging;
+  window.dispatchEvent(new CustomEvent(BUILDER_DRAG_END_EVENT));
 }

@@ -1,7 +1,7 @@
-import { useCallback, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useState, type DragEvent } from "react";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "../../registry/form-element-registry";
-import { CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
+import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
 interface CanvasInteractionOptions {
@@ -24,6 +24,12 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
   const count = store.document.elements.length;
   const pendingRemoval = pendingRemovalId ? store.findElement(pendingRemovalId) : null;
   const pendingRemovalEntry = pendingRemoval ? registryByType.get(pendingRemoval.type) : undefined;
+
+  useEffect(() => {
+    const clearDropTarget = () => setDragOverIndex(null);
+    window.addEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+    return () => window.removeEventListener(BUILDER_DRAG_END_EVENT, clearDropTarget);
+  }, []);
 
   const announcePosition = useCallback(
     (entry: FormElementRegistryEntry, action: string, position: number) => {
