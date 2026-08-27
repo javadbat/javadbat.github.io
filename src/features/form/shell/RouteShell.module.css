@@ -198,6 +198,26 @@
   min-inline-size: 5rem;
 }
 
+.previewHeaderIcon {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.previewBuilderIcon {
+  fill: currentcolor;
+  stroke: none;
+}
+
+.previewOverflowMenu,
+.previewOverflowToggle {
+  display: none;
+}
+
 .hero,
 .placeholder {
   display: grid;
@@ -540,6 +560,109 @@
   .previewActions {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 28.749rem) {
+  .topbar {
+    gap: 0.5rem;
+    align-items: center;
+    padding-inline: 0.75rem;
+  }
+
+  .brand {
+    min-inline-size: 0;
+  }
+
+  .brand > span:last-child {
+    display: none;
+  }
+
+  .topActions {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .previewLocaleControl {
+    display: none;
+  }
+
+  .previewNavButton {
+    --jb-button-height-sm: 2.75rem;
+    --jb-button-inline-padding-sm: 0;
+    inline-size: 2.75rem;
+    min-inline-size: 2.75rem;
+  }
+
+  .previewNavButton > span {
+    display: none;
+  }
+
+  .previewNavButton .previewHeaderIcon {
+    inline-size: 1.2rem;
+    block-size: 1.2rem;
+  }
+
+  .previewOverflowMenu {
+    position: relative;
+    display: block;
+  }
+
+  .previewOverflowToggle {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    padding: 0;
+    border: 0.0625rem solid var(--shell-line);
+    border-radius: 0.65rem;
+    color: var(--shell-muted);
+    background: var(--shell-surface);
+    cursor: pointer;
+    corner-shape: squircle;
+  }
+
+  .previewOverflowToggle:hover,
+  .previewOverflowToggle:focus-visible,
+  .previewOverflowToggle[aria-expanded="true"] {
+    color: var(--shell-accent-strong);
+    background: color-mix(in oklch, var(--shell-accent) 8%, var(--shell-surface));
+    outline: none;
+  }
+
+  .previewOverflowIcon {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    fill: currentcolor;
+  }
+
+  .previewOverflowPanel {
+    position: absolute;
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: auto minmax(5rem, 1fr);
+    gap: 0.65rem;
+    align-items: center;
+    inline-size: min(15rem, calc(100vw - 1.5rem));
+    padding: 0.75rem;
+    border: 0.0625rem solid var(--shell-line);
+    border-radius: 0.85rem;
+    color: var(--shell-muted);
+    background: var(--shell-surface);
+    box-shadow: 0 1rem 2.5rem color-mix(in oklch, var(--shell-shadow) 14%, transparent);
+    font-size: 0.75rem;
+    font-weight: 650;
+    corner-shape: squircle;
+  }
+
+  .previewOverflowPanel[hidden] {
+    display: none;
+  }
+
+  .previewOverflowPanel jb-select {
+    inline-size: 100%;
   }
 }
 

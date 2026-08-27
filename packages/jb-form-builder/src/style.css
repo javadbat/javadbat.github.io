@@ -33,6 +33,12 @@
   max-inline-size: 100%;
 }
 
+[part~="repeatable-items"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
 [part~="element"] > p {
   margin: 0;
   white-space: pre-wrap;

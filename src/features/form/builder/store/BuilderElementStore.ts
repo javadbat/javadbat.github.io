@@ -185,6 +185,9 @@ export class BuilderElementStore {
     const locale = this.draft.document.localization.defaultLocale;
     const label = locale.toLowerCase().split("-")[0] === "fa" ? `مرحله ${suffix}` : `Step ${suffix}`;
     container.steps.push({ id, value: `step_${suffix}`, label: { translations: { [locale]: label } }, children: [] });
+    for (const targetLocale of Object.keys(this.draft.document.localization.locales)) {
+      if (targetLocale !== locale) addMissingElementDefaultTranslations(container, locale, targetLocale);
+    }
     this.draft.markChanged();
     return id;
   }

@@ -52,6 +52,23 @@ describe("BuilderElementStore", () => {
     expect((elements.selected?.props.content as { translations: Record<string, string> }).translations).toEqual({ en: "Text", fa: "متن" });
   });
 
+  it("creates bilingual wizard controls and step labels", () => {
+    const document = createEmptyFormDocument();
+    document.localization.locales.fa = { direction: "rtl" };
+    const elements = new BuilderElementStore(new BuilderDraftStore(document));
+    const wizardEntry = formElementRegistry.find(entry => entry.type === "jb-form-wizard")!;
+
+    elements.add(wizardEntry);
+    if (elements.selected?.type !== "jb-form-wizard") throw new Error("Expected wizard");
+    const wizard = elements.selected;
+
+    expect(wizard.steps[0].label.translations).toEqual({ en: "Step 1", fa: "مرحله ۱" });
+    expect(wizard.props.previousLabel).toEqual({ translations: { en: "Previous", fa: "قبلی" } });
+
+    elements.addWizardStep(wizard.id);
+    expect(wizard.steps[2].label.translations).toEqual({ en: "Step 3", fa: "مرحله ۳" });
+  });
+
   it("updates the selected element and its component properties", () => {
     const { elements } = createStores();
     elements.add(formElementRegistry[0]);

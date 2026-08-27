@@ -445,6 +445,10 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
     const spacing = element.props.spacing;
     const spacingByName = { xs: "0.5rem", sm: "1rem", md: "1.75rem", lg: "2.5rem", xl: "4rem" } as const;
     target.style.marginBlock = typeof spacing === "string" && spacing in spacingByName ? spacingByName[spacing as keyof typeof spacingByName] : spacingByName.md;
+    const lineType = element.props.lineType;
+    const supportedLineTypes = new Set(["solid", "dashed", "dotted", "double", "none"]);
+    target.style.border = "0";
+    target.style.borderBlockStart = `0.0625rem ${typeof lineType === "string" && supportedLineTypes.has(lineType) ? lineType : "solid"} var(--jb-form-builder-line)`;
     return;
   }
   if (element.type === "section-heading") {
@@ -569,7 +573,17 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
   // Value parsing can depend on component props. For example, jb-time-input
   // validates HH:mm versus HH:mm:ss according to secondEnabled. Apply all
   // props before the initial value so valid configured values are not rejected.
-  setRuntimeValue(target, "initialValue", runtimeInitialValue(element));
+  const initialValue = runtimeInitialValue(element);
+  setRuntimeValue(target, "initialValue", initialValue);
+  if (element.type === "jb-time-input" && initialValue !== undefined) {
+    // jb-time-input initializes its nested jb-input when it is connected. A
+    // value assigned while the renderer is still building its detached form
+    // can therefore be cleared by that connected initialization. Reapply the
+    // configured default after the complete form has been committed.
+    queueMicrotask(() => {
+      if (target.isConnected) target.initialValue = initialValue;
+    });
+  }
   if (target.validation) {
     target.validation.list = element.validation.map(rule => compileValidationRule(rule, locale, defaultLocale));
   }

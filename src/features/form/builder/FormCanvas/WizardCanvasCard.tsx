@@ -68,7 +68,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
   return (
     <div className={styles.tabContainerCard}>
       <CanvasCard {...props} element={element} />
-      <div className={styles.builderTabList} aria-label="Wizard steps">
+      <div className={styles.builderTabList} aria-label={locale.toLowerCase().startsWith("fa") ? "مراحل فرم" : "Wizard steps"}>
         {element.steps.map((step, index) => (
           <button
             key={step.id}
@@ -81,7 +81,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
             {index + 1}. {getLocalizedText(step.label, locale, defaultLocale)}
           </button>
         ))}
-        <JBButton size="sm" variant="ghost" aria-label="Add wizard step" onClick={() => {
+        <JBButton size="sm" variant="ghost" aria-label={locale.toLowerCase().startsWith("fa") ? "افزودن مرحله" : "Add wizard step"} onClick={() => {
           const id = store.addWizardStep(element.id);
           if (id) activateStep(id);
         }}>+</JBButton>
@@ -90,7 +90,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
         <div className={styles.tabPanel} aria-label={getLocalizedText(activeStep.label, locale, defaultLocale)}>
           {activeStep.children.length === 0 ? (
             <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>
-              Drop form elements into this step
+              {locale.toLowerCase().startsWith("fa") ? "اجزای فرم را در این مرحله رها کنید" : "Drop form elements into this step"}
             </div>
           ) : (
             <ol className={styles.tabChildList}>

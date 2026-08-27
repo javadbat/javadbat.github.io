@@ -41,4 +41,17 @@ describe("form element localized defaults", () => {
       expect(options[0].label.translations.fa).toBe("گزینه ۱");
     }
   });
+
+  it("uses readable localized labels for size options", () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;
+    const sizeDefinition = entry.propertyDefinitions.find(definition => definition.key === "size")!;
+
+    expect(sizeDefinition.options).toEqual([
+      { value: "xs", label: { en: "Extra small", fa: "خیلی کوچک" } },
+      { value: "sm", label: { en: "Small", fa: "کوچک" } },
+      { value: "md", label: { en: "Medium", fa: "متوسط" } },
+      { value: "lg", label: { en: "Large", fa: "بزرگ" } },
+      { value: "xl", label: { en: "Extra large", fa: "خیلی بزرگ" } },
+    ]);
+  });
 });

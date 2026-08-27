@@ -81,6 +81,22 @@ describe("BuilderLocalizationStore", () => {
     expect(elements.selected?.label?.translations).toEqual({ en: "Account name" });
   });
 
+  it("repairs untouched Persian wizard defaults when switching to English", () => {
+    const document = createEmptyFormDocument();
+    document.localization = { defaultLocale: "fa", locales: { fa: { direction: "rtl" }, en: { direction: "ltr" } } };
+    const draft = new BuilderDraftStore(document);
+    const elements = new BuilderElementStore(draft);
+    const localization = new BuilderLocalizationStore(draft, elements, new MemoryLocalePreferences());
+    const wizardEntry = formElementRegistry.find(entry => entry.type === "jb-form-wizard")!;
+
+    elements.add(wizardEntry);
+    localization.setEditingLocale("en");
+    if (elements.selected?.type !== "jb-form-wizard") throw new Error("Expected wizard");
+
+    expect(elements.selected.steps.map(step => step.label.translations.en)).toEqual(["Step 1", "Step 2"]);
+    expect(elements.selected.props.nextLabel).toEqual({ translations: { fa: "بعدی", en: "Next" } });
+  });
+
   it("prunes translations when supported locales are removed", () => {
     const draft = new BuilderDraftStore(createEmptyFormDocument());
     const elements = new BuilderElementStore(draft);

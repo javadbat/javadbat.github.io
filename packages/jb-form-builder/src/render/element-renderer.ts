@@ -1,7 +1,7 @@
 import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isWizardElement, type JBConditionElementV1, type JBFormElementV1, type JBFormWizardElementV1, type JBRepeatableGroupElementV1, type JBTabElementV1, type LocalizedText } from "../contract/form-document";
 import type { JBConditionGroup, JBConditionValue } from "jb-condition";
 import type { FormIssue } from "../contract/form-issue";
-import { registryByType, type FormElementRegistryEntry } from "../registry/form-element-registry";
+import { addMissingElementDefaultTranslations, registryByType, type FormElementRegistryEntry } from "../registry/form-element-registry";
 import type { RuntimeFormElement } from "../registry/form-element-adapter";
 
 /** One rendered document element wrapper plus an optional isolated failure. */
@@ -159,14 +159,17 @@ function localizedProperty(element: JBFormWizardElementV1, key: string, locale: 
 
 function renderWizardElement(wrapper: HTMLElement, element: JBFormWizardElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale: string): FormIssue[] {
   const issues: FormIssue[] = [];
+  const localizedElement = structuredClone(element);
+  addMissingElementDefaultTranslations(localizedElement, defaultLocale, locale);
   const wizard = document.createElement("jb-form-wizard");
-  wizard.id = element.id;
-  wizard.dataset.formElementId = element.id;
-  wizard.setAttribute("validation-mode", element.props.validationMode === "none" ? "none" : "current");
-  wizard.setAttribute("previous-label", localizedProperty(element, "previousLabel", locale, defaultLocale, "Previous"));
-  wizard.setAttribute("next-label", localizedProperty(element, "nextLabel", locale, defaultLocale, "Next"));
-  wizard.setAttribute("complete-label", localizedProperty(element, "completeLabel", locale, defaultLocale, "Complete"));
-  for (const step of element.steps) {
+  wizard.id = localizedElement.id;
+  wizard.dataset.formElementId = localizedElement.id;
+  wizard.setAttribute("validation-mode", localizedElement.props.validationMode === "none" ? "none" : "current");
+  wizard.setAttribute("navigation-label", locale.toLowerCase().split("-")[0] === "fa" ? "پیمایش مراحل فرم" : "Wizard navigation");
+  wizard.setAttribute("previous-label", localizedProperty(localizedElement, "previousLabel", locale, defaultLocale, "Previous"));
+  wizard.setAttribute("next-label", localizedProperty(localizedElement, "nextLabel", locale, defaultLocale, "Next"));
+  wizard.setAttribute("complete-label", localizedProperty(localizedElement, "completeLabel", locale, defaultLocale, "Complete"));
+  for (const step of localizedElement.steps) {
     const stepRoot = document.createElement("section");
     stepRoot.dataset.wizardStep = "";
     stepRoot.dataset.stepId = step.id;

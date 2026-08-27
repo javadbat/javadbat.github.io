@@ -233,6 +233,28 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.activeStep).toBe(1);
   });
 
+  it("renders untouched Persian wizard defaults in English preview", async () => {
+    const wizardEntry = formElementRegistry.find(candidate => candidate.type === "jb-form-wizard")!;
+    const element = createDefaultElement(wizardEntry, "onboarding", "fa");
+    if (element.type !== "jb-form-wizard") throw new Error("Expected wizard container");
+    const formDocument = createEmptyFormDocument();
+    formDocument.localization = { defaultLocale: "fa", locales: { fa: { direction: "rtl" }, en: { direction: "ltr" } } };
+    formDocument.elements = [element];
+    const renderer = document.createElement("jb-form-builder");
+    renderer.locale = "en";
+    document.body.append(renderer);
+    renderer.formDocument = formDocument;
+
+    await renderer.updateComplete;
+    await Promise.resolve();
+
+    const runtime = expectReadyRuntime(renderer, element);
+    expect(Array.from(runtime.querySelectorAll<HTMLElement>("[data-wizard-step]")).map(step => step.dataset.stepLabel)).toEqual(["Step 1", "Step 2"]);
+    expect(runtime.getAttribute("previous-label")).toBe("Previous");
+    expect(runtime.getAttribute("next-label")).toBe("Next");
+    expect(runtime.shadowRoot?.querySelector("nav")?.getAttribute("aria-label")).toBe("Wizard navigation");
+  });
+
   it("renders fields inside tab panels and disables inactive fields for active-only validation", async () => {
     const tabEntry = formElementRegistry.find(candidate => candidate.type === "jb-tab")!;
     const inputEntry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;

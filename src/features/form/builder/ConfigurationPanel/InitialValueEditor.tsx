@@ -5,7 +5,8 @@ import { JBSelect } from "jb-select/react";
 import { JBInput } from "jb-input/react";
 import { JBTextarea } from "jb-textarea/react";
 import { JBTimeInput } from "jb-time-input/react";
-import type { ReactNode } from "react";
+import type { JBTimeInputWebComponent } from "jb-time-input";
+import { useEffect, useRef, type ReactNode } from "react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { JBFormElementType, JBFormElementV1 } from "../../domain/form-document";
 import type { FormElementRegistryEntry } from "../../registry/form-element-registry";
@@ -159,6 +160,7 @@ function rangeRenderer({ element, label, message, locale, onValueChange }: Initi
 function dateRenderer({ element, label, message, onValueChange }: InitialValueEditorProps) {
   const inputType = element.props.inputType === "GREGORIAN" || element.props.inputType === "JALALI" ? element.props.inputType : undefined;
   const valueType = element.props.valueType === "GREGORIAN" || element.props.valueType === "JALALI" || element.props.valueType === "TIME_STAMP" ? element.props.valueType : undefined;
+  const commitValue = (event: Event) => onValueChange(inputValue(event) || undefined);
   return (
     <JBDateInput
       size="sm"
@@ -173,12 +175,14 @@ function dateRenderer({ element, label, message, onValueChange }: InitialValueEd
       direction={element.props.direction === "rtl" || element.props.direction === "ltr" ? element.props.direction : undefined}
       showPersianNumber={element.props.showPersianNumber === true}
       value={typeof element.initialValue === "string" ? element.initialValue : null}
-      onInput={event => onValueChange(inputValue(event as unknown as Event) || undefined)}
+      onInput={event => commitValue(event as unknown as Event)}
+      onChange={event => commitValue(event as unknown as Event)}
+      onSelect={event => commitValue(event as unknown as Event)}
     />
   );
 }
 
-function timeRenderer({ element, label, message, onValueChange }: InitialValueEditorProps) {
+function TimeInitialValueInput({ element, label, message, onValueChange }: InitialValueEditorProps) {
   const secondEnabled = element.props.secondEnabled === true;
   const storedValue = typeof element.initialValue === "string" ? element.initialValue : null;
   const displayedValue = storedValue && !secondEnabled && /^\d{2}:\d{2}:\d{2}$/.test(storedValue)
@@ -186,17 +190,34 @@ function timeRenderer({ element, label, message, onValueChange }: InitialValueEd
     : storedValue && secondEnabled && /^\d{2}:\d{2}$/.test(storedValue)
       ? `${storedValue}:00`
       : storedValue;
+  const timeInputRef = useRef<JBTimeInputWebComponent | null>(null);
+  const commitCurrentValue = () => onValueChange(timeInputRef.current?.value || undefined);
+
+  useEffect(() => {
+    const picker = timeInputRef.current?.elements?.timePicker?.component;
+    if (!picker) return;
+    const commitPickerValue = () => commitCurrentValue();
+    picker.addEventListener("change", commitPickerValue);
+    return () => picker.removeEventListener("change", commitPickerValue);
+  }, [onValueChange]);
+
   return (
     <JBTimeInput
+      ref={timeInputRef}
       label={label}
       message={message}
       secondEnabled={secondEnabled}
       frontalZero={element.props.frontalZero !== false}
       showPersianNumber={element.props.showPersianNumber === true}
       value={displayedValue}
-      onInput={event => onValueChange(inputValue(event as unknown as Event) || undefined)}
+      onInput={commitCurrentValue}
+      onChange={commitCurrentValue}
     />
   );
+}
+
+function timeRenderer(props: InitialValueEditorProps) {
+  return <TimeInitialValueInput {...props} />;
 }
 
 function textareaRenderer({ element, label, message, onValueChange }: InitialValueEditorProps) {

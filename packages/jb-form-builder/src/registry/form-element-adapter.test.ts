@@ -6,6 +6,17 @@ import { createDefaultElement, formElementRegistry } from "./form-element-regist
 import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("form element adapter runtime assignment", () => {
+  it("applies the configured divider line type", () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "divider")!;
+    const element = createDefaultElement(entry, "divider");
+    element.props.lineType = "dashed";
+    const target = document.createElement("hr") as unknown as RuntimeFormElement;
+
+    entry.applyToRuntime(target, element, "en");
+
+    expect(target.style.borderBlockStart).toBe("0.0625rem dashed var(--jb-form-builder-line)");
+  });
+
   it.each([
     { type: "jb-number-input", property: "decimalPrecision", propertyValue: 2, initialValue: "12.34", runtimeInitialValue: "12.34" },
     { type: "jb-range-input", property: "mode", propertyValue: "range", initialValue: [2, 8], runtimeInitialValue: [2, 8] },

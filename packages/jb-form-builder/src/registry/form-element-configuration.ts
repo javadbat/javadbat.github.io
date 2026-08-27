@@ -12,6 +12,11 @@ export interface PropertyOption {
   label: PropertyLabel;
 }
 
+export interface NumberPropertyValueAdapter {
+  fromInput: (value: number) => number;
+  toInput: (value: number) => number;
+}
+
 export interface FormElementPropertyDefinition {
   key: string;
   label: PropertyLabel;
@@ -21,6 +26,7 @@ export interface FormElementPropertyDefinition {
   min?: number;
   max?: number;
   step?: number;
+  valueAdapter?: NumberPropertyValueAdapter;
   options?: readonly PropertyOption[];
 }
 
@@ -70,12 +76,23 @@ const urlProperty = (key: string, en: string, fa: string): FormElementPropertyDe
   control: "url",
 });
 
-const numberProperty = (key: string, en: string, fa: string, options: Pick<FormElementPropertyDefinition, "min" | "max" | "step"> = {}): FormElementPropertyDefinition => ({
+const numberProperty = (
+  key: string,
+  en: string,
+  fa: string,
+  options: Pick<FormElementPropertyDefinition, "min" | "max" | "step" | "valueAdapter"> = {},
+): FormElementPropertyDefinition => ({
   key,
   label: label(en, fa),
   control: "number",
   ...options,
 });
+
+const ROOT_FONT_SIZE_PX = 16;
+const remPixelValueAdapter: NumberPropertyValueAdapter = {
+  fromInput: value => value / ROOT_FONT_SIZE_PX,
+  toInput: value => value * ROOT_FONT_SIZE_PX,
+};
 
 const colorProperty = (key: string, en: string, fa: string): FormElementPropertyDefinition => ({
   key,
@@ -102,10 +119,13 @@ const stringListProperty = (key: string, en: string, fa: string): FormElementPro
   control: "string-list",
 });
 
-const sizeOptions = ["xs", "sm", "md", "lg", "xl"].map(value => ({
-  value,
-  label: label(value.toUpperCase(), value.toUpperCase()),
-}));
+const sizeOptions = [
+  { value: "xs", label: label("Extra small", "خیلی کوچک") },
+  { value: "sm", label: label("Small", "کوچک") },
+  { value: "md", label: label("Medium", "متوسط") },
+  { value: "lg", label: label("Large", "بزرگ") },
+  { value: "xl", label: label("Extra large", "خیلی بزرگ") },
+];
 
 const inputModeOptions = [
   ["text", "Text", "متن"],
@@ -197,8 +217,17 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
   divider: configuration(
     { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
     "none",
-    { spacing: "md" },
-    [selectProperty("spacing", "Spacing", "فاصله", sizeOptions)],
+    { spacing: "md", lineType: "solid" },
+    [
+      selectProperty("spacing", "Spacing", "فاصله", sizeOptions),
+      selectProperty("lineType", "Line type", "نوع خط", [
+        { value: "solid", label: label("Solid", "پیوسته") },
+        { value: "dashed", label: label("Dashed", "خط‌چین") },
+        { value: "dotted", label: label("Dotted", "نقطه‌چین") },
+        { value: "double", label: label("Double", "دوتایی") },
+        { value: "none", label: label("No line", "بدون خط") },
+      ]),
+    ],
   ),
   "section-heading": configuration(
     { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
@@ -222,7 +251,12 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     [
       textareaProperty("content", "Text", "متن", true),
       colorProperty("color", "Color", "رنگ"),
-      numberProperty("fontSize", "Font size (rem)", "اندازه متن (rem)", { min: 0.5, max: 6, step: 0.125 }),
+      numberProperty("fontSize", "Font size (px)", "اندازه متن (px)", {
+        min: 0.5,
+        max: 6,
+        step: 0.125,
+        valueAdapter: remPixelValueAdapter,
+      }),
       selectProperty("fontWeight", "Font weight", "ضخامت متن", [
         { value: "normal", label: label("Normal", "معمولی") },
         { value: "medium", label: label("Medium", "متوسط") },

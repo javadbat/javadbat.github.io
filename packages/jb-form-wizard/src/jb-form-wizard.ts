@@ -19,6 +19,7 @@ export class JBFormWizardWebComponent extends HTMLElement {
   #observer: MutationObserver;
   #heading: HTMLElement;
   #progress: HTMLOutputElement;
+  #navigation: HTMLElement;
   #previousButton: HTMLElementTagNameMap["jb-button"];
   #nextButton: HTMLElementTagNameMap["jb-button"];
   #previousLabel: HTMLSpanElement;
@@ -38,10 +39,9 @@ export class JBFormWizardWebComponent extends HTMLElement {
     this.#progress.setAttribute("part", "progress");
     this.#progress.setAttribute("aria-live", "polite");
     const slot = document.createElement("slot");
-    const navigation = document.createElement("nav");
-    navigation.className = "navigation";
-    navigation.setAttribute("part", "navigation");
-    navigation.setAttribute("aria-label", "Wizard navigation");
+    this.#navigation = document.createElement("nav");
+    this.#navigation.className = "navigation";
+    this.#navigation.setAttribute("part", "navigation");
     this.#previousButton = document.createElement("jb-button");
     this.#previousButton.setAttribute("type", "button");
     this.#previousButton.setAttribute("variant", "outline");
@@ -77,13 +77,13 @@ export class JBFormWizardWebComponent extends HTMLElement {
     this.#completionBadge.setAttribute("part", "completion-badge");
     this.#completionBadge.setAttribute("role", "status");
     this.#completionBadge.hidden = true;
-    navigation.append(this.#previousButton, this.#progress, this.#nextButton, this.#completionBadge);
-    root.append(style, this.#heading, slot, navigation);
+    this.#navigation.append(this.#previousButton, this.#progress, this.#nextButton, this.#completionBadge);
+    root.append(style, this.#heading, slot, this.#navigation);
     this.#observer = new MutationObserver(() => this.#sync());
   }
 
   static get observedAttributes(): string[] {
-    return ["active-step", "validation-mode", "previous-label", "next-label", "complete-label", "completion-display"];
+    return ["active-step", "validation-mode", "previous-label", "next-label", "complete-label", "completion-display", "navigation-label"];
   }
 
   connectedCallback(): void {
@@ -217,6 +217,7 @@ export class JBFormWizardWebComponent extends HTMLElement {
     this.#heading.textContent = steps.length > 0 ? currentLabel : "";
     this.#heading.hidden = steps.length === 0;
     this.#progress.textContent = steps.length > 0 ? `${this.#activeStep + 1} / ${steps.length}` : "";
+    this.#navigation.setAttribute("aria-label", this.getAttribute("navigation-label") ?? "Wizard navigation");
     this.#previousLabel.textContent = this.getAttribute("previous-label") ?? "Previous";
     this.#previousButton.disabled = this.#activeStep === 0 || steps.length === 0;
     const isLast = steps.length > 0 && this.#activeStep === steps.length - 1;

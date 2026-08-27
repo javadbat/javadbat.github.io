@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBColorInput } from "jb-color-input/react";
 import { JBInput } from "jb-input/react";
+import { JBNumberInput } from "jb-number-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBTextarea } from "jb-textarea/react";
@@ -109,6 +110,42 @@ export const PropertyField = observer(function PropertyField({ definition, local
     );
   }
 
+  if (definition.control === "number") {
+    const adaptToInput = definition.valueAdapter?.toInput ?? ((number: number) => number);
+    const adaptFromInput = definition.valueAdapter?.fromInput ?? ((number: number) => number);
+    const displayedValue = typeof value === "number"
+      ? definition.key === "maxFileSize"
+        ? value / BYTES_PER_MEGABYTE
+        : adaptToInput(value)
+      : "";
+
+    return (
+      <JBNumberInput
+        size="sm"
+        name={`prop-${definition.key}`}
+        label={label}
+        value={displayedValue}
+        message={guidance}
+        placeholder={placeholder}
+        minValue={definition.min === undefined ? undefined : adaptToInput(definition.min)}
+        maxValue={definition.max === undefined ? undefined : adaptToInput(definition.max)}
+        step={definition.step === undefined ? undefined : adaptToInput(definition.step)}
+        acceptNegative={definition.min === undefined || definition.min < 0}
+        onInput={event => {
+          const nextValue = inputValue(event as unknown as Event);
+          store.updateSelectedProp(
+            definition.key,
+            nextValue === ""
+              ? undefined
+              : definition.key === "maxFileSize"
+                ? Number(nextValue) * BYTES_PER_MEGABYTE
+                : adaptFromInput(Number(nextValue)),
+          );
+        }}
+      />
+    );
+  }
+
   const displayedValue =
     definition.control === "string-list"
       ? Array.isArray(value)
@@ -117,9 +154,7 @@ export const PropertyField = observer(function PropertyField({ definition, local
       : definition.localized
         ? localizedPropertyValue(value, locale, defaultLocale)
         : typeof value === "string" || typeof value === "number"
-          ? definition.key === "maxFileSize" && typeof value === "number"
-            ? String(value / BYTES_PER_MEGABYTE)
-            : String(value)
+          ? String(value)
           : "";
 
   return (
@@ -127,7 +162,7 @@ export const PropertyField = observer(function PropertyField({ definition, local
       size="sm"
       name={`prop-${definition.key}`}
       label={label}
-      type={definition.control === "number" ? "number" : definition.control === "url" ? "url" : "text"}
+      type={definition.control === "url" ? "url" : "text"}
       value={displayedValue}
       message={guidance}
       placeholder={placeholder}
@@ -135,11 +170,6 @@ export const PropertyField = observer(function PropertyField({ definition, local
         const nextValue = inputValue(event as unknown as Event);
         if (definition.localized) {
           store.updateSelectedLocalizedProp(definition.key, nextValue, locale);
-        } else if (definition.control === "number") {
-          store.updateSelectedProp(
-            definition.key,
-            nextValue === "" ? undefined : definition.key === "maxFileSize" ? Number(nextValue) * BYTES_PER_MEGABYTE : Number(nextValue),
-          );
         } else if (definition.control === "string-list") {
           store.updateSelectedProp(
             definition.key,

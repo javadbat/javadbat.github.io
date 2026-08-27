@@ -31,6 +31,9 @@ if (typeof HTMLElement.prototype.attachInternals !== "function") {
 if (typeof Element.prototype.animate !== "function") {
   Element.prototype.animate = () => ({ cancel: () => undefined }) as Animation;
 }
+if (typeof Element.prototype.getAnimations !== "function") {
+  Element.prototype.getAnimations = () => [];
+}
 if (!("part" in Element.prototype)) {
   Object.defineProperty(Element.prototype, "part", {
     configurable: true,
@@ -174,6 +177,27 @@ describe("Builder core editing", () => {
     expect(view.container.querySelector('jb-number-input[name="elementInitialValueEnd"]')).toBeTruthy();
   });
 
+  it("commits a time-picker selection before the property editor unmounts", () => {
+    const store = new BuilderStore();
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-time-input")!;
+    store.addElement(entry);
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const timeInput = view.container.querySelector("jb-time-input") as HTMLElement & {
+      elements: { timePicker: { component: HTMLElement & { value: { hour: number; minute: number; second?: number } } } };
+    };
+
+    act(() => {
+      timeInput.elements.timePicker.component.value = { hour: 9, minute: 45 };
+      timeInput.elements.timePicker.component.dispatchEvent(new Event("change"));
+    });
+
+    expect(store.selectedElement?.initialValue).toBe("09:45");
+  });
+
   it("keeps a required name empty while editing and restores it on blur", () => {
     const store = new BuilderStore();
     const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
@@ -263,6 +287,33 @@ describe("Builder core editing", () => {
     expect(colorInput).toBeTruthy();
     fireEvent.input(colorInput!, { target: { value: "oklch(0.6 0.2 250)" } });
     expect(store.selectedElement?.props.color).toBe("oklch(0.6 0.2 250)");
+  });
+
+  it("edits font size in pixels while storing rem", () => {
+    const store = new BuilderStore();
+    const textEntry = formElementRegistry.find(entry => entry.type === "text")!;
+    store.addElement(textEntry);
+    store.updateSelectedProp("fontSize", 1.5);
+    const fontSizeDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "fontSize")!;
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <PropertyField definition={fontSizeDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const numberInput = view.container.querySelector<HTMLElement>('jb-number-input[name="prop-fontSize"]')!;
+
+    expect(numberInput).toBeTruthy();
+    expect((numberInput as unknown as { value: string }).value).toBe("24");
+    expect((numberInput as unknown as { minValue: number }).minValue).toBe(8);
+    expect((numberInput as unknown as { maxValue: number }).maxValue).toBe(96);
+    expect((numberInput as unknown as { step: number }).step).toBe(2);
+
+    act(() => {
+      (numberInput as unknown as { value: string }).value = "32";
+      numberInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    expect(store.selectedElement?.props.fontSize).toBe(2);
   });
 
   it("creates registry defaults without sharing mutable props", () => {

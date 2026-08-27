@@ -1,4 +1,4 @@
-import { isContainerElement, type JBFormElementType, type JBFormElementV1, type JSONValue } from "../contract/form-document";
+import { isContainerElement, isWizardElement, type JBFormElementType, type JBFormElementV1, type JSONValue } from "../contract/form-document";
 import { configurationByType, type CommonFieldSupport, type FormElementPropertyDefinition, type InitialValueKind } from "./form-element-configuration";
 import { adapterByType, type FormElementAdapter } from "./form-element-adapter";
 
@@ -453,16 +453,33 @@ export function addMissingElementDefaultTranslations(element: JBFormElementV1, s
   if (!isContainerElement(element) && !isContainerElement(sourceDefault) && !isContainerElement(targetDefault)) {
     changed = addDefaultLocalizedValue(element.label, sourceDefault.label, targetDefault.label, sourceLocale, targetLocale) || changed;
     changed = addDefaultLocalizedValue(element.placeholder, sourceDefault.placeholder, targetDefault.placeholder, sourceLocale, targetLocale) || changed;
-    for (const definition of entry.propertyDefinitions) {
-      if (!definition.localized) continue;
-      changed = addDefaultLocalizedValue(
-        localizedValue(element.props[definition.key]),
-        localizedValue(sourceDefault.props[definition.key]),
-        localizedValue(targetDefault.props[definition.key]),
-        sourceLocale,
-        targetLocale,
-      ) || changed;
-    }
+  }
+
+  for (const definition of entry.propertyDefinitions) {
+    if (!definition.localized) continue;
+    changed = addDefaultLocalizedValue(
+      localizedValue(element.props[definition.key]),
+      localizedValue(sourceDefault.props[definition.key]),
+      localizedValue(targetDefault.props[definition.key]),
+      sourceLocale,
+      targetLocale,
+    ) || changed;
+  }
+
+  if (isWizardElement(element)) {
+    const sourceLanguage = sourceLocale.toLowerCase().split("-")[0];
+    const targetLanguage = targetLocale.toLowerCase().split("-")[0];
+    element.steps.forEach((step, index) => {
+      if (targetLocale in step.label.translations) return;
+      const position = index + 1;
+      const persianPosition = String(position).replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]);
+      const sourceDefaults = sourceLanguage === "fa"
+        ? new Set([`مرحله ${position}`, `مرحله ${persianPosition}`])
+        : new Set([`Step ${position}`]);
+      if (!sourceDefaults.has(step.label.translations[sourceLocale] ?? "")) return;
+      step.label.translations[targetLocale] = targetLanguage === "fa" ? `مرحله ${persianPosition}` : `Step ${position}`;
+      changed = true;
+    });
   }
 
   return changed;

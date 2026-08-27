@@ -43,6 +43,13 @@ describe("jb-form-wizard", () => {
     ]);
   });
 
+  it("uses the host-provided localized navigation label", () => {
+    const wizard = createWizard();
+    wizard.setAttribute("navigation-label", "پیمایش مراحل فرم");
+
+    expect(wizard.shadowRoot?.querySelector("nav")?.getAttribute("aria-label")).toBe("پیمایش مراحل فرم");
+  });
+
   it("keeps the step heading above the content and only the position in navigation", () => {
     const wizard = createWizard();
     const heading = wizard.shadowRoot?.querySelector("strong[part='step-heading']");

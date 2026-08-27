@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
@@ -16,11 +16,40 @@ function getRequestedLanguage(): string | null {
   return new URLSearchParams(window.location.search).get(PREVIEW_LANGUAGE_QUERY_PARAMETER);
 }
 
+function BuilderIcon() {
+  return (
+    <svg className={`${styles.previewHeaderIcon} ${styles.previewBuilderIcon}`} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+    </svg>
+  );
+}
+
+function DesignerIcon() {
+  return (
+    <svg className={styles.previewHeaderIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m14.7 5.3 4 4M4 20l4.3-1 10.4-10.4a2.8 2.8 0 0 0-4-4L4.3 15 4 20Z" />
+      <path d="m12.5 7.5 4 4" />
+    </svg>
+  );
+}
+
+function OverflowIcon() {
+  return (
+    <svg className={styles.previewOverflowIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="5" cy="12" r="1.6" />
+      <circle cx="12" cy="12" r="1.6" />
+      <circle cx="19" cy="12" r="1.6" />
+    </svg>
+  );
+}
+
 export function PreviewApp() {
   const { locale, direction, setLocale, messages } = useFormLocale("en");
   const { slug } = getCurrentFormRoute();
   const resolution = useStoredForm(slug);
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const supportedLanguages = useMemo(() => resolution.status === "ready" ? Object.keys(resolution.document.localization.locales) : [], [resolution]);
   const selectedLanguage = useMemo(() => {
     if (resolution.status !== "ready") return requestedLanguage ?? locale;
@@ -42,6 +71,30 @@ export function PreviewApp() {
     url.searchParams.set(PREVIEW_LANGUAGE_QUERY_PARAMETER, selectedLanguage);
     window.history.replaceState(window.history.state, "", url);
   }, [locale, resolution.status, selectedLanguage, setLocale]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (event.target instanceof Node && !menuRef.current?.contains(event.target)) setMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [menuOpen]);
+
+  const selectLanguage = (nextLanguage: string) => {
+    setRequestedLanguage(nextLanguage);
+    setLocale(nextLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
+    setMenuOpen(false);
+  };
   const unresolvedMessage =
     resolution.status === "loading"
       ? messages.loadingForms
@@ -73,11 +126,7 @@ export function PreviewApp() {
                 size="sm"
                 value={selectedLanguage}
                 hideClear
-                onChange={event => {
-                  const nextLanguage = event.target.value;
-                  setRequestedLanguage(nextLanguage);
-                  setLocale(nextLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
-                }}
+                onChange={event => selectLanguage(event.target.value)}
               >
                 {supportedLanguages.map(language => (
                   <JBOption key={language} value={language}>
@@ -87,12 +136,46 @@ export function PreviewApp() {
               </JBSelect>
             </div>
           )}
-          <JBButton variant="ghost" onClick={() => window.location.assign(formRouteHref("builder", slug))}>
-            {messages.builder}
+          <JBButton className={styles.previewNavButton} variant="ghost" size="sm" aria-label={messages.builder} onClick={() => window.location.assign(formRouteHref("builder", slug))}>
+            <BuilderIcon />
+            <span>{messages.builder}</span>
           </JBButton>
-          <JBButton variant="outline" onClick={() => window.location.assign(formRouteHref("designer", slug))}>
-            {messages.designer}
+          <JBButton className={styles.previewNavButton} variant="outline" size="sm" aria-label={messages.designer} onClick={() => window.location.assign(formRouteHref("designer", slug))}>
+            <DesignerIcon />
+            <span>{messages.designer}</span>
           </JBButton>
+          {resolution.status === "ready" && (
+            <div className={styles.previewOverflowMenu} ref={menuRef}>
+              <button
+                type="button"
+                className={styles.previewOverflowToggle}
+                aria-label={messages.moreActions}
+                aria-expanded={menuOpen}
+                aria-controls="preview-mobile-actions"
+                onClick={() => setMenuOpen(open => !open)}
+              >
+                <OverflowIcon />
+              </button>
+              <div id="preview-mobile-actions" className={styles.previewOverflowPanel} hidden={!menuOpen}>
+                <label htmlFor="preview-mobile-language">{messages.locale}</label>
+                <JBSelect<string>
+                  id="preview-mobile-language"
+                  name="previewMobileLanguage"
+                  aria-label={messages.contentLocale}
+                  size="sm"
+                  value={selectedLanguage}
+                  hideClear
+                  onChange={event => selectLanguage(event.target.value)}
+                >
+                  {supportedLanguages.map(language => (
+                    <JBOption key={language} value={language}>
+                      {language.toUpperCase()}
+                    </JBOption>
+                  ))}
+                </JBSelect>
+              </div>
+            </div>
+          )}
         </div>
       </header>
       {resolution.status === "ready" ? (

@@ -48,6 +48,10 @@ export class BuilderLocalizationStore {
 
   setEditingLocale(locale: string): void {
     if (!this.draft.document.localization.locales[locale]) return;
+    const sourceLocale = this.draft.document.localization.defaultLocale;
+    for (const element of this.draft.document.elements) {
+      addMissingElementDefaultTranslations(element, sourceLocale, locale);
+    }
     this.editingLocale = locale;
     this.preferences.set(this.preferenceScope, locale);
   }
