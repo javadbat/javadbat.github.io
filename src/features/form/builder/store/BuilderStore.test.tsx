@@ -31,6 +31,17 @@ if (typeof HTMLElement.prototype.attachInternals !== "function") {
 if (typeof Element.prototype.animate !== "function") {
   Element.prototype.animate = () => ({ cancel: () => undefined }) as Animation;
 }
+if (!("part" in Element.prototype)) {
+  Object.defineProperty(Element.prototype, "part", {
+    configurable: true,
+    get(this: Element) {
+      const readTokens = () => new Set((this.getAttribute("part") ?? "").split(/\s+/).filter(Boolean));
+      return {
+        add: (...values: string[]) => this.setAttribute("part", [...new Set([...readTokens(), ...values])].join(" ")),
+      };
+    },
+  });
+}
 
 function createDataTransfer(): DataTransfer {
   const data = new Map<string, string>();
@@ -105,6 +116,64 @@ describe("Builder shell performance baseline", () => {
 });
 
 describe("Builder core editing", () => {
+  it.each([
+    ["jb-mobile-input", 'jb-input[name="elementInitialValue"]'],
+    ["jb-password-input", 'jb-input[name="elementInitialValue"]'],
+    ["jb-payment-input", 'jb-input[name="elementInitialValue"]'],
+    ["jb-national-input", 'jb-input[name="elementInitialValue"]'],
+    ["jb-pin-input", 'jb-input[name="elementInitialValue"]'],
+    ["jb-time-input", "jb-time-input"],
+    ["jb-textarea", 'jb-textarea[name="elementInitialValue"]'],
+    ["jb-listbox", 'jb-select[name="elementInitialValue"]'],
+  ] as const)("renders %s initial values with %s", (type, selector) => {
+    const store = new BuilderStore();
+    const entry = formElementRegistry.find(candidate => candidate.type === type)!;
+    store.addElement(entry);
+
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+
+    expect(view.container.querySelector(selector)).toBeTruthy();
+    if (type === "jb-time-input") {
+      expect((view.container.querySelector("jb-time-input") as HTMLElement & { secondEnabled: boolean }).secondEnabled).toBe(false);
+    }
+  });
+
+  it.each(["jb-checkbox", "jb-switch"] as const)("renders localized boolean options for %s", type => {
+    const store = new BuilderStore();
+    const entry = formElementRegistry.find(candidate => candidate.type === type)!;
+    store.addElement(entry);
+
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={entry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+      </BuilderStoreProvider>,
+    );
+    const options = Array.from(view.container.querySelectorAll("jb-option"), option => option.textContent);
+
+    expect(options).toEqual(["—", "بله", "خیر"]);
+  });
+
+  it("uses two numeric initial-value controls for range mode", () => {
+    const store = new BuilderStore();
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-range-input")!;
+    store.addElement(entry);
+    store.updateSelectedProp("mode", "range");
+    store.updateSelectedElement({ initialValue: [2, 8] });
+
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+
+    expect(view.container.querySelector('jb-number-input[name="elementInitialValueStart"]')).toBeTruthy();
+    expect(view.container.querySelector('jb-number-input[name="elementInitialValueEnd"]')).toBeTruthy();
+  });
+
   it("keeps a required name empty while editing and restores it on blur", () => {
     const store = new BuilderStore();
     const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;

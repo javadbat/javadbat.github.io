@@ -372,6 +372,20 @@ function resolveRuntimeValue(value: JSONValue, locale: string, defaultLocale: st
   return isLocalizedText(value) ? getLocalizedText(value, locale, defaultLocale) : value;
 }
 
+function runtimeInitialValue(element: JBFormElementV1): JSONValue | undefined {
+  if (element.type !== "jb-time-input" || typeof element.initialValue !== "string") {
+    return element.initialValue;
+  }
+  const secondEnabled = element.props.secondEnabled === true;
+  if (secondEnabled && /^\d{2}:\d{2}$/.test(element.initialValue)) {
+    return `${element.initialValue}:00`;
+  }
+  if (!secondEnabled && /^\d{2}:\d{2}:\d{2}$/.test(element.initialValue)) {
+    return element.initialValue.slice(0, 5);
+  }
+  return element.initialValue;
+}
+
 function isSafeLinkUrl(value: string): boolean {
   const trimmed = value.trim();
   if (trimmed.length === 0) return false;
@@ -539,9 +553,6 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
   setRuntimeValue(target, "name", element.name);
   setRuntimeValue(target, "required", element.required);
   setRuntimeValue(target, "disabled", element.disabled);
-  if (element.type !== "jb-range-input") {
-    setRuntimeValue(target, "initialValue", element.initialValue);
-  }
   setRuntimeValue(target, "label", element.label ? getLocalizedText(element.label, locale, defaultLocale) : undefined);
   setRuntimeValue(target, "placeholder", element.placeholder ? getLocalizedText(element.placeholder, locale, defaultLocale) : undefined);
   for (const [key, value] of Object.entries(element.props)) {
@@ -555,9 +566,10 @@ function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, lo
       setRuntimeValue(target, key, resolveRuntimeValue(value, locale, defaultLocale));
     }
   }
-  if (element.type === "jb-range-input") {
-    setRuntimeValue(target, "initialValue", element.initialValue);
-  }
+  // Value parsing can depend on component props. For example, jb-time-input
+  // validates HH:mm versus HH:mm:ss according to secondEnabled. Apply all
+  // props before the initial value so valid configured values are not rejected.
+  setRuntimeValue(target, "initialValue", runtimeInitialValue(element));
   if (target.validation) {
     target.validation.list = element.validation.map(rule => compileValidationRule(rule, locale, defaultLocale));
   }

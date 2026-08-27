@@ -122,6 +122,34 @@ describe("JB element registry adapters", () => {
     expect(target.querySelector("jb-option")?.textContent).toBe("Option 1");
   });
 
+  it("uses the built renderer's configured time format before assigning its initial value", () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-time-input")!;
+    const element = createDefaultElement(entry, "appointmentTime");
+    element.props.secondEnabled = false;
+    element.initialValue = "12:30:45";
+    const assignments: Array<[string, unknown]> = [];
+    const target = document.createElement("div") as unknown as RuntimeFormElement;
+    Object.defineProperties(target, {
+      secondEnabled: {
+        configurable: true,
+        set(value: unknown) {
+          assignments.push(["secondEnabled", value]);
+        },
+      },
+      initialValue: {
+        configurable: true,
+        set(value: unknown) {
+          assignments.push(["initialValue", value]);
+        },
+      },
+    });
+
+    entry.applyToRuntime(target, element, "en");
+
+    expect(assignments).toEqual(expect.arrayContaining([["secondEnabled", false], ["initialValue", "12:30"]]));
+    expect(assignments.findIndex(([key]) => key === "secondEnabled")).toBeLessThan(assignments.findIndex(([key]) => key === "initialValue"));
+  });
+
   it("keeps user rules declarative while compiling trusted runtime validators", () => {
     const rule = createValidationRule("pattern");
     if (rule.rule !== "pattern") {

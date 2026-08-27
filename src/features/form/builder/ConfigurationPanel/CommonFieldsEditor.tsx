@@ -2,14 +2,13 @@ import { observer } from "mobx-react-lite";
 import { useRef } from "react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
-import { JBOption } from "jb-select/option/react";
-import { JBSelect } from "jb-select/react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementRegistryEntry } from "../../registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
 import { inputValue } from "./configuration-values";
+import { InitialValueEditor } from "./InitialValueEditor";
 import styles from "./ConfigurationPanel.module.css";
 
 interface CommonFieldsEditorProps {
@@ -67,43 +66,15 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
         />
       ) : null}
       {entry.commonFields.initialValue ? (
-        entry.initialValueKind === "boolean" ? (
-          <JBSelect<string>
-            size="sm"
-            popoverPosition="fixed"
-            name="elementInitialValue"
-            label={messages.initialValue}
-            message={messages.initialValueHelp}
-            value={typeof element.initialValue === "boolean" ? String(element.initialValue) : "unset"}
-            hideClear
-            onChange={event => store.updateSelectedElement({ initialValue: event.target.value === "unset" ? undefined : event.target.value === "true" })}
-          >
-            <JBOption value="unset">—</JBOption>
-            <JBOption value="true">True</JBOption>
-            <JBOption value="false">False</JBOption>
-          </JBSelect>
-        ) : (
-          <JBInput
-            size="sm"
-            name="elementInitialValue"
-            label={messages.initialValue}
-            message={messages.initialValueHelp}
-            value={
-              Array.isArray(element.initialValue)
-                ? element.initialValue.join(", ")
-                : typeof element.initialValue === "string" || typeof element.initialValue === "number"
-                  ? String(element.initialValue)
-                  : ""
-            }
-            onInput={event => {
-              const value = inputValue(event as unknown as Event);
-              store.updateSelectedElement({
-                initialValue:
-                  value === "" ? undefined : entry.initialValueKind === "range" ? (value.includes(",") ? value.split(",").map(part => Number(part.trim())) : Number(value)) : value,
-              });
-            }}
-          />
-        )
+        <InitialValueEditor
+          entry={entry}
+          element={element}
+          label={messages.initialValue}
+          message={messages.initialValueHelp}
+          locale={locale}
+          defaultLocale={defaultLocale}
+          onValueChange={value => store.updateSelectedElement({ initialValue: value as typeof element.initialValue })}
+        />
       ) : null}
       {entry.commonFields.required || entry.commonFields.disabled ? (
         <div className={styles.checkboxGroup}>
