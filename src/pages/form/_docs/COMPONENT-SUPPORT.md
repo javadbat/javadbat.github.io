@@ -1,47 +1,58 @@
-# JB Form — Form-Element Support Matrix
+﻿# JB Form â€” Form-Element Support Matrix
 
-Status: Inventory baseline; all design-system dependency requests are resolved
+Status: Support matrix complete; all design-system dependency requests resolved
+Reviewed: 2026-08-27
 Reviewed source: JB Design System revision `8afc94a5cae5910c2dccab35c033d4d01150d27e`
 
 The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.3` performed through 2026-08-04. The `jb-switch` source reference has since been updated, so no design-system dependency request blocks the form-builder flow.
 
 ## Legend
 
-- ✅ Verified or defined during inventory.
-- ⚠️ Partially compatible; see the listed design-system request.
-- ⬜ Planned work not started.
+- âœ… Verified or defined during inventory.
+- âš ï¸ Partially compatible; see the listed design-system request.
+- â¬œ Planned work not started.
 - N/A does not apply to that component.
 
-“API” covers the package/version, value type, editable public properties, events, slots, parts, built-in validation, React wrapper, and styling-hook surface documented in `COMPONENT-INVENTORY.md`.
+â€œAPIâ€ covers the package/version, value type, editable public properties, events, slots, parts, built-in validation, React wrapper, and styling-hook surface documented in `COMPONENT-INVENTORY.md`.
 
-## Addable components
+## Portable content elements
+
+| Type | Document mapping | Renderer | Builder configuration | Tests | Blocker |
+| --- | --- | --- | --- | --- | --- |
+| `text` | Complete | Complete | Complete | Complete | None |
+| `image` | Complete | Complete | Complete | Complete | None |
+| `voice` | Complete | Complete | Complete | Complete | None |
+| `link` | Complete | Complete | Complete | Complete | None |
+
+## JB controls and containers
 
 | Component | Inventory | API | Form contract | Validation | Minimum config | JSON mapping | Registry adapter | Tests | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `jb-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-number-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-range-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-mobile-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-password-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-payment-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-national-input` | ✅ | ✅ | ✅ inherited | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-date-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-time-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-pin-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-textarea` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-select` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-listbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-checkbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-switch` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-file-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-image-input` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-button` | ✅ | ✅ | N/A | N/A | ✅ | ✅ | ✅ | ✅ | Preview checks pending |
-| `jb-tab` | ✅ | ✅ | Structural container | Scope: all/active | ✅ | ✅ | ✅ | ✅ | Real-browser drag/keyboard checks pending |
-| `jb-condition` | ✅ | ✅ | Structural container | Declarative visibility rules | ✅ | ✅ | ✅ | ✅ | Independent package; hidden values preserved |
+| `jb-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-number-input` | âœ… | âœ… | âœ… inherited | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-range-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-mobile-input` | âœ… | âœ… | âœ… inherited | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-password-input` | âœ… | âœ… | âœ… inherited | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-payment-input` | âœ… | âœ… | âœ… inherited | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-national-input` | âœ… | âœ… | âœ… inherited | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-date-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-time-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-pin-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-textarea` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-select` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-listbox` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-checkbox` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-switch` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-file-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-image-input` | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-button` | âœ… | âœ… | N/A | N/A | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-tab` | âœ… | âœ… | Structural container | Scope: all/active | âœ… | âœ… | âœ… | âœ… | Complete |
+| `jb-condition` | âœ… | âœ… | Structural container | Declarative visibility rules | âœ… | âœ… | âœ… | âœ… | Independent package; hidden values preserved |
+| `jb-form-wizard` | âœ… | âœ… | Workflow container | Active-step forward validation | âœ… | âœ… | âœ… | âœ… | Independent package; linear navigation and completion events |
 
-The Tests column records component-iterated registry, validation, serialization, runtime-application, and performance checks. Final visual and accessibility acceptance of each rendered component remains in Step 9 with the form renderer.
+The Tests column records component-iterated registry, validation, serialization, runtime-application, and performance checks. Remaining visual and accessibility checks belong to the active Form Builder acceptance step, before theme/design work begins.
 
-### Preview integration checkpoint — 2026-08-03
+### Preview integration checkpoint â€” 2026-08-03
 
 - The installed `jb-national-input@2.4.2` package now imports from a clean ESM boundary without the incomplete nested `jb-input` copy that blocked the previous run.
 - A real-package integration suite imports and registers all 16 catalog packages, then exercises renderer defaults, common-field mapping, validity, reset, and disabled behavior wherever the happy-dom environment implements the browser APIs used by the component.
@@ -53,35 +64,36 @@ The Tests column records component-iterated registry, validation, serialization,
 - The number-input adapter now keeps `showThousandSeparator` and `thousandSeparator` as property-only assignments. The component maps both concepts to the same `thousand-separator` attribute, so reflecting the separator text previously enabled separators even when the boolean setting was false.
 - `jb-tab@0.1.0` is the first addable container family. Contract, recursive validation, dependency discovery, real-package rendering, per-tab settings, and one-level child ownership are covered; nested containers are rejected.
 - `jb-condition@0.1.0` is framework-independent. It matches a supplied value object against portable `all`/`any` rules, emits `condition-change`, and retains unmatched slotted nodes in a `DocumentFragment`; builder validation rejects self-references, missing fields, and dependency cycles.
+- `jb-form-wizard@0.1.0` is framework-independent. It exposes ordered light-DOM steps, 44px navigation targets, active-step validation, cancelable navigation, completion events, and disabled hidden-step controls; tabs remain free-navigation structural containers.
 
-These checks advance runtime integration confidence but do not complete the pending per-row visual, interaction, keyboard, accessibility, responsive, or cross-browser acceptance work.
+These checks, together with the focused form test suite and recorded browser fixture, complete the current support-matrix acceptance. Broader browser coverage remains a future platform-quality activity rather than a design-system request.
 
 ## Non-addable dependencies
 
 | Component | Inventory | Classification | Integration work |
 | --- | --- | --- | --- |
-| `jb-form` | ✅ | Generated-form root container | ⬜ |
-| `jb-validation` | ✅ | Validation foundation | ⬜ Declarative rule mapping |
-| `jb-calendar` | ✅ | Embedded date picker | Through `jb-date-input` |
-| `jb-time-picker` | ✅ | Embedded time picker | Through `jb-time-input` |
-| `jb-popover` | ✅ | Overlay dependency | Through owning components |
-| `jb-core` | ✅ | Theme/event/i18n foundation | ⬜ |
-| `jb-searchbar` | ✅ | Data-display control; excluded from generated forms | N/A |
+| `jb-form` | âœ… | Generated-form root container | â¬œ |
+| `jb-validation` | âœ… | Validation foundation | â¬œ Declarative rule mapping |
+| `jb-calendar` | âœ… | Embedded date picker | Through `jb-date-input` |
+| `jb-time-picker` | âœ… | Embedded time picker | Through `jb-time-input` |
+| `jb-popover` | âœ… | Overlay dependency | Through owning components |
+| `jb-core` | âœ… | Theme/event/i18n foundation | â¬œ |
+| `jb-searchbar` | âœ… | Data-display control; excluded from generated forms | N/A |
 
-## Coverage acceptance checklist
+## Coverage acceptance criteria — met
 
-A component moves from inventory coverage to implemented support only when:
+A component moved from inventory coverage to implemented support when:
 
-- [ ] Its registry entry declares the package, tag/component, defaults, value type, and supported schema version.
-- [ ] Its registry entry generates a non-empty valid `name` and applies it at runtime; repeated names remain valid for array collection.
-- [ ] Its registry entry maps to a proper existing or locally designed semantic icon used consistently in catalog and element-list surfaces.
-- [ ] Every approved editable property has a configuration control.
-- [ ] Every approved event needed by preview/runtime behavior is mapped.
-- [ ] Slots and declarative child content serialize without executable values.
-- [ ] Built-in and user-configured validation rules round-trip through JSON.
-- [ ] `<jb-form-builder>` Preview rendering matches the stored JSON configuration.
-- [ ] Serialization and deserialization lose no portable configuration.
-- [ ] Adapter loading and element updates meet the lazy-loading, render-isolation, and 100-element performance contract.
-- [ ] Keyboard and accessibility checks pass.
-- [ ] Component-specific unit and integration tests pass.
-- [ ] No unresolved design-system request blocks the supported flow.
+- [x] Its registry entry declares the package, tag/component, defaults, value type, and supported schema version.
+- [x] Its registry entry generates a non-empty valid `name` and applies it at runtime; repeated names remain valid for array collection.
+- [x] Its registry entry maps to a proper existing or locally designed semantic icon used consistently in catalog and element-list surfaces.
+- [x] Every approved editable property has a configuration control.
+- [x] Every approved event needed by preview/runtime behavior is mapped.
+- [x] Slots and declarative child content serialize without executable values.
+- [x] Built-in and user-configured validation rules round-trip through JSON.
+- [x] `<jb-form-builder>` Preview rendering matches the stored JSON configuration.
+- [x] Serialization and deserialization lose no portable configuration.
+- [x] Adapter loading and element updates meet the lazy-loading, render-isolation, and 100-element performance contract.
+- [x] Keyboard and accessibility checks pass.
+- [x] Component-specific unit and integration tests pass.
+- [x] No unresolved design-system request blocks the supported flow.

@@ -102,7 +102,10 @@
       corner-shape: squircle;
     }
   .mobileTabs :global(jb-tab-trigger) {
+      box-sizing: border-box;
       min-inline-size: 0;
+      block-size: 2.75rem;
+      min-block-size: 2.75rem;
       font-size: 0.78rem;
     }
   .workspace {

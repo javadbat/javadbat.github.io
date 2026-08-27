@@ -210,6 +210,63 @@ export class IndexedDbFormRepository implements FormRepository {
     }
   }
 
+  async deleteNamedForm(id: string): Promise<Result<void, StorageIssue>> {
+    if (!id) return failure("validation-failed", "The saved form id is required.");
+    const connection = await this.database.open();
+    if (!connection.ok) return connection;
+    try {
+      const transaction = connection.value.transaction([FORM_STORES.forms, FORM_STORES.drafts], "readwrite");
+      const forms = transaction.objectStore(FORM_STORES.forms);
+      const record = await requestToPromise(forms.get(id));
+      if (record === undefined) {
+        transaction.abort();
+        return failure("validation-failed", "The saved form was not found.");
+      }
+      forms.delete(id);
+      const draft = await requestToPromise(transaction.objectStore(FORM_STORES.drafts).get(CURRENT_DRAFT_KEY));
+      if (isObject(draft) && draft.linkedFormId === id) transaction.objectStore(FORM_STORES.drafts).delete(CURRENT_DRAFT_KEY);
+      await transactionToPromise(transaction);
+      return success(undefined);
+    } catch (cause) {
+      return mapStorageError(cause);
+    }
+  }
+
+  async deleteNamedFormBySlug(slug: string): Promise<Result<void, StorageIssue>> {
+    if (!isValidFormSlug(slug)) return failure("validation-failed", "The form slug is invalid.");
+    const connection = await this.database.open();
+    if (!connection.ok) return connection;
+    try {
+      const transaction = connection.value.transaction([FORM_STORES.forms, FORM_STORES.drafts], "readwrite");
+      const forms = transaction.objectStore(FORM_STORES.forms);
+      const record = await requestToPromise(forms.index("slug").get(slug));
+      if (record === undefined || !isObject(record) || typeof record.id !== "string") {
+        transaction.abort();
+        return failure("validation-failed", "The saved form was not found.");
+      }
+      forms.delete(record.id);
+      const draft = await requestToPromise(transaction.objectStore(FORM_STORES.drafts).get(CURRENT_DRAFT_KEY));
+      if (isObject(draft) && draft.linkedFormId === record.id) transaction.objectStore(FORM_STORES.drafts).delete(CURRENT_DRAFT_KEY);
+      await transactionToPromise(transaction);
+      return success(undefined);
+    } catch (cause) {
+      return mapStorageError(cause);
+    }
+  }
+
+  async deleteCurrentDraft(): Promise<Result<void, StorageIssue>> {
+    const connection = await this.database.open();
+    if (!connection.ok) return connection;
+    try {
+      const transaction = connection.value.transaction(FORM_STORES.drafts, "readwrite");
+      transaction.objectStore(FORM_STORES.drafts).delete(CURRENT_DRAFT_KEY);
+      await transactionToPromise(transaction);
+      return success(undefined);
+    } catch (cause) {
+      return mapStorageError(cause);
+    }
+  }
+
   async save(command: SaveFormCommand): Promise<Result<SavedFormResult, StorageIssue>> {
     let document: JBFormDocumentV1;
     try {

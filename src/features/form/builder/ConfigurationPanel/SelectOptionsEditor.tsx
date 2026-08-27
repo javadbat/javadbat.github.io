@@ -70,6 +70,7 @@ export const SelectOptionsEditor = observer(function SelectOptionsEditor({ local
             size="sm"
             name={`optionLabel-${option.id}`}
             label={messages.optionLabel}
+            message={messages.optionLabelHelp}
             value={getLocalizedText(option.label, locale, defaultLocale)}
             onInput={event => updateOptionLabel(index, inputValue(event as unknown as Event))}
           />
@@ -77,6 +78,7 @@ export const SelectOptionsEditor = observer(function SelectOptionsEditor({ local
             size="sm"
             name={`optionValue-${option.id}`}
             label={messages.optionValue}
+            message={messages.optionValueHelp}
             value={option.value}
             onInput={event => updateOption(index, { value: inputValue(event as unknown as Event) })}
           />

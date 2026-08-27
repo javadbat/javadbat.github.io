@@ -212,6 +212,23 @@ describe("IndexedDbFormRepository", () => {
     }
   });
 
+  it("deletes a named form and its linked current draft", async () => {
+    const repository = createRepository();
+    const saved = await repository.save({
+      document: namedDocument("Delete me", "delete-me"),
+      linkedRecord: null,
+      slug: "delete-me",
+    });
+    expect(saved.ok).toBe(true);
+    if (!saved.ok || !saved.value.namedForm) return;
+
+    const deleted = await repository.deleteNamedForm(saved.value.namedForm.id);
+
+    expect(deleted).toEqual({ ok: true, value: undefined });
+    expect(await repository.getBySlug("delete-me")).toEqual({ ok: true, value: null });
+    expect(await repository.getCurrentDraft()).toEqual({ ok: true, value: null });
+  });
+
   it("returns typed validation and corrupt-record failures", async () => {
     const repository = createRepository();
     const invalid = namedDocument("Invalid");

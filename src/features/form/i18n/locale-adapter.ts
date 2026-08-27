@@ -9,10 +9,12 @@ import { builderStatusScreenTranslations } from "../builder/BuilderStatusScreen/
 import { builderWorkspaceTranslations } from "../builder/BuilderWorkspace/translations";
 import { componentCatalogTranslations } from "../builder/ComponentCatalog/translations";
 import { configurationPanelTranslations } from "../builder/ConfigurationPanel/translations";
+import { propertyGuidanceTranslations } from "../builder/ConfigurationPanel/property-guidance.translations";
 import { designerPlaceholderAppTranslations } from "../designer/translations";
 import { exportJsonModalTranslations } from "../builder/ExportJsonModal/translations";
 import { formCanvasTranslations } from "../builder/FormCanvas/translations";
 import { formLandingAppTranslations } from "../landing/translations";
+import { deleteFormTranslations } from "../landing/delete.translations";
 import { formResultModalTranslations } from "../preview/FormResultModal.translations";
 import { formSettingsModalTranslations } from "../builder/FormSettingsModal/translations";
 import { importJsonModalTranslations } from "../builder/ImportJsonModal/translations";
@@ -33,10 +35,12 @@ const formTranslationModules = [
   builderWorkspaceTranslations,
   componentCatalogTranslations,
   configurationPanelTranslations,
+  propertyGuidanceTranslations,
   designerPlaceholderAppTranslations,
   exportJsonModalTranslations,
   formCanvasTranslations,
   formLandingAppTranslations,
+  deleteFormTranslations,
   formResultModalTranslations,
   formSettingsModalTranslations,
   importJsonModalTranslations,

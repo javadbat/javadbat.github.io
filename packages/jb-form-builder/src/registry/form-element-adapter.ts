@@ -57,6 +57,8 @@ const allowedValuesValidation = ["allowedValues"] as const satisfies readonly Va
 
 const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   text: () => Promise.resolve(),
+  divider: () => Promise.resolve(),
+  "section-heading": () => Promise.resolve(),
   image: () => Promise.resolve(),
   voice: () => Promise.resolve(),
   link: () => Promise.resolve(),
@@ -83,10 +85,16 @@ const componentLoaders: Record<JBFormElementType, () => Promise<unknown>> = {
   "jb-button": () => import("jb-button"),
   "jb-tab": () => import("jb-tab"),
   "jb-condition": () => import("jb-condition"),
+  "jb-form-wizard": () => import("jb-form-wizard"),
+  "jb-repeatable-group": async () => {
+    if (!customElements.get("jb-repeatable-group")) customElements.define("jb-repeatable-group", class extends HTMLElement {});
+  },
 };
 
 const definitions = [
   contentAdapterDefinition("text", "p"),
+  contentAdapterDefinition("divider", "hr"),
+  contentAdapterDefinition("section-heading", "h2"),
   contentAdapterDefinition("image", "img"),
   contentAdapterDefinition("voice", "audio"),
   contentAdapterDefinition("link", "a"),
@@ -110,6 +118,8 @@ const definitions = [
   adapterDefinition("jb-button", "none", ["click"], []),
   containerAdapterDefinition("jb-tab", "jb-tab"),
   containerAdapterDefinition("jb-condition", "jb-condition"),
+  containerAdapterDefinition("jb-form-wizard", "jb-form-wizard"),
+  containerAdapterDefinition("jb-repeatable-group", "jb-repeatable-group"),
 ] as const satisfies readonly FormElementAdapterDefinition[];
 
 function adapterDefinition(
@@ -135,7 +145,7 @@ function adapterDefinition(
   };
 }
 
-function contentAdapterDefinition(type: "text" | "image" | "voice" | "link", tagName: "p" | "img" | "audio" | "a"): FormElementAdapterDefinition {
+function contentAdapterDefinition(type: "text" | "divider" | "section-heading" | "image" | "voice" | "link", tagName: "p" | "hr" | "h2" | "img" | "audio" | "a"): FormElementAdapterDefinition {
   return {
     type,
     packageName: type,
@@ -152,7 +162,7 @@ function contentAdapterDefinition(type: "text" | "image" | "voice" | "link", tag
   };
 }
 
-function containerAdapterDefinition(type: "jb-tab" | "jb-condition", tagName: "jb-tab" | "jb-condition"): FormElementAdapterDefinition {
+function containerAdapterDefinition(type: "jb-tab" | "jb-condition" | "jb-form-wizard" | "jb-repeatable-group", tagName: "jb-tab" | "jb-condition" | "jb-form-wizard" | "jb-repeatable-group"): FormElementAdapterDefinition {
   return {
     type,
     packageName: type,
@@ -163,7 +173,7 @@ function containerAdapterDefinition(type: "jb-tab" | "jb-condition", tagName: "j
     adapterVersion: 1,
     supportedSchemaVersions: [1],
     valueType: "none",
-    eventNames: type === "jb-condition" ? ["condition-change"] : ["change"],
+    eventNames: type === "jb-condition" ? ["condition-change"] : type === "jb-form-wizard" ? ["wizard-before-change", "wizard-change", "wizard-complete"] : type === "jb-repeatable-group" ? ["input", "change"] : ["change"],
     validationRules: [],
     loadComponent: componentLoaders[type],
   };
@@ -292,7 +302,7 @@ function validateElement(definition: FormElementAdapterDefinition, element: JBFo
   if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(element.name)) {
     issues.push(issue(element, "invalid-name", "name", "Name must begin with a letter and contain at most 64 portable characters."));
   }
-  if (element.type === "jb-tab" || element.type === "jb-condition") {
+  if (element.type === "jb-tab" || element.type === "jb-condition" || element.type === "jb-form-wizard") {
     const knownProps = new Set(context.propertyDefinitions.map(property => property.key));
     for (const key of Object.keys(element.props)) {
       if (!knownProps.has(key)) issues.push(issue(element, "unknown-property", `props.${key}`, `${key} is not an approved editable property for ${element.type}.`));
@@ -412,6 +422,18 @@ function renderSelectOptions(target: RuntimeFormElement, value: JSONValue | unde
 }
 
 function applyToRuntime(target: RuntimeFormElement, element: JBFormElementV1, locale: string, defaultLocale = "en"): void {
+  if (element.type === "divider") {
+    target.setAttribute("aria-hidden", "true");
+    const spacing = element.props.spacing;
+    const spacingByName = { xs: "0.5rem", sm: "1rem", md: "1.75rem", lg: "2.5rem", xl: "4rem" } as const;
+    target.style.marginBlock = typeof spacing === "string" && spacing in spacingByName ? spacingByName[spacing as keyof typeof spacingByName] : spacingByName.md;
+    return;
+  }
+  if (element.type === "section-heading") {
+    target.textContent = element.props.content === undefined ? "" : String(resolveRuntimeValue(element.props.content, locale, defaultLocale));
+    target.dataset.formContent = "section-heading";
+    return;
+  }
   if (element.type === "text") {
     const content = element.props.content;
     target.textContent = content === undefined ? "" : String(resolveRuntimeValue(content, locale, defaultLocale));

@@ -391,7 +391,7 @@ Registry implementation status:
 - serialization/deserialization use lossless structured clones and runtime application resolves localized properties and declarative `jb-option` children;
 - user validation remains function-free JSON (`minLength`, `maxLength`, `pattern`, `minValue`, `maxValue`, and `allowedValues`) and is compiled into trusted `jb-validation` entries only at runtime;
 - optional empty fields pass custom rules; the component's built-in `required` behavior exclusively owns missing-value errors;
-- component-iterated adapter tests and the production build pass; per-component rendered Preview checks remain in Step 9.
+- component-iterated adapter tests and the production build pass; remaining per-component rendered Preview checks belong to Form Builder acceptance before theme/design work.
 
 ## Renderer boundary
 

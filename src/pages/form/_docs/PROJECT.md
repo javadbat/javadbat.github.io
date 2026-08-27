@@ -1,6 +1,6 @@
 # JB Form — Route-Family Project Description
 
-Status: Phase 1 accepted; Phase 2 in progress
+Status: Phase 1 accepted; Phase 2 Form Builder workflow completion in progress
 Route namespace: `/form`  
 Design system: [JB Design System](https://javadbat.github.io/design-system/?path=/docs/getting-started-introduction--docs)
 
@@ -11,14 +11,15 @@ JB Form is a local-first route family for building, designing, and previewing fo
 The route family contains:
 
 - **Builder** — create and configure form structure.
-- **Designer** — an empty Phase 1 destination that becomes the Theme Designer in Phase 3.
+- **Designer** — an identity-preserving placeholder that becomes the Theme Designer after higher-priority workflow expansion.
 - **Preview** — load stored form JSON and render a responsive runtime form.
 
-The project has two gated phases:
+The project has four staged phases:
 
 1. **Form Builder and Preview** — build/configure forms, persist them in IndexedDB, export JSON, and render them on the responsive Preview route.
-2. **Theme Builder** — define the theme contract, theme data, token mapping, component styling hooks, and theme operations. Preview is already responsive in Phase 1.
-3. **Designer** — implement the Theme Designer and its Designer workflow after the Theme Builder phase.
+2. **Form Builder workflow completion** — finish respondent workflow acceptance, upload integration, publishing/response foundations, form-lifecycle refinements, and required delivery hardening.
+3. **Theme Builder** — after Form Builder completion, define the theme contract, theme data, token mapping, component styling hooks, and theme operations.
+4. **Designer** — implement the Theme Designer after Form Builder and Theme Builder are complete.
 
 ## Route family
 
@@ -71,7 +72,7 @@ The slug is optional. A slug route loads that named form from IndexedDB by defau
 5. Add elements with generated names.
 6. Configure, reorder, duplicate, or remove elements.
 7. Explicitly save the current draft or linked named form.
-8. Open Designer for the same form and see the Phase 3 placeholder.
+8. Open Designer for the same form and see the future-work placeholder.
 9. Open Preview for the same form.
 10. Preview reloads JSON from IndexedDB and passes it to `<jb-form-builder>`.
 11. Interact with the responsive rendered form.
@@ -122,7 +123,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Builder contains a Designer button for the current form.
 - Designer is a separate route and independently resolves JSON/form identity from IndexedDB.
 - Phase 1 Designer is an intentional empty placeholder.
-- Designer does not mutate JSON until its Phase 3 implementation.
+- Designer does not mutate JSON until its later implementation.
 
 ### Preview
 
@@ -221,13 +222,13 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - **Renderer delivery:** the application renderer remains in use through Phase 2; the published package replaces it at the owner-approved final delivery step.
 - **Preview state:** runtime response values and validation display state.
 - **i18n adapter:** `jb-core/i18n` configuration for UI and form runtime.
-- **Theme contract:** reserved Phase 2 boundary.
+- **Theme contract:** reserved Phase 3 boundary.
 
 ## Phase boundary
 
 Phase 1 completes when Builder supports the approved inventory, drafts and named forms persist reliably, Designer placeholder navigation preserves form identity, responsive Preview independently renders stored JSON through `<jb-form-builder>`, export is validated, and acceptance tests pass.
 
-Phase 2 implements the Theme Builder contract and theme operations without changing existing form/element identity or route meaning. Phase 3 implements Designer.
+Phase 2 completes respondent and operational Form Builder workflows. Phase 3 implements the Theme Builder contract and theme operations without changing existing form/element identity or route meaning. Theme Designer follows as Phase 4.
 
 ## Confirmed decisions
 
@@ -250,12 +251,16 @@ Phase 2 implements the Theme Builder contract and theme operations without chang
 - Changed linked forms must be explicitly saved before Designer or Preview navigation.
 - The interaction defaults in `PRODUCT-FLOW.md` are approved.
 - Current drafts and named forms persist only through explicit Save or Save As.
-- Phase 3 includes Designer implementation. Other scheduled workflow enhancements remain independently sequenced after their contracts are approved.
+- Phase 2 prioritizes respondent workflow, uploads, publishing/response foundations, and form-lifecycle refinements. All theme/design implementation follows in Phases 3 and 4.
 
-## Open decisions
+## Current decisions and gates
 
-No blocking product or architecture decisions remain. DSR-001 through DSR-004 are resolved, DSR-006 is closed for the client-only Phase 1 route model, and renderer publication is deferred by owner until the final delivery step.
+- Phase 1 is accepted.
+- Phase 2 is active and covers Form Builder workflow completion.
+- Theme contract and implementation decisions are intentionally deferred to Phase 3.
+- `DSR-001` through `DSR-004` are resolved; `DSR-006` is closed for the client-only Phase 1 route model. See `DESIGN-SYSTEM-REQUESTS.md`.
+- Renderer package publication is deferred by the owner until the final delivery handoff.
 
 ## Documentation rule
 
-Durable product decisions belong here. Form serialization decisions belong in `FORM-JSON-CONTRACT.md`; technical decisions belong in `TECHNICAL-FOUNDATION.md`; interaction detail belongs in `PRODUCT-FLOW.md`; Phase 2 theme surfaces belong in `THEME-INVENTORY.md` and `THEME-BEHAVIOR.md`; execution status belongs in `PLAN.md`.
+Durable product decisions belong here. Form serialization decisions belong in `FORM-JSON-CONTRACT.md`; technical decisions belong in `TECHNICAL-FOUNDATION.md`; interaction detail belongs in `PRODUCT-FLOW.md`; later Phase 3 theme surfaces belong in `THEME-INVENTORY.md` and `THEME-BEHAVIOR.md`; execution status belongs in `PLAN.md`.

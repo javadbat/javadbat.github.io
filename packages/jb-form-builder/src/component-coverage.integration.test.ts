@@ -213,6 +213,26 @@ describe("real JB component Preview coverage", () => {
     expect(runtime.getAttribute("name")).toBeNull();
   });
 
+  it("renders a wizard as linear steps with localized navigation", async () => {
+    const wizardEntry = formElementRegistry.find(candidate => candidate.type === "jb-form-wizard")!;
+    const inputEntry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;
+    const element = createDefaultElement(wizardEntry, "onboarding");
+    if (element.type !== "jb-form-wizard") throw new Error("Expected wizard container");
+    element.steps[0].children.push(createDefaultElement(inputEntry, "fullName") as never);
+    const renderer = createRenderer(element);
+
+    await renderer.updateComplete;
+    await Promise.resolve();
+
+    const runtime = expectReadyRuntime(renderer, element) as RuntimeField & { activeStep: number; next(): boolean };
+    const steps = runtime.querySelectorAll<HTMLElement>("[data-wizard-step]");
+    expect(runtime.localName).toBe("jb-form-wizard");
+    expect(steps).toHaveLength(2);
+    expect(Array.from(steps).map(step => step.hidden)).toEqual([false, true]);
+    expect(runtime.next()).toBe(true);
+    expect(runtime.activeStep).toBe(1);
+  });
+
   it("renders fields inside tab panels and disables inactive fields for active-only validation", async () => {
     const tabEntry = formElementRegistry.find(candidate => candidate.type === "jb-tab")!;
     const inputEntry = formElementRegistry.find(candidate => candidate.type === "jb-input")!;
@@ -271,6 +291,36 @@ describe("real JB component Preview coverage", () => {
     expect(runtimeCondition.matched).toBe(true);
     expect(runtimeCondition.querySelector(`[data-form-element-id="${child.id}"]`)).toBe(childRuntime);
     expect(childRuntime.value).toBe("Alice");
+  });
+
+  it("refreshes conditions when a number control button changes the value", async () => {
+    const numberEntry = formElementRegistry.find(candidate => candidate.type === "jb-number-input")!;
+    const conditionEntry = formElementRegistry.find(candidate => candidate.type === "jb-condition")!;
+    const source = createDefaultElement(numberEntry, "quantity");
+    source.initialValue = "0";
+    const condition = createDefaultElement(conditionEntry, "quantityDetails");
+    if (condition.type !== "jb-condition") throw new Error("Expected conditional container");
+    condition.conditions.rules.push({ id: crypto.randomUUID(), fieldName: "quantity", operator: "equals", value: "1" });
+    condition.children.push(createDefaultElement(formElementRegistry.find(candidate => candidate.type === "jb-input")!, "details") as never);
+    const formDocument = createEmptyFormDocument();
+    formDocument.elements = [source, condition];
+    const renderer = document.createElement("jb-form-builder");
+    document.body.append(renderer);
+    renderer.formDocument = formDocument;
+
+    await renderer.updateComplete;
+    await Promise.resolve();
+    const runtimeCondition = renderer.shadowRoot?.querySelector<HTMLElement & { matched: boolean }>("jb-condition")!;
+    const numberRuntime = renderer.shadowRoot?.querySelector<RuntimeField>(`[data-form-element-id="${source.id}"]`)!;
+    expect(runtimeCondition.matched).toBe(false);
+
+    const increaseButton = numberRuntime.shadowRoot?.querySelector<HTMLButtonElement>(".increase-number-button");
+    expect(increaseButton).not.toBeNull();
+    increaseButton!.click();
+    await Promise.resolve();
+
+    expect(numberRuntime.value).toBe("1");
+    expect(runtimeCondition.matched).toBe(true);
   });
 
   it("renders every happy-dom-compatible real package together in one form", async () => {
@@ -394,8 +444,8 @@ describe("real JB component Preview coverage", () => {
   });
 
   it("keeps every registry component represented by the real-package suite", () => {
-    expect(formElementRegistry).toHaveLength(24);
-    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(24);
-    expect(Object.keys(configurationByType)).toHaveLength(24);
+    expect(formElementRegistry).toHaveLength(28);
+    expect(new Set(formElementRegistry.map(entry => entry.type)).size).toBe(28);
+    expect(Object.keys(configurationByType)).toHaveLength(28);
   });
 });

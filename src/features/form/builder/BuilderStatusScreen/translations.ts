@@ -1,7 +1,9 @@
 export const builderStatusScreenTranslations = {
   en: {
     "loading": "Loading builder",
-    "retry": "Retry"
+    "retry": "Retry",
+    "deleteCorruptForm": "Delete corrupt form",
+    "deleteCorruptFormConfirm": "Delete this corrupt saved form? This cannot be undone."
   },
   fa: {
     "loading": "در حال بارگذاری فرم‌ساز",

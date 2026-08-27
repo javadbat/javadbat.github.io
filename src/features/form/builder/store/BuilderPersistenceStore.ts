@@ -27,9 +27,31 @@ export class BuilderPersistenceStore {
     this.issues = [];
   }
 
+  setMemoryOnly(issue: StorageIssue): void {
+    this.status = "ready";
+    this.storageIssue = issue;
+    this.issues = [issue.message];
+  }
+
   setLoadError(message: string): void {
     this.status = "load-error";
     this.issues = [message];
+  }
+
+  async deleteCorruptRecord(slug?: string): Promise<boolean> {
+    if (this.storageIssue?.code !== "corrupt-record" && this.storageIssue?.code !== "incompatible-record") return false;
+    const result = slug ? await this.repository.deleteNamedFormBySlug(slug) : await this.repository.deleteCurrentDraft();
+    if (!result.ok) {
+      runInAction(() => this.setStorageError(result.error, "load-error"));
+      return false;
+    }
+    runInAction(() => {
+      this.draft.hydrate(null);
+      this.linkedRecord = null;
+      this.hasSavedDraft = false;
+      this.setReady();
+    });
+    return true;
   }
 
   async initialize(slug?: string): Promise<boolean> {
@@ -38,6 +60,15 @@ export class BuilderPersistenceStore {
     this.issues = [];
     const loaded = slug ? await this.repository.getBySlug(slug) : await this.repository.getCurrentDraft();
     if (!loaded.ok) {
+      if (loaded.error.code === "storage-unavailable" || loaded.error.code === "storage-blocked") {
+        runInAction(() => {
+          this.draft.hydrate(null);
+          this.linkedRecord = null;
+          this.hasSavedDraft = false;
+          this.setMemoryOnly(loaded.error);
+        });
+        return true;
+      }
       runInAction(() => this.setStorageError(loaded.error, "load-error"));
       return false;
     }

@@ -17,6 +17,7 @@ export interface FormElementPropertyDefinition {
   label: PropertyLabel;
   control: PropertyControl;
   localized?: boolean;
+  builderVisible?: boolean;
   min?: number;
   max?: number;
   step?: number;
@@ -49,6 +50,11 @@ const textProperty = (key: string, en: string, fa: string, localized = false): F
   label: label(en, fa),
   control: "text",
   localized,
+});
+
+const hiddenTextProperty = (key: string, en: string, fa: string, localized = false): FormElementPropertyDefinition => ({
+  ...textProperty(key, en, fa, localized),
+  builderVisible: false,
 });
 
 const textareaProperty = (key: string, en: string, fa: string, localized = false): FormElementPropertyDefinition => ({
@@ -188,6 +194,25 @@ const configuration = (
 });
 
 export const configurationByType: Record<JBFormElementType, FormElementConfiguration> = {
+  divider: configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    { spacing: "md" },
+    [selectProperty("spacing", "Spacing", "فاصله", sizeOptions)],
+  ),
+  "section-heading": configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    { content: localizedDefault("Section", "بخش"), level: "h2" },
+    [
+      textProperty("content", "Heading", "عنوان بخش", true),
+      selectProperty("level", "Heading level", "سطح عنوان", [
+        { value: "h2", label: label("Heading 2", "عنوان ۲") },
+        { value: "h3", label: label("Heading 3", "عنوان ۳") },
+        { value: "h4", label: label("Heading 4", "عنوان ۴") },
+      ]),
+    ],
+  ),
   text: configuration(
     { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
     "string",
@@ -303,7 +328,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       selectProperty("size", "Size", "اندازه", sizeOptions),
       booleanProperty("nullable", "Allow no active tab", "اجازه بدون تب فعال"),
       textProperty("defaultValue", "Initially active tab value", "مقدار تب فعال اولیه"),
-      textProperty("ariaLabel", "Accessible tab-list label", "برچسب دسترس‌پذیری فهرست تب", true),
+      hiddenTextProperty("ariaLabel", "Accessible tab-list label", "برچسب دسترس‌پذیری فهرست تب", true),
     ],
   ),
   "jb-condition": configuration(
@@ -311,6 +336,36 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "none",
     {},
     [],
+  ),
+  "jb-form-wizard": configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    {
+      validationMode: "current",
+      previousLabel: localizedDefault("Previous", "قبلی"),
+      nextLabel: localizedDefault("Next", "بعدی"),
+      completeLabel: localizedDefault("Complete", "تکمیل"),
+    },
+    [
+      selectProperty("validationMode", "Forward validation", "اعتبارسنجی حرکت رو به جلو", [
+        { value: "current", label: label("Validate current step", "اعتبارسنجی مرحله فعلی") },
+        { value: "none", label: label("Do not validate", "بدون اعتبارسنجی") },
+      ]),
+      textProperty("previousLabel", "Previous button label", "برچسب دکمه قبلی", true),
+      textProperty("nextLabel", "Next button label", "برچسب دکمه بعدی", true),
+      textProperty("completeLabel", "Complete button label", "برچسب دکمه تکمیل", true),
+    ],
+  ),
+  "jb-repeatable-group": configuration(
+    { required: false, disabled: false, initialValue: false, label: false, placeholder: false },
+    "none",
+    { repeatCount: 1, minItems: 1, maxItems: 10, allowAdd: false },
+    [
+      numberProperty("repeatCount", "Initial repetitions", "تعداد تکرار اولیه", { min: 0, step: 1 }),
+      booleanProperty("allowAdd", "Let respondent add items", "اجازه افزودن مورد به کاربر"),
+      numberProperty("minItems", "Minimum items", "حداقل موارد", { min: 0, step: 1 }),
+      numberProperty("maxItems", "Maximum items", "حداکثر موارد", { min: 0, step: 1 }),
+    ],
   ),
   "jb-input": configuration(inputCommon, "string", inputDefaults, inputProperties),
   "jb-number-input": configuration(
@@ -402,7 +457,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     textProperty("message", "Helper message", "پیام راهنما", true),
     textProperty("inputType", "Input type", "نوع ورودی"),
     textProperty("valueType", "Value type", "نوع مقدار"),
-    textProperty("format", "Display format", "قالب نمایش"),
+    hiddenTextProperty("format", "Display format", "قالب نمایش"),
     textProperty("min", "Minimum date", "کمترین تاریخ"),
     textProperty("max", "Maximum date", "بیشترین تاریخ"),
     selectProperty("direction", "Calendar direction", "جهت تقویم", [
@@ -564,8 +619,8 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       textProperty("message", "Helper message", "پیام راهنما", true),
       booleanProperty("multiple", "Multiple images", "چند تصویر"),
       stringListProperty("acceptTypes", "Accepted image types", "نوع تصویرهای مجاز"),
-      numberProperty("maxFileSize", "Maximum file size (bytes)", "بیشترین اندازه فایل (بایت)", { min: 0, step: 1 }),
-      textProperty("uploadAdapter", "Upload adapter identifier", "شناسه رابط بارگذاری"),
+      numberProperty("maxFileSize", "Maximum file size (MB)", "بیشترین اندازه فایل (مگابایت)", { min: 0, step: 0.1 }),
+      hiddenTextProperty("uploadAdapter", "Upload adapter identifier", "شناسه رابط بارگذاری"),
     ],
   ),
   "jb-button": configuration(
@@ -578,7 +633,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     },
     "string",
     {
-      content: localizedDefault("Next", "بعدی"),
+      content: localizedDefault("Next", "ارسال"),
       type: "button",
       action: "next",
       color: "primary",

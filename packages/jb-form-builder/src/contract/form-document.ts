@@ -31,6 +31,8 @@ export interface FormLocalization {
 
 export type JBFormElementType =
   | "text"
+  | "divider"
+  | "section-heading"
   | "image"
   | "voice"
   | "link"
@@ -53,9 +55,11 @@ export type JBFormElementType =
   | "jb-image-input"
   | "jb-button"
   | "jb-tab"
-  | "jb-condition";
+  | "jb-condition"
+  | "jb-form-wizard"
+  | "jb-repeatable-group";
 
-export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition">;
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition" | "jb-form-wizard" | "jb-repeatable-group">;
 export type JBFormElementKind = "content" | "field" | "container";
 export type ContainerValidationScope = "all" | "active";
 export type JBConditionMatch = "all" | "any";
@@ -144,8 +148,25 @@ export interface JBConditionElementV1 extends JBFormElementBaseV1 {
   children: JBFormLeafElementV1[];
 }
 
+export interface JBWizardStepV1 {
+  id: UUID;
+  value: string;
+  label: LocalizedText;
+  children: JBFormLeafElementV1[];
+}
+
+export interface JBFormWizardElementV1 extends JBFormElementBaseV1 {
+  type: "jb-form-wizard";
+  steps: JBWizardStepV1[];
+}
+
+export interface JBRepeatableGroupElementV1 extends JBFormElementBaseV1 {
+  type: "jb-repeatable-group";
+  children: JBFormLeafElementV1[];
+}
+
 /** Containers are deliberately one level deep in v1. */
-export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1;
+export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1 | JBFormWizardElementV1 | JBRepeatableGroupElementV1;
 export type JBFormElementV1 = JBFormLeafElementV1 | JBFormContainerElementV1;
 
 export function isTabElement(element: JBFormElementV1): element is JBTabElementV1 {
@@ -156,12 +177,23 @@ export function isConditionElement(element: JBFormElementV1): element is JBCondi
   return element.type === "jb-condition";
 }
 
+export function isWizardElement(element: JBFormElementV1): element is JBFormWizardElementV1 {
+  return element.type === "jb-form-wizard";
+}
+
+export function isRepeatableGroupElement(element: JBFormElementV1): element is JBRepeatableGroupElementV1 {
+  return element.type === "jb-repeatable-group";
+}
+
 export function isContainerElement(element: JBFormElementV1): element is JBFormContainerElementV1 {
-  return isTabElement(element) || isConditionElement(element);
+  return isTabElement(element) || isConditionElement(element) || isWizardElement(element) || isRepeatableGroupElement(element);
 }
 
 export function getContainerChildren(element: JBFormContainerElementV1): JBFormLeafElementV1[] {
-  return isTabElement(element) ? element.tabs.flatMap(tab => tab.children) : element.children;
+  if (isTabElement(element)) return element.tabs.flatMap(tab => tab.children);
+  if (isWizardElement(element)) return element.steps.flatMap(step => step.children);
+  if (isRepeatableGroupElement(element)) return element.children;
+  return element.children;
 }
 
 export function walkFormElements(elements: readonly JBFormElementV1[]): JBFormElementV1[] {

@@ -165,6 +165,12 @@
         },
         {
           "$ref": "#/$defs/conditionElement"
+        },
+        {
+          "$ref": "#/$defs/wizardElement"
+        },
+        {
+          "$ref": "#/$defs/repeatableGroupElement"
         }
       ]
     },
@@ -178,6 +184,8 @@
         "type": {
           "enum": [
             "text",
+            "divider",
+            "section-heading",
             "image",
             "voice",
             "link",
@@ -200,7 +208,9 @@
             "jb-image-input",
             "jb-button",
             "jb-tab",
-            "jb-condition"
+            "jb-condition",
+            "jb-form-wizard",
+            "jb-repeatable-group"
           ]
         },
         "adapterVersion": { "type": "integer", "minimum": 1 },
@@ -222,7 +232,7 @@
             "id": { "$ref": "#/$defs/uuid" },
             "type": {
               "enum": [
-                "text", "image", "voice", "link", "jb-input", "jb-number-input",
+                "text", "divider", "section-heading", "image", "voice", "link", "jb-input", "jb-number-input",
                 "jb-range-input", "jb-mobile-input", "jb-password-input",
                 "jb-payment-input", "jb-national-input", "jb-date-input",
                 "jb-time-input", "jb-pin-input", "jb-textarea", "jb-select",
@@ -328,6 +338,70 @@
           }
         }
       ]
+    },
+    "wizardElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "adapterVersion", "name", "props", "validation", "steps"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" },
+            "type": { "const": "jb-form-wizard" },
+            "adapterVersion": { "type": "integer", "minimum": 1 },
+            "name": { "$ref": "#/$defs/elementName" },
+            "props": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+            },
+            "validation": { "type": "array", "maxItems": 0 },
+            "steps": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/wizardStep" }
+            }
+          }
+        }
+      ]
+    },
+    "repeatableGroupElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "adapterVersion", "name", "props", "validation", "children"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" },
+            "type": { "const": "jb-repeatable-group" },
+            "adapterVersion": { "type": "integer", "minimum": 1 },
+            "name": { "$ref": "#/$defs/elementName" },
+            "props": { "type": "object", "additionalProperties": { "$ref": "#/$defs/jsonValue" } },
+            "validation": { "type": "array", "maxItems": 0 },
+            "children": { "type": "array", "items": { "$ref": "#/$defs/leafElement" } }
+          }
+        }
+      ]
+    },
+    "wizardStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value", "label", "children"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "label": { "$ref": "#/$defs/localizedText" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/leafElement" }
+        }
+      }
     },
     "conditionGroup": {
       "type": "object",

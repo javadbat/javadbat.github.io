@@ -3,12 +3,16 @@ import {
   isConditionElement,
   isContainerElement,
   isTabElement,
+  isWizardElement,
+  isRepeatableGroupElement,
   walkFormElements,
   type JBConditionElementV1,
   type JBConditionMatch,
   type JBConditionRuleV1,
   type JBFormElementV1,
   type JBFormLeafElementV1,
+  type JBFormWizardElementV1,
+  type JBRepeatableGroupElementV1,
   type JBTabElementV1,
   type JBValidationRule,
   type JSONValue,
@@ -86,6 +90,32 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  addToWizard(containerId: string, stepId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    if (entry.isContainer) return null;
+    const step = this.getWizardStep(containerId, stepId);
+    if (!step) return null;
+    const element = this.createElement(entry);
+    if (isContainerElement(element)) return null;
+    const index = Math.max(0, Math.min(insertionIndex ?? step.children.length, step.children.length));
+    step.children.splice(index, 0, element);
+    this.selectedElementId = element.id;
+    this.draft.markChanged();
+    return element.id;
+  }
+
+  addToRepeatableGroup(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    if (entry.isContainer) return null;
+    const container = this.getRepeatableGroupContainer(containerId);
+    if (!container) return null;
+    const element = this.createElement(entry);
+    if (isContainerElement(element)) return null;
+    const index = Math.max(0, Math.min(insertionIndex ?? container.children.length, container.children.length));
+    container.children.splice(index, 0, element);
+    this.selectedElementId = element.id;
+    this.draft.markChanged();
+    return element.id;
+  }
+
   private createElement(entry: FormElementRegistryEntry): JBFormElementV1 {
     const defaultLocale = this.draft.document.localization.defaultLocale;
     const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName), defaultLocale);
@@ -141,6 +171,52 @@ export class BuilderElementStore {
     if (next === index) return index;
     const [tab] = container.tabs.splice(index, 1);
     container.tabs.splice(next, 0, tab);
+    this.draft.markChanged();
+    return next;
+  }
+
+  addWizardStep(containerId: string): string | null {
+    const container = this.getWizardContainer(containerId);
+    if (!container) return null;
+    const values = new Set(container.steps.map(step => step.value));
+    let suffix = container.steps.length + 1;
+    while (values.has(`step_${suffix}`)) suffix += 1;
+    const id = crypto.randomUUID();
+    const locale = this.draft.document.localization.defaultLocale;
+    const label = locale.toLowerCase().split("-")[0] === "fa" ? `مرحله ${suffix}` : `Step ${suffix}`;
+    container.steps.push({ id, value: `step_${suffix}`, label: { translations: { [locale]: label } }, children: [] });
+    this.draft.markChanged();
+    return id;
+  }
+
+  updateWizardStep(containerId: string, stepId: string, patch: Partial<Pick<JBFormWizardElementV1["steps"][number], "value" | "label">>): boolean {
+    const step = this.getWizardStep(containerId, stepId);
+    if (!step) return false;
+    Object.assign(step, patch);
+    this.draft.markChanged();
+    return true;
+  }
+
+  removeWizardStep(containerId: string, stepId: string): boolean {
+    const container = this.getWizardContainer(containerId);
+    if (!container || container.steps.length <= 1) return false;
+    const index = container.steps.findIndex(step => step.id === stepId);
+    if (index < 0) return false;
+    const [removed] = container.steps.splice(index, 1);
+    if (removed.children.some(child => child.id === this.selectedElementId)) this.selectedElementId = container.id;
+    this.draft.markChanged();
+    return true;
+  }
+
+  moveWizardStep(containerId: string, stepId: string, offset: -1 | 1): number {
+    const container = this.getWizardContainer(containerId);
+    if (!container) return -1;
+    const index = container.steps.findIndex(step => step.id === stepId);
+    if (index < 0) return -1;
+    const next = Math.max(0, Math.min(index + offset, container.steps.length - 1));
+    if (next === index) return index;
+    const [step] = container.steps.splice(index, 1);
+    container.steps.splice(next, 0, step);
     this.draft.markChanged();
     return next;
   }
@@ -278,6 +354,40 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  moveToWizardInsertionIndex(elementId: string, containerId: string, stepId: string, insertionIndex: number): number {
+    const location = this.findLocation(elementId);
+    const step = this.getWizardStep(containerId, stepId);
+    if (!location || !step) return -1;
+    const element = location.collection[location.index];
+    if (!element || isContainerElement(element)) return -1;
+    const boundedIndex = Math.max(0, Math.min(insertionIndex, step.children.length));
+    const sameCollection = location.collection === step.children;
+    const nextIndex = sameCollection && boundedIndex > location.index ? boundedIndex - 1 : boundedIndex;
+    if (sameCollection && nextIndex === location.index) return location.index;
+    location.collection.splice(location.index, 1);
+    step.children.splice(nextIndex, 0, element);
+    this.selectedElementId = elementId;
+    this.draft.markChanged();
+    return nextIndex;
+  }
+
+  moveToRepeatableGroupInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
+    const location = this.findLocation(elementId);
+    const container = this.getRepeatableGroupContainer(containerId);
+    if (!location || !container) return -1;
+    const element = location.collection[location.index];
+    if (!element || isContainerElement(element)) return -1;
+    const boundedIndex = Math.max(0, Math.min(insertionIndex, container.children.length));
+    const sameCollection = location.collection === container.children;
+    const nextIndex = sameCollection && boundedIndex > location.index ? boundedIndex - 1 : boundedIndex;
+    if (sameCollection && nextIndex === location.index) return location.index;
+    location.collection.splice(location.index, 1);
+    container.children.splice(nextIndex, 0, element);
+    this.selectedElementId = elementId;
+    this.draft.markChanged();
+    return nextIndex;
+  }
+
   updateSelectedConditionMatch(match: JBConditionMatch): boolean {
     if (!this.selected || !isConditionElement(this.selected)) return false;
     this.selected.conditions.match = match;
@@ -322,12 +432,22 @@ export class BuilderElementStore {
 
   getParentTab(elementId: string): { containerId: string; tabId: string } | null {
     const location = this.findLocation(elementId);
-    return location?.containerId && location.tabId ? { containerId: location.containerId, tabId: location.tabId } : null;
+    return location?.containerId && location.tabId && isTabElement(this.find(location.containerId)!) ? { containerId: location.containerId, tabId: location.tabId } : null;
+  }
+
+  getParentWizard(elementId: string): { containerId: string; stepId: string } | null {
+    const location = this.findLocation(elementId);
+    return location?.containerId && location.tabId && isWizardElement(this.find(location.containerId)!) ? { containerId: location.containerId, stepId: location.tabId } : null;
   }
 
   getParentCondition(elementId: string): { containerId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId === null && isConditionElement(this.find(location.containerId)!) ? { containerId: location.containerId } : null;
+  }
+
+  getParentRepeatableGroup(elementId: string): { containerId: string } | null {
+    const location = this.findLocation(elementId);
+    return location?.containerId && location.tabId === null && isRepeatableGroupElement(this.find(location.containerId)!) ? { containerId: location.containerId } : null;
   }
 
   duplicate(elementId: string): string | null {
@@ -377,6 +497,20 @@ export class BuilderElementStore {
     return element && isConditionElement(element) ? element : null;
   }
 
+  private getWizardContainer(containerId: string): JBFormWizardElementV1 | null {
+    const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
+    return element && isWizardElement(element) ? element : null;
+  }
+
+  private getWizardStep(containerId: string, stepId: string): JBFormWizardElementV1["steps"][number] | null {
+    return this.getWizardContainer(containerId)?.steps.find(step => step.id === stepId) ?? null;
+  }
+
+  private getRepeatableGroupContainer(containerId: string): JBRepeatableGroupElementV1 | null {
+    const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
+    return element && isRepeatableGroupElement(element) ? element : null;
+  }
+
   private findLocation(elementId: string): { collection: JBFormElementV1[] | JBFormLeafElementV1[]; index: number; containerId: string | null; tabId: string | null } | null {
     const topIndex = this.draft.document.elements.findIndex(element => element.id === elementId);
     if (topIndex >= 0) return { collection: this.draft.document.elements, index: topIndex, containerId: null, tabId: null };
@@ -385,10 +519,21 @@ export class BuilderElementStore {
         const index = element.children.findIndex(child => child.id === elementId);
         if (index >= 0) return { collection: element.children, index, containerId: element.id, tabId: null };
       }
-      if (!isTabElement(element)) continue;
-      for (const tab of element.tabs) {
-        const index = tab.children.findIndex(child => child.id === elementId);
-        if (index >= 0) return { collection: tab.children, index, containerId: element.id, tabId: tab.id };
+      if (isTabElement(element)) {
+        for (const tab of element.tabs) {
+          const index = tab.children.findIndex(child => child.id === elementId);
+          if (index >= 0) return { collection: tab.children, index, containerId: element.id, tabId: tab.id };
+        }
+      }
+      if (isWizardElement(element)) {
+        for (const step of element.steps) {
+          const index = step.children.findIndex(child => child.id === elementId);
+          if (index >= 0) return { collection: step.children, index, containerId: element.id, tabId: step.id };
+        }
+      }
+      if (isRepeatableGroupElement(element)) {
+        const index = element.children.findIndex(child => child.id === elementId);
+        if (index >= 0) return { collection: element.children, index, containerId: element.id, tabId: null };
       }
     }
     return null;
@@ -398,6 +543,17 @@ export class BuilderElementStore {
     element.id = crypto.randomUUID();
     if (isConditionElement(element)) {
       element.conditions.rules.forEach(rule => { rule.id = crypto.randomUUID(); });
+      element.children.forEach(child => { child.id = crypto.randomUUID(); });
+      return;
+    }
+    if (isWizardElement(element)) {
+      element.steps.forEach(step => {
+        step.id = crypto.randomUUID();
+        step.children.forEach(child => { child.id = crypto.randomUUID(); });
+      });
+      return;
+    }
+    if (isRepeatableGroupElement(element)) {
       element.children.forEach(child => { child.id = crypto.randomUUID(); });
       return;
     }

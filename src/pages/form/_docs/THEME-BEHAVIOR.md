@@ -1,9 +1,9 @@
 # JB Form Theme Builder Behavior
 
-Status: Phase 2 behavior definition complete; runtime implementation pending  
+Status: Deferred Phase 3 behavior definition; starts after Form Builder completion
 Reviewed: 2026-08-04
 
-This document defines Theme Builder operations without deciding the deferred global-token versus component-override allowlists. It also does not implement the Designer route, which remains Phase 3.
+This document defines Theme Builder operations without deciding the deferred global-token versus component-override allowlists. It does not implement the lower-priority Designer route.
 
 ## State model
 

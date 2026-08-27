@@ -18,3 +18,9 @@
   color: var(--form-muted, oklch(0.56 0.035 255));
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}

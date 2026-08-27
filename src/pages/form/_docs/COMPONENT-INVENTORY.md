@@ -1,7 +1,7 @@
 # JB Form — Form-Element Component Inventory
 
-Status: Initial input inventory complete; DSR-001, DSR-002, DSR-003, DSR-004, and DSR-006 are closed
-Reviewed: 2026-07-29  
+Status: Inventory complete; all Form Builder design-system requests resolved or deferred outside current scope
+Reviewed: 2026-08-27
 Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`](https://github.com/javadbat/design-system/tree/8afc94a5cae5910c2dccab35c033d4d01150d27e)
 
 ## Sources
@@ -48,7 +48,16 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 
 `jb-number-input`, `jb-mobile-input`, `jb-password-input`, `jb-payment-input`, and `jb-national-input` extend `JBInputWebComponent`. They inherit the `jb-input` value, form, dirty-state, validation, attributes, events, slots, parts, and base theme surface in addition to their specialized APIs.
 
-## Addable Phase 1 catalog
+## Current catalog
+
+Four portable content blocks are implemented directly by the form document and renderer contract rather than as JB form-control packages:
+
+- `text` — explanatory text;
+- `image` — image content from a URL;
+- `voice` — playable audio content from a URL;
+- `link` — a link to a page or resource.
+
+The remaining catalog entries are JB controls, an action, and structural containers:
 
 | Category | Component | Package/version | Value | Form contract | React |
 | --- | --- | --- | --- | --- | --- |
@@ -72,8 +81,9 @@ The exported form JSON cannot contain JavaScript validator functions. The JSON c
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
 | Container | Tabs | `jb-tab@0.1.0` | None | Owns tab panels containing leaf elements | Yes |
 | Container | Conditional container | `jb-condition@0.1.0` | None | Shows an ordered child list when portable field-name rules match | Web component |
+| Workflow container | Wizard | `jb-form-wizard@0.1.0` | None | Owns ordered steps, validates the active step before forward navigation, and emits navigation/completion events | Web component |
 
-Total: 17 value-producing controls, 1 action control, and 2 structural containers.
+Total: 25 catalog entries — 4 portable content blocks, 17 value-producing controls, 1 action control, and 3 structural/workflow containers.
 
 ## Minimum builder configuration and public API
 

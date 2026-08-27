@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { formRouteHref } from "../application/form-route";
 import { getLocalizedText } from "../domain/form-document";
@@ -6,12 +6,16 @@ import { useFormLocale, type FormAppLocale } from "../i18n/locale-adapter";
 import { formRepository } from "../storage/form-repository";
 import type { CurrentDraftRecordV1, StoredFormRecordV1 } from "../storage/storage-types";
 import styles from "../shell/RouteShell.module.css";
+import { defineJBFormDelete } from "../../../../packages/jb-form-delete/src/index";
+
+defineJBFormDelete();
 
 export function FormLandingApp() {
   const { locale, direction, setLocale, messages } = useFormLocale("en");
   const [forms, setForms] = useState<StoredFormRecordV1[]>([]);
   const [draft, setDraft] = useState<CurrentDraftRecordV1 | null>(null);
   const [storageState, setStorageState] = useState<"loading" | "ready" | "error">("loading");
+  const savedFormsRef = useRef<HTMLElement>(null);
   const dateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
@@ -22,6 +26,29 @@ export function FormLandingApp() {
   );
 
   const navigate = (path: string) => window.location.assign(path);
+
+  useEffect(() => {
+    const container = savedFormsRef.current;
+    if (!container) return;
+    const handleDelete = (event: Event) => {
+      const formId = (event as CustomEvent<{ formId?: string }>).detail?.formId;
+      const record = forms.find(form => form.id === formId);
+      if (record) void deleteForm(record);
+    };
+    container.addEventListener("delete-request", handleDelete);
+    return () => container.removeEventListener("delete-request", handleDelete);
+  }, [forms]);
+
+  const deleteForm = async (record: StoredFormRecordV1) => {
+    if (!window.confirm(`${messages.deleteFormConfirm}\n\n${getLocalizedText(record.document.metadata.name, locale, record.document.localization.defaultLocale)}`)) return;
+    const result = await formRepository.deleteNamedForm(record.id);
+    if (result.ok) {
+      setForms(current => current.filter(form => form.id !== record.id));
+      setDraft(current => current?.linkedFormId === record.id ? null : current);
+    } else {
+      setStorageState("error");
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -95,7 +122,7 @@ export function FormLandingApp() {
         </div>
       </main>
 
-      <section className={styles.savedForms} aria-labelledby="saved-forms-title">
+      <section ref={savedFormsRef} className={styles.savedForms} aria-labelledby="saved-forms-title">
         <div className={styles.savedFormsHeading}>
           <div>
             <p className={styles.eyebrow}>{messages.currentDraft}</p>
@@ -132,6 +159,7 @@ export function FormLandingApp() {
                   <JBButton size="sm" variant="ghost" onClick={() => navigate(formRouteHref("preview", record.slug))}>
                     {messages.preview}
                   </JBButton>
+                  <jb-form-delete form-id={record.id} label={messages.deleteForm} />
                 </div>
               </li>
             ))}

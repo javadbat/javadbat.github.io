@@ -1,6 +1,6 @@
 # JB Form — Route-Family Product Flow and Interaction Specification
 
-Status: Approved for Phase 1
+Status: Approved Phase 1 flow; Phase 2 mobile/touch additions implemented
 Phase: Phase 1 — Form Builder  
 Route namespace: `/form`  
 Reviewed: 2026-07-29
@@ -9,7 +9,7 @@ Reviewed: 2026-07-29
 
 This document defines navigation and interaction across the Phase 1 Form pages. It covers Builder editing, the empty Designer destination, responsive Preview rendering, form resolution from IndexedDB, keyboard and focus behavior, locale/direction behavior, persistence feedback, and recovery.
 
-It does not define the final JSON schema, Theme Designer UI, state-management implementation, visual theme, or mobile/touch editing.
+It does not define the final JSON schema, Theme Designer UI, state-management implementation, or visual theme. Mobile/touch Builder behavior is now included in the implementation and acceptance notes.
 
 ## Confirmed product constraints
 
@@ -20,7 +20,7 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 - When a slug is present, the page loads that named form by default.
 - When no slug is present, the page loads the current working draft.
 - Builder contains links to Designer and Preview for the current form.
-- Designer is an empty destination in Phase 1 and is implemented in Phase 3.
+- Designer is an identity-preserving placeholder and is implemented after the higher-priority workflow expansion.
 - Builder has no embedded Preview mode.
 - Preview is a separate responsive page.
 - Preview loads its form JSON from IndexedDB and passes it to `<jb-form-builder>`.
@@ -35,7 +35,7 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 - App-owned rounded surfaces use `corner-shape: squircle` with their existing `border-radius` as the unsupported-browser fallback.
 - Authored layout and spacing dimensions use `rem`.
 - Component-owned UI state uses local React state; state shared across Builder regions uses MobX.
-- Builder remains desktop-first in Phase 1; Preview is responsive in Phase 1.
+- Builder is desktop-first at wide widths and supports the Phase 2 compact/mobile workspace; Preview is responsive at all supported widths.
 
 ## Route contract
 
@@ -143,7 +143,7 @@ In RTL, inline start is the right side and inline end is the left. Vertical form
 | `90rem` and wider | Catalog, canvas, and configuration panel remain visible. |
 | `75rem`–`89.9375rem` | All three regions remain visible with compact side panels. |
 | `64rem`–`74.9375rem` | Canvas remains primary; only one side panel is expanded at a time. |
-| Below `64rem` | Phase 1 shows a desktop-editing explanation and preserves the draft. Preview remains available. |
+| Below `64rem` | Phase 2 mobile workspace shows one of Catalog, Canvas, or Properties at a time. Preview remains available. |
 
 All implementation dimensions use `rem`. A one-device-pixel border may use the design-system token or the smallest appropriate CSS border value when a `rem` conversion would create inconsistent rendering.
 
@@ -278,7 +278,7 @@ Designer is a separate destination:
 - Before navigation, Builder requires the changed document to validate and save successfully.
 - Phase 1 Designer shows an intentional empty/not-yet-available page with:
   - resolved form identity;
-  - a clear Phase 3 message;
+  - a clear future-work message;
   - Back to Builder;
   - Open Preview.
 - Designer does not alter form JSON in Phase 1.
@@ -398,7 +398,7 @@ Loading over changed or unnamed work proposes:
 - Load without saving;
 - Cancel.
 
-Deleting named forms remains deferred to Phase 2.
+Deleting named forms is available from the landing page with confirmation.
 
 ## Locale and direction
 
@@ -565,7 +565,7 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 
 1. Activate Designer for the current form.
 2. Resolve the same form identity.
-3. Show the Phase 3 placeholder.
+3. Show the future-work placeholder.
 4. Return to the correct Builder route or open Preview.
 
 ### Persian/RTL form
@@ -586,11 +586,11 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 ## Approved interaction decisions
 
 - `/form` is a landing page.
-- Builder editing is supported from `64rem`; smaller widths keep Preview available but show a desktop-editing explanation.
+- Builder editing is supported from `320px` through desktop widths. Below `64rem`, the workspace shows one panel at a time; Preview remains responsive.
 - Add supports a button and desktop drag-to-insert.
 - Every removal requires confirmation in Phase 1.
 - Loading over changed work offers Save, Continue without saving, or Cancel.
-- Save As is included in Phase 1; named-form deletion is deferred.
+- Save As is included, and named-form deletion is available from the landing page with confirmation.
 - Preview begins from configured initial values and keeps response values session-only.
 - Every element name is non-empty and valid; repeated names produce intentional array values.
 - Changed linked forms require explicit Save before Designer or Preview navigation.

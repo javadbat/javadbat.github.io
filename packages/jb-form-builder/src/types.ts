@@ -104,6 +104,7 @@ export interface JBFormBuilderEventMap {
   change: CustomEvent<RendererValueDetail>;
   action: CustomEvent<RendererActionDetail>;
   reset: CustomEvent<{ value: FormValues }>;
+  submit: CustomEvent<RendererValueDetail>;
 }
 
 declare global {

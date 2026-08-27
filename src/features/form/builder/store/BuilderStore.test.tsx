@@ -89,7 +89,7 @@ describe("Builder shell performance baseline", () => {
       </BuilderStoreProvider>,
     );
     const renderDuration = performance.now() - renderStartedAt;
-    const target = store.document.elements[49];
+    const target = store.document.elements.find(element => element.type === "jb-input")!;
 
     expect(view.container.querySelectorAll("[id^='element-select-']")).toHaveLength(100);
     expect(renderDuration).toBeLessThan(1_000);

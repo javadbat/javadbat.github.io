@@ -57,9 +57,10 @@ export type JBFormElementType =
   | "jb-image-input"
   | "jb-button"
   | "jb-tab"
-  | "jb-condition";
+  | "jb-condition"
+  | "jb-form-wizard";
 
-export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition">;
+export type JBFormLeafElementType = Exclude<JBFormElementType, "jb-tab" | "jb-condition" | "jb-form-wizard">;
 export type ContainerValidationScope = "all" | "active";
 export type JBConditionMatch = "all" | "any";
 export type JBConditionOperator = "equals" | "notEquals" | "isEmpty" | "isNotEmpty" | "contains" | "notContains" | "containsAny" | "containsAll" | "greaterThan" | "greaterThanOrEqual" | "lessThan" | "lessThanOrEqual";
@@ -147,7 +148,19 @@ export interface JBConditionElementV1 extends JBFormElementBaseV1 {
   children: JBFormLeafElementV1[];
 }
 
-export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1;
+export interface JBWizardStepV1 {
+  id: UUID;
+  value: string;
+  label: LocalizedText;
+  children: JBFormLeafElementV1[];
+}
+
+export interface JBFormWizardElementV1 extends JBFormElementBaseV1 {
+  type: "jb-form-wizard";
+  steps: JBWizardStepV1[];
+}
+
+export type JBFormContainerElementV1 = JBTabElementV1 | JBConditionElementV1 | JBFormWizardElementV1;
 export type JBFormElementV1 = JBFormLeafElementV1 | JBFormContainerElementV1;
 
 export interface JBFormDocumentV1 {

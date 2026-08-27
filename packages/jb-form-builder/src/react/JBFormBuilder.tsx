@@ -21,6 +21,7 @@ interface JBFormBuilderOwnProps {
   onChangeValue?: (event: JBFormBuilderEventMap["change"]) => void;
   onAction?: (event: JBFormBuilderEventMap["action"]) => void;
   onResetValue?: (event: JBFormBuilderEventMap["reset"]) => void;
+  onSubmitValue?: (event: JBFormBuilderEventMap["submit"]) => void;
 }
 
 export type JBFormBuilderProps = PropsWithChildren<JBFormBuilderOwnProps> &
@@ -39,6 +40,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
     onChangeValue,
     onAction,
     onResetValue,
+    onSubmitValue,
     ...hostAttributes
   },
   forwardedRef,
@@ -55,6 +57,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
   useEvent(element, "change", onChangeValue);
   useEvent(element, "action", onAction);
   useEvent(element, "reset", onResetValue);
+  useEvent(element, "submit", onSubmitValue);
 
   useEffect(() => {
     const currentElement = element.current;

@@ -7,6 +7,7 @@ import {
   type JBFormDocumentV1,
   type JBFormElementV1,
   type JBFormLeafElementV1,
+  type JBFormWizardElementV1,
   type JBTabElementV1,
   type JBValidationRule,
   type JSONValue,
@@ -136,6 +137,10 @@ export class BuilderStore {
     return initialized;
   }
 
+  async deleteCorruptRecord(slug?: string): Promise<boolean> {
+    return this.persistence.deleteCorruptRecord(slug);
+  }
+
   importDocument(document: JBFormDocumentV1): boolean {
     if (this.status === "saving") return false;
     this.draft.import(document);
@@ -175,8 +180,15 @@ export class BuilderStore {
       if (parent) return this.addElementToTab(parent.containerId, parent.tabId, entry) ?? this.addElement(entry);
       const conditionalParent = this.elements.getParentCondition(this.selectedElementId);
       if (conditionalParent) return this.addElementToCondition(conditionalParent.containerId, entry) ?? this.addElement(entry);
+      const wizardParent = this.elements.getParentWizard(this.selectedElementId);
+      if (wizardParent) return this.addElementToWizard(wizardParent.containerId, wizardParent.stepId, entry) ?? this.addElement(entry);
+      const repeatableParent = this.elements.getParentRepeatableGroup(this.selectedElementId);
+      if (repeatableParent) return this.addElementToRepeatableGroup(repeatableParent.containerId, entry) ?? this.addElement(entry);
       const activeTabId = this.activeContainerTabs.get(this.selectedElementId);
-      if (activeTabId) return this.addElementToTab(this.selectedElementId, activeTabId, entry) ?? this.addElement(entry);
+      if (activeTabId) {
+        if (this.selectedElement?.type === "jb-form-wizard") return this.addElementToWizard(this.selectedElementId, activeTabId, entry) ?? this.addElement(entry);
+        return this.addElementToTab(this.selectedElementId, activeTabId, entry) ?? this.addElement(entry);
+      }
       if (this.selectedElement?.type === "jb-condition") return this.addElementToCondition(this.selectedElement.id, entry) ?? this.addElement(entry);
     }
     return this.addElement(entry);
@@ -194,6 +206,14 @@ export class BuilderStore {
     return this.elements.addToCondition(containerId, entry, insertionIndex);
   }
 
+  addElementToWizard(containerId: string, stepId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    return this.elements.addToWizard(containerId, stepId, entry, insertionIndex);
+  }
+
+  addElementToRepeatableGroup(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
+    return this.elements.addToRepeatableGroup(containerId, entry, insertionIndex);
+  }
+
   addTab(containerId: string): string | null {
     return this.elements.addTab(containerId);
   }
@@ -208,6 +228,22 @@ export class BuilderStore {
 
   moveTab(containerId: string, tabId: string, offset: -1 | 1): number {
     return this.elements.moveTab(containerId, tabId, offset);
+  }
+
+  addWizardStep(containerId: string): string | null {
+    return this.elements.addWizardStep(containerId);
+  }
+
+  updateWizardStep(containerId: string, stepId: string, patch: Partial<Pick<JBFormWizardElementV1["steps"][number], "value" | "label">>): boolean {
+    return this.elements.updateWizardStep(containerId, stepId, patch);
+  }
+
+  removeWizardStep(containerId: string, stepId: string): boolean {
+    return this.elements.removeWizardStep(containerId, stepId);
+  }
+
+  moveWizardStep(containerId: string, stepId: string, offset: -1 | 1): number {
+    return this.elements.moveWizardStep(containerId, stepId, offset);
   }
 
   updateSelectedElement(patch: Partial<Pick<JBFormLeafElementV1, "name" | "label" | "placeholder" | "required" | "disabled" | "initialValue">>): void {
@@ -288,6 +324,14 @@ export class BuilderStore {
 
   moveElementToConditionInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
     return this.elements.moveToConditionInsertionIndex(elementId, containerId, insertionIndex);
+  }
+
+  moveElementToWizardInsertionIndex(elementId: string, containerId: string, stepId: string, insertionIndex: number): number {
+    return this.elements.moveToWizardInsertionIndex(elementId, containerId, stepId, insertionIndex);
+  }
+
+  moveElementToRepeatableGroupInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
+    return this.elements.moveToRepeatableGroupInsertionIndex(elementId, containerId, insertionIndex);
   }
 
   findElement(elementId: string): JBFormElementV1 | null {

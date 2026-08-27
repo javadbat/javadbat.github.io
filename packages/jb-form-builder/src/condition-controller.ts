@@ -21,7 +21,10 @@ export class ConditionController {
   connect(): void {
     if (this.#connected) return;
     this.#connected = true;
-    for (const eventName of ["input", "change", "form-change", "condition-change"]) {
+    // Number-input control buttons update the component value before emitting
+    // a non-bubbling `change` event. The click is the only form-level signal
+    // for that interaction, so include it when scheduling condition refreshes.
+    for (const eventName of ["input", "change", "form-change", "condition-change", "click"]) {
       this.#form.addEventListener(eventName, this.#schedule);
     }
     this.sync();
@@ -30,7 +33,7 @@ export class ConditionController {
   disconnect(): void {
     if (!this.#connected) return;
     this.#connected = false;
-    for (const eventName of ["input", "change", "form-change", "condition-change"]) {
+    for (const eventName of ["input", "change", "form-change", "condition-change", "click"]) {
       this.#form.removeEventListener(eventName, this.#schedule);
     }
   }

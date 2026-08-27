@@ -69,7 +69,7 @@ The form document is the portable source of truth shared by Builder, IndexedDB r
 | `metadata` | Yes | Localized display metadata and portable timestamps. |
 | `localization` | Yes | Default locale and supported locale/direction declarations. |
 | `elements` | Yes | Ordered top-level leaf/container array. Container-owned child arrays preserve their own form order. |
-| `theme` | Yes | Phase 1 writes `null`; the key reserves the Phase 2 Theme Builder boundary and later Phase 3 Designer work. |
+| `theme` | Yes | Phase 1 writes `null`; the key reserves the later Phase 3 Theme Builder boundary and Theme Designer work. |
 
 Top-level unknown fields are rejected in version 1.
 
@@ -493,7 +493,7 @@ Phase 1 exports:
 }
 ```
 
-`null` means use the default JB theme. Phase 2 promotes `theme` to the versioned object defined in `THEME-SCHEMA.md` and increments the form document schema version. No Phase 1 element property is reinterpreted as theme data.
+`null` means use the default JB theme. After Form Builder completion, Phase 3 promotes `theme` to the versioned object defined in `THEME-SCHEMA.md` and increments the form document schema version. No Phase 1 element property is reinterpreted as theme data.
 
 ## Portable document versus IndexedDB record
 

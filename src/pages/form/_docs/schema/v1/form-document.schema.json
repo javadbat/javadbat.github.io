@@ -165,6 +165,9 @@
         },
         {
           "$ref": "#/$defs/conditionElement"
+        },
+        {
+          "$ref": "#/$defs/wizardElement"
         }
       ]
     },
@@ -200,7 +203,8 @@
             "jb-image-input",
             "jb-button",
             "jb-tab",
-            "jb-condition"
+            "jb-condition",
+            "jb-form-wizard"
           ]
         },
         "adapterVersion": { "type": "integer", "minimum": 1 },
@@ -328,6 +332,51 @@
           }
         }
       ]
+    },
+    "wizardElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "adapterVersion", "name", "props", "validation", "steps"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" },
+            "type": { "const": "jb-form-wizard" },
+            "adapterVersion": { "type": "integer", "minimum": 1 },
+            "name": { "$ref": "#/$defs/elementName" },
+            "props": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+            },
+            "validation": { "type": "array", "maxItems": 0 },
+            "steps": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/wizardStep" }
+            }
+          }
+        }
+      ]
+    },
+    "wizardStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value", "label", "children"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "label": { "$ref": "#/$defs/localizedText" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/leafElement" }
+        }
+      }
     },
     "conditionGroup": {
       "type": "object",

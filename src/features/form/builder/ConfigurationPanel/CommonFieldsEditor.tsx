@@ -73,6 +73,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
             popoverPosition="fixed"
             name="elementInitialValue"
             label={messages.initialValue}
+            message={messages.initialValueHelp}
             value={typeof element.initialValue === "boolean" ? String(element.initialValue) : "unset"}
             hideClear
             onChange={event => store.updateSelectedElement({ initialValue: event.target.value === "unset" ? undefined : event.target.value === "true" })}
@@ -86,6 +87,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
             size="sm"
             name="elementInitialValue"
             label={messages.initialValue}
+            message={messages.initialValueHelp}
             value={
               Array.isArray(element.initialValue)
                 ? element.initialValue.join(", ")

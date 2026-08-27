@@ -9,11 +9,11 @@ import type { RuntimeFormElement } from "./form-element-adapter";
 
 describe("JB element registry adapters", () => {
   it("declares complete adapter metadata for every inventory component", () => {
-    expect(formElementRegistry).toHaveLength(24);
+    expect(formElementRegistry).toHaveLength(28);
 
     for (const entry of formElementRegistry) {
       expect(entry.packageName).toBe(entry.type === "jb-listbox" ? "jb-select/listbox" : entry.type);
-      expect(entry.tagName).toBe(entry.type === "text" ? "p" : entry.type === "image" ? "img" : entry.type === "voice" ? "audio" : entry.type === "link" ? "a" : entry.type);
+      expect(entry.tagName).toBe(entry.type === "text" || entry.type === "section-heading" ? (entry.type === "text" ? "p" : "h2") : entry.type === "divider" ? "hr" : entry.type === "image" ? "img" : entry.type === "voice" ? "audio" : entry.type === "link" ? "a" : entry.type);
       expect(entry.adapterVersion).toBe(1);
       expect(entry.supportedSchemaVersions).toEqual([1]);
       expect(entry.valueType.length).toBeGreaterThan(0);

@@ -56,6 +56,24 @@ const catalogEntries = [
     defaultName: "linkBlock",
   },
   {
+    type: "divider",
+    displayName: "Divider / spacer",
+    description: "Separate form sections with a visual divider and optional spacing.",
+    category: "Content",
+    keywords: ["divider", "spacer", "separator", "line", "section"],
+    iconId: "drop",
+    defaultName: "divider",
+  },
+  {
+    type: "section-heading",
+    displayName: "Section heading",
+    description: "Add a heading to organize a form section.",
+    category: "Content",
+    keywords: ["heading", "title", "section", "header"],
+    iconId: "content-text",
+    defaultName: "section",
+  },
+  {
     type: "jb-input",
     displayName: "Text input",
     description: "A flexible single-line text field.",
@@ -235,6 +253,24 @@ const catalogEntries = [
     iconId: "switch",
     defaultName: "condition",
   },
+  {
+    type: "jb-form-wizard",
+    displayName: "Wizard",
+    description: "Guide respondents through a linear sequence of form steps.",
+    category: "Container",
+    keywords: ["wizard", "step", "multi-step", "workflow", "progress"],
+    iconId: "select",
+    defaultName: "wizard",
+  },
+  {
+    type: "jb-repeatable-group",
+    displayName: "Repeatable group",
+    description: "Repeat a group of fields and return a collection of nested records.",
+    category: "Container",
+    keywords: ["repeat", "repeating", "collection", "group", "container", "array"],
+    iconId: "select",
+    defaultName: "items",
+  },
 ] as const satisfies readonly {
   type: JBFormElementType;
   displayName: string;
@@ -254,6 +290,10 @@ export const formElementRegistry: readonly FormElementRegistryEntry[] = catalogE
 export const registryByType = new Map(formElementRegistry.map(entry => [entry.type, entry]));
 
 const persianDisplayNames: Record<JBFormElementType, string> = {
+  "jb-form-wizard": "فرایند مرحله‌ای",
+  "jb-repeatable-group": "گروه تکرارشونده",
+  divider: "جداکننده",
+  "section-heading": "عنوان بخش",
   "jb-condition": "شرط",
   "jb-tab": "تب‌ها",
   text: "متن",
@@ -324,6 +364,27 @@ export function createDefaultElement(entry: FormElementRegistryEntry, name: stri
       validation: [],
       conditions: { match: "all", rules: [] },
       children: [],
+    };
+  }
+  if (entry.type === "jb-form-wizard") {
+    const isFarsi = locale.toLowerCase().split("-")[0] === "fa";
+    return {
+      id: crypto.randomUUID(),
+      type: "jb-form-wizard",
+      adapterVersion: entry.adapterVersion,
+      name,
+      props: defaultProps,
+      validation: [],
+      steps: [
+        { id: crypto.randomUUID(), value: "step_1", label: { translations: { [locale]: isFarsi ? "مرحله ۱" : "Step 1" } }, children: [] },
+        { id: crypto.randomUUID(), value: "step_2", label: { translations: { [locale]: isFarsi ? "مرحله ۲" : "Step 2" } }, children: [] },
+      ],
+    };
+  }
+  if (entry.type === "jb-repeatable-group") {
+    return {
+      id: crypto.randomUUID(), type: entry.type, adapterVersion: entry.adapterVersion, name,
+      props: defaultProps, validation: [], children: [],
     };
   }
   const element: JBFormElementV1 = {

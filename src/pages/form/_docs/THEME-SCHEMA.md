@@ -1,9 +1,9 @@
 # JB Form Theme JSON Schema
 
-Status: Phase 2 schema definition complete; runtime implementation pending  
+Status: Deferred Phase 3 schema definition; starts after Form Builder completion
 Reviewed: 2026-08-04
 
-This document defines how theme data will be attached to the portable form document. It does not implement the Theme Builder UI and does not move Designer work out of Phase 3.
+This document defines how theme data will be attached to the portable form document. It does not implement the Theme Builder UI or change the lower priority of Designer work.
 
 ## Relationship to the form document
 
@@ -16,7 +16,7 @@ This document defines how theme data will be attached to the portable form docum
 
 ## Proposed v2 shape
 
-The following is the Phase 2 contract shape. Exact allowlists and value validation remain intentionally deferred; Theme Builder behavior is defined first in `THEME-BEHAVIOR.md`.
+The following is the deferred Phase 3 contract shape. Exact allowlists and value validation remain intentionally deferred; Theme Builder behavior is defined first in `THEME-BEHAVIOR.md`.
 
 ```json
 {
@@ -80,7 +80,7 @@ The renderer resolves the effective theme in this order:
 4. Component token overrides in `theme.components`.
 5. Public part declarations in `theme.components[*].parts`.
 
-The same resolved theme is used by Preview and the future Theme Designer. Phase 2 may provide editing and preview operations without implementing the Designer route; Designer implementation remains Phase 3.
+The same resolved theme is used by Preview and the future Theme Designer. Phase 3 may provide editing and preview operations without implementing the Designer route; Form Builder completion remains a prerequisite, and Theme Designer follows Theme Builder.
 
 ## Compatibility
 

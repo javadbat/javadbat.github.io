@@ -40,6 +40,10 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages }:
 
   const closeResultModal = useCallback(() => setResultModalOpen(false), []);
 
+  const handleRendererSubmit = useCallback((event: JBFormBuilderEventMap["submit"]) => {
+    showSubmittedValues(event.detail.value);
+  }, [showSubmittedValues]);
+
   useEffect(() => {
     if (resultModalOpen || submittedValues === null) return;
     const cleanupTimer = window.setTimeout(
@@ -78,10 +82,6 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages }:
     } catch {
       setValidationState("error");
     }
-  }, [showSubmittedValues]);
-
-  const handleRendererSubmit = useCallback((event: JBFormBuilderEventMap["submit"]) => {
-    showSubmittedValues(event.detail.value);
   }, [showSubmittedValues]);
 
   const reset = useCallback(() => {

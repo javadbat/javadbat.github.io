@@ -9,12 +9,37 @@ import { CommonFieldsEditor } from "./CommonFieldsEditor";
 import { PropertyField } from "./PropertyField";
 import { TabConfigurationEditor } from "./TabConfigurationEditor";
 import { ConditionConfigurationEditor } from "./ConditionConfigurationEditor";
-import { isConditionElement, isContainerElement, isTabElement } from "../../domain/form-document";
+import { WizardConfigurationEditor } from "./WizardConfigurationEditor";
+import { isConditionElement, isContainerElement, isTabElement, isWizardElement } from "../../domain/form-document";
 import styles from "./ConfigurationPanel.module.css";
 
 interface ConfigurationPanelProps {
   messages: FormMessages;
 }
+
+const advancedPropertyKeys = new Set([
+  "autocomplete",
+  "inputmode",
+  "calendarDefaultView",
+  "showPersianNumber",
+  "showControlButton",
+  "tickStep",
+  "minorTickStep",
+  "popoverPosition",
+  "hideClear",
+  "autoHeight",
+  "optionalUnits",
+  "maxFileSize",
+  "separator",
+]);
+
+const removedPropertyKeys = new Set([
+  "valueType",
+  "disableBalloonRotation",
+  "autofocus",
+  "frontalZero",
+  "closeButtonText",
+]);
 
 export const ConfigurationPanel = observer(function ConfigurationPanel({ messages }: ConfigurationPanelProps) {
   const store = useBuilderStore();
@@ -22,6 +47,9 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
   const entry = element ? registryByType.get(element.type) : undefined;
+  const visibleProperties = entry?.propertyDefinitions.filter(definition => !removedPropertyKeys.has(definition.key) && definition.builderVisible !== false) ?? [];
+  const advancedProperties = visibleProperties.filter(definition => advancedPropertyKeys.has(definition.key));
+  const standardProperties = visibleProperties.filter(definition => !advancedPropertyKeys.has(definition.key));
   return (
     <aside className={styles.configuration} data-builder-panel="properties" aria-labelledby="properties-title">
       <div className={styles.panelHeading}>
@@ -47,9 +75,17 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           <CommonFieldsEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages} />
           {isTabElement(element) ? <TabConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
           {isConditionElement(element) ? <ConditionConfigurationEditor /> : null}
-          {entry.propertyDefinitions.length > 0 ? (
+          {isWizardElement(element) ? <WizardConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
+          {standardProperties.length > 0 ? (
             <CollapsibleConfigurationSection title={messages.componentSettings}>
-              {entry.propertyDefinitions.map(definition => (
+              {standardProperties.map(definition => (
+                <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+              ))}
+            </CollapsibleConfigurationSection>
+          ) : null}
+          {advancedProperties.length > 0 ? (
+            <CollapsibleConfigurationSection title={messages.advancedSettings} defaultOpen={false}>
+              {advancedProperties.map(definition => (
                 <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
               ))}
             </CollapsibleConfigurationSection>

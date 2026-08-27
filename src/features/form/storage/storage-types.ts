@@ -95,5 +95,8 @@ export interface FormRepository {
   getCurrentDraft(): Promise<Result<CurrentDraftRecordV1 | null, StorageIssue>>;
   getBySlug(slug: string): Promise<Result<StoredFormRecordV1 | null, StorageIssue>>;
   listNamedForms(): Promise<Result<StoredFormRecordV1[], StorageIssue>>;
+  deleteNamedForm(id: string): Promise<Result<void, StorageIssue>>;
+  deleteNamedFormBySlug(slug: string): Promise<Result<void, StorageIssue>>;
+  deleteCurrentDraft(): Promise<Result<void, StorageIssue>>;
   save(command: SaveFormCommand): Promise<Result<SavedFormResult, StorageIssue>>;
 }

@@ -357,8 +357,8 @@
   .overflowMenuToggle {
       display: inline-grid;
       place-items: center;
-      inline-size: 2.5rem;
-      block-size: 2.5rem;
+      inline-size: 2.75rem;
+      block-size: 2.75rem;
       padding: 0;
       border: 0;
       border-radius: var(--form-radius-sm);
@@ -413,7 +413,8 @@
     }
 
   .overflowMenuPanel .historyActions :global(jb-button) {
-      inline-size: 2.5rem;
+      inline-size: 2.75rem;
+      min-block-size: 2.75rem;
     }
 
   .overflowMenuPanel .localeControls {
@@ -443,10 +444,10 @@
     }
 
   .headerActions > .saveButton {
-      --jb-button-height: 2.5rem;
-      --jb-button-height-sm: 2.5rem;
-      inline-size: 2.5rem;
-      min-inline-size: 2.5rem;
+      --jb-button-height: 2.75rem;
+      --jb-button-height-sm: 2.75rem;
+      inline-size: 2.75rem;
+      min-inline-size: 2.75rem;
     }
 
   .headerActions > .saveButton[data-mobile-hidden="true"] {
@@ -454,11 +455,11 @@
     }
 
   .headerActions > .mobilePreviewButton {
-      --jb-button-height: 2.5rem;
-      --jb-button-height-sm: 2.5rem;
+      --jb-button-height: 2.75rem;
+      --jb-button-height-sm: 2.75rem;
       display: inline-flex;
-      inline-size: 2.5rem;
-      min-inline-size: 2.5rem;
+      inline-size: 2.75rem;
+      min-inline-size: 2.75rem;
     }
    }
 

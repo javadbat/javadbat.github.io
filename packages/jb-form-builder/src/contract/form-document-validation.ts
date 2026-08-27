@@ -1,7 +1,7 @@
 import Ajv2020, { type ErrorObject } from "ajv/dist/2020.js";
 import formDocumentSchema from "./form-document.schema.json";
 import type { FormIssue } from "./form-issue";
-import { isConditionElement, isContainerElement, isTabElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
+import { isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
 
 export interface FormDocumentValidationResult {
@@ -70,6 +70,13 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
       });
     } else if (isConditionElement(element)) {
       element.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/children/${childIndex}`));
+    } else if (isWizardElement(element)) {
+      element.steps.forEach((step, stepIndex) => {
+        localizedValues.push([`${path}/steps/${stepIndex}/label`, step.label]);
+        step.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/steps/${stepIndex}/children/${childIndex}`));
+        });
+    } else if (isRepeatableGroupElement(element)) {
+      element.children.forEach((child, childIndex) => visitLocalizedValues(child, `${path}/children/${childIndex}`));
     } else {
       localizedValues.push([`${path}/label`, element.label], [`${path}/placeholder`, element.placeholder]);
     }
@@ -103,6 +110,26 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
     if (!isContainerElement(element)) return;
     if (isConditionElement(element)) {
       element.children.forEach((child, childIndex) => validateElement(child, `${path}/children/${childIndex}`));
+      return;
+    }
+    if (isWizardElement(element)) {
+      const stepIds = new Set<string>();
+      const stepValues = new Set<string>();
+      element.steps.forEach((step, stepIndex) => {
+        const stepPath = `${path}/steps/${stepIndex}`;
+        if (stepIds.has(step.id)) issues.push(semanticIssue("duplicate_wizard_step_id", `${stepPath}/id`, "Step ids must be unique within their wizard.", element.id));
+        if (stepValues.has(step.value)) issues.push(semanticIssue("duplicate_wizard_step_value", `${stepPath}/value`, "Step values must be unique within their wizard.", element.id));
+        stepIds.add(step.id);
+        stepValues.add(step.value);
+        step.children.forEach((child, childIndex) => validateElement(child, `${stepPath}/children/${childIndex}`));
+      });
+      return;
+    }
+    if (isRepeatableGroupElement(element)) {
+      element.children.forEach((child, childIndex) => validateElement(child, `${path}/children/${childIndex}`));
+      const { repeatCount, minItems, maxItems } = element.props;
+      if (typeof repeatCount === "number" && typeof minItems === "number" && repeatCount < minItems) issues.push(semanticIssue("repeat_count_below_minimum", `${path}/props/repeatCount`, "Initial repetitions cannot be below the minimum.", element.id));
+      if (typeof minItems === "number" && typeof maxItems === "number" && minItems > maxItems) issues.push(semanticIssue("repeat_min_above_maximum", `${path}/props/minItems`, "Minimum items cannot exceed maximum items.", element.id));
       return;
     }
     const tabIds = new Set<string>();
@@ -139,6 +166,10 @@ function validateSemanticDocument(document: JBFormDocumentV1): FormIssue[] {
       element.children.forEach(child => addFieldOwner(child, element.id));
     } else if (isTabElement(element)) {
       element.tabs.forEach(tab => tab.children.forEach(child => addFieldOwner(child, null)));
+    } else if (isWizardElement(element)) {
+      element.steps.forEach(step => step.children.forEach(child => addFieldOwner(child, null)));
+    } else if (isRepeatableGroupElement(element)) {
+      element.children.forEach(child => addFieldOwner(child, element.id));
     } else {
       addFieldOwner(element, null);
     }

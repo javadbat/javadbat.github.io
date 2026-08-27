@@ -1,4 +1,4 @@
-import { getLocalizedText, isConditionElement, isContainerElement, type JBConditionElementV1, type JBFormElementV1, type JBTabElementV1 } from "../contract/form-document";
+import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isWizardElement, type JBConditionElementV1, type JBFormElementV1, type JBFormWizardElementV1, type JBRepeatableGroupElementV1, type JBTabElementV1, type LocalizedText } from "../contract/form-document";
 import type { JBConditionGroup, JBConditionValue } from "jb-condition";
 import type { FormIssue } from "../contract/form-issue";
 import { registryByType, type FormElementRegistryEntry } from "../registry/form-element-registry";
@@ -44,7 +44,10 @@ function appendElementError(wrapper: HTMLElement, element: JBFormElementV1, mess
 function renderRuntimeElement(wrapper: HTMLElement, element: JBFormElementV1, adapter: FormElementRegistryEntry, locale: string, defaultLocale: string): void {
   // Element content is created through DOM APIs and textContent only. Portable
   // JSON is never interpreted as HTML, script, or an executable callback.
-  const runtimeElement = document.createElement(adapter.tagName) as RuntimeFormElement;
+  const runtimeTagName = element.type === "section-heading" && (element.props.level === "h3" || element.props.level === "h4")
+    ? element.props.level
+    : adapter.tagName;
+  const runtimeElement = document.createElement(runtimeTagName) as RuntimeFormElement;
   runtimeElement.id = element.id;
   runtimeElement.dataset.formElementId = element.id;
   adapter.applyToRuntime(runtimeElement, element, locale, defaultLocale);
@@ -147,6 +150,99 @@ function renderConditionElement(wrapper: HTMLElement, element: JBConditionElemen
   return issues;
 }
 
+function localizedProperty(element: JBFormWizardElementV1, key: string, locale: string, defaultLocale: string, fallback: string): string {
+  const value = element.props[key];
+  return typeof value === "object" && value !== null && !Array.isArray(value) && "translations" in value
+    ? getLocalizedText(value as unknown as LocalizedText, locale, defaultLocale)
+    : fallback;
+}
+
+function renderWizardElement(wrapper: HTMLElement, element: JBFormWizardElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale: string): FormIssue[] {
+  const issues: FormIssue[] = [];
+  const wizard = document.createElement("jb-form-wizard");
+  wizard.id = element.id;
+  wizard.dataset.formElementId = element.id;
+  wizard.setAttribute("validation-mode", element.props.validationMode === "none" ? "none" : "current");
+  wizard.setAttribute("previous-label", localizedProperty(element, "previousLabel", locale, defaultLocale, "Previous"));
+  wizard.setAttribute("next-label", localizedProperty(element, "nextLabel", locale, defaultLocale, "Next"));
+  wizard.setAttribute("complete-label", localizedProperty(element, "completeLabel", locale, defaultLocale, "Complete"));
+  for (const step of element.steps) {
+    const stepRoot = document.createElement("section");
+    stepRoot.dataset.wizardStep = "";
+    stepRoot.dataset.stepId = step.id;
+    stepRoot.dataset.stepValue = step.value;
+    stepRoot.dataset.stepLabel = getLocalizedText(step.label, locale, defaultLocale);
+    for (const child of step.children) {
+      const rendered = renderFormElement(child, locale, unavailableTypes, defaultLocale);
+      stepRoot.append(rendered.wrapper);
+      issues.push(...rendered.issues);
+    }
+    wizard.append(stepRoot);
+  }
+  wrapper.append(wizard);
+  return issues;
+}
+
+function repeatableNumber(element: JBRepeatableGroupElementV1, key: string, fallback: number): number {
+  const value = element.props[key];
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : fallback;
+}
+
+function cloneLeafForRepeat(element: JBFormElementV1): JBFormElementV1 {
+  const clone = structuredClone(element);
+  clone.id = crypto.randomUUID();
+  return clone;
+}
+
+function renderRepeatableGroup(wrapper: HTMLElement, element: JBRepeatableGroupElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale: string): FormIssue[] {
+  const issues: FormIssue[] = [];
+  const minItems = repeatableNumber(element, "minItems", 1);
+  const maxItems = Math.max(minItems, repeatableNumber(element, "maxItems", 10));
+  const initialCount = Math.min(maxItems, Math.max(minItems, repeatableNumber(element, "repeatCount", minItems)));
+  const group = document.createElement("jb-repeatable-group");
+  group.setAttribute("part", "repeatable-group");
+  group.dataset.formElementId = element.id;
+  group.dataset.repeatableGroup = element.name;
+  const instances = document.createElement("div");
+  instances.setAttribute("part", "repeatable-items");
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.textContent = "Add item";
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.textContent = "Remove item";
+  const updateButtons = () => {
+    removeButton.disabled = instances.children.length <= minItems;
+    addButton.disabled = instances.children.length >= maxItems;
+  };
+  const addInstance = () => {
+    if (instances.children.length >= maxItems) return;
+    const subForm = document.createElement("jb-form");
+    subForm.setAttribute("name", element.name);
+    subForm.setAttribute("role", "group");
+    for (const child of element.children) {
+      const rendered = renderFormElement(cloneLeafForRepeat(child), locale, unavailableTypes, defaultLocale);
+      subForm.append(rendered.wrapper);
+      issues.push(...rendered.issues);
+    }
+    instances.append(subForm);
+    updateButtons();
+  };
+  for (let index = 0; index < initialCount; index += 1) addInstance();
+  const controls = document.createElement("div");
+  addButton.addEventListener("click", addInstance);
+  removeButton.addEventListener("click", () => {
+    if (instances.children.length > minItems) instances.lastElementChild?.remove();
+    updateButtons();
+  });
+  controls.append(addButton, removeButton);
+  if (element.props.allowAdd === true) group.append(instances, controls);
+  else group.append(instances);
+  wrapper.append(group);
+  updateButtons();
+  return issues;
+}
+
 export function renderFormElement(element: JBFormElementV1, locale: string, unavailableTypes: ReadonlySet<string>, defaultLocale = "en"): RenderedElement {
   const wrapper = createWrapper(element);
   // A dependency failure is isolated to its own wrapper so the rest of a valid
@@ -170,7 +266,11 @@ export function renderFormElement(element: JBFormElementV1, locale: string, unav
         wrapper,
         issues: isConditionElement(element)
           ? renderConditionElement(wrapper, element, locale, unavailableTypes, defaultLocale)
-          : renderTabElement(wrapper, element, locale, unavailableTypes, defaultLocale),
+          : isRepeatableGroupElement(element)
+            ? renderRepeatableGroup(wrapper, element, locale, unavailableTypes, defaultLocale)
+          : isWizardElement(element)
+            ? renderWizardElement(wrapper, element, locale, unavailableTypes, defaultLocale)
+            : renderTabElement(wrapper, element, locale, unavailableTypes, defaultLocale),
       };
     }
     renderRuntimeElement(wrapper, element, adapter, locale, defaultLocale);

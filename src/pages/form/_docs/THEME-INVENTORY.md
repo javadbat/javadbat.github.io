@@ -1,6 +1,6 @@
 # JB Theme Token and Styling-Hook Inventory
 
-Status: Phase 2, first inventory pass complete  
+Status: Deferred Phase 3 input; first inventory pass complete
 Reviewed: 2026-08-04
 
 This inventory records the styling surfaces available to Theme Builder. It is based on `jb-core/theme` and the installed web-component `custom-elements.json` manifests. The builder should consume these public surfaces; it should not copy component CSS or reach into private Shadow DOM.
@@ -68,7 +68,7 @@ form[data-theme="..."] jb-input::part(input-box) {
 
 The `border-radius` declaration is the progressive-enhancement fallback. App-owned Builder, Designer, and Preview surfaces may use `corner-shape: squircle` directly; this rule does not create or require a `--jb-corner-shape` token.
 
-## Phase 2 boundaries discovered
+## Deferred Theme Builder boundaries discovered
 
 - Global tokens are suitable for form-wide theme values.
 - Component CSS properties and `::part` selectors are separate public styling surfaces and should not be collapsed into one undifferentiated token map.
