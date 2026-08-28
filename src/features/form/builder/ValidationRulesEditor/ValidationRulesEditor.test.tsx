@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formAppMessages } from "../../i18n/locale-adapter";
-import { formElementRegistry } from "../../registry/form-element-registry";
+import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
 import { BuilderStore } from "../store/BuilderStore";
 import { BuilderStoreProvider } from "../store/BuilderStoreContext";
 import { ValidationRulesEditor } from "./ValidationRulesEditor";

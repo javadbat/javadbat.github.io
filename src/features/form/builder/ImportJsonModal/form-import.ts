@@ -1,6 +1,6 @@
-import type { FormIssue } from "../domain/form-issue";
-import type { JBFormDocumentV1 } from "../domain/form-document";
-import { validateFormDocument } from "../domain/form-document-validation";
+import type { FormIssue } from "../../domain/form-issue";
+import type { JBFormDocumentV1 } from "../../domain/form-document";
+import { validateFormDocument } from "../../domain/form-document-validation";
 
 export interface PreparedFormImport {
   valid: true;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
-import { formRouteHref } from "../../application/form-route";
+import { formPageHref } from "../../application/form-page-url";
 import type { BuilderNavigationTarget } from "../BuilderHeader/BuilderHeader";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
@@ -32,7 +32,7 @@ export function useBuilderAppActions() {
         openSettings();
         return;
       }
-      window.location.assign(formRouteHref(target, store.linkedRecord?.slug));
+      window.location.assign(formPageHref(target, store.linkedRecord?.slug));
     },
     [openSettings, store],
   );

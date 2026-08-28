@@ -3,6 +3,11 @@ import type { JBFormDocumentV1 } from "../domain/form-document";
 import { formRepository } from "../storage/form-repository";
 import type { LinkedFormReference, StorageIssue } from "../storage/storage-types";
 
+/**
+ * Complete route-level outcome of resolving either a named form or the current
+ * draft. Consumers render explicit loading, absence, failure, and ready states
+ * instead of interpreting repository records themselves.
+ */
 export type StoredFormResolution =
   | { status: "loading" }
   | { status: "empty" }
@@ -14,14 +19,22 @@ export type StoredFormResolution =
       linkedRecord: LinkedFormReference | null;
     };
 
+/**
+ * Resolves the form requested by a route: a slug selects a named form, while
+ * an absent slug selects the current draft. Named-record revision information
+ * is retained so later saves can detect concurrent edits.
+ */
 export function useStoredForm(slug?: string): StoredFormResolution {
+  /** Current route-facing resolution rendered by designer and preview pages. */
   const [resolution, setResolution] = useState<StoredFormResolution>({
     status: "loading",
   });
 
   useEffect(() => {
+    /** Prevents a superseded asynchronous lookup from updating an unmounted or retargeted route. */
     let active = true;
     setResolution({ status: "loading" });
+    /** Repository lookup chosen from the route's named-form or current-draft intent. */
     const request = slug ? formRepository.getBySlug(slug) : formRepository.getCurrentDraft();
     request.then(result => {
       if (!active) {

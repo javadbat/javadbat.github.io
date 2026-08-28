@@ -7,7 +7,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBTextarea } from "jb-textarea/react";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import type { FormElementPropertyDefinition } from "../../registry/form-element-configuration";
+import type { FormElementPropertyDefinition } from "jb-form-builder/registry/form-element-configuration";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { inputValue, localizedPropertyValue, propertyLabel } from "./configuration-values";
 import { getPropertyGuidance, getPropertyPlaceholder } from "./property-guidance";

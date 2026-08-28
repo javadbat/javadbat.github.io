@@ -6,7 +6,7 @@ import { JBSelect } from "jb-select/react";
 import "jb-icons/eye";
 import "jb-icons/react";
 import { observer } from "mobx-react-lite";
-import { formRouteHref } from "../../application/form-route";
+import { formPageHref } from "../../application/form-page-url";
 import { inferLocaleDirection } from "../../domain/form-document";
 import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
 import { useBuilderStore } from "../store/BuilderStoreContext";
@@ -14,18 +14,28 @@ import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./BuilderHeader.module.css";
 import DesignIcon from './design.svg?react'
 import SaveIcon from './save.svg?react'
+/** Builder destinations available from primary navigation actions. */
 export type BuilderNavigationTarget = "designer" | "preview";
 
+/** Primary document and workflow actions owned by the builder header. */
 interface BuilderHeaderProps {
+  /** Localized builder-interface copy. */
   messages: FormMessages;
+  /** Opens document identity and localization settings. */
   onOpenSettings: () => void;
+  /** Navigates to another route while retaining selected form identity. */
   onNavigate: (target: BuilderNavigationTarget) => void;
+  /** Opens portable JSON import. */
   onImport: () => void;
+  /** Restores the previous document state. */
   onUndo: () => boolean;
+  /** Reapplies an undone document state. */
   onRedo: () => boolean;
+  /** Opens portable JSON export. */
   onExport: () => void;
 }
 
+/** Decorative settings glyph for document configuration actions. */
 function SettingsIcon() {
   return (
     <svg className={styles.settingsIcon} viewBox="0 0 24 24" aria-hidden="true">
@@ -37,6 +47,7 @@ function SettingsIcon() {
   );
 }
 
+/** Decorative undo or redo glyph whose direction follows the requested history action. */
 function HistoryActionIcon({ action }: { action: "undo" | "redo" }) {
   return (
     <svg className={styles.historyIcon} data-action={action} viewBox="0 0 24 24" aria-hidden="true">
@@ -46,6 +57,7 @@ function HistoryActionIcon({ action }: { action: "undo" | "redo" }) {
   );
 }
 
+/** Decorative overflow glyph for compact builder actions. */
 function OverflowMenuIcon() {
   return (
     <svg className={styles.overflowMenuIcon} viewBox="0 0 24 24" aria-hidden="true">
@@ -63,11 +75,17 @@ function OverflowMenuIcon() {
  * the header and the builder sections that actually consume those values.
  */
 export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+  /** Shared builder state observed for document identity, locale, and save status. */
   const store = useBuilderStore();
+  /** Whether compact layout should prioritize preview after the draft is safely saved. */
   const showMobilePreview = store.status === "ready" && store.hasSavedDraft && !store.isDirty;
+  /** Visibility of the compact action menu. */
   const [menuOpen, setMenuOpen] = useState(false);
+  /** Menu boundary used to detect outside-pointer dismissal. */
   const menuRef = useRef<HTMLDivElement>(null);
+  /** Built-in and document-configured locales available for content editing. */
   const selectableLocales = [...new Set(["en", "fa", ...Object.keys(store.document.localization.locales)])];
+  /** Adds a locale when necessary, selects it for editing, and closes compact navigation. */
   const selectLocale = (nextLocale: string) => {
     if (!store.document.localization.locales[nextLocale]) {
       store.setFormLocalization({
@@ -85,9 +103,11 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
   useEffect(() => {
     if (!menuOpen) return;
 
+    /** Closes compact actions when focus intent moves outside the menu. */
     const closeOnOutsideClick = (event: MouseEvent) => {
       if (event.target instanceof Node && !menuRef.current?.contains(event.target)) setMenuOpen(false);
     };
+    /** Closes compact actions with the conventional Escape interaction. */
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMenuOpen(false);
     };
@@ -100,6 +120,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
     };
   }, [menuOpen]);
 
+  /** Closes compact navigation before executing the selected business action. */
   const runMenuAction = (action: () => void) => {
     setMenuOpen(false);
     action();
@@ -107,7 +128,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
 
   return (
     <header className={styles.header}>
-      <a className={styles.brand} href={formRouteHref("landing")}>
+      <a className={styles.brand} href={formPageHref("landing")}>
         <span className={styles.brandMark}>JB</span>
         <span>
           <strong>{messages.productName}</strong>

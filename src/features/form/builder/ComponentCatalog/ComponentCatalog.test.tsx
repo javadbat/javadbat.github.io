@@ -3,7 +3,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { formAppMessages } from "../../i18n/locale-adapter";
-import { formElementRegistry } from "../../registry/form-element-registry";
+import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
 import { ComponentCatalog } from "./ComponentCatalog";
 
 const addCatalogElement = vi.fn();

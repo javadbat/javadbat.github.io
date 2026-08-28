@@ -9,7 +9,7 @@ import type { JBTimeInputWebComponent } from "jb-time-input";
 import { useEffect, useRef, type ReactNode } from "react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { JBFormElementType, JBFormElementV1 } from "../../domain/form-document";
-import type { FormElementRegistryEntry } from "../../registry/form-element-registry";
+import type { FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import { asSelectOptions, inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
 

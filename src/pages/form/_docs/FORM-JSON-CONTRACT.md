@@ -69,7 +69,7 @@ The form document is the portable source of truth shared by Builder, IndexedDB r
 | `metadata` | Yes | Localized display metadata and portable timestamps. |
 | `localization` | Yes | Default locale and supported locale/direction declarations. |
 | `elements` | Yes | Ordered top-level leaf/container array. Container-owned child arrays preserve their own form order. |
-| `theme` | Yes | Phase 1 writes `null`; the key reserves the later Phase 3 Theme Builder boundary and Theme Designer work. |
+| `theme` | Yes | Version 1 legacy field; it must be `null`. ThemeConfig is a separate portable config. |
 
 Top-level unknown fields are rejected in version 1.
 
@@ -493,7 +493,7 @@ Phase 1 exports:
 }
 ```
 
-`null` means use the default JB theme. After Form Builder completion, Phase 3 promotes `theme` to the versioned object defined in `THEME-SCHEMA.md` and increments the form document schema version. No Phase 1 element property is reinterpreted as theme data.
+`null` means use the default JB theme in FormConfig v1. A future form schema version removes this legacy field instead of promoting it to an object. The standalone ThemeConfig defined by `THEME-SCHEMA.md` is supplied separately to the renderer. Form export never embeds it, and no Phase 1 element property is reinterpreted as theme data.
 
 ## Portable document versus IndexedDB record
 
@@ -639,7 +639,7 @@ Approved for Phase 1:
 - ASCII element-name syntax and 64-character limit.
 - Slug syntax, maximum 80 characters, stable-on-rename behavior, and explicit slug editing.
 - Locale-keyed `translations` objects and the documented resolution order.
-- `theme: null` in version 1, promoted to a versioned object in schema version 2.
+- `theme: null` remains the version 1 legacy field; a future form schema removes it and keeps ThemeConfig separate.
 - The initial six declarative validation rules, JSON-safe regex representation, and exclusion of user-provided/async functions.
 - Export filename `{slug-or-untitled-form}.jb-form.json`.
 - Builder Save As creates a new IndexedDB form ID and slug while preserving copied element IDs. Exporting another file preserves all document IDs.

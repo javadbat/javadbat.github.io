@@ -1,13 +1,13 @@
 import { lazy, Suspense, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { getCurrentFormRoute } from "../../application/form-route";
+import { getCurrentFormSlug } from "../../application/form-page-url";
 import { useFormLocale } from "../../i18n/locale-adapter";
 import { BuilderHeader } from "../BuilderHeader/BuilderHeader";
 import { BuilderStatusScreen } from "../BuilderStatusScreen/BuilderStatusScreen";
 import { BuilderStoreProvider, useBuilderStore } from "../store/BuilderStoreContext";
 import { BuilderWorkspace } from "../BuilderWorkspace/BuilderWorkspace";
 import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
-import { useBuilderLifecycle } from "../useBuilderLifecycle";
+import { useBuilderLifecycle } from "./useBuilderLifecycle";
 import { useBuilderAppActions, useHistoryShortcuts } from "./useBuilderAppActions";
 import styles from "./BuilderApp.module.css";
 
@@ -18,11 +18,11 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
   const { locale, direction, setLocale, messages } = useFormLocale("en");
-  const route = getCurrentFormRoute();
+  const slug = getCurrentFormSlug();
   const actions = useBuilderAppActions();
   const editingAppLocale = store.editingLocale.toLowerCase().split("-")[0] === "fa" ? "fa" : "en";
 
-  useBuilderLifecycle(route.slug);
+  useBuilderLifecycle(slug);
   useHistoryShortcuts();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   }, [editingAppLocale, locale, setLocale, store.status]);
 
   if (store.status === "loading" || store.status === "load-error") {
-    return <BuilderStatusScreen messages={messages} slug={route.slug} />;
+    return <BuilderStatusScreen messages={messages} slug={slug} />;
   }
 
   return (

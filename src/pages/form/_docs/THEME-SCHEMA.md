@@ -1,94 +1,95 @@
-# JB Form Theme JSON Schema
+# JB Form ThemeConfig Version 1 Contract
 
-Status: Deferred Phase 3 schema definition; starts after Form Builder completion
-Reviewed: 2026-08-04
+Status: Product contract approved; schema implementation not started
+Reviewed: 2026-08-29
 
-This document defines how theme data will be attached to the portable form document. It does not implement the Theme Builder UI or change the lower priority of Designer work.
+ThemeConfig is standalone portable visual configuration. It is not nested in FormConfig, does not own form identity, and is reusable with any form.
 
-## Relationship to the form document
+## Runtime relationship
 
-- Form document schema version 1 remains unchanged. Its required `theme` field is `null`, which means the default JB theme.
-- Form document schema version 2 will retain `theme` as a required nullable field. `null` continues to mean “use the default JB theme.”
-- A non-null theme is a versioned object with its own `schemaVersion`. The form document owns that object; theme data is not stored as a second document or as element props.
-- Theme data is portable and is included in Save, export, import, IndexedDB records, and renderer input.
-- Theme data changes presentation only. It must not change form identity, element identity/order, element values, validation rules, or the runtime response payload.
-- A v1 document migrates to v2 by preserving `theme: null`. No element property is reinterpreted as theme data.
-
-## Proposed v2 shape
-
-The following is the deferred Phase 3 contract shape. Exact allowlists and value validation remain intentionally deferred; Theme Builder behavior is defined first in `THEME-BEHAVIOR.md`.
-
-```json
-{
-  "theme": {
-    "schemaVersion": 1,
-    "preset": null,
-    "globals": {
-      "tokens": {
-        "--jb-primary": "oklch(0.6 0.26 256)",
-        "--jb-radius": "1rem"
-      }
-    },
-    "components": {
-      "jb-input": {
-        "tokens": {
-          "--jb-input-border-color": "var(--jb-primary)"
-        },
-        "parts": {
-          "input-box": {
-            "styles": {
-              "border-radius": "var(--jb-radius)",
-              "corner-shape": "squircle"
-            }
-          }
-        }
-      }
-    }
-  }
-}
+```js
+builder.formConfig = formConfig;
+builder.themeConfig = themeConfig; // optional
 ```
 
-The enclosing form document keeps its existing top-level fields, changes `$schema` and `schemaVersion` to version 2, and accepts this object in its `theme` field.
+Missing, `undefined`, or `null` ThemeConfig means current JB defaults. The component does not resolve theme names, queries, files, or IndexedDB.
 
-## Field rules
+Form schema v1 stays unchanged with legacy `theme: null`. A future form schema removes that field; it never promotes it to an embedded object. Form/theme exports stay separate.
+
+## Required and optional fields
+
+`schemaVersion: 1` and non-empty `name` are required for persisted/exported config. `description` is optional. Every visual section and value is optional. Partial in-memory config cannot persist/export until required metadata is valid.
+
+## Portable fields
 
 | Field | Rule |
 | --- | --- |
-| `theme.schemaVersion` | Positive integer owned by the theme contract; starts at `1`. |
-| `theme.preset` | Nullable local preset identifier. It is not a URL, module name, or executable reference. |
-| `theme.globals.tokens` | Map of allowlisted shared JB token names to CSS values. The allowlist comes from `jb-core/theme`. |
-| `theme.components` | Map keyed by supported JB custom-element tag name. Unknown component keys are rejected. |
-| `components[*].tokens` | Map of allowlisted public component CSS custom properties to CSS values. |
-| `components[*].parts` | Map of allowlisted public part names to style declarations. The renderer generates the corresponding `::part(...)` selector. |
-| `parts[*].styles` | JSON-safe CSS declaration map validated against the component's public styling contract. Selector text and arbitrary CSS blocks are not accepted. |
+| `$schema` | Optional stable schema URL. |
+| `schemaVersion` | Required integer; version 1 is `1`. |
+| `name` | Required non-empty display name. |
+| `description` | Optional description. |
+| `global` | Optional sparse map keyed by CSS variable name. |
+| `typography` | Optional font family and text scale. |
+| `sizing` | Optional audience preset and spacing scale. |
+| `defaults` | Optional `controlSize`; the only v1 component default. |
+| `background` | Optional color, pattern, or image configuration. |
+| `components` | Optional preserved component token maps; not edited in v1. |
 
-All values must be JSON-safe strings, numbers, booleans, arrays, or objects allowed by the final schema. Functions, DOM nodes, callbacks, uploaded `File` objects, and generated CSS text are not portable theme values.
+Export includes only meaningful values actually set. It never expands all supported tokens, null placeholders, or current JB defaults.
 
-## Styling and corner geometry
+## Global and friendly values
 
-There is no global `corner-shape` token. `corner-shape: squircle` may appear only in a component part declaration that is emitted through the matching public `::part(...)` selector. The shared `--jb-radius*` tokens remain available for radius values and progressive-enhancement fallbacks.
+`global` accepts every public shared CSS custom property in the supported `jb-core/theme`, keyed by its actual CSS variable name. Verify the exact allowlist against the supported package during implementation.
 
-Private Shadow DOM descendants and undocumented selectors are never valid theme targets. App-owned Builder, Designer, and Preview surfaces remain outside `theme.components` and use application CSS.
+Maps are sparse. Missing, `undefined`, or `null` means no override. JSON cannot encode `undefined`; setting `null` removes the key. Unknown/invalid entries fail unless the author explicitly chooses supported-values-only import.
 
-## Theme resolution
+Font family uses the product catalog. Text and spacing scales remain form-scoped. Audience size stores Compact, Standard, Large, Extra Large, or `custom` plus its resolved values. Manual resolution changes set `custom`.
 
-The renderer resolves the effective theme in this order:
+Size precedence is explicit element size, then theme `controlSize`, then native JB default.
 
-1. JB component defaults and shared `jb-core` defaults.
-2. The selected local preset, if any.
-3. `theme.globals.tokens`.
-4. Component token overrides in `theme.components`.
-5. Public part declarations in `theme.components[*].parts`.
+## Background
 
-The same resolved theme is used by Preview and the future Theme Designer. Phase 3 may provide editing and preview operations without implementing the Designer route; Form Builder completion remains a prerequisite, and Theme Designer follows Theme Builder.
+Background is one discriminated object:
 
-## Compatibility
+- `color`: required color value;
+- `pattern`: stable bundled `patternId`, optional background/foreground colors, opacity, and scale;
+- `image`: URL or data source, optional fit, position, opacity, overlay color, and fallback color.
 
-- A missing or `null` theme renders with the default JB theme.
-- A theme object with an unsupported `schemaVersion` is rejected with a recoverable document issue; it is not silently downgraded.
-- Imports must validate the complete form document and theme object before persistence.
-- Export preserves the theme object exactly after canonical JSON key ordering.
+URL sources permit HTTP/HTTPS; load failure is runtime state. Data sources accept Base64 PNG/JPEG/WebP. Decoded size warns above 400 KB and rejects above 800 KB.
 
-## Next decision
+`file:` and `blob:` are temporary editor sources, never portable ThemeConfig. Extracted fallback stores only after valid commit.
 
-The global-token versus component-level override allowlists and precedence details remain deferred by the current plan.
+## Component compatibility
+
+`components` lets presets/imports preserve supported component CSS variables. Keys must be supported JB tags and public manifest properties. Maps are sparse and non-null. Version 1 renders/preserves but does not edit them.
+
+`::part`, selectors, declaration maps, arbitrary CSS, and per-element maps are invalid.
+
+Precedence is JB defaults, `global`, then `components[tag].tokens`. Global edits never overwrite or recalculate explicit component values.
+
+## Sparse canonicalization
+
+Remove editor-only fields, `undefined`, `null`, invalid empty strings, empty objects/arrays, and unset/default representations. Preserve meaningful `0` and `false`.
+
+Canonical top-level order is `$schema`, `schemaVersion`, `name`, `description`, `global`, `typography`, `sizing`, `defaults`, `background`, and `components`.
+
+Emit only non-empty optional sections. Sort token/component keys lexicographically. Never materialize current JB defaults.
+
+## Local record versus portable config
+
+The local record adds `recordVersion`, UUID `id`, stable `slug`, timestamps, and the portable `config`. Generate slug from initial name and append `-2`, `-3`, etc. on conflict. Rename keeps slug; import creates new local identity.
+
+UUID, slug, timestamps, source preset, default selection, bindings, save state, and history are never portable.
+
+## Import and export
+
+- Reject unsupported/newer versions without silent downgrade.
+- Compatible missing fields use current defaults without materializing them.
+- Validate before persistence or draft replacement.
+- Default import is all-or-nothing.
+- Explicit Import supported values only strips and reports unsupported paths.
+- Failure changes nothing.
+- Export filename is `{theme-slug}.jb-theme.json`.
+- Export is canonical snapshot, not a preset reference.
+- Exclude local/runtime/temporary/generated data.
+- Form export stays separate and never embeds ThemeConfig.

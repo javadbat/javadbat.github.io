@@ -14,8 +14,9 @@ Use this folder in operational order. `PLAN.md` is the only execution checklist;
 8. `TECHNICAL-FOUNDATION.md` — implementation boundaries, testing, and performance rules.
 9. `THEME-INVENTORY.md` — public theme tokens and styling hooks.
 10. `THEME-SCHEMA.md` — theme data shape and compatibility rules.
-11. `THEME-BEHAVIOR.md` — Theme Builder behavior and acceptance rules.
-12. `UX-ROADMAP.md` — product/UX direction and future backlog.
+11. `THEME-BEHAVIOR.md` — Theme Designer behavior and acceptance rules.
+12. `DESIGNER-PLAN.md` — dedicated Theme Designer scope, routes, UI, delivery, and end-to-end acceptance.
+13. `UX-ROADMAP.md` — product/UX direction and future backlog.
 
 ## Status convention
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
-import { formRouteHref, getCurrentFormRoute } from "../application/form-route";
+import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
@@ -45,7 +45,7 @@ function OverflowIcon() {
 
 export function PreviewApp() {
   const { locale, direction, setLocale, messages } = useFormLocale("en");
-  const { slug } = getCurrentFormRoute();
+  const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -109,7 +109,7 @@ export function PreviewApp() {
   return (
     <div className={styles.page} dir={direction}>
       <header className={styles.topbar}>
-        <a className={styles.brand} href={formRouteHref("landing")}>
+        <a className={styles.brand} href={formPageHref("landing")}>
           <span className={styles.brandMark}>JB</span>
           <span>
             <strong>{messages.productName}</strong>
@@ -136,11 +136,11 @@ export function PreviewApp() {
               </JBSelect>
             </div>
           )}
-          <JBButton className={styles.previewNavButton} variant="ghost" size="sm" aria-label={messages.builder} onClick={() => window.location.assign(formRouteHref("builder", slug))}>
+          <JBButton className={styles.previewNavButton} variant="ghost" size="sm" aria-label={messages.builder} onClick={() => window.location.assign(formPageHref("builder", slug))}>
             <BuilderIcon />
             <span>{messages.builder}</span>
           </JBButton>
-          <JBButton className={styles.previewNavButton} variant="outline" size="sm" aria-label={messages.designer} onClick={() => window.location.assign(formRouteHref("designer", slug))}>
+          <JBButton className={styles.previewNavButton} variant="outline" size="sm" aria-label={messages.designer} onClick={() => window.location.assign(formPageHref("designer", slug))}>
             <DesignerIcon />
             <span>{messages.designer}</span>
           </JBButton>

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { ValidationItem } from "jb-validation";
-import { localizedText } from "../domain/form-document";
+import { localizedText } from "../contract/form-document";
 import { compileValidationRule, createValidationRule } from "./validation-rule-registry";
 import { formElementRegistry, createDefaultElement } from "./form-element-registry";
 import type { RuntimeFormElement } from "./form-element-adapter";

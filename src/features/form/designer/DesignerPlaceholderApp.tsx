@@ -1,5 +1,5 @@
 import { JBButton } from "jb-button/react";
-import { formRouteHref, getCurrentFormRoute } from "../application/form-route";
+import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
@@ -7,7 +7,7 @@ import styles from "../shell/RouteShell.module.css";
 
 export function DesignerPlaceholderApp() {
   const { locale, direction, messages } = useFormLocale("en");
-  const { slug } = getCurrentFormRoute();
+  const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
   const formName = resolution.status === "ready"
     ? getLocalizedText(resolution.document.metadata.name, locale, resolution.document.localization.defaultLocale)
@@ -16,7 +16,7 @@ export function DesignerPlaceholderApp() {
   return (
     <div className={styles.page} dir={direction}>
       <header className={styles.topbar}>
-        <a className={styles.brand} href={formRouteHref("landing")}>
+        <a className={styles.brand} href={formPageHref("landing")}>
           <span className={styles.brandMark}>JB</span>
           <span>
             <strong>{messages.productName}</strong>
@@ -24,10 +24,10 @@ export function DesignerPlaceholderApp() {
           </span>
         </a>
         <div className={styles.topActions}>
-          <JBButton variant="ghost" onClick={() => window.location.assign(formRouteHref("builder", slug))}>
+          <JBButton variant="ghost" onClick={() => window.location.assign(formPageHref("builder", slug))}>
             {messages.builder}
           </JBButton>
-          <JBButton variant="outline" onClick={() => window.location.assign(formRouteHref("preview", slug))}>
+          <JBButton variant="outline" onClick={() => window.location.assign(formPageHref("preview", slug))}>
             {messages.preview}
           </JBButton>
         </div>

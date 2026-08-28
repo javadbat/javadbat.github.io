@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import { getFormElementDisplayName } from "../../registry/form-element-registry";
+import { getFormElementDisplayName } from "jb-form-builder/registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
@@ -15,7 +15,7 @@ import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
 import { InsertionTarget } from "./InsertionTarget";
 
-const RemoveElementModal = lazy(() => import("../RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
+const RemoveElementModal = lazy(() => import("./RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
 
 interface FormCanvasProps {
   messages: FormMessages;

@@ -1,7 +1,7 @@
 # JB Form — Operational Plan
 
 Status: Phase 1 accepted; Form Builder workflow completion active
-Reviewed: 2026-08-27
+Reviewed: 2026-08-29
 Owner: Form Builder product owner
 
 This is the execution checklist. Work is handled in order, one active step at a time. Completed implementation detail belongs in the supporting documents; it is not repeated here as open work.
@@ -99,44 +99,35 @@ Status: DEFERRED UNTIL REQUIRED
 
 ## Design work — starts after Form Builder completion
 
-Do not start theme contract decisions, Theme Builder implementation, or Theme Designer implementation until Steps 1–7 are complete or explicitly deferred by the owner.
+Theme contract planning is complete. Do not start Theme Designer UI or runtime implementation until Steps 1–7 are complete or explicitly deferred by the owner.
 
-## Step 8 — finish the Theme Builder contract
+## Step 8 — Theme Designer contract
 
-Status: LATER; BLOCKED BY DECISION
+Status: COMPLETE (PLANNING ONLY)
 
-Decide and document:
+Approved and documented:
 
-- the allowlist of global tokens;
-- the allowlist of component-level tokens;
-- public `::part` style declarations;
-- precedence between preset, global, component, and part-level values;
-- validation and migration behavior for unsupported theme values.
+- standalone sparse ThemeConfig and local-record identity;
+- every shared `jb-core/theme` token;
+- component values preserved/rendered but not edited in v1;
+- no `::part`, raw CSS, or per-element styling in v1;
+- routes, bindings, presets, backgrounds, mobile authoring, autosave, history, import/export, preview, validation, and migration behavior.
 
-Update `THEME-SCHEMA.md`, `THEME-BEHAVIOR.md`, and `THEME-INVENTORY.md` together. Do not implement UI until the allowlists and precedence are approved.
+Contract sources are `DESIGNER-PLAN.md`, `THEME-SCHEMA.md`, `THEME-BEHAVIOR.md`, and `THEME-INVENTORY.md`.
 
-## Step 9 — implement Theme Builder
+## Step 9 — select the Theme Designer visual direction
+
+Status: LATER; NOT STARTED; BLOCKED BY FORM BUILDER SEQUENCE
+
+After the Form Builder gate, use the Product Design workflow to produce exactly three visual directions built on the existing JB design system. Select one target before UI implementation.
+
+## Step 10 — implement Theme Designer
 
 Status: LATER; NOT STARTED
 
-Implement the approved Theme Builder with:
-
-- persisted theme, draft theme, and Preview runtime separation;
-- live preview, reset, presets, import, export, undo, redo, Save, and Save As;
-- recoverable validation and persistence errors;
-- stable form and element identity;
-- public JB tokens and parts only.
-
-Acceptance is defined by `THEME-BEHAVIOR.md` and `THEME-SCHEMA.md`.
-
-## Step 10 — Theme Designer
-
-Status: LOWER PRIORITY; NOT STARTED
-
-- Start only after Form Builder completion and the Theme Builder steps above.
-- Create a separate Theme Designer delivery plan.
-- Replace the identity-preserving Designer placeholder.
-- Reuse the approved theme contract without changing form or element identity.
+- Start only after the Form Builder gate and Step 9 visual selection.
+- Replace the identity-preserving placeholder with the one approved Theme Designer feature.
+- Follow `DESIGNER-PLAN.md`; acceptance is defined there and in the theme schema/behavior contracts.
 
 ## Done means
 

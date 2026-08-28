@@ -1,3 +1,4 @@
+/** Converts one IndexedDB request into the promise-based result flow used by the repository. */
 export function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
@@ -5,6 +6,7 @@ export function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   });
 }
 
+/** Resolves only after every write in an IndexedDB transaction commits successfully. */
 export function transactionToPromise(transaction: IDBTransaction): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve();

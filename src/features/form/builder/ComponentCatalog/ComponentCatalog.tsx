@@ -3,7 +3,7 @@ import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "../../registry/form-element-registry";
+import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import styles from "./ComponentCatalog.module.css";
 import { beginBuilderDrag, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";

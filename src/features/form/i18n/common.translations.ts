@@ -1,3 +1,4 @@
+/** Shared `/form` copy used across multiple routes and component ownership boundaries. */
 export const commonTranslations = {
   en: {
     "productName": "JB Form",

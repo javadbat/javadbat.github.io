@@ -1,83 +1,86 @@
-# JB Form Theme Builder Behavior
+# JB Form Theme Designer Behavior
 
-Status: Deferred Phase 3 behavior definition; starts after Form Builder completion
-Reviewed: 2026-08-04
+Status: Product behavior approved; implementation not started
+Reviewed: 2026-08-29
 
-This document defines Theme Builder operations without deciding the deferred global-token versus component-override allowlists. It does not implement the lower-priority Designer route.
+This document owns Designer interaction, persistence, and recovery. `THEME-SCHEMA.md` owns portable data; `DESIGNER-PLAN.md` owns full scope and sequence.
 
 ## State model
 
-Theme editing uses three distinct states:
+Keep persisted ThemeConfig, editor draft/intermediate input, preview runtime, and local relationships separate. Themes never live inside FormConfig. Preview responses, validation state, viewport, preview-form selection, and component selection never enter ThemeConfig.
 
-- **Persisted theme:** the theme stored inside the saved form document.
-- **Draft theme:** the editable working copy used by the Theme Builder and live preview.
-- **Preview runtime:** the rendered controls and styles produced from the draft theme; runtime response values and validation state are never written into theme data.
+## Library and loading
 
-Opening Theme Builder clones the persisted theme into draft state. A draft edit marks the form dirty but does not write IndexedDB, change the saved form revision, or mutate the source form document until explicit Save.
+`/form/designer` opens the library. Create asks Blank/Preset, required name, and optional description. Editing a preset clones it before the first edit. Duplicate creates new UUID/slug.
 
-## Live preview
+`theme=:slug` resolves a local theme; `form=:slug` selects preview only. Missing theme offers Library/Create/Import. Missing preview form uses the fixture. The saved-form selector changes preview without changing bindings.
 
-- Every valid draft edit updates the Theme Builder preview without navigation or persistence.
-- Preview uses the same form document and `<jb-form-builder>` renderer contract as the standalone Preview route.
-- Theme changes are presentation-only: values, validation state, element order, form identity, and response data remain unchanged.
-- Invalid intermediate input stays in editor state and is shown near the editing control; the last valid theme remains active in preview.
-- Preview updates should meet the existing editing feedback target of 100 ms on the reference environment.
-- Leaving the page with unsaved theme changes uses the existing unsaved-change guard.
+## Live preview and components
 
-## Reset behavior
+Committed valid changes reach preview under 100ms. Invalid intermediate input stays local; preview retains last valid value. Preview uses the runtime renderer, is interactive, and keeps responses session-only. Desktop offers Desktop/Mobile viewports; mobile uses real width. Reset preview clears runtime state only.
 
-Theme Builder exposes two explicit reset operations:
+Preview uses form locale/direction while v1 Designer chrome is English/LTR.
 
-1. **Discard draft changes** restores the draft to the last persisted theme. It does not alter the saved form and clears the theme dirty state.
-2. **Reset to default** removes the selected preset and all theme overrides, producing `theme: null` semantics in the draft. It requires confirmation when the draft contains changes.
-
-Reset never changes form structure, element properties, values, or the persisted document without explicit Save.
+Components is a selector plus isolated representative preview, not a token editor. Valid preset/import component values apply and persist. State clearly that editing comes later; add no override warnings, propagation, or reset-all action.
 
 ## Presets
 
-- Presets are local, named, versioned entries supplied by the application or the approved JB preset catalog; they are not remote URLs, executable modules, or arbitrary CSS files.
-- Selecting a preset replaces the draft theme base and keeps the result unsaved until explicit Save.
-- A preset selection is represented by the stable `theme.preset` identifier. Explicit draft overrides remain separate from the preset base.
-- The preset catalog must provide a default fallback. If an imported preset identifier is unavailable, import reports a recoverable issue and offers the default theme; it does not execute or fetch replacement code.
-- Applying a preset does not rewrite form element props or create per-element styling data.
+Eight presets are immutable templates. Creation materializes a detached snapshot. Applying another preset is one undoable replacement after confirmation. Export contains the snapshot, not a preset dependency.
 
-## Theme import
+## Autosave and history
 
-Theme Builder supports importing a theme object defined by `THEME-SCHEMA.md`.
+- Autosave 500ms after the latest committed valid edit.
+- Write only canonical valid ThemeConfig.
+- Show Saving, Saved, or Save failed.
+- New edits during saving require a later revision; old completion cannot clear newer dirty state.
+- Navigation waits for save and blocks on failure with Retry/export.
+- No normal Save button.
+- Temporary file/blob background is never reported as saved.
 
-- The file is parsed as JSON and validated before it can affect the draft.
-- Import validates the theme schema version, preset identifier, supported component keys, public CSS properties, public part names, and JSON-safe CSS declarations.
-- Unknown fields, private Shadow DOM selectors, arbitrary CSS blocks, scripts, callbacks, and non-serializable values are rejected.
-- A valid import replaces draft theme state only; it does not overwrite the persisted form or IndexedDB record.
-- The user can preview, discard, or explicitly Save the imported draft.
-- Import failure leaves the current draft unchanged and reports recoverable field/file issues.
+Undo/redo covers preset, name, description, and committed visual edits. Invalid control text creates no history until valid commit. History is session-only; undo/redo results autosave.
 
-Full form JSON import remains a separate operation. When a full form document contains a valid `theme` object, the same theme validation and draft rules apply.
+Reset removes authored visual overrides while retaining metadata after confirmation. Discard restores the latest persisted config and clears session history after confirmation.
 
-## Theme export
+## Import and export
 
-- Theme Builder can export the current valid draft theme as a standalone, readable JSON theme file.
-- The standalone filename is `{slug-or-untitled-form}.jb-theme.json`.
-- The export contains the theme schema version, preset identifier, and explicit theme data. It excludes editor selection, dirty state, preview response values, generated CSS text, and runtime component instances.
-- Export is deterministic and uses the repository's canonical JSON key ordering.
-- A full form export continues to contain the theme under the form document's `theme` field. It remains the portable source of form structure plus presentation configuration.
-- Invalid draft data blocks export and leaves the last valid/persisted export available as recovery.
+Accept pasted JSON or `.jb-theme.json`. Parse and validate before changing draft/storage. Default rejects the whole unsupported input; explicit Import supported values only shows/removes unsupported paths.
 
-## Save and recovery
+Import creates a new local theme and asks on every name/generated-slug conflict. Create copy is the safe default. Failure changes nothing.
 
-- Explicit Save validates the complete form document and the draft theme together, then stores them as one new document revision.
-- Save failure preserves the draft in memory and provides export/retry recovery.
-- Save As creates the normal new form identity and carries the current valid theme draft into the new document.
-- Browser refresh, route navigation, and tab close follow the existing draft-recovery policy; theme draft data is not silently discarded when recovery is available.
+Export uses the latest valid canonical draft even if IndexedDB fails. Invalid intermediate input is excluded with explanation; it does not destroy export recovery. Download `{theme-slug}.jb-theme.json`.
 
-## Undo and redo
+Exclude null, undefined, empty/default, local-record, binding, history, runtime, and temporary-source data. Form export is always independent.
 
-- Builder undo/redo operates on detached portable document snapshots, so editor selection and MobX state are never serialized into history.
-- Undo and redo cover approved form edits and will cover theme data automatically when the `theme` object becomes editable.
-- `Ctrl/Cmd+Z` undoes and `Ctrl/Cmd+Shift+Z` or `Ctrl/Cmd+Y` redoes when focus is not inside a text-editing control.
-- Undoing back to the persisted document clears the dirty state; any other history position remains unsaved.
-- Import starts a new unsaved draft history and does not expose the previous saved record through undo.
+## Default and bindings
 
-## Deferred decision
+Default selection and form-to-theme bindings are local relationships, not portable config. Explicit URL theme wins without changing binding. Default affects only unbound forms; JB default is final fallback.
 
-This behavior contract intentionally does not define the global-token versus component-level override allowlists, detailed precedence, or token editor UI. Those decisions remain deferred until after these operations are accepted.
+## Background behavior
+
+Accept HTTP/HTTPS and attempt loading. On network, decoding, mixed-content, or CORS-dependent extraction failure, keep editing and render fallback with Background unavailable, Retry, and Edit source.
+
+Local file selection creates a temporary browser source. Keep it out of persistence/export and show a warning to upload/use URL or convert to Base64. Navigation offers Stay and replace or Leave with saved background/fallback.
+
+Base64 accepts PNG/JPEG/WebP. Measure decoded bytes: above 400 KB through 800 KB warns and needs confirmation; above 800 KB rejects while preserving prior background.
+
+Attempt fallback extraction automatically. Local/blob, Base64, and same-origin are normally readable; cross-origin needs CORS even when cached. On success commit through the normal fallback field. Failure retains current/default fallback and manual editing.
+
+## Delete and runtime application
+
+Presets/JB default cannot be deleted. Deleting an unused local theme requires confirmation. A used/default theme requires selecting another theme or Default. Reference replacement and delete are atomic; failure rolls back everything.
+
+Apply theme only in renderer/form scope; never change host `<html>` size or mutate FormConfig. Explicit element size wins over theme `controlSize`; unset inherits. Component tokens win over globals and are not recalculated. Missing, `undefined`, or `null` theme values produce no override.
+
+## Recovery
+
+| Failure | Behavior |
+| --- | --- |
+| Unknown/corrupt theme | Explain and offer Library/Create/Import; do not invent a record. |
+| Unsupported import | Reject or explicit supported-values-only path. |
+| Storage/autosave failure | Keep memory draft; Retry and export. |
+| Background unavailable | Use fallback; retry/edit source. |
+| Missing preview form | Use fixture and continue editing. |
+| Temporary source on leave | Stay/replace or leave with saved fallback. |
+| Delete transaction failure | Preserve theme and relationships. |
+
+Acceptance is the walkthrough in `DESIGNER-PLAN.md` plus tests for sparse output, precedence, migrations, save races, rollback, Base64 limits, temporary-source exclusion, query resolution, keyboard use, 320px layout, and performance.

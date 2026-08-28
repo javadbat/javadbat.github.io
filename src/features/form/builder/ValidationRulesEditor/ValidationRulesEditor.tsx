@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import type { JBValidationRule } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import type { ValidationRuleName } from "../../registry/validation-rule-registry";
+import type { ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";

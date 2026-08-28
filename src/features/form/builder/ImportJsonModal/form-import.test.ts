@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyFormDocument } from "../domain/form-document";
+import { createEmptyFormDocument } from "../../domain/form-document";
 import { prepareFormImport } from "./form-import";
 
 describe("form JSON import", () => {

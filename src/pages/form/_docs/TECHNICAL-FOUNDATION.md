@@ -54,7 +54,7 @@ src/
         form-document.ts
         form-issues.ts
       application/
-        form-route.ts
+        form-page-url.ts
         form-resolver.ts
         form-save-service.ts
       registry/
@@ -105,52 +105,31 @@ Each route owns its loading, unavailable-storage, incompatible-document, unknown
 
 Route-level loading/error presentation that is owned only by one route root uses local React state or `useReducer`; it is not automatically promoted to MobX.
 
-### Optional-slug parsing
+### Optional form selection
 
-The shared parser accepts only:
+Astro owns the page routes:
 
 ```text
 /form
 /form/builder
-/form/builder/:slug
 /form/designer
-/form/designer/:slug
 /form/preview
-/form/preview/:slug
 ```
+
+Named-form identity is client-owned state in the optional `form` query parameter, for example `/form/builder?form=my-form`.
 
 Rules:
 
-- ignore one trailing slash;
-- decode a slug exactly once;
 - validate it against the approved slug expression and length;
-- reject extra path segments;
-- never read a slug from a query string or hash;
 - never fall back from an unknown/invalid slug to the current draft;
-- route generation always uses one shared `buildFormUrl(mode, slug?)` function.
-
-The resolver returns:
-
-```ts
-type FormRoute =
-  | { mode: "landing"; slug: null }
-  | { mode: "builder" | "designer" | "preview"; slug: string | null };
-```
+- page selection and document titles remain in Astro;
+- client code only reads form state and builds navigation links to known Astro pages.
 
 Navigation to Designer and Preview performs a full document navigation after a successful explicit Save. This guarantees that the destination loads IndexedDB instead of receiving Builder memory.
 
-### GitHub Pages deep-link constraint
+### GitHub Pages routing
 
-Named-form slugs exist only in a user's IndexedDB and cannot be enumerated by Astro at build time. GitHub Pages has no rewrite rule for arbitrary `/form/{mode}/:slug` paths.
-
-Approved simple Phase 1 handling:
-
-- generate normal static shells for the no-slug routes;
-- add a form-aware `404.html` shell;
-- when the 404 path matches the strict form-route parser, mount the correct route island without changing the URL;
-- render the normal not-found page for every other path.
-
-This makes direct slug navigation usable on GitHub Pages, but the initial HTTP response remains `404`. This limitation is accepted for Phase 1 and may be enhanced later. A `200` response for arbitrary slug deep links requires hosting with a rewrite to the form shell.
+Named-form slugs exist only in a user's IndexedDB and cannot be enumerated by Astro at build time. Keeping the slug in query state lets every direct link resolve to an Astro-generated static page with a normal successful response. The global `404.html` remains a plain not-found page.
 
 ## State boundaries
 
@@ -303,7 +282,7 @@ IndexedDB implementation status:
 - JSON Schema/Ajv is dynamically imported only when an existing record or Save needs validation, keeping it out of the empty Builder startup path;
 - record envelopes, projection consistency, semantic rules, registry adapters, corrupt data, newer record versions, quota, abort, and unavailable storage return typed failures;
 - Builder writes only from explicit Save/Save As, restores current or slug-selected records, and retains edits made while a transaction is in flight;
-- Landing, Designer, and Preview resolve storage independently, and the form-aware `404.html` shell preserves arbitrary strict slug URLs on GitHub Pages.
+- Landing, Designer, and Preview resolve storage independently, and Astro serves every form surface directly on GitHub Pages.
 
 ## Validation pipeline
 
@@ -573,7 +552,7 @@ React route error boundaries catch unexpected UI exceptions. Domain and infrastr
 - explicit Save before Preview/Designer;
 - repeated phone names producing array values;
 - IndexedDB persistence across reload and separate Preview navigation;
-- direct GitHub Pages-style 404 fallback routing;
+- direct navigation to Astro form pages with named-form query state;
 - JSON export/schema fixture verification;
 - narrow and desktop responsive Preview.
 
@@ -584,12 +563,27 @@ Implementation dependencies:
 
 The implementation step adds scripts for unit tests, type checking, linting, build, and end-to-end tests to CI.
 
+## Planned Theme Designer technical boundary
+
+This is a post-Form-Builder plan; current `DesignerPlaceholderApp`, route resolution, Form v1 schema, and explicit form Save behavior remain unchanged until the gate in `PLAN.md` is satisfied.
+
+- FormConfig and ThemeConfig are separate parsed renderer properties.
+- The host application resolves query strings, theme records, defaults, and bindings; the web component never reads IndexedDB or route state.
+- Theme records use their own repository and 500ms valid-value autosave; Form Builder keeps explicit Save/Save As.
+- Canonical ThemeConfig is sparse and omits missing, `undefined`, `null`, empty, and default/unset values.
+- Theme styles are scoped to the renderer/form host and never alter document-root `rem`.
+- Component token maps from presets/imports render and persist but have no v1 editor.
+- Temporary file/blob backgrounds remain runtime state; storage/export accepts only approved portable background sources.
+- Preview feedback target is under 100ms and mobile authoring supports 320px without page overflow.
+
+Detailed implementation order and acceptance live in `DESIGNER-PLAN.md`, `THEME-SCHEMA.md`, and `THEME-BEHAVIOR.md`.
+
 ## Entry criteria for Builder shell
 
 Builder shell implementation may begin when:
 
 - this approved architecture is reflected in implementation;
-- the simple form-aware GitHub Pages fallback is kept isolated for later enhancement;
+- all form page routes are owned by Astro;
 - all 16 catalog entries receive a suitable existing or locally designed icon;
 - DSR-001 through DSR-004 are resolved and remain covered by integration tests;
 
@@ -598,7 +592,7 @@ Builder shell implementation may begin when:
 Approved:
 
 - local React state, shared route-local MobX state, native IndexedDB, Ajv, and external CSS Modules;
-- the simple form-aware GitHub Pages `404.html` fallback for Phase 1;
+- Astro-owned static form pages with named-form identity in query state;
 - sourcing or locally designing proper catalog icons during implementation;
 - client-only `jb-core/i18n` with one active locale per route page;
 - deferring any enhanced deep-link hosting or scoped-locale work until it is actually needed.

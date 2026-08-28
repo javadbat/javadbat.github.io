@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
 import { validateFormDocument } from "../../domain/form-document-validation";
 import { formAppMessages } from "../../i18n/locale-adapter";
-import { formElementRegistry } from "../../registry/form-element-registry";
+import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
 import { IndexedDbFormRepository } from "../../storage/form-repository";
 import { BuilderStore } from "./BuilderStore";
 import { BuilderStoreProvider } from "./BuilderStoreContext";

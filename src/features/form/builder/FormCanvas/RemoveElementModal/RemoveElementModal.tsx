@@ -1,9 +1,9 @@
 import { JBButton } from "jb-button/react";
-import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
-import type { FormMessages } from "../../i18n/locale-adapter";
-import modalStyles from "../../shell/FormModal.module.css";
+import modalStyles from "../../../shell/FormModal.module.css";
 import styles from "./RemoveElementModal.module.css";
 import { JBModal } from "jb-modal/react";
+import type { FormMessages } from "../../../i18n/locale-adapter";
+import { ModalCloseButton } from "@react-components/modal/ModalCloseButton";
 
 interface RemoveElementModalProps {
   isOpen: boolean;

@@ -17,44 +17,54 @@ import {
   type JBValidationRule,
   type JSONValue,
 } from "../../domain/form-document";
-import { addMissingElementDefaultTranslations, createDefaultElement, type FormElementRegistryEntry } from "../../registry/form-element-registry";
-import { createValidationRule, type ValidationRuleName } from "../../registry/validation-rule-registry";
+import { addMissingElementDefaultTranslations, createDefaultElement, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import { createValidationRule, type ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 
+/** Portable field-name rule shared by configuration validation and mutation guards. */
 export const ELEMENT_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 
 /** Owns element selection, collection mutations, and selected-element validation rules. */
 export class BuilderElementStore {
+  /** Identity targeted by canvas and configuration UI. */
   selectedElementId: string | null = null;
+  /** Draft boundary that records completed element mutations. */
   private readonly draft: BuilderDraftStore;
 
+  /** Connects element operations to one editable document. */
   constructor(draft: BuilderDraftStore) {
     this.draft = draft;
     makeAutoObservable<this, "draft">(this, { draft: false }, { autoBind: true });
   }
 
+  /** Flattened document hierarchy used for identity lookup and name uniqueness. */
   get all(): JBFormElementV1[] {
     return this.draft.document.elements.some(isContainerElement) ? walkFormElements(this.draft.document.elements) : this.draft.document.elements;
   }
 
+  /** Selected element resolved from the current document hierarchy. */
   get selected(): JBFormElementV1 | null {
     return this.all.find(element => element.id === this.selectedElementId) ?? null;
   }
 
+  /** Selects an existing element and reports whether its identity resolved. */
   select(elementId: string): boolean {
     if (!this.all.some(element => element.id === elementId)) return false;
     this.selectedElementId = elementId;
     return true;
   }
 
+  /** Clears the current builder selection. */
   clearSelection(): void {
     this.selectedElementId = null;
   }
 
+  /** Removes selection when replacement or history makes its identity stale. */
   reconcileSelection(): void {
     if (!this.all.some(element => element.id === this.selectedElementId)) this.selectedElementId = null;
   }
 
+  /** Creates and inserts a registry element at the document root. */
   add(entry: FormElementRegistryEntry, insertionIndex = this.draft.document.elements.length): string {
     const element = this.createElement(entry);
     const index = Math.max(0, Math.min(insertionIndex, this.draft.document.elements.length));
@@ -64,6 +74,7 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  /** Creates and inserts a leaf element into one tab. */
   addToTab(containerId: string, tabId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
     if (entry.isContainer) return null;
     const tab = this.getTab(containerId, tabId);
@@ -77,6 +88,7 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  /** Creates and inserts a leaf element into one condition container. */
   addToCondition(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
     if (entry.isContainer) return null;
     const container = this.getConditionContainer(containerId);
@@ -90,6 +102,7 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  /** Creates and inserts a leaf element into one wizard step. */
   addToWizard(containerId: string, stepId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
     if (entry.isContainer) return null;
     const step = this.getWizardStep(containerId, stepId);
@@ -103,6 +116,7 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  /** Creates and inserts a leaf element into a repeatable-group template. */
   addToRepeatableGroup(containerId: string, entry: FormElementRegistryEntry, insertionIndex?: number): string | null {
     if (entry.isContainer) return null;
     const container = this.getRepeatableGroupContainer(containerId);
@@ -116,6 +130,7 @@ export class BuilderElementStore {
     return element.id;
   }
 
+  /** Creates a registry default with a document-wide unique name and all configured locales. */
   private createElement(entry: FormElementRegistryEntry): JBFormElementV1 {
     const defaultLocale = this.draft.document.localization.defaultLocale;
     const element = createDefaultElement(entry, this.getAvailableName(entry.defaultName), defaultLocale);
@@ -125,6 +140,7 @@ export class BuilderElementStore {
     return element;
   }
 
+  /** Adds a uniquely identified tab with a localized default label. */
   addTab(containerId: string): string | null {
     const container = this.getTabContainer(containerId);
     if (!container) return null;
@@ -139,6 +155,7 @@ export class BuilderElementStore {
     return id;
   }
 
+  /** Updates editable portable fields of one tab. */
   updateTab(containerId: string, tabId: string, patch: Partial<Pick<JBTabElementV1["tabs"][number], "value" | "label" | "disabled" | "color">>): boolean {
     const container = this.getTabContainer(containerId);
     const tab = container?.tabs.find(candidate => candidate.id === tabId);
@@ -150,6 +167,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Removes a tab while preserving the container's required valid structure. */
   removeTab(containerId: string, tabId: string): boolean {
     const container = this.getTabContainer(containerId);
     if (!container || container.tabs.length <= 1) return false;
@@ -162,6 +180,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Reorders a tab by one position and returns its resulting index. */
   moveTab(containerId: string, tabId: string, offset: -1 | 1): number {
     const container = this.getTabContainer(containerId);
     if (!container) return -1;
@@ -175,6 +194,7 @@ export class BuilderElementStore {
     return next;
   }
 
+  /** Adds a uniquely identified wizard step with a localized default label. */
   addWizardStep(containerId: string): string | null {
     const container = this.getWizardContainer(containerId);
     if (!container) return null;
@@ -192,6 +212,7 @@ export class BuilderElementStore {
     return id;
   }
 
+  /** Updates editable portable fields of one wizard step. */
   updateWizardStep(containerId: string, stepId: string, patch: Partial<Pick<JBFormWizardElementV1["steps"][number], "value" | "label">>): boolean {
     const step = this.getWizardStep(containerId, stepId);
     if (!step) return false;
@@ -200,6 +221,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Removes a wizard step while preserving the container's required valid structure. */
   removeWizardStep(containerId: string, stepId: string): boolean {
     const container = this.getWizardContainer(containerId);
     if (!container || container.steps.length <= 1) return false;
@@ -211,6 +233,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Reorders a wizard step by one position and returns its resulting index. */
   moveWizardStep(containerId: string, stepId: string, offset: -1 | 1): number {
     const container = this.getWizardContainer(containerId);
     if (!container) return -1;
@@ -224,6 +247,7 @@ export class BuilderElementStore {
     return next;
   }
 
+  /** Updates supported common fields on the selected leaf as one history change. */
   updateSelected(patch: Partial<Pick<JBFormLeafElementV1, "name" | "label" | "placeholder" | "required" | "disabled" | "initialValue">>): boolean {
     if (!this.selected) return false;
     const previousName = this.selected.name;
@@ -239,6 +263,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Updates or removes one registry-defined portable property on the selected element. */
   updateSelectedProp(key: string, value: JSONValue | undefined): boolean {
     if (!this.selected) return false;
     if (value === undefined) delete this.selected.props[key];
@@ -247,6 +272,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Changes whether selected-container validation covers all or active children. */
   updateSelectedContainerValidationScope(scope: "all" | "active"): boolean {
     if (!this.selected || !isTabElement(this.selected)) return false;
     this.selected.validationScope = scope;
@@ -254,6 +280,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Adds a supported validation rule to the selected leaf and returns its identity. */
   addValidationRule(rule: ValidationRuleName, locale = "en"): string | null {
     if (!this.selected || isContainerElement(this.selected)) return null;
     const validation = createValidationRule(rule, locale);
@@ -262,6 +289,7 @@ export class BuilderElementStore {
     return validation.id;
   }
 
+  /** Replaces a validation rule while preserving its list position. */
   updateValidationRule(ruleId: string, nextRule: JBValidationRule): boolean {
     if (!this.selected || isContainerElement(this.selected)) return false;
     const index = this.selected.validation.findIndex(rule => rule.id === ruleId);
@@ -275,6 +303,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Removes a validation rule from the selected leaf. */
   removeValidationRule(ruleId: string): boolean {
     if (!this.selected || isContainerElement(this.selected)) return false;
     const index = this.selected.validation.findIndex(rule => rule.id === ruleId);
@@ -284,12 +313,14 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Categorizes a field name as missing, invalid, or acceptable. */
   getNameError(elementId: string): "required" | "invalid" | null {
     const element = this.all.find(candidate => candidate.id === elementId);
     if (!element || element.name.length === 0) return "required";
     return ELEMENT_NAME_PATTERN.test(element.name) ? null : "invalid";
   }
 
+  /** Moves an element one sibling position and returns its resulting index. */
   moveBy(elementId: string, offset: -1 | 1): number {
     const location = this.findLocation(elementId);
     if (!location) return -1;
@@ -305,6 +336,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Moves any element to a top-level insertion position. */
   moveToInsertionIndex(elementId: string, insertionIndex: number): number {
     const location = this.findLocation(elementId);
     if (!location) return -1;
@@ -323,6 +355,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Moves a leaf element into a specific tab insertion position. */
   moveToTabInsertionIndex(elementId: string, containerId: string, tabId: string, insertionIndex: number): number {
     const location = this.findLocation(elementId);
     const tab = this.getTab(containerId, tabId);
@@ -340,6 +373,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Moves a leaf element into a condition container insertion position. */
   moveToConditionInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
     const location = this.findLocation(elementId);
     const container = this.getConditionContainer(containerId);
@@ -357,6 +391,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Moves a leaf element into a wizard-step insertion position. */
   moveToWizardInsertionIndex(elementId: string, containerId: string, stepId: string, insertionIndex: number): number {
     const location = this.findLocation(elementId);
     const step = this.getWizardStep(containerId, stepId);
@@ -374,6 +409,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Moves a leaf element into a repeatable-group template insertion position. */
   moveToRepeatableGroupInsertionIndex(elementId: string, containerId: string, insertionIndex: number): number {
     const location = this.findLocation(elementId);
     const container = this.getRepeatableGroupContainer(containerId);
@@ -391,6 +427,7 @@ export class BuilderElementStore {
     return nextIndex;
   }
 
+  /** Updates whether every or any rule controls the selected condition container. */
   updateSelectedConditionMatch(match: JBConditionMatch): boolean {
     if (!this.selected || !isConditionElement(this.selected)) return false;
     this.selected.conditions.match = match;
@@ -398,6 +435,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Adds a condition rule targeting a named form field. */
   addSelectedConditionRule(fieldName: string): string | null {
     if (!this.selected || !isConditionElement(this.selected)) return null;
     const id = crypto.randomUUID();
@@ -406,6 +444,7 @@ export class BuilderElementStore {
     return id;
   }
 
+  /** Updates the comparison definition of one selected-container condition rule. */
   updateSelectedConditionRule(ruleId: string, patch: Partial<Omit<JBConditionRuleV1, "id">>): boolean {
     if (!this.selected || !isConditionElement(this.selected)) return false;
     const rule = this.selected.conditions.rules.find(candidate => candidate.id === ruleId);
@@ -420,6 +459,7 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Removes one rule from the selected condition container. */
   removeSelectedConditionRule(ruleId: string): boolean {
     if (!this.selected || !isConditionElement(this.selected)) return false;
     const index = this.selected.conditions.rules.findIndex(rule => rule.id === ruleId);
@@ -429,30 +469,36 @@ export class BuilderElementStore {
     return true;
   }
 
+  /** Resolves an element anywhere in the document hierarchy. */
   find(elementId: string): JBFormElementV1 | null {
     return this.all.find(element => element.id === elementId) ?? null;
   }
 
+  /** Resolves the tab membership of a nested element. */
   getParentTab(elementId: string): { containerId: string; tabId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId && isTabElement(this.find(location.containerId)!) ? { containerId: location.containerId, tabId: location.tabId } : null;
   }
 
+  /** Resolves the wizard-step membership of a nested element. */
   getParentWizard(elementId: string): { containerId: string; stepId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId && isWizardElement(this.find(location.containerId)!) ? { containerId: location.containerId, stepId: location.tabId } : null;
   }
 
+  /** Resolves the condition-container membership of a nested element. */
   getParentCondition(elementId: string): { containerId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId === null && isConditionElement(this.find(location.containerId)!) ? { containerId: location.containerId } : null;
   }
 
+  /** Resolves the repeatable-group membership of a nested element. */
   getParentRepeatableGroup(elementId: string): { containerId: string } | null {
     const location = this.findLocation(elementId);
     return location?.containerId && location.tabId === null && isRepeatableGroupElement(this.find(location.containerId)!) ? { containerId: location.containerId } : null;
   }
 
+  /** Deeply duplicates an element with fresh identities and a unique field name. */
   duplicate(elementId: string): string | null {
     const location = this.findLocation(elementId);
     if (!location) return null;
@@ -464,6 +510,7 @@ export class BuilderElementStore {
     return duplicate.id;
   }
 
+  /** Removes an element and returns the best next identity for canvas selection. */
   remove(elementId: string): string | null {
     const location = this.findLocation(elementId);
     if (!location) return this.selectedElementId;
@@ -474,10 +521,12 @@ export class BuilderElementStore {
     return this.selectedElementId;
   }
 
+  /** Returns an element's top-level position for move-control status copy. */
   getPosition(elementId: string): number {
     return this.findLocation(elementId)?.index ?? -1;
   }
 
+  /** Produces a document-wide unique portable field name from a registry default. */
   private getAvailableName(baseName: string): string {
     const names = new Set(this.all.map(element => element.name));
     if (!names.has(baseName)) return baseName;
@@ -486,34 +535,41 @@ export class BuilderElementStore {
     return `${baseName}_${suffix}`;
   }
 
+  /** Resolves a tab container by identity. */
   private getTabContainer(containerId: string): JBTabElementV1 | null {
     const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
     return element && isTabElement(element) ? element : null;
   }
 
+  /** Resolves one tab within a tab container. */
   private getTab(containerId: string, tabId: string): JBTabElementV1["tabs"][number] | null {
     return this.getTabContainer(containerId)?.tabs.find(tab => tab.id === tabId) ?? null;
   }
 
+  /** Resolves a condition container by identity. */
   private getConditionContainer(containerId: string): JBConditionElementV1 | null {
     const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
     return element && isConditionElement(element) ? element : null;
   }
 
+  /** Resolves a wizard container by identity. */
   private getWizardContainer(containerId: string): JBFormWizardElementV1 | null {
     const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
     return element && isWizardElement(element) ? element : null;
   }
 
+  /** Resolves one step within a wizard container. */
   private getWizardStep(containerId: string, stepId: string): JBFormWizardElementV1["steps"][number] | null {
     return this.getWizardContainer(containerId)?.steps.find(step => step.id === stepId) ?? null;
   }
 
+  /** Resolves a repeatable-group container by identity. */
   private getRepeatableGroupContainer(containerId: string): JBRepeatableGroupElementV1 | null {
     const element = this.draft.document.elements.find(candidate => candidate.id === containerId);
     return element && isRepeatableGroupElement(element) ? element : null;
   }
 
+  /** Locates an element's owning collection and structural context for move and delete operations. */
   private findLocation(elementId: string): { collection: JBFormElementV1[] | JBFormLeafElementV1[]; index: number; containerId: string | null; tabId: string | null } | null {
     const topIndex = this.draft.document.elements.findIndex(element => element.id === elementId);
     if (topIndex >= 0) return { collection: this.draft.document.elements, index: topIndex, containerId: null, tabId: null };
@@ -542,6 +598,7 @@ export class BuilderElementStore {
     return null;
   }
 
+  /** Assigns fresh identities throughout a duplicated element subtree. */
   private regenerateIds(element: JBFormElementV1): void {
     element.id = crypto.randomUUID();
     if (isConditionElement(element)) {
@@ -567,6 +624,7 @@ export class BuilderElementStore {
     });
   }
 
+  /** Retargets condition rules after a source field is renamed. */
   private replaceConditionFieldName(previousName: string, nextName: string): void {
     this.draft.document.elements.filter(isConditionElement).forEach(container => {
       container.conditions.rules.forEach(rule => {

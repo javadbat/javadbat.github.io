@@ -1,12 +1,298 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { FormLandingApp } from "../../features/form/landing/FormLandingApp";
+import { formPageHref } from "../../features/form/application/form-page-url";
+import { commonTranslations } from "../../features/form/i18n/common.translations";
+import { deleteFormTranslations } from "../../features/form/landing/delete.translations";
+import landingStyles from "../../features/form/landing/FormLanding.module.css";
+import { formLandingAppTranslations } from "../../features/form/landing/translations";
+import shellStyles from "../../features/form/shell/RouteShell.module.css";
+
+const messages = { ...commonTranslations.en, ...formLandingAppTranslations.en, ...deleteFormTranslations.en };
+const builderHref = formPageHref("builder");
+const previewHref = formPageHref("preview");
+const designerHref = formPageHref("designer");
+const components = [
+  ["Text", "متن", "content-text"], ["Image", "تصویر", "content-image"], ["Voice", "صوت", "content-voice"], ["Link", "پیوند", "content-link"],
+  ["Divider / spacer", "جداکننده / فاصله", "drag"], ["Section heading", "عنوان بخش", "content-text"],
+  ["Text input", "ورودی متن", "text-input"], ["Number input", "ورودی عدد", "number-input"], ["Range input", "ورودی بازه", "number-input"],
+  ["Mobile input", "شماره موبایل", "mobile-input"], ["Password input", "گذرواژه", "password-input"], ["Payment input", "اطلاعات پرداخت", "payment-input"],
+  ["National ID", "کد ملی", "national-input"], ["Date input", "تاریخ", "date-input"], ["Time input", "زمان", "time-input"], ["PIN input", "کد تأیید", "pin-input"],
+  ["Textarea", "متن چندخطی", "textarea"], ["Select", "فهرست انتخاب", "select"], ["Listbox", "فهرست باز", "select"],
+  ["Checkbox", "کادر انتخاب", "checkbox"], ["Switch", "کلید روشن/خاموش", "switch"], ["File input", "بارگذاری فایل", "file-input"],
+  ["Image input", "بارگذاری تصویر", "image-input"], ["Button", "دکمه", "button"], ["Tabs", "زبانه‌ها", "select"],
+  ["Conditional container", "بخش شرطی", "switch"], ["Wizard", "فرم مرحله‌ای", "move-down"], ["Repeatable group", "گروه تکرارشونده", "duplicate"],
+].map(([en, fa, icon]) => ({ en, fa, icon }));
+const sectionDecor = {
+  hero: ["content-link", "checkbox", "date-input"],
+  features: ["drag", "settings", "switch"],
+  workflow: ["content-text", "configure", "content-image"],
+  embed: ["content-text", "duplicate", "button"],
+  global: ["language", "mobile-input", "content-voice"],
+  designer: ["settings", "content-image", "configure"],
+  workspace: ["file-input", "textarea", "select"],
+  final: ["button", "content-link", "checkbox"],
+};
 ---
 
-<Layout
-  title="JB Form"
-  description="Build and preview portable forms with the JB Design System."
->
-  <link rel="stylesheet" href="/styles/fonts.css" />
-  <FormLandingApp client:only="react" />
+<Layout title="JB Form — Open-source visual form builder" description="Build forms visually, export portable JSON, and render them anywhere with the open-source jb-form-builder component.">
+  <div class={`${shellStyles.page} ${landingStyles.page}`} data-form-landing>
+    <header class={landingStyles.topbar}>
+      <a class={`${shellStyles.brand} ${landingStyles.brand}`} href="/form"><span class={shellStyles.brandMark}>JB</span><span><strong data-i18n="productName">{messages.productName}</strong><small data-i18n="openSourceLabel">{messages.openSourceLabel}</small></span></a>
+      <nav class={landingStyles.nav} aria-label="Primary navigation"><a href="#features" data-i18n="navFeatures">{messages.navFeatures}</a><a href="#components" data-i18n="navComponents">{messages.navComponents}</a><a href="#embed" data-i18n="navEmbed">{messages.navEmbed}</a><a href="#workspace" data-i18n="navWorkspace">{messages.navWorkspace}</a></nav>
+      <div class={landingStyles.topActions}><a class={landingStyles.sourceLink} href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer" data-i18n="viewSource">{messages.viewSource}</a><button class={`${landingStyles.button} ${landingStyles.buttonQuiet} ${landingStyles.buttonSmall}`} type="button" data-locale-toggle>FA</button><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonSmall}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
+    </header>
+
+    <main>
+      <section class={`${landingStyles.section} ${landingStyles.hero}`}>
+        <div class={landingStyles.heroCopy}>
+          <div class={`${landingStyles.sectionDecor} ${landingStyles.decorHero}`} aria-hidden="true">{sectionDecor.hero.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+          <div class={landingStyles.openBadge}><span></span><b data-i18n="openSourceBadge">{messages.openSourceBadge}</b></div>
+          <p class={landingStyles.eyebrow} data-i18n="workspaceEyebrow">{messages.workspaceEyebrow}</p>
+          <h1 data-i18n="formHomeTitle">{messages.formHomeTitle}</h1>
+          <p class={landingStyles.heroDescription} data-i18n="formHomeDescription">{messages.formHomeDescription}</p>
+          <div class={landingStyles.heroActions}><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonLarge}`} href={builderHref} data-draft-action>{messages.createForm}</a><a class={`${landingStyles.button} ${landingStyles.buttonSecondary} ${landingStyles.buttonLarge}`} href={previewHref} data-preview-draft><jb-icon-eye size="sm" open></jb-icon-eye><span data-i18n="seeLivePreview">{messages.seeLivePreview}</span></a></div>
+          <p class={landingStyles.heroNote} data-i18n="heroNote">{messages.heroNote}</p>
+        </div>
+
+        <div class={landingStyles.heroProduct} aria-label="JB Form builder interface">
+          <div class={landingStyles.productWindow}>
+            <div class={landingStyles.productToolbar}><div><span>JB</span><strong data-en="Untitled form" data-fa="فرم بدون عنوان">Untitled form</strong><i data-en="Saved" data-fa="ذخیره شده">Saved</i></div><div><span data-en="Import JSON" data-fa="ورود JSON">Import JSON</span><span data-en="Export JSON" data-fa="خروجی JSON">Export JSON</span><b data-en="Save" data-fa="ذخیره">Save</b></div></div>
+            <div class={landingStyles.builderGrid}>
+              <aside class={landingStyles.catalogPanel}><header><div><small data-en="BUILDER" data-fa="فرم‌ساز">BUILDER</small><strong data-en="Components" data-fa="اجزا">Components</strong></div><b data-en="28" data-fa="۲۸">28</b></header><div class={landingStyles.searchMock} data-en="Search components" data-fa="جست‌وجوی اجزا">Search components</div>{components.slice(0, 7).map((item) => <div class={landingStyles.catalogItem}><svg class={landingStyles.catalogElementIcon} aria-hidden="true" focusable="false"><use href={`/form/catalog-icons.svg#${item.icon}`} /></svg><span data-en={item.en} data-fa={item.fa}>{item.en}</span><b data-en="Add" data-fa="افزودن">Add</b></div>)}</aside>
+              <div class={landingStyles.canvasPanel}><small data-en="CURRENT DRAFT" data-fa="پیش‌نویس فعلی">CURRENT DRAFT</small><h2 data-en="Untitled form" data-fa="فرم بدون عنوان">Untitled form</h2><div class={landingStyles.canvasCard}><span>⋮⋮</span><div><strong data-en="Full name" data-fa="نام و نام خانوادگی">Full name</strong><small data-en="Text input" data-fa="ورودی متن">Text input</small></div></div><div class={landingStyles.canvasCard}><span>⋮⋮</span><div><strong data-en="Country" data-fa="کشور">Country</strong><small data-en="Select" data-fa="فهرست انتخاب">Select</small></div></div><div class={`${landingStyles.canvasCard} ${landingStyles.canvasCardActive}`}><span>⋮⋮</span><div><strong data-en="Email address" data-fa="نشانی ایمیل">Email address</strong><small data-en="Text input · required" data-fa="ورودی متن · الزامی">Text input · required</small></div></div><div class={landingStyles.dropZone} data-en="Drop a component here" data-fa="جزء را اینجا رها کنید">Drop a component here</div></div>
+              <aside class={landingStyles.propertiesPanel}><small data-en="SETTINGS" data-fa="تنظیمات">SETTINGS</small><h3 data-en="Properties" data-fa="ویژگی‌ها">Properties</h3><label><span data-en="Label" data-fa="عنوان">Label</span><input value="Email address" data-value-en="Email address" data-value-fa="نشانی ایمیل" readonly /></label><label><span data-en="Placeholder" data-fa="متن راهنما">Placeholder</span><input value="you@example.com" readonly /></label><label><span data-en="Validation" data-fa="اعتبارسنجی">Validation</span><select><option data-en="Email" data-fa="ایمیل">Email</option></select></label><div class={landingStyles.toggleRow}><span data-en="Required" data-fa="الزامی">Required</span><i></i></div></aside>
+            </div>
+          </div>
+          <div class={`${landingStyles.floatCard} ${landingStyles.jsonCard}`}><span>form.json</span><code>{'{ "type": "jb-input",\n  "name": "email",\n  "required": true }'}</code></div>
+          <div class={`${landingStyles.floatCard} ${landingStyles.errorCard}`}><strong data-i18n="validationError">{messages.validationError}</strong><span data-i18n="validationHint">{messages.validationHint}</span></div>
+          <div class={`${landingStyles.floatCard} ${landingStyles.rtlCard}`} dir="rtl"><strong>فرم ثبت‌نام</strong><label>نام<input value="علی" readonly /></label><button type="button">ارسال</button></div>
+        </div>
+      </section>
+
+      <section class={`${landingStyles.section} ${landingStyles.valueStrip}`}>
+        <article><jb-icon-edit size="sm"></jb-icon-edit><div><strong data-i18n="valueVisual">{messages.valueVisual}</strong><span data-i18n="valueVisualDescription">{messages.valueVisualDescription}</span></div></article>
+        <article><jb-icon-expand size="sm"></jb-icon-expand><div><strong data-i18n="valuePortable">{messages.valuePortable}</strong><span data-i18n="valuePortableDescription">{messages.valuePortableDescription}</span></div></article>
+        <article><jb-icon-eye size="sm" open></jb-icon-eye><div><strong data-i18n="valueAccessible">{messages.valueAccessible}</strong><span data-i18n="valueAccessibleDescription">{messages.valueAccessibleDescription}</span></div></article>
+        <article><jb-icon-arrow-tailed size="sm"></jb-icon-arrow-tailed><div><strong data-i18n="valueAnywhere">{messages.valueAnywhere}</strong><span data-i18n="valueAnywhereDescription">{messages.valueAnywhereDescription}</span></div></article>
+      </section>
+
+      <section id="components" class={`${landingStyles.section} ${landingStyles.componentSection}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorComponents}`} aria-hidden="true"><span><svg><use href="/form/catalog-icons.svg#content-image" /></svg></span><span><svg><use href="/form/catalog-icons.svg#date-input" /></svg></span><span><svg><use href="/form/catalog-icons.svg#switch" /></svg></span><span><svg><use href="/form/catalog-icons.svg#content-voice" /></svg></span></div>
+        <div class={landingStyles.sectionHeading}><div><p class={landingStyles.eyebrow} data-i18n="componentEyebrow">{messages.componentEyebrow}</p><h2 data-i18n="componentTitle">{messages.componentTitle}</h2></div><p data-i18n="componentDescription">{messages.componentDescription}</p></div>
+        <div class={landingStyles.componentGrid}>{components.map((item) => <div class={landingStyles.componentChip}><i class={landingStyles.componentIconTile}><svg class={landingStyles.componentIcon} aria-hidden="true" focusable="false"><use href={`/form/catalog-icons.svg#${item.icon}`} /></svg></i><span data-en={item.en} data-fa={item.fa}>{item.en}</span></div>)}</div>
+      </section>
+
+      <section id="features" class={`${landingStyles.section} ${landingStyles.features}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorFeatures}`} aria-hidden="true">{sectionDecor.features.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div class={`${landingStyles.sectionHeading} ${landingStyles.headingCentered}`}><div><p class={landingStyles.eyebrow} data-i18n="featuresEyebrow">{messages.featuresEyebrow}</p><h2 data-i18n="featuresTitle">{messages.featuresTitle}</h2></div><p data-i18n="featuresDescription">{messages.featuresDescription}</p></div>
+        <div class={landingStyles.featureGrid}>
+          <article><span class={landingStyles.step} data-en="1" data-fa="۱">1</span><h3 data-i18n="featureBuildTitle">{messages.featureBuildTitle}</h3><p data-i18n="featureBuildDescription">{messages.featureBuildDescription}</p><div class={landingStyles.reorderVisual}><span data-en="Full name" data-fa="نام و نام خانوادگی">Full name</span><span data-en="Email address" data-fa="نشانی ایمیل">Email address</span><i data-en="Drop here" data-fa="اینجا رها کنید">Drop here</i></div></article>
+          <article><span class={`${landingStyles.step} ${landingStyles.stepCoral}`} data-en="2" data-fa="۲">2</span><h3 data-i18n="featureConfigureTitle">{messages.featureConfigureTitle}</h3><p data-i18n="featureConfigureDescription">{messages.featureConfigureDescription}</p><div class={landingStyles.configureVisual}><label><span data-en="Label" data-fa="عنوان">Label</span><input value="Email address" data-value-en="Email address" data-value-fa="نشانی ایمیل" readonly /></label><label><span data-en="Validation" data-fa="اعتبارسنجی">Validation</span><select><option data-en="Email" data-fa="ایمیل">Email</option></select></label><strong data-i18n="validEmailPrompt">{messages.validEmailPrompt}</strong></div></article>
+          <article><span class={`${landingStyles.step} ${landingStyles.stepMint}`} data-en="3" data-fa="۳">3</span><h3 data-i18n="featureLogicTitle">{messages.featureLogicTitle}</h3><p data-i18n="featureLogicDescription">{messages.featureLogicDescription}</p><div class={landingStyles.logicVisual}><strong data-en="Show National ID if" data-fa="نمایش کد ملی اگر">Show National ID if</strong><p><span data-en="Country" data-fa="کشور">Country</span><span data-en="is" data-fa="برابر است با">is</span><span data-en="Iran" data-fa="ایران">Iran</span></p><label><span data-en="National ID" data-fa="کد ملی">National ID</span><input value="1234567890" data-value-en="1234567890" data-value-fa="۱۲۳۴۵۶۷۸۹۰" readonly /></label></div></article>
+          <article><span class={`${landingStyles.step} ${landingStyles.stepCoral}`} data-en="4" data-fa="۴">4</span><h3 data-i18n="featureStructureTitle">{messages.featureStructureTitle}</h3><p data-i18n="featureStructureDescription">{messages.featureStructureDescription}</p><div class={landingStyles.structureVisual}><span class={landingStyles.active} data-en="1 · Account" data-fa="۱ · حساب">1 · Account</span><span data-en="2 · Profile" data-fa="۲ · پروفایل">2 · Profile</span><span data-en="3 · Review" data-fa="۳ · بازبینی">3 · Review</span></div></article>
+        </div>
+      </section>
+
+      <section class={`${landingStyles.section} ${landingStyles.workflow}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorWorkflow}`} aria-hidden="true">{sectionDecor.workflow.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div class={`${landingStyles.sectionHeading} ${landingStyles.headingCentered}`}><div><p class={landingStyles.eyebrow} data-i18n="workflowEyebrow">{messages.workflowEyebrow}</p><h2 data-i18n="workflowTitle">{messages.workflowTitle}</h2></div><p data-i18n="workflowDescription">{messages.workflowDescription}</p></div>
+        <ol><li><span>1</span><strong data-i18n="workflowBuild">{messages.workflowBuild}</strong><p data-i18n="workflowBuildDescription">{messages.workflowBuildDescription}</p></li><li><span>2</span><strong data-i18n="workflowConfigure">{messages.workflowConfigure}</strong><p data-i18n="workflowConfigureDescription">{messages.workflowConfigureDescription}</p></li><li><span>3</span><strong data-i18n="workflowPreview">{messages.workflowPreview}</strong><p data-i18n="workflowPreviewDescription">{messages.workflowPreviewDescription}</p></li><li><span>4</span><strong data-i18n="workflowExport">{messages.workflowExport}</strong><p data-i18n="workflowExportDescription">{messages.workflowExportDescription}</p></li></ol>
+      </section>
+
+      <section id="embed" class={`${landingStyles.section} ${landingStyles.embedSection}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorEmbed}`} aria-hidden="true">{sectionDecor.embed.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div class={landingStyles.embedCopy}><span class={landingStyles.mitBadge} data-en="MIT · OPEN SOURCE" data-fa="متن‌باز · مجوز MIT">MIT · OPEN SOURCE</span><h2 data-i18n="embedTitle">{messages.embedTitle}</h2><p data-i18n="embedDescription">{messages.embedDescription}</p><ul><li data-i18n="embedPoint1">{messages.embedPoint1}</li><li data-i18n="embedPoint2">{messages.embedPoint2}</li><li data-i18n="embedPoint3">{messages.embedPoint3}</li></ul><div><a class={`${landingStyles.button} ${landingStyles.buttonLight}`} href={builderHref} data-i18n="buildAForm">{messages.buildAForm}</a><a class={`${landingStyles.button} ${landingStyles.buttonDarkQuiet}`} href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer" data-i18n="browseSource">{messages.browseSource}</a></div></div>
+        <div class={landingStyles.codeWindow}><div class={landingStyles.codeTabs} role="tablist"><button type="button" aria-selected="true" data-code-tab="web" data-en="Web component" data-fa="وب‌کامپوننت">Web component</button><button type="button" aria-selected="false" data-code-tab="react">React</button><button type="button" data-copy-code data-en="Copy" data-fa="کپی">Copy</button></div>
+          <pre data-code-panel="web"><code>import "jb-form-builder";
+import &#123; loadDependencies &#125; from
+  "jb-form-builder/dependency-loader";
+
+const form = document.querySelector(
+  "jb-form-builder"
+);
+form.loadDependencies = loadDependencies;
+form.formDocument = exportedJson;</code></pre>
+          <pre data-code-panel="react" hidden><code>import &#123; JBFormBuilder &#125; from
+  "jb-form-builder/react";
+
+&lt;JBFormBuilder
+  formDocument=&#123;exportedJson&#125;
+  loadDependencies=&#123;loadDependencies&#125;
+/&gt;</code></pre>
+          <div class={landingStyles.renderResult}><span>&lt;jb-form-builder&gt;</span><strong data-i18n="renderedOnYourSite">{messages.renderedOnYourSite}</strong><i data-en="Framework-independent · route-agnostic" data-fa="مستقل از فریم‌ورک · مستقل از مسیر">Framework-independent · route-agnostic</i></div>
+        </div>
+      </section>
+
+      <section class={`${landingStyles.section} ${landingStyles.globalSection}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorGlobal}`} aria-hidden="true">{sectionDecor.global.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div class={landingStyles.sectionHeading}><div><p class={landingStyles.eyebrow} data-i18n="globalEyebrow">{messages.globalEyebrow}</p><h2 data-i18n="globalTitle">{messages.globalTitle}</h2></div><p data-i18n="globalDescription">{messages.globalDescription}</p></div>
+        <div class={landingStyles.globalGrid}><article class={landingStyles.localeCard} dir="ltr"><header><strong>English</strong><span>LTR</span></header><label>Full name<input value="Ali Rezaei" readonly /></label><label>Email<input value="ali@example.com" readonly /></label><label>Message<textarea readonly>Tell us about your project.</textarea></label><button type="button">Send</button></article><article class={landingStyles.localeCard} dir="rtl"><header><strong>فارسی</strong><span>RTL</span></header><label>نام و نام خانوادگی<input value="علی رضایی" readonly /></label><label>ایمیل<input value="ali@example.com" readonly /></label><label>پیام<textarea readonly>درباره پروژه خود بنویسید.</textarea></label><button type="button">ارسال</button></article><article class={landingStyles.localeCard}><header><strong data-i18n="livePreviewTitle">{messages.livePreviewTitle}</strong><span data-en="Responsive" data-fa="واکنش‌گرا">Responsive</span></header><label><span data-en="Satisfaction" data-fa="میزان رضایت">Satisfaction</span><input type="range" min="0" max="10" value="8" /></label><label><span data-en="Country" data-fa="کشور">Country</span><select><option data-en="United States" data-fa="ایالات متحده">United States</option></select></label><label><span data-en="Comments" data-fa="توضیحات">Comments</span><textarea readonly data-value-en="Great experience!" data-value-fa="تجربه بسیار خوبی بود!">Great experience!</textarea></label><button type="button" data-en="Submit" data-fa="ثبت">Submit</button></article></div>
+      </section>
+
+      <section class={`${landingStyles.section} ${landingStyles.designerSection}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorDesigner}`} aria-hidden="true">{sectionDecor.designer.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div><span class={landingStyles.constructionBadge} data-i18n="underConstruction">{messages.underConstruction}</span><p class={landingStyles.eyebrow} data-i18n="designerEyebrow">{messages.designerEyebrow}</p><h2 data-i18n="designerTitle">{messages.designerTitle}</h2><p data-i18n="designerDescription">{messages.designerDescription}</p><a class={`${landingStyles.button} ${landingStyles.buttonSecondary}`} href={designerHref} data-i18n="visitDesignerRoute">{messages.visitDesignerRoute}</a></div>
+        <div class={landingStyles.designerPreview}><aside><strong data-en="Theme" data-fa="پوسته">Theme</strong><span data-en="Colors" data-fa="رنگ‌ها">Colors</span><span data-en="Typography" data-fa="تایپوگرافی">Typography</span><span data-en="Spacing" data-fa="فاصله‌گذاری">Spacing</span><span data-en="Components" data-fa="اجزا">Components</span></aside><div><strong data-en="Theme Designer" data-fa="طراح پوسته">Theme Designer</strong><span data-i18n="inProgress">{messages.inProgress}</span></div></div>
+      </section>
+
+      <section id="workspace" class={`${landingStyles.section} ${landingStyles.workspaceSection}`}>
+        <div class={`${landingStyles.sectionDecor} ${landingStyles.decorWorkspace}`} aria-hidden="true">{sectionDecor.workspace.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div>
+        <div class={landingStyles.workspaceIntro}><p class={landingStyles.eyebrow} data-i18n="workspaceLabel">{messages.workspaceLabel}</p><h2 data-i18n="workspaceTitle">{messages.workspaceTitle}</h2><p data-i18n="formsLibraryDescription">{messages.formsLibraryDescription}</p><a class={`${landingStyles.button} ${landingStyles.buttonPrimary}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
+        <div class={landingStyles.library}>
+          <div class={landingStyles.libraryHeader}><div class={landingStyles.headingLine}><h3 data-i18n="savedForms">{messages.savedForms}</h3><span class={landingStyles.count} data-form-count>0</span></div><label class={landingStyles.search} data-search-control hidden><span class={landingStyles.visuallyHidden} data-i18n="searchForms">{messages.searchForms}</span><input type="search" data-form-search data-i18n-placeholder="searchFormsPlaceholder" placeholder={messages.searchFormsPlaceholder} /></label></div>
+          <section class={landingStyles.draftPanel} data-current-draft hidden><div><p class={landingStyles.eyebrow} data-i18n="currentDraft">{messages.currentDraft}</p><h3 data-draft-name></h3><p class={landingStyles.draftMeta}><span data-draft-fields></span><span>·</span><span data-i18n="updated">{messages.updated}</span><time data-draft-updated></time></p></div><div class={landingStyles.draftActions}><a class={`${landingStyles.button} ${landingStyles.buttonOnAccent}`} href={builderHref} data-i18n="continueDraft">{messages.continueDraft}</a><a class={`${landingStyles.button} ${landingStyles.buttonOnAccentQuiet}`} href={previewHref} data-draft-preview-link data-i18n="preview">{messages.preview}</a></div></section>
+          <output class={landingStyles.state} data-forms-loading data-i18n="loadingForms">{messages.loadingForms}</output>
+          <div class={`${landingStyles.state} ${landingStyles.errorState}`} role="alert" data-forms-error hidden><strong data-i18n="storageUnavailableTitle">{messages.storageUnavailableTitle}</strong><p data-i18n="storageUnavailable">{messages.storageUnavailable}</p></div>
+          <div class={`${landingStyles.state} ${landingStyles.emptyState}`} data-forms-empty hidden><strong data-i18n="emptyFormsTitle">{messages.emptyFormsTitle}</strong><p data-i18n="emptyFormsDescription">{messages.emptyFormsDescription}</p><a class={`${landingStyles.button} ${landingStyles.buttonPrimary}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
+          <p class={landingStyles.state} data-forms-no-results data-i18n="noMatchingForms" hidden>{messages.noMatchingForms}</p><ul class={landingStyles.formGrid} data-form-list hidden></ul>
+        </div>
+      </section>
+
+      <section class={`${landingStyles.section} ${landingStyles.finalCta}`}><div class={`${landingStyles.sectionDecor} ${landingStyles.decorFinal}`} aria-hidden="true">{sectionDecor.final.map((icon) => <span><svg><use href={`/form/catalog-icons.svg#${icon}`} /></svg></span>)}</div><div><p class={landingStyles.eyebrow} data-i18n="finalEyebrow">{messages.finalEyebrow}</p><h2 data-i18n="finalTitle">{messages.finalTitle}</h2><p data-i18n="finalDescription">{messages.finalDescription}</p></div><div><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonLarge}`} href={builderHref} data-i18n="startBuilding">{messages.startBuilding}</a><a class={`${landingStyles.button} ${landingStyles.buttonSecondary} ${landingStyles.buttonLarge}`} href="#embed" data-i18n="seeEmbedCode">{messages.seeEmbedCode}</a></div></section>
+    </main>
+
+    <footer class={landingStyles.footer}><a class={shellStyles.brand} href="/form"><span class={shellStyles.brandMark}>JB</span><span><strong>JB Form</strong><small data-i18n="footerTagline">{messages.footerTagline}</small></span></a><div><strong data-en="Product" data-fa="محصول">Product</strong><a href="#features" data-en="Features" data-fa="قابلیت‌ها">Features</a><a href="#components" data-en="Components" data-fa="اجزا">Components</a><a href="#embed" data-en="Embed" data-fa="نحوه استفاده">Embed</a></div><div><strong data-en="Build" data-fa="ساخت">Build</strong><a href={builderHref} data-en="Builder" data-fa="فرم‌ساز">Builder</a><a href={previewHref} data-en="Preview" data-fa="پیش‌نمایش">Preview</a><a href={designerHref} data-i18n="designerComingSoon">{messages.designerComingSoon}</a></div><div><strong data-en="Open source" data-fa="متن‌باز">Open source</strong><a href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer">GitHub</a><span data-en="MIT License" data-fa="مجوز MIT">MIT License</span><span>jb-form-builder</span></div><small>© 2026 JB Form.</small></footer>
+    <template data-form-card-template><li class={landingStyles.formCard}><div class={landingStyles.cardHeader}><div><strong data-form-name></strong><code data-form-slug></code></div><span class={landingStyles.fieldBadge} data-field-count></span></div><p class={landingStyles.updatedLine}><span data-i18n="updated">{messages.updated}</span><time data-form-updated></time></p><div class={landingStyles.cardActions}><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonSmall}`} data-load-form data-i18n="loadForm">{messages.loadForm}</a><a class={`${landingStyles.button} ${landingStyles.buttonSecondary} ${landingStyles.buttonSmall}`} data-preview-form data-i18n="preview">{messages.preview}</a><button class={`${landingStyles.button} ${landingStyles.buttonDanger} ${landingStyles.buttonSmall}`} type="button" data-delete-form data-i18n="deleteForm">{messages.deleteForm}</button></div></li></template>
+  </div>
 </Layout>
+
+<script>
+  import "jb-icons/arrow-tailed";
+  import "jb-icons/edit";
+  import "jb-icons/expand";
+  import "jb-icons/eye";
+  import "jb-icons/plus";
+  import { formPageHref } from "../../features/form/application/form-page-url";
+  import { getLocalizedText } from "../../features/form/domain/form-document";
+  import { commonTranslations } from "../../features/form/i18n/common.translations";
+  import { deleteFormTranslations } from "../../features/form/landing/delete.translations";
+  import { formLandingAppTranslations } from "../../features/form/landing/translations";
+  import { formRepository } from "../../features/form/storage/form-repository";
+  import type { CurrentDraftRecordV1, StoredFormRecordV1 } from "../../features/form/storage/storage-types";
+
+  type LandingLocale = "en" | "fa";
+  const localeStorageKey = "jb-form:locale";
+  const dictionaries = {
+    en: { ...commonTranslations.en, ...formLandingAppTranslations.en, ...deleteFormTranslations.en },
+    fa: { ...commonTranslations.fa, ...formLandingAppTranslations.fa, ...deleteFormTranslations.fa },
+  } as const;
+  const landing = document.querySelector<HTMLElement>("[data-form-landing]");
+  const template = landing?.querySelector<HTMLTemplateElement>("[data-form-card-template]");
+  const list = landing?.querySelector<HTMLUListElement>("[data-form-list]");
+  const searchInput = landing?.querySelector<HTMLInputElement>("[data-form-search]");
+  let locale: LandingLocale = readLocale();
+  let forms: StoredFormRecordV1[] = [];
+  let draft: CurrentDraftRecordV1 | null = null;
+  let query = "";
+
+  function readLocale(): LandingLocale {
+    try { return localStorage.getItem(localeStorageKey) === "fa" ? "fa" : "en"; } catch { return "en"; }
+  }
+  function setHidden(selector: string, hidden: boolean) {
+    const element = landing?.querySelector<HTMLElement>(selector);
+    if (element) element.hidden = hidden;
+  }
+  function localizedName(record: StoredFormRecordV1 | CurrentDraftRecordV1) {
+    return getLocalizedText(record.document.metadata.name, locale, record.document.localization.defaultLocale);
+  }
+  function formatFieldCount(count: number) {
+    const messages = dictionaries[locale];
+    return `${count} ${count === 1 ? messages.field : messages.fields}`;
+  }
+  function applyLocale() {
+    if (!landing) return;
+    const messages = dictionaries[locale];
+    const direction = locale === "fa" ? "rtl" : "ltr";
+    landing.dir = direction;
+    document.documentElement.lang = locale;
+    document.documentElement.dir = direction;
+    landing.querySelectorAll<HTMLElement>("[data-i18n]").forEach(element => {
+      const key = element.dataset.i18n as keyof typeof messages;
+      element.textContent = messages[key];
+    });
+    landing.querySelectorAll<HTMLInputElement>("[data-i18n-placeholder]").forEach(element => {
+      const key = element.dataset.i18nPlaceholder as keyof typeof messages;
+      element.placeholder = messages[key];
+    });
+    landing.querySelectorAll<HTMLElement>("[data-en][data-fa]").forEach(element => {
+      element.textContent = locale === "fa" ? element.dataset.fa! : element.dataset.en!;
+    });
+    landing.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("[data-value-en][data-value-fa]").forEach(element => {
+      element.value = locale === "fa" ? element.dataset.valueFa! : element.dataset.valueEn!;
+    });
+    landing.querySelector<HTMLElement>("[data-locale-toggle]")!.textContent = locale === "en" ? "FA" : "EN";
+    landing.querySelectorAll<HTMLElement>("[data-draft-action]").forEach(element => {
+      element.textContent = draft ? messages.continueDraft : messages.createForm;
+    });
+    const count = landing.querySelector<HTMLElement>("[data-form-count]")!;
+    count.setAttribute("aria-label", `${forms.length} ${forms.length === 1 ? messages.savedForm : messages.savedForms}`);
+  }
+  function renderDraft() {
+    if (!landing) return;
+    setHidden("[data-current-draft]", !draft);
+    setHidden("[data-preview-draft]", !draft);
+    if (!draft) return;
+    const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+    landing.querySelector<HTMLElement>("[data-draft-name]")!.textContent = localizedName(draft);
+    landing.querySelector<HTMLElement>("[data-draft-fields]")!.textContent = formatFieldCount(draft.document.elements.length);
+    const updated = landing.querySelector<HTMLTimeElement>("[data-draft-updated]")!;
+    updated.dateTime = draft.updatedAt;
+    updated.textContent = formatter.format(new Date(draft.updatedAt));
+    landing.querySelector<HTMLAnchorElement>("[data-draft-preview-link]")!.href = formPageHref("preview", draft.linkedSlug ?? undefined);
+  }
+  function renderForms() {
+    if (!landing || !template || !list) return;
+    const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+    const normalizedQuery = query.trim().toLocaleLowerCase(locale);
+    const visibleForms = forms.filter(record => `${localizedName(record)} ${record.slug}`.toLocaleLowerCase(locale).includes(normalizedQuery));
+    list.replaceChildren();
+    landing.querySelector<HTMLElement>("[data-form-count]")!.textContent = String(forms.length);
+    for (const record of visibleForms) {
+      const fragment = template.content.cloneNode(true) as DocumentFragment;
+      const card = fragment.querySelector<HTMLElement>("li")!;
+      card.querySelector<HTMLElement>("[data-form-name]")!.textContent = localizedName(record);
+      card.querySelector<HTMLElement>("[data-form-slug]")!.textContent = record.slug;
+      card.querySelector<HTMLElement>("[data-field-count]")!.textContent = formatFieldCount(record.document.elements.length);
+      const updated = card.querySelector<HTMLTimeElement>("[data-form-updated]")!;
+      updated.dateTime = record.updatedAt;
+      updated.textContent = formatter.format(new Date(record.updatedAt));
+      card.querySelector<HTMLAnchorElement>("[data-load-form]")!.href = formPageHref("builder", record.slug);
+      card.querySelector<HTMLAnchorElement>("[data-preview-form]")!.href = formPageHref("preview", record.slug);
+      card.querySelector<HTMLButtonElement>("[data-delete-form]")!.addEventListener("click", async () => {
+        if (!window.confirm(`${dictionaries[locale].deleteFormConfirm}\n\n${localizedName(record)}`)) return;
+        const result = await formRepository.deleteNamedForm(record.id);
+        if (!result.ok) { setStorageState("error"); return; }
+        forms = forms.filter(form => form.id !== record.id);
+        if (draft?.linkedFormId === record.id) draft = null;
+        applyLocale(); renderDraft(); renderForms(); setStorageState("ready");
+      });
+      list.append(fragment);
+    }
+    setHidden("[data-forms-no-results]", forms.length === 0 || visibleForms.length > 0);
+    setHidden("[data-form-list]", forms.length === 0 || visibleForms.length === 0);
+    applyLocale();
+  }
+  function setStorageState(state: "loading" | "ready" | "error") {
+    setHidden("[data-forms-loading]", state !== "loading");
+    setHidden("[data-forms-error]", state !== "error");
+    setHidden("[data-forms-empty]", state !== "ready" || forms.length !== 0);
+    setHidden("[data-search-control]", state !== "ready" || forms.length < 2);
+    if (state !== "ready") { setHidden("[data-form-list]", true); setHidden("[data-forms-no-results]", true); }
+  }
+  searchInput?.addEventListener("input", () => { query = searchInput.value; renderForms(); });
+  landing?.querySelectorAll<HTMLButtonElement>("[data-code-tab]").forEach(button => button.addEventListener("click", () => { const selected = button.dataset.codeTab; landing.querySelectorAll<HTMLButtonElement>("[data-code-tab]").forEach(tab => tab.setAttribute("aria-selected", String(tab === button))); landing.querySelectorAll<HTMLElement>("[data-code-panel]").forEach(panel => { panel.hidden = panel.dataset.codePanel !== selected; }); }));
+  landing?.querySelector<HTMLButtonElement>("[data-copy-code]")?.addEventListener("click", async event => { const button = event.currentTarget; const code = landing.querySelector<HTMLElement>("[data-code-panel]:not([hidden]) code")?.textContent ?? ""; try { await navigator.clipboard.writeText(code); button.textContent = dictionaries[locale].copied; window.setTimeout(() => { button.textContent = dictionaries[locale].copy; }, 1600); } catch { button.textContent = dictionaries[locale].copyFailed; } });
+  landing?.querySelector<HTMLButtonElement>("[data-locale-toggle]")?.addEventListener("click", () => {
+    locale = locale === "en" ? "fa" : "en";
+    try { localStorage.setItem(localeStorageKey, locale); } catch { /* Switching remains available without persistence. */ }
+    applyLocale(); renderDraft(); renderForms();
+  });
+  applyLocale();
+  setStorageState("loading");
+  void Promise.all([formRepository.listNamedForms(), formRepository.getCurrentDraft()]).then(([formsResult, draftResult]) => {
+    if (!formsResult.ok || !draftResult.ok) { setStorageState("error"); return; }
+    forms = formsResult.value;
+    draft = draftResult.value;
+    applyLocale(); renderDraft(); renderForms(); setStorageState("ready");
+  });
+</script>

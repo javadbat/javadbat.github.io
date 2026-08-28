@@ -43,7 +43,6 @@
     "jb-file-input": "^3.3.0",
     "jb-form": "^0.12.0",
     "jb-form-builder": "file:packages/jb-form-builder",
-    "jb-form-delete": "file:packages/jb-form-delete",
     "jb-form-wizard": "file:packages/jb-form-wizard",
     "jb-icons": "^2.2.0",
     "jb-image-input": "^3.10.1",

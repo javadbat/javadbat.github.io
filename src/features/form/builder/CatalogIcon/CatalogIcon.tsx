@@ -6,13 +6,19 @@ import "jb-icons/plus";
 import "jb-icons/react";
 import styles from "./CatalogIcon.module.css";
 
+/** Business icon request shared by the catalog, canvas cards, and configuration actions. */
 interface CatalogIconProps {
+  /** Registry or action icon identifier to render. */
   iconId: string;
+  /** Optional consumer style used to size or position the icon. */
   className?: string;
+  /** Whether stateful action artwork should show its active variant. */
   active?: boolean;
 }
 
+/** Renders consistent builder action icons and registry-provided catalog symbols. */
 export const CatalogIcon = memo(function CatalogIcon({ iconId, className, active = false }: CatalogIconProps) {
+  /** Shared and consumer-provided classes applied to either icon implementation. */
   const classes = [styles.catalogIcon, className].filter(Boolean).join(" ");
 
   switch (iconId) {

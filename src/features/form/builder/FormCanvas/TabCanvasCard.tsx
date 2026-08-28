@@ -2,7 +2,7 @@ import { useEffect, useState, type DragEvent, type KeyboardEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { getLocalizedText, type JBTabElementV1 } from "../../domain/form-document";
-import { registryByType } from "../../registry/form-element-registry";
+import { registryByType } from "jb-form-builder/registry/form-element-registry";
 import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";

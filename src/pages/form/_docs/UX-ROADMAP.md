@@ -1,7 +1,7 @@
 # JB Form UX roadmap
 
 Status: Reconciled with the current Form Builder implementation
-Reviewed: 2026-08-27
+Reviewed: 2026-08-29
 Source of truth for delivery status: `PROJECT.md` and `PLAN.md`
 
 This document describes product direction and UX sequence. It does not override the approved product, interaction, JSON, or technical decisions in the other Form documents.
@@ -28,7 +28,7 @@ The following capabilities are implemented in the repository and should be treat
 
 - `/form` is the landing page for creating or continuing the current draft, previewing, and opening named forms.
 - `/form/builder` opens the current working draft; it does not show a project-selection screen.
-- `/form/builder/:slug`, `/form/designer/:slug`, and `/form/preview/:slug` open a named form by slug.
+- `/form/builder?form=:slug`, `/form/designer?form=:slug`, and `/form/preview?form=:slug` open a named form by slug.
 - Named forms can be loaded and deleted from the landing page.
 - The Builder form-settings modal supports naming, slugging, Save, and Save As. Save As is the current duplicate-form path; a separate landing-page Duplicate action is not required by the current flow.
 - IndexedDB writes happen only after an explicit Save or Save As.
@@ -51,7 +51,7 @@ The following capabilities are implemented in the repository and should be treat
 - Persian/RTL is supported, and the form-settings flow can add supported locale definitions.
 - Preview is a separate route, reloads the saved document, and renders through the application-local `<jb-form-builder>` renderer.
 - Preview is responsive and does not submit or persist respondent responses online.
-- Designer is a separate identity-preserving placeholder. Its implementation follows the higher-priority respondent workflow, upload, publishing, and form-lifecycle work.
+- Designer is currently an identity-preserving placeholder. Its approved future replacement is the standalone visual Theme Designer in `DESIGNER-PLAN.md`, still sequenced after higher-priority Form Builder work.
 
 ## UX principles
 
@@ -93,16 +93,14 @@ The registry remains the implementation source for what is currently addable. Ne
 - Add publishing and response collection after backend, permissions, storage, retention, and privacy contracts exist.
 - Revisit the complete local form lifecycle and add landing-page Duplicate if research shows Save As is insufficient.
 
-### After Form Builder: Theme Builder
+### After Form Builder: Theme Designer
 
-- Finalize the versioned theme contract only after the Builder workflow work is complete or explicitly deferred.
-- Then build theme editing with live preview, reset, presets, import, and export as defined in `THEME-BEHAVIOR.md`.
-- Keep form and element identity stable while theme data evolves.
-- Keep the existing Designer route as an identity-preserving placeholder during Theme Builder work.
-
-### Last design step: Theme Designer
-
-- Replace the Designer placeholder only after Form Builder and Theme Builder are complete.
+- The ThemeConfig and behavior contract is approved in planning, but implementation remains gated on Form Builder completion/deferral.
+- Theme Builder and Theme Designer are one visual-theme feature, not separate phases.
+- Themes are standalone reusable configs; forms keep separate local bindings.
+- After the gate, select one of three Product Design visual directions before implementation.
+- Then build the library, responsive editor, live preview, presets, backgrounds, autosave, history, import/export, and recovery defined by `DESIGNER-PLAN.md`.
+- Keep the existing placeholder until implementation starts.
 
 ## Property presentation rules
 
@@ -115,7 +113,7 @@ The registry remains the implementation source for what is currently addable. Ne
 
 ## Planned packages
 
-- `jb-form-delete` is implemented as an accessible host-controlled delete action. The host owns confirmation and persistence.
+- The saved-form delete action is a local React component. The landing page owns confirmation and persistence.
 - `jb-form-wizard` is implemented as the optional respondent-facing linear workflow container; final representative browser/mobile/RTL acceptance remains.
 
 ## Future upload architecture

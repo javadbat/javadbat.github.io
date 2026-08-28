@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBTextarea } from "jb-textarea/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
-import { prepareFormImport } from "../../import/form-import";
+import { prepareFormImport } from "./form-import";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import modalStyles from "../../shell/FormModal.module.css";
 import { useBuilderStore } from "../store/BuilderStoreContext";

@@ -20,15 +20,19 @@ import { formSettingsModalTranslations } from "../builder/FormSettingsModal/tran
 import { importJsonModalTranslations } from "../builder/ImportJsonModal/translations";
 import { previewAppTranslations } from "../preview/PreviewApp.translations";
 import { previewFormPanelTranslations } from "../preview/PreviewFormPanel.translations";
-import { removeElementModalTranslations } from "../builder/RemoveElementModal/translations";
 import { validationRulesEditorTranslations } from "../builder/ValidationRulesEditor/translations";
 import { commonTranslations } from "./common.translations";
+import { removeElementModalTranslations } from "../builder/FormCanvas/RemoveElementModal/translations";
 
+/** Supported interface locales for every `/form` route. */
 export type FormAppLocale = "en" | "fa";
+/** Document flow direction paired with the active interface locale. */
 export type FormAppDirection = "ltr" | "rtl";
 
+/** Browser preference key that keeps locale selection consistent across form routes. */
 const FORM_APP_LOCALE_STORAGE_KEY = "jb-form:locale";
 
+/** Component-owned dictionaries composed into the form application's translation catalog. */
 const formTranslationModules = [
   builderHeaderTranslations,
   builderStatusScreenTranslations,
@@ -51,17 +55,23 @@ const formTranslationModules = [
   commonTranslations,
 ] as const;
 
+/** Locale-indexed source dictionaries used to initialize i18next and derive strict message keys. */
 const formAppDictionarySource = {
   en: Object.assign({}, ...formTranslationModules.map(module => module.en)),
   fa: Object.assign({}, ...formTranslationModules.map(module => module.fa)),
 } as const;
 
+/** Every message identifier available to form components. */
 export type FormMessageKey = Extract<keyof (typeof formAppDictionarySource)["en"], string>;
+/** Fully resolved message map passed to components so UI copy remains locale-independent. */
 export type FormMessages = Record<FormMessageKey, string>;
+/** Direct locale-to-message lookup used by non-hook contexts and tests. */
 export const formAppMessages: Record<FormAppLocale, FormMessages> = formAppDictionarySource;
 
+/** Stable list of message identifiers materialized for each hook consumer. */
 const formMessageKeys = Object.keys(formAppDictionarySource.en) as FormMessageKey[];
 
+/** Isolated i18next instance for the form product, separate from host-page localization. */
 export const formAppI18n = i18next.createInstance();
 
 void formAppI18n.use(initReactI18next).init({
@@ -76,10 +86,12 @@ void formAppI18n.use(initReactI18next).init({
   initAsync: false,
 });
 
+/** Resolves all form message keys through i18next for the active locale. */
 function resolveFormMessages(t: TFunction): FormMessages {
   return Object.fromEntries(formMessageKeys.map(key => [key, t(key)])) as FormMessages;
 }
 
+/** Maps persistence failure categories to actionable, localized form-product copy. */
 export function getStorageIssueMessage(messages: FormMessages, issue: StorageIssue | null): string {
   if (!issue) {
     return messages.storageError;
@@ -105,12 +117,15 @@ export function getStorageIssueMessage(messages: FormMessages, issue: StorageIss
   }
 }
 
+/** Returns the writing direction required by the supported interface locale. */
 function localeDirection(locale: FormAppLocale): FormAppDirection {
   return locale === "fa" ? "rtl" : "ltr";
 }
 
+/** Reads a valid saved locale preference without allowing unavailable storage to block the app. */
 function readStoredFormAppLocale(fallback: FormAppLocale): FormAppLocale {
   try {
+    /** Previously selected locale shared by all form routes. */
     const storedLocale = globalThis.localStorage?.getItem(FORM_APP_LOCALE_STORAGE_KEY);
     return storedLocale === "en" || storedLocale === "fa" ? storedLocale : fallback;
   } catch {
@@ -118,6 +133,7 @@ function readStoredFormAppLocale(fallback: FormAppLocale): FormAppLocale {
   }
 }
 
+/** Persists the user's locale choice when browser storage is available. */
 function persistFormAppLocale(locale: FormAppLocale): void {
   try {
     globalThis.localStorage?.setItem(FORM_APP_LOCALE_STORAGE_KEY, locale);
@@ -126,7 +142,12 @@ function persistFormAppLocale(locale: FormAppLocale): void {
   }
 }
 
+/**
+ * Synchronizes the active locale with document semantics and all JB web
+ * components so calendars, number systems, direction, and messages agree.
+ */
 function configureJBI18n(locale: FormAppLocale): void {
+  /** Writing direction applied to both native layout and component behavior. */
   const direction = localeDirection(locale);
 
   document.documentElement.lang = locale;
@@ -137,11 +158,19 @@ function configureJBI18n(locale: FormAppLocale): void {
   jbI18n.setLocale(locale);
 }
 
+/**
+ * Provides the active form locale, direction, strict messages, and locale
+ * switching while coordinating React i18next, browser preference, and JB UI.
+ */
 export function useFormLocale(initialLocale: FormAppLocale = "en") {
+  /** Translation function and isolated form i18n controller for the current React tree. */
   const { t, i18n } = useTranslation(undefined, { i18n: formAppI18n });
+  /** Canonical supported locale even when i18next reports a regional or fallback language. */
   const locale = (i18n.resolvedLanguage === "fa" ? "fa" : "en") satisfies FormAppLocale;
+  /** Complete localized copy contract consumed by form components. */
   const messages = useMemo(() => resolveFormMessages(t), [t, locale]);
 
+  /** User action that persists and activates a new form interface locale. */
   const setLocale = useCallback((nextLocale: FormAppLocale) => {
     persistFormAppLocale(nextLocale);
     void i18n.changeLanguage(nextLocale);

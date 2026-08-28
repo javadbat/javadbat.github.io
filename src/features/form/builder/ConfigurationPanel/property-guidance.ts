@@ -1,5 +1,5 @@
 import type { FormMessages } from "../../i18n/locale-adapter";
-import type { FormElementPropertyDefinition } from "../../registry/form-element-configuration";
+import type { FormElementPropertyDefinition } from "jb-form-builder/registry/form-element-configuration";
 import { propertyLabel } from "./configuration-values";
 
 const guidanceByKey: Partial<Record<string, keyof FormMessages>> = {

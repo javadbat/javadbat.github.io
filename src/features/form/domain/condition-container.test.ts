@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BuilderStore } from "../builder/store/BuilderStore";
-import { registryByType } from "../registry/form-element-registry";
+import { registryByType } from "jb-form-builder/registry/form-element-registry";
 import { getRequiredDependencies } from "jb-form-builder/dependency-loader";
 import { isConditionElement } from "./form-document";
 import { validateFormDocument } from "./form-document-validation";

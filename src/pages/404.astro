@@ -1,12 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { Form404App } from "../features/form/shell/Form404App";
+import styles from "../features/form/shell/RouteShell.module.css";
 ---
 
 <Layout
   title="Page not found"
   description="The requested page could not be found."
 >
-  <link rel="stylesheet" href="/styles/fonts.css" />
-  <Form404App client:only="react" />
+  <main class={styles.placeholder}>
+    <p class={styles.eyebrow}>404</p>
+    <h1>Page not found</h1>
+    <p class={styles.placeholderDescription}>The requested page does not exist.</p>
+  </main>
 </Layout>

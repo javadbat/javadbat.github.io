@@ -2,7 +2,7 @@ import { JBButton } from "jb-button/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { CodeViewer } from "../../../../components/react/components/code-viewer/CodeViewer";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
-import { downloadFormExport, prepareFormExport } from "../../export/form-export";
+import { downloadFormExport, prepareFormExport } from "./form-export";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import modalStyles from "../../shell/FormModal.module.css";
 import styles from "./ExportJsonModal.module.css";

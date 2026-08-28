@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type DragEvent } from "react";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "../../registry/form-element-registry";
+import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 

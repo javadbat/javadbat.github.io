@@ -1,9 +1,9 @@
 # JB Theme Token and Styling-Hook Inventory
 
-Status: Deferred Phase 3 input; first inventory pass complete
-Reviewed: 2026-08-04
+Status: Theme Designer v1 input; first pass complete, implementation audit pending
+Reviewed: 2026-08-29
 
-This inventory records the styling surfaces available to Theme Builder. It is based on `jb-core/theme` and the installed web-component `custom-elements.json` manifests. The builder should consume these public surfaces; it should not copy component CSS or reach into private Shadow DOM.
+This inventory records styling surfaces available to Theme Designer. It is based on `jb-core/theme` and installed `custom-elements.json` manifests. Designer consumes public surfaces only.
 
 ## Token layers
 
@@ -19,6 +19,8 @@ This inventory records the styling surfaces available to Theme Builder. It is ba
 
 Components initialize the shared tokens they need. Application-owned surfaces may also use `defineColors()` and `defineSizes()` from `jb-core/theme` when they need the same foundation.
 
+ThemeConfig v1 accepts every public shared token using its CSS variable name as a sparse `global` key. Missing, `undefined`, and `null` produce no override and are omitted from canonical JSON. Verify the allowlist against the exact supported `jb-core/theme` release before freezing the JSON Schema.
+
 ### Component tokens
 
 Each component manifest exposes its supported CSS custom properties under a component namespace. The principal namespaces are:
@@ -31,7 +33,7 @@ Each component manifest exposes its supported CSS custom properties under a comp
 | File controls | `--jb-file-input-*`, `--jb-image-input-*` | Includes upload, loading, overlay, and file-state presentation. |
 | Actions and overlays | `--jb-button-*`, `--jb-popover-*`, `--jb-modal-*` | Includes control geometry, overlay colors, radius, and elevation. |
 
-The complete property names and descriptions remain the installed package manifests' `cssProperties` entries. Theme Builder should expose a curated semantic subset and retain an escape hatch only where the corresponding public component contract supports it.
+The complete property names/descriptions remain the manifests' `cssProperties`. ThemeConfig v1 preserves valid component maps from presets/imports, but Designer v1 does not edit them. Components UI is selection plus isolated preview.
 
 ## Public Shadow DOM styling hooks
 
@@ -53,11 +55,11 @@ The following public parts are relevant to form controls and editor surfaces:
 | `jb-popover` | `content` |
 | `jb-modal` | `background`, `content-box`, `component-wrapper` |
 
-Use these hooks with `::part(...)` from the application or the form theme scope. Part names are public contracts; selectors must not target private descendants inside a component's Shadow DOM.
+These hooks remain inventory for a later CSS/parts editor. ThemeConfig v1 accepts no `::part`, selector, declaration map, or arbitrary CSS. Private Shadow DOM descendants are never valid targets.
 
 ## Corner geometry rule
 
-There is no shared `corner-shape` variable in the JB theme contract. `--jb-radius*` remains the available radius foundation. For JB Shadow DOM surfaces that need the application's squircle treatment, Theme Builder may emit documented `::part` rules such as:
+There is no shared `corner-shape` variable. `--jb-radius*` is the v1 radius foundation. The example below is future CSS/parts-editor syntax, not valid ThemeConfig v1 data:
 
 ```css
 form[data-theme="..."] jb-input::part(input-box) {
@@ -68,14 +70,16 @@ form[data-theme="..."] jb-input::part(input-box) {
 
 The `border-radius` declaration is the progressive-enhancement fallback. App-owned Builder, Designer, and Preview surfaces may use `corner-shape: squircle` directly; this rule does not create or require a `--jb-corner-shape` token.
 
-## Deferred Theme Builder boundaries discovered
+## Theme Designer boundaries
 
-- Global tokens are suitable for form-wide theme values.
+- Every shared token is supported as a sparse form-wide override.
 - Component CSS properties and `::part` selectors are separate public styling surfaces and should not be collapsed into one undifferentiated token map.
 - Derived input controls inherit the `jb-input` surface, so the schema should avoid duplicating inherited properties for every specialized input.
 - Overlay and picker parts are available for styling, but their private descendants are not part of the contract.
-- Runtime values such as callbacks, DOM factories, uploaded `File` objects, and generated CSS are not theme JSON values.
-- The theme JSON schema and its relationship to the stable form document are defined in `THEME-SCHEMA.md`.
+- Runtime callbacks, DOM factories, `File` objects, `blob:`/`file:` sources, and generated CSS are not ThemeConfig.
+- Typography, spacing, Audience size, and backgrounds add form-scope fields outside the JB token inventory.
+- Never change host `<html>` font size. Audit fixed non-overridable component `rem` values and request public hooks only for confirmed gaps.
+- ThemeConfig is separate from FormConfig and reusable across forms.
 
 ## Sources
 

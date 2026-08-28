@@ -42,11 +42,11 @@ It does not define the final JSON schema, Theme Designer UI, state-management im
 | Purpose | Without slug | With slug |
 | --- | --- | --- |
 | Landing | `/form` | N/A |
-| Builder | `/form/builder` | `/form/builder/:slug` |
-| Designer | `/form/designer` | `/form/designer/:slug` |
-| Preview | `/form/preview` | `/form/preview/:slug` |
+| Builder | `/form/builder` | `/form/builder?form=:slug` |
+| Designer | `/form/designer` | `/form/designer?form=:slug` |
+| Preview | `/form/preview` | `/form/preview?form=:slug` |
 
-The slug is an optional final path segment, not a query parameter.
+The slug is optional client-owned URL state in the `form` query parameter. Astro owns the page route.
 
 ### Landing page
 
@@ -150,7 +150,7 @@ All implementation dimensions use `rem`. A one-device-pixel border may use the d
 ### Direct entry
 
 - `/form/builder` restores the current draft or creates a new empty draft.
-- `/form/builder/:slug` loads the named form and establishes it as the working draft and linked named form.
+- `/form/builder?form=:slug` loads the named form and establishes it as the working draft and linked named form.
 - The builder never opens with a project selector.
 - Storage initialization completes before choosing empty versus restored state.
 - Default new-form configuration is locale `en` and direction `ltr`.
@@ -273,7 +273,7 @@ Cancel returns focus to Remove.
 Designer is a separate destination:
 
 - `/form/designer` resolves the working draft.
-- `/form/designer/:slug` resolves the named form.
+- `/form/designer?form=:slug` resolves the named form.
 - Builder has a visible Designer button with an appropriate icon.
 - Before navigation, Builder requires the changed document to validate and save successfully.
 - Phase 1 Designer shows an intentional empty/not-yet-available page with:
@@ -291,7 +291,7 @@ The empty Designer page is not a fake theme editor.
 
 Preview never depends on in-memory Builder state because it is a separate page.
 
-1. Open `/form/preview` or `/form/preview/:slug`.
+1. Open `/form/preview` or `/form/preview?form=:slug`.
 2. Initialize IndexedDB.
 3. Resolve the working draft or named form using the shared route contract.
 4. Validate and migrate the stored form document.
@@ -547,7 +547,7 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 
 ### Slug entry
 
-1. Open `/form/builder/:slug`.
+1. Open `/form/builder?form=:slug`.
 2. Resolve the named form from IndexedDB.
 3. Establish it as linked working draft.
 4. Change it and observe separate draft/named save states.
@@ -595,3 +595,17 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 - Every element name is non-empty and valid; repeated names produce intentional array values.
 - Changed linked forms require explicit Save before Designer or Preview navigation.
 - The application `<jb-form-builder>` renderer is used through Phase 2; publication remains the owner-approved final delivery step.
+
+## Planned Theme Designer flow
+
+This section is approved planning, not current placeholder behavior. Implementation remains gated by `PLAN.md`.
+
+1. Open `/form/designer` to browse Default, local themes, and presets.
+2. Create/import a standalone theme, then edit it through autosaving friendly controls.
+3. Use `?theme=:themeSlug` with the comprehensive fixture or add `form=:formSlug` for a real-form preview.
+4. Keep preview interactions session-only and switch saved preview forms without changing bindings.
+5. Set a local default or bind themes to forms outside both portable configs.
+6. Export/import sparse `.jb-theme.json` independently from `.jb-form.json`.
+7. On delete, choose replacement and update bindings/default selection atomically.
+
+Desktop is a settings/live-preview split. Mobile uses Design/Preview tabs at 320px minimum. Background file/blob previews are temporary and prompt on leave. Full behavior, routes, presets, recovery, and acceptance are in `DESIGNER-PLAN.md` and `THEME-BEHAVIOR.md`.

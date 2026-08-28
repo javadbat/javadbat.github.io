@@ -6,7 +6,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import type { ValidationRuleName } from "../../registry/validation-rule-registry";
+import type { ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import modalStyles from "../../shell/FormModal.module.css";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { ValidationRuleEditor } from "./ValidationRuleEditor";
