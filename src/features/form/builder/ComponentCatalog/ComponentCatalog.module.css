@@ -24,10 +24,10 @@
   min-inline-size: 0;
   min-block-size: 0;
   max-block-size: 100%;
-  border: 0;
+  border: 0.0625rem solid var(--form-line);
   border-radius: var(--form-radius-lg);
   background: var(--form-surface);
-  box-shadow: var(--shadow-drop);
+  box-shadow: none;
   corner-shape: squircle;
 }
 
@@ -103,7 +103,7 @@
   align-items: center;
   min-block-size: 2.75rem;
   padding: 0.3rem 0.35rem;
-  border: 0;
+  border: 0.0625rem solid transparent;
   border-radius: var(--form-radius-sm);
   transition:
     background-color 140ms ease,
@@ -112,9 +112,10 @@
 }
 
 .catalogRow:hover {
-  background: rgba( from var(--jb-neutral-9) r g b / 0.4);
-  box-shadow: var(--shadow-drop);
-  transform: translateY(-0.0625rem);
+  border-color: var(--form-line);
+  background: #f8faff;
+  box-shadow: none;
+  transform: none;
 }
 
 .catalogRow[draggable="true"] {
@@ -152,8 +153,8 @@
   inline-size: 2rem;
   block-size: 2rem;
   border-radius: var(--form-radius-sm);
-  color: var(--form-ink);
-  background: transparent;
+  color: var(--form-accent);
+  background: var(--form-accent-soft);
 }
 
 .catalogCopy {
@@ -180,6 +181,11 @@
 }
 .searchInput{
   margin-block-end: 1rem;
+}
+
+.catalogRow :global(jb-button) {
+  --jb-button-font-weight: 700;
+  --jb-button-bg-color-ghost-hover: var(--form-accent-soft);
 }
 @media (max-width: 63.999rem) {
   .catalogRow :global(jb-button) {

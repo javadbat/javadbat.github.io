@@ -1,26 +1,33 @@
 .app {
-  --form-ink: var(--jb-neutral-2, oklch(0.25 0.055 258));
-  --form-muted: var(--jb-neutral-5, oklch(0.53 0.035 258));
-  --form-line: var(--jb-neutral-8, oklch(0.91 0.018 258));
-  --form-surface: var(--jb-white, oklch(1 0 0));
-  --form-canvas: var(--jb-neutral-10, oklch(0.982 0.008 258));
-  --form-accent: var(--jb-primary, oklch(0.58 0.21 259));
-  --form-accent-strong: var(--jb-primary-dark, oklch(0.46 0.19 259));
-  --form-accent-soft: var(--jb-primary-subtle, oklch(0.96 0.03 259));
-  --form-neutral-soft: var(--jb-neutral-9, oklch(0.97 0.01 258));
-  --form-success-ink: oklch(0.49 0.075 155);
-  --form-success-soft: oklch(0.965 0.03 155);
-  --form-warning-ink: oklch(0.52 0.1 75);
-  --form-warning-soft: oklch(0.97 0.04 85);
-  --form-shadow: oklch(0.28 0.04 255);
-  --shadow-drop: rgba(14, 63, 126, 0.04) 0 0 0 1px, rgba(42, 51, 69, 0.04) 0 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0 6px 6px -3px, rgba(14, 63, 126, 0.04) 0 12px 12px -6px, rgba(14, 63, 126, 0.04) 0 24px 24px -12px;
-  --shadow-box: rgba(0, 0, 0, 0.13) 0 0 11px -4px inset, rgba(0, 0, 0, 0.06) 0 2px 1px, rgba(0, 0, 0, 0.05) -4px 4px 10px;
-  --shadow-float: rgba(14, 63, 126, 0.08) 0 8px 28px -12px, rgba(42, 51, 70, 0.06) 0 3px 10px -6px;
-  --shadow-selected: 0 0 0 0.1875rem color-mix(in oklch, var(--form-accent) 16%, transparent), var(--shadow-float);
-  --form-radius-sm: 0.75rem;
-  --form-radius-md: 1rem;
-  --form-radius-lg: 1.35rem;
-  --form-inner-line: color-mix(in oklch, var(--form-line) 72%, transparent);
+  --form-ink: #101b48;
+  --form-muted: #657090;
+  --form-line: #dde2ef;
+  --form-surface: #ffffff;
+  --form-canvas: #f3f6fc;
+  --form-accent: #2455e8;
+  --form-accent-strong: #173fb7;
+  --form-accent-soft: #edf2ff;
+  --form-neutral-soft: #f4f6fb;
+  --form-success-ink: #0a8f59;
+  --form-success-soft: #edf9f3;
+  --form-warning-ink: #9a6810;
+  --form-warning-soft: #fff8e8;
+  --shadow-drop: 0 0.0625rem 0.125rem rgba(16, 27, 72, 0.04), 0 0.25rem 0.9rem rgba(16, 27, 72, 0.045);
+  --shadow-box: inset 0 0 0 0.0625rem rgba(16, 27, 72, 0.055);
+  --shadow-float: 0 0.75rem 2rem rgba(16, 27, 72, 0.1), 0 0.125rem 0.5rem rgba(16, 27, 72, 0.06);
+  --shadow-selected: 0 0 0 0.125rem rgba(36, 85, 232, 0.22), var(--shadow-drop);
+  --form-radius-sm: 0.6rem;
+  --form-radius-md: 0.75rem;
+  --form-radius-lg: 1rem;
+  --form-inner-line: color-mix(in srgb, var(--form-line) 88%, transparent);
+  --jb-primary: var(--form-accent);
+  --jb-content-primary: var(--form-ink);
+  --jb-content-inverse: #ffffff;
+  --jb-surface-primary: var(--form-surface);
+  --jb-surface-secondary: var(--form-neutral-soft);
+  --jb-radius: 0.65rem;
+  --jb-radius-sm: 0.55rem;
+  --jb-radius-xs: 0.45rem;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   block-size: 100dvh;
@@ -28,18 +35,34 @@
   overflow: hidden;
   color: var(--form-ink);
   background: var(--form-canvas);
+  font-family: text-font, fa-font, system-ui, sans-serif;
 }
 
 .app :global(jb-button[variant="outline"]) {
-  --jb-button-border-width: 0;
-  --jb-button-box-shadow: var(--shadow-drop);
+  --jb-button-border-width: 0.0625rem;
+  --jb-button-border-color: var(--form-line);
+  --jb-button-bg-color-outline: var(--form-surface);
+  --jb-button-bg-color-outline-hover: var(--form-accent-soft);
+  --jb-button-box-shadow: none;
 }
 .app :global(button) {
   font-family: inherit;
 }
 
 .app :global(jb-button[color="primary"]) {
-  --jb-button-box-shadow: 0 0.4rem 1rem color-mix(in oklch, var(--form-accent) 24%, transparent);
+  --jb-button-primary: var(--form-accent);
+  --jb-button-base-color-hover: #3565ed;
+  --jb-button-base-color-pressed: var(--form-accent-strong);
+  --jb-button-box-shadow: 0 0.35rem 0.85rem rgba(36, 85, 232, 0.18);
+}
+
+.app :global(jb-button[variant=ghost]),
+.app :global(jb-button[variant=text]) {
+  --jb-button-color-ghost: var(--form-accent);
+  --jb-button-color-ghost-hover: var(--form-accent-strong);
+  --jb-button-bg-color-ghost-hover: var(--form-accent-soft);
+  --jb-button-color-text: var(--form-accent);
+  --jb-button-color-text-hover: var(--form-accent-strong);
 }
 
 @media (max-width: 63.999rem) {

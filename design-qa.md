@@ -1,98 +1,135 @@
-# Design QA — JB Form landing page
+# Theme Designer Design QA
 
-- Source visual truth: `C:/Users/javad/AppData/Local/Temp/codex-clipboard-b17f0841-24e3-4bfb-8e2e-15900aa0dce7.png`
-- Implementation route: `/form`
-- Implementation screenshots:
-  - `.codex/product-design/qa/form-landing-implementation-top.png`
-  - `.codex/product-design/qa/form-landing-embed.png`
-  - `.codex/product-design/qa/form-landing-designer-workspace.png`
-  - `.codex/product-design/qa/form-landing-mobile.png`
-- Desktop viewport: 1440 × 1024 CSS px, device scale factor 1.
-- Mobile viewport: 375 × 812 captured CSS px, device scale factor 1.
-- Source pixels: 780 × 2014. The selected generated concept is a downscaled full-page board; comparison normalized its 780 px board width against the 1440 px implementation viewport by relative section proportions rather than raw pixels.
-- State: English, existing local draft, React embed tab selected for the focused embed capture.
+## Evidence
 
-**Full-view comparison evidence**
+- Source visual truth: `C:/Users/javad/AppData/Local/Temp/codex-clipboard-98e76cc3-5e57-4369-b4ac-9ca25a83085f.png`
+- Source pixels: 1487 × 1058
+- Implementation route: `/form/designer`
+- Implementation screenshot: unavailable
+- Intended comparison viewport: 1487 × 1058 CSS pixels at device scale factor 1
+- Density normalization: not performed because the implementation capture was unavailable
+- State: Rose Pop preset, Background → Pattern expanded, Science doodles selected, desktop preview, Parent permission form
 
-The source board and browser-rendered implementation were opened together. Both use the selected warm-white/cool-blue direction, an editorial split hero, a dominant three-column builder demonstration, floating JSON/validation/RTL artifacts, a four-item value strip, a 28-component grid, numbered feature storytelling, localization examples, workspace content, and a substantial footer.
+## Full-view comparison evidence
 
-The implementation intentionally changes the source concept's product promise from “Ship them as JSON” to “Ship them anywhere” and adds a dominant open-source embed section. This is required by the owner's clarified product truth: exported form documents render in a user's own application through `<jb-form-builder>`. It also adds an explicit “Under construction” Theme Designer section so the page does not imply that theme design is already available.
+Blocked. The selected source image is available, but the in-app browser could not start because the Windows browser sandbox helper exited during setup. A browser-rendered implementation screenshot could not be captured, so no valid side-by-side comparison input exists.
 
-**Focused region comparison evidence**
+## Focused-region comparison evidence
 
-- Hero: `.codex/product-design/qa/form-landing-implementation-top.png` preserves the source's scale, two-column balance, blue product canvas, high-fidelity builder shell, and floating product artifacts.
-- Embed: `.codex/product-design/qa/form-landing-embed.png` verifies readable web-component/React tabs, real package imports, strong contrast, and the portable JSON-to-site story.
-- Designer/workspace: `.codex/product-design/qa/form-landing-designer-workspace.png` verifies the roadmap state is clearly labeled and the existing draft/library workflow remains visible.
-- Mobile: `.codex/product-design/qa/form-landing-mobile.png` verifies stacked hierarchy and no horizontal overflow (`scrollWidth` equals `clientWidth`, 375 px).
+Blocked for the same reason. The settings panel, preview toolbar, and form-preview regions could not be captured at matching scale for focused comparison.
 
-- Persian: .codex/product-design/qa/form-landing-persian.png verifies native Persian product copy, RTL document direction, translated builder graphics and footer labels, and no desktop horizontal overflow.
+## Findings
 
-**Required fidelity surfaces**
+- [P0] Browser-rendered visual evidence is missing
+  - Location: `/form/designer`, full page and all focused regions.
+  - Evidence: the source image is available, but the implementation screenshot is unavailable after two browser connection attempts failed before page navigation.
+  - Impact: typography, spacing, token rendering, generated-asset integration, responsive behavior, and runtime custom-element layout cannot be accepted from code/build output alone.
+  - Fix: restore the in-app browser connection, capture the implementation at 1487 × 1058 in the stated state, combine it with the source image in one comparison input, fix visible P0/P1/P2 drift, and repeat.
 
-- Fonts and typography: Existing JB fonts are retained. Display weights, tight headline tracking, body line height, and small UI labels visually match the selected editorial direction.
-- Spacing and layout rhythm: The 82 rem content frame, hero proportions, section spacing, feature grids, radii, and card padding preserve the reference rhythm across desktop and mobile.
-- Colors and visual tokens: Warm off-white, navy ink, cobalt blue, pale blue, coral validation, and mint status tokens match the selected direction with accessible foreground contrast.
-- Image quality and asset fidelity: Product graphics are real HTML representations of the existing builder interface, not generic placeholders. Standard icons come from `jb-icons`; no custom SVG or substitute raster artwork was introduced.
-- Copy and content: Copy now accurately explains open source, portable JSON, framework-independent rendering, the React wrapper, local drafts, English/Persian RTL, and the unfinished Theme Designer.
+## Required fidelity surfaces
 
-**Primary interactions tested**
+- Fonts and typography: not visually verified.
+- Spacing and layout rhythm: not visually verified.
+- Colors and visual tokens: not visually verified.
+- Image quality and asset fidelity: generated assets are present in the implementation, but their rendered crop, transparency, and sharpness are not visually verified.
+- Copy and content: source-aligned copy is implemented, but wrapping and truncation are not visually verified.
 
-- Builder and preview CTAs resolve to the existing routes.
-- English/Persian toggle changes document language, direction, and localized marketing copy.
-- Web component/React code tabs switch their visible example.
-- Local current-draft and saved-form states render from the existing repository.
-- Desktop and mobile layouts render without horizontal overflow.
-- Chrome developer logs were checked after the primary interactions; no warning or error entries were reported.
+## Primary interactions tested
 
-**Findings**
+Not browser-tested because capture setup failed. TypeScript, form tests, and production build passed, but these are not substitutes for interaction verification. The following still require browser testing:
 
-No actionable P0, P1, or P2 mismatches remain.
+- preset selection and live preview updates;
+- color, range, number, select, and image controls;
+- background modes and pattern selection;
+- undo/redo, autosave, reset, and export;
+- desktop/mobile preview switching;
+- mobile Design/Preview tabs;
+- keyboard focus and responsive overflow.
 
-**Open Questions**
+## Console errors checked
 
-- The external GitHub link assumes this repository is the intended public source destination.
-- The Designer CTA intentionally opens the existing status route; it does not describe Theme Designer as available.
+Not checked because the browser session could not be created.
 
-**Comparison history**
+## Comparison history
 
-- Iteration 1: The first browser comparison matched the selected composition and revealed no P0/P1/P2 issue. The clarified open-source renderer and under-construction Designer content are intentional product corrections, not design drift. No post-comparison visual fix was required.
+- Pass 1: blocked before implementation capture; no visual findings could be established or fixed.
+- Pass 2: browser connection retried and failed at the same setup boundary; implementation capture remained unavailable.
 
-**Follow-up Polish**
+## Implementation checklist
 
-- Resolved: the component mosaic, builder illustration, feature diagrams, embed panel, responsive preview, Theme Designer preview, and footer now switch with the page locale.
+1. Capture `/form/designer` at 1487 × 1058 with Rose Pop and Pattern settings visible.
+2. Put the source and implementation capture into one comparison input.
+3. Test the primary interactions and inspect the browser console.
+4. Fix all P0/P1/P2 differences and repeat the comparison.
+5. Update this report to `final result: passed` only after the comparison gate succeeds.
 
-**Implementation Checklist**
+## Follow-up polish
 
-- [x] Selected visual direction reproduced.
-- [x] Open-source embed workflow made primary.
-- [x] Designer labeled under construction.
-- [x] Existing draft/library behavior preserved.
-- [x] Desktop and mobile verified.
-- [x] TypeScript, production build, and form tests passed.
+No P3 findings are classified until a valid visual comparison is available.
 
-**Icon and mobile-density follow-up**
+final result: blocked
 
-- Source visual truth: C:/Users/javad/AppData/Local/Temp/codex-clipboard-c2519c2b-9e54-4cf2-80f6-e6cdd3fff873.png (1353 × 629 px).
-- Focused implementation: .codex/product-design/qa/form-landing-icons-components.png (1312 × 598 px at 1× density).
-- Normalized comparison: .codex/product-design/qa/form-landing-icons-comparison.jpg; source and implementation were scaled to the same 520 px height and placed side by side.
-- Full-page evidence: .codex/product-design/qa/form-landing-icons-full.jpg at a 1440 × 1024 CSS viewport, 1× density, Persian RTL state.
-- Mobile evidence: .codex/product-design/qa/form-landing-icons-mobile.jpg plus focused component, feature, and footer captures at a 375 × 812 CSS viewport, 1× density, Persian RTL state.
-- Focused comparison: repeated edit/plus/expand symbols are replaced by the existing form registry sprite. All 28 component cells render a semantic icon; the section retains the source grid, typography, spacing, and border rhythm.
-- Full-view comparison: real form icons and restrained floating icon tiles now recur through hero, component, feature, workflow, embed, localization, Designer, workspace, and CTA sections without displacing primary content.
-- Mobile density: component catalog (324 px client / 1288 px scroll), feature cards (359 / 1356), workflow (359 / 896), and localization cards (359 / 936) use contained RTL horizontal rails. Document width remains 375 px with no page-level overflow.
-- Compact footer: measured height is 209 px at 375 px width, using a three-column link layout.
-- Motion/accessibility: mobile decorations are hidden; prefers-reduced-motion disables decorative drift and card movement.
-- Chrome production-build console: no warnings or errors.
+---
 
-**Follow-up findings**
+# Form Builder Theme Alignment Design QA
 
-No actionable P0, P1, or P2 differences remain. The added icon constellation is an intentional enhancement requested after the original reference, and the component-grid comparison confirms it does not reduce label readability or alter information hierarchy.
+## Evidence
 
-**Comparison history — iteration 2**
+- Source visual truth: user-provided form designer screenshot and form builder screenshot in the task prompt.
+- Source pixels: designer 2557 x 1269; builder 2558 x 1279.
+- Implementation route: `/form/builder`.
+- Implementation screenshot: unavailable.
+- Intended comparison viewport: 2558 x 1279 CSS pixels at device scale factor 1.
+- Density normalization: not performed because the implementation capture was unavailable.
+- State: Persian, desktop three-panel builder, populated student registration form, no selected field.
 
-- Earlier finding: every catalog cell reused one of three unrelated action symbols, weakening scanability and product credibility.
-- Fix: mapped every component to the real builder catalog icon sprite, added category-tinted icon tiles, and reused those icons as restrained decoration across the page.
-- Post-fix evidence: .codex/product-design/qa/form-landing-icons-comparison.jpg.
-- Mobile follow-up: stacked grids made the page unnecessarily long. They were converted to snap-aligned horizontal rails and the footer was compressed; focused mobile captures show next-card peeking and no document overflow.
+## Full-view comparison evidence
 
-final result: passed
+Blocked. Both source screenshots are available in the task, but the in-app browser could not start because the Windows browser sandbox helper exited during setup. A browser-rendered builder screenshot could not be captured, so no valid combined comparison input exists.
+
+## Focused-region comparison evidence
+
+Blocked for the same reason. The header actions, component catalog rows, canvas cards, and configuration-panel empty state could not be captured at matching scale for focused comparison.
+
+## Findings
+
+- [P0] Browser-rendered visual evidence is missing
+  - Location: `/form/builder`, full page and focused header, catalog, canvas, and properties regions.
+  - Evidence: the source screenshots are available, but the implementation screenshot is unavailable after two browser connection attempts failed before page navigation.
+  - Impact: final typography, spacing, button rendering, RTL alignment, responsive behavior, and custom-element styles cannot be accepted from build output alone.
+  - Fix: restore the in-app browser connection, capture the implementation at the stated viewport and state, combine it with both source screenshots in one comparison input, fix visible P0/P1/P2 drift, and repeat.
+
+## Required fidelity surfaces
+
+- Fonts and typography: aligned in code to the designer font stack; not visually verified.
+- Spacing and layout rhythm: panel gaps, radii, borders, and elevation aligned in code; not visually verified.
+- Colors and visual tokens: navy text, #2455e8 primary blue, pale blue canvas, and gray-blue lines aligned in code; not visually verified.
+- Image quality and asset fidelity: no new raster assets were required for this styling pass.
+- Copy and content: unchanged by this pass; wrapping and truncation are not visually verified.
+
+## Primary interactions tested
+
+The 76 builder tests passed, including catalog, workspace, store, validation, and modal behavior. Browser-level interaction verification remains blocked for drag-and-drop, panel switching, save, preview, designer navigation, JSON actions, locale selection, and focus states.
+
+## Console errors checked
+
+Not checked because the browser session could not be created.
+
+## Comparison history
+
+- Pass 1: blocked before implementation capture; no visual findings could be established or fixed.
+- Pass 2: browser connection retried after the production build and failed at the same setup boundary.
+
+## Implementation checklist
+
+1. Capture `/form/builder` at 2558 x 1279 in the populated Persian desktop state.
+2. Put the designer reference, original builder reference, and implementation capture into one comparison input.
+3. Test the primary interactions and inspect the browser console.
+4. Fix all P0/P1/P2 differences and repeat the comparison.
+5. Update this report to `final result: passed` only after the comparison gate succeeds.
+
+## Follow-up polish
+
+No P3 findings are classified until a valid visual comparison is available.
+
+final result: blocked

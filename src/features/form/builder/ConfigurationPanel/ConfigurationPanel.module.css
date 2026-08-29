@@ -12,10 +12,10 @@
   min-inline-size: 0;
   min-block-size: 0;
   max-block-size: 100%;
-  border: 0;
+  border: 0.0625rem solid var(--form-line);
   border-radius: var(--form-radius-lg);
   background: var(--form-surface);
-  box-shadow: var(--shadow-drop);
+  box-shadow: none;
   corner-shape: squircle;
 }
 
@@ -61,8 +61,8 @@
   inline-size: 2rem;
   block-size: 2rem;
   border-radius: var(--form-radius-sm);
-  color: var(--form-ink);
-  background: transparent;
+  color: var(--form-accent);
+  background: var(--form-accent-soft);
 }
 
 .configurationFields {
@@ -96,7 +96,7 @@
   padding: 0.9rem;
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
-  background: oklch(0.975 0.01 255);
+  background: #f8faff;
   box-shadow: none;
 }
 
@@ -122,7 +122,7 @@
   padding: 0.75rem;
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
-  background: oklch(0.985 0.006 255);
+  background: #fbfcff;
 }
 
 .conditionRuleHeading {
@@ -146,7 +146,7 @@
   padding: 0.75rem;
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
-  background: oklch(0.985 0.006 255);
+  background: #fbfcff;
 }
 
 .tabEditorRow:focus-visible {
@@ -183,7 +183,7 @@
   padding: 0.75rem;
   border: 0.0625rem solid var(--form-inner-line);
   border-radius: var(--form-radius-md);
-  background: oklch(0.985 0.006 255);
+  background: #fbfcff;
   box-shadow: none;
 }
 
@@ -213,7 +213,7 @@
   border: 0;
   border-radius: var(--form-radius-md);
   background: var(--form-accent-soft);
-  box-shadow: var(--shadow-box);
+  box-shadow: inset 0 0 0 0.0625rem rgba(36, 85, 232, 0.14);
   transform: rotate(8deg);
 }
 

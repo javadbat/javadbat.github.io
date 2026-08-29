@@ -14,11 +14,12 @@
   gap: 1.25rem;
   align-items: center;
   min-block-size: 4.25rem;
-  margin: 0.75rem 0.75rem 0;
-  padding: 0.55rem 1rem;
+  margin: 0.45rem 0.45rem 0;
+  padding: 0.55rem 1.1rem;
+  border: 0.0625rem solid var(--form-line);
   border-radius: var(--form-radius-lg);
   background: var(--form-surface);
-  box-shadow: var(--shadow-drop);
+  box-shadow: 0 0.2rem 0.8rem rgba(16, 27, 72, 0.04);
   corner-shape: squircle;
 }
 
@@ -35,11 +36,11 @@
   place-items: center;
   inline-size: 2.5rem;
   block-size: 2.5rem;
-  border-radius: var(--form-radius-md);
+  border-radius: 0.55rem;
   color: var(--form-surface);
-  background: var(--form-accent);
-  box-shadow: 0 0.45rem 1rem color-mix(in oklch, var(--form-accent) 25%, transparent);
-  font-size: 0.8rem;
+  background: #111c51;
+  box-shadow: none;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.05em;
 }
@@ -94,6 +95,13 @@
   outline: none;
 }
 
+.settingsButton:focus-visible,
+.menuSettingsButton:focus-visible,
+.overflowMenuToggle:focus-visible {
+  outline: 0.125rem solid rgba(36, 85, 232, 0.28);
+  outline-offset: 0.125rem;
+}
+
 .settingsIcon {
   inline-size: 1.25rem;
   block-size: 1.25rem;
@@ -111,7 +119,7 @@
   align-items: center;
   padding: 0.35rem 0.6rem;
   border-radius: 999rem;
-  color: oklch(0.48 0.035 255);
+  color: #586383;
   background: var(--form-neutral-soft);
   font-size: 0.7rem;
   font-weight: 700;
@@ -246,9 +254,10 @@
 .localeControls {
   min-block-size: 2.25rem;
   padding: 0.15rem 0.25rem 0.15rem 0.55rem;
-  border: 0;
+  border: 0.0625rem solid var(--form-line);
   border-radius: var(--form-radius-sm);
   color: var(--form-muted);
+  background: #fbfcff;
   corner-shape: squircle;
 }
 
