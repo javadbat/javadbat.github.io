@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { getFormElementDisplayName } from "jb-form-builder/registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
@@ -34,7 +35,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
 
   return (
     <main
-      className={styles.canvas}
+      className={`${layoutStyles.panel} ${styles.canvas}`}
       data-builder-panel="canvas"
       aria-labelledby="form-canvas-title"
       onKeyDown={event => {

@@ -22,17 +22,12 @@
 
 .topbar {
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: 0.45rem;
   z-index: 50;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 2rem;
   align-items: center;
-  min-block-size: 4.4rem;
-  padding: 0.7rem max(1rem, calc((100vw - 82rem) / 2));
-  border-block-end: 0.0625rem solid color-mix(in oklch, var(--line) 80%, transparent);
-  background: color-mix(in oklch, var(--canvas) 91%, transparent);
-  backdrop-filter: blur(1rem);
 }
 
 .brand { white-space: nowrap; }

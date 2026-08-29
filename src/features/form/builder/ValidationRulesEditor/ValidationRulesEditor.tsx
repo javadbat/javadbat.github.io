@@ -6,7 +6,7 @@ import type { FormMessages } from "../../i18n/locale-adapter";
 import type { ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { useBuilderStore } from "../store/BuilderStoreContext";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { ruleLabel } from "./validation-rule-label";
 import styles from "./ValidationRulesEditor.module.css";
 
@@ -38,7 +38,7 @@ export const ValidationRulesEditor = observer(function ValidationRulesEditor({ l
   const isOpen = editingElementId !== null && editingElementId === element?.id;
   return (
     <>
-      <CollapsibleConfigurationSection title={messages.validationRules}>
+      <JBCollapse title={messages.validationRules}>
         {rules.length === 0 ? (
           <p className={styles.emptyRules}>{messages.noValidationRules}</p>
         ) : (
@@ -54,7 +54,7 @@ export const ValidationRulesEditor = observer(function ValidationRulesEditor({ l
         <JBButton className={styles.manageButton} size="sm" variant="outline" onClick={() => setEditingElementId(element?.id ?? null)}>
           {rules.length === 0 ? messages.addValidation : messages.manageValidation}
         </JBButton>
-      </CollapsibleConfigurationSection>
+      </JBCollapse>
 
       {isOpen ? (
         <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>

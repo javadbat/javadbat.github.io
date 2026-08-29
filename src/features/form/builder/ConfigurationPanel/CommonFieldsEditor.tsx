@@ -6,7 +6,7 @@ import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { inputValue } from "./configuration-values";
 import { InitialValueEditor } from "./InitialValueEditor";
 import styles from "./ConfigurationPanel.module.css";
@@ -30,7 +30,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
     lastNonEmptyName.current.value = element.name;
   }
   return (
-    <CollapsibleConfigurationSection title={messages.commonSettings}>
+    <JBCollapse title={messages.commonSettings}>
       <JBInput
         size="sm"
         id={`element-name-${element.id}`}
@@ -98,6 +98,6 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
           ) : null}
         </div>
       ) : null}
-    </CollapsibleConfigurationSection>
+    </JBCollapse>
   );
 });

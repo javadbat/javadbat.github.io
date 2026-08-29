@@ -6,6 +6,7 @@ import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
+import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
 import styles from "../shell/RouteShell.module.css";
 import { PreviewFormPanel } from "./PreviewFormPanel";
 
@@ -44,7 +45,7 @@ function OverflowIcon() {
 }
 
 export function PreviewApp() {
-  const { locale, direction, setLocale, messages } = useFormLocale("en");
+  const { locale, direction, messages } = useFormLocale("en");
   const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
@@ -64,13 +65,11 @@ export function PreviewApp() {
 
   useEffect(() => {
     if (resolution.status !== "ready") return;
-    const appLocale = selectedLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en";
-    if (locale !== appLocale) setLocale(appLocale);
     const url = new URL(window.location.href);
     if (url.searchParams.get(PREVIEW_LANGUAGE_QUERY_PARAMETER) === selectedLanguage) return;
     url.searchParams.set(PREVIEW_LANGUAGE_QUERY_PARAMETER, selectedLanguage);
     window.history.replaceState(window.history.state, "", url);
-  }, [locale, resolution.status, selectedLanguage, setLocale]);
+  }, [resolution.status, selectedLanguage]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -92,7 +91,6 @@ export function PreviewApp() {
 
   const selectLanguage = (nextLanguage: string) => {
     setRequestedLanguage(nextLanguage);
-    setLocale(nextLanguage.toLowerCase().split("-")[0] === "fa" ? "fa" : "en");
     setMenuOpen(false);
   };
   const unresolvedMessage =
@@ -108,14 +106,8 @@ export function PreviewApp() {
 
   return (
     <div className={styles.page} dir={direction}>
-      <header className={styles.topbar}>
-        <a className={styles.brand} href={formPageHref("landing")}>
-          <span className={styles.brandMark}>JB</span>
-          <span>
-            <strong>{messages.productName}</strong>
-            <small>{messages.preview}</small>
-          </span>
-        </a>
+      <FormRouteHeader className={styles.topbar}>
+        <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.preview} />
         <div className={styles.topActions}>
           {resolution.status === "ready" && (
             <div className={styles.previewLocaleControl}>
@@ -177,7 +169,7 @@ export function PreviewApp() {
             </div>
           )}
         </div>
-      </header>
+      </FormRouteHeader>
       {resolution.status === "ready" ? (
         <main className={styles.previewMain}>
           <header className={styles.previewHeading}>

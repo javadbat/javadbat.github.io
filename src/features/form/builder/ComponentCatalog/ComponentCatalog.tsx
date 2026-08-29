@@ -5,6 +5,7 @@ import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
 import { beginBuilderDrag, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import "jb-icons/search"
@@ -77,7 +78,7 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
   }, [query, store.editingLocale]);
 
   return (
-    <aside className={styles.catalog} data-builder-panel="catalog" aria-labelledby="component-catalog-title">
+    <aside className={`${layoutStyles.panel} ${styles.catalog}`} data-builder-panel="catalog" aria-labelledby="component-catalog-title">
       <div className={styles.panelHeading}>
         <div>
           <p className={styles.eyebrow}>{messages.builder}</p>

@@ -4,6 +4,7 @@ import { JBTab } from "jb-tab/react";
 import { JBTabList } from "jb-tab/list/react";
 import { JBTabTrigger } from "jb-tab/trigger/react";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { ComponentCatalog } from "../ComponentCatalog/ComponentCatalog";
 import { ConfigurationPanel } from "../ConfigurationPanel/ConfigurationPanel";
 import { FormCanvas } from "../FormCanvas/FormCanvas";
@@ -61,7 +62,7 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
           </JBTabList>
         </JBTab>
       </nav>
-      <div className={styles.workspace} data-side-panel={compactPanel} data-mobile-panel={mobilePanel}>
+      <div className={`${layoutStyles.workspace} ${styles.workspace}`} data-side-panel={compactPanel} data-mobile-panel={mobilePanel}>
         <ComponentCatalog messages={messages} onElementAdded={() => setMobilePanel("canvas")} />
         <FormCanvas
           messages={messages}

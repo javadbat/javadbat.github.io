@@ -136,9 +136,6 @@
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  max-inline-size: 76rem;
-  margin-inline: auto;
-  padding: 1.25rem clamp(1rem, 4vw, 2.5rem);
 }
 
 .brand {
@@ -150,22 +147,7 @@
 }
 
 .brandMark {
-  display: inline-grid;
-  place-items: center;
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
-  border-radius: 0.75rem;
-  color: var(--shell-surface);
-  background: linear-gradient(
-    145deg,
-    oklch(0.61 0.19 255),
-    var(--shell-accent-strong)
-  );
-  box-shadow: 0 0.4rem 1rem
-    color-mix(in oklch, var(--shell-accent) 24%, transparent);
   font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
 }
 
 .brand strong,

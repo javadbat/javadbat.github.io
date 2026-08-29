@@ -19,16 +19,8 @@
 }
 
 .catalog {
-  box-sizing: border-box;
   overflow: hidden;
-  min-inline-size: 0;
-  min-block-size: 0;
-  max-block-size: 100%;
-  border: 0.0625rem solid var(--form-line);
-  border-radius: var(--form-radius-lg);
   background: var(--form-surface);
-  box-shadow: none;
-  corner-shape: squircle;
 }
 
 .catalog {

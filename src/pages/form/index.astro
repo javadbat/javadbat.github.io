@@ -6,6 +6,7 @@ import { deleteFormTranslations } from "../../features/form/landing/delete.trans
 import landingStyles from "../../features/form/landing/FormLanding.module.css";
 import { formLandingAppTranslations } from "../../features/form/landing/translations";
 import shellStyles from "../../features/form/shell/RouteShell.module.css";
+import layoutStyles from "../../features/form/layout/FormRouteLayout.module.css";
 
 const messages = { ...commonTranslations.en, ...formLandingAppTranslations.en, ...deleteFormTranslations.en };
 const builderHref = formPageHref("builder");
@@ -36,8 +37,8 @@ const sectionDecor = {
 
 <Layout title="JB Form — Open-source visual form builder" description="Build forms visually, export portable JSON, and render them anywhere with the open-source jb-form-builder component.">
   <div class={`${shellStyles.page} ${landingStyles.page}`} data-form-landing>
-    <header class={landingStyles.topbar}>
-      <a class={`${shellStyles.brand} ${landingStyles.brand}`} href="/form"><span class={shellStyles.brandMark}>JB</span><span><strong data-i18n="productName">{messages.productName}</strong><small data-i18n="openSourceLabel">{messages.openSourceLabel}</small></span></a>
+    <header class={`${layoutStyles.header} ${landingStyles.topbar}`}>
+      <a class={`${shellStyles.brand} ${landingStyles.brand}`} href="/form"><span class={`${layoutStyles.brandMark} ${shellStyles.brandMark}`}>JB</span><span><strong data-i18n="productName">{messages.productName}</strong><small data-i18n="openSourceLabel">{messages.openSourceLabel}</small></span></a>
       <nav class={landingStyles.nav} aria-label="Primary navigation"><a href="#features" data-i18n="navFeatures">{messages.navFeatures}</a><a href="#components" data-i18n="navComponents">{messages.navComponents}</a><a href="#embed" data-i18n="navEmbed">{messages.navEmbed}</a><a href="#workspace" data-i18n="navWorkspace">{messages.navWorkspace}</a></nav>
       <div class={landingStyles.topActions}><a class={landingStyles.sourceLink} href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer" data-i18n="viewSource">{messages.viewSource}</a><button class={`${landingStyles.button} ${landingStyles.buttonQuiet} ${landingStyles.buttonSmall}`} type="button" data-locale-toggle>FA</button><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonSmall}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
     </header>

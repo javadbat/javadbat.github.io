@@ -8,14 +8,9 @@
 .workspace {
   display: grid;
   grid-template-columns: minmax(15rem, 17rem) minmax(34rem, 1fr) minmax(18rem, 20rem);
-  gap: 0.6rem;
-  box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: none;
-  min-block-size: 0;
   margin-inline: auto;
-  padding: 0.6rem;
-  overflow: hidden;
 }
 
 .compactTabs,

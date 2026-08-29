@@ -1,9 +1,10 @@
 import { observer } from "mobx-react-lite";
 import type { FormMessages } from "../../i18n/locale-adapter";
+import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { ValidationRulesEditor } from "../ValidationRulesEditor/ValidationRulesEditor";
 import { CommonFieldsEditor } from "./CommonFieldsEditor";
 import { PropertyField } from "./PropertyField";
@@ -51,7 +52,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
   const advancedProperties = visibleProperties.filter(definition => advancedPropertyKeys.has(definition.key));
   const standardProperties = visibleProperties.filter(definition => !advancedPropertyKeys.has(definition.key));
   return (
-    <aside className={styles.configuration} data-builder-panel="properties" aria-labelledby="properties-title">
+    <aside className={`${layoutStyles.panel} ${styles.configuration}`} data-builder-panel="properties" aria-labelledby="properties-title">
       <div className={styles.panelHeading}>
         <div>
           <p className={styles.eyebrow}>{messages.settings}</p>
@@ -77,18 +78,18 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           {isConditionElement(element) ? <ConditionConfigurationEditor /> : null}
           {isWizardElement(element) ? <WizardConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
           {standardProperties.length > 0 ? (
-            <CollapsibleConfigurationSection title={messages.componentSettings}>
+            <JBCollapse title={messages.componentSettings}>
               {standardProperties.map(definition => (
                 <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
               ))}
-            </CollapsibleConfigurationSection>
+            </JBCollapse>
           ) : null}
           {advancedProperties.length > 0 ? (
-            <CollapsibleConfigurationSection title={messages.advancedSettings} defaultOpen={false}>
+            <JBCollapse title={messages.advancedSettings} defaultOpen={false}>
               {advancedProperties.map(definition => (
                 <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
               ))}
-            </CollapsibleConfigurationSection>
+            </JBCollapse>
           ) : null}
           {!isContainerElement(element) ? <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} /> : null}
         </div>

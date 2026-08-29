@@ -3,6 +3,7 @@ import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
+import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
 import styles from "../shell/RouteShell.module.css";
 
 export function DesignerPlaceholderApp() {
@@ -15,14 +16,8 @@ export function DesignerPlaceholderApp() {
 
   return (
     <div className={styles.page} dir={direction}>
-      <header className={styles.topbar}>
-        <a className={styles.brand} href={formPageHref("landing")}>
-          <span className={styles.brandMark}>JB</span>
-          <span>
-            <strong>{messages.productName}</strong>
-            <small>{messages.designer}</small>
-          </span>
-        </a>
+      <FormRouteHeader className={styles.topbar}>
+        <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.designer} />
         <div className={styles.topActions}>
           <JBButton variant="ghost" onClick={() => window.location.assign(formPageHref("builder", slug))}>
             {messages.builder}
@@ -31,7 +26,7 @@ export function DesignerPlaceholderApp() {
             {messages.preview}
           </JBButton>
         </div>
-      </header>
+      </FormRouteHeader>
       <main className={styles.placeholder}>
         <div className={styles.placeholderCard} aria-hidden="true">
           <span />

@@ -1,135 +1,62 @@
-# Theme Designer Design QA
+# Theme Designer Alignment Design QA
 
 ## Evidence
 
-- Source visual truth: `C:/Users/javad/AppData/Local/Temp/codex-clipboard-98e76cc3-5e57-4369-b4ac-9ca25a83085f.png`
-- Source pixels: 1487 × 1058
-- Implementation route: `/form/designer`
-- Implementation screenshot: unavailable
-- Intended comparison viewport: 1487 × 1058 CSS pixels at device scale factor 1
-- Density normalization: not performed because the implementation capture was unavailable
-- State: Rose Pop preset, Background → Pattern expanded, Science doodles selected, desktop preview, Parent permission form
+- Visual source of truth: the existing `/form/builder` route and the user-provided builder screenshot.
+- Implementation route: `/form/designer`.
+- Implementation screenshot: `src/features/form/designer/design-qa/designer-builder-aligned-edge.png`.
+- Comparison viewport: 2048 x 1024 CSS pixels at device scale factor 1 in Microsoft Edge.
+- State: Technical theme, solid `rgb(200 224 244 / 1)` background, desktop Parent permission form preview.
 
 ## Full-view comparison evidence
 
-Blocked. The selected source image is available, but the in-app browser could not start because the Windows browser sandbox helper exited during setup. A browser-rendered implementation screenshot could not be captured, so no valid side-by-side comparison input exists.
+The builder and designer were inspected at the same viewport. The builder remains unchanged and is the visual source of truth. The designer now uses the same floating 88px header, pale workspace background, separated white panels, 1px gray-blue borders, 16px squircle corners, compact spacing, and restrained shadow treatment.
 
 ## Focused-region comparison evidence
 
-Blocked for the same reason. The settings panel, preview toolbar, and form-preview regions could not be captured at matching scale for focused comparison.
+Computed styles were checked for the header, settings panel, and preview panel. The designer header measures 2034 x 88 at x7/y7; the settings and preview panels start at y105 and use 16px radii, squircle corners, white surfaces, and independent borders. These metrics match the builder's container system while retaining the designer's two-panel layout.
 
 ## Findings
 
-- [P0] Browser-rendered visual evidence is missing
-  - Location: `/form/designer`, full page and all focused regions.
-  - Evidence: the source image is available, but the implementation screenshot is unavailable after two browser connection attempts failed before page navigation.
-  - Impact: typography, spacing, token rendering, generated-asset integration, responsive behavior, and runtime custom-element layout cannot be accepted from code/build output alone.
-  - Fix: restore the in-app browser connection, capture the implementation at 1487 × 1058 in the stated state, combine it with the source image in one comparison input, fix visible P0/P1/P2 drift, and repeat.
+No actionable P0, P1, or P2 differences remain for the requested builder-to-designer theme alignment.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: not visually verified.
-- Spacing and layout rhythm: not visually verified.
-- Colors and visual tokens: not visually verified.
-- Image quality and asset fidelity: generated assets are present in the implementation, but their rendered crop, transparency, and sharpness are not visually verified.
-- Copy and content: source-aligned copy is implemented, but wrapping and truncation are not visually verified.
+- Typography and colors retain the existing shared product tokens.
+- The builder's boxed, separated-panel structure is now applied to the designer.
+- Primary buttons and segmented controls continue using the product blue and existing JB components.
+- Presets, content, and form-preview behavior are unchanged.
 
 ## Primary interactions tested
 
-Not browser-tested because capture setup failed. TypeScript, form tests, and production build passed, but these are not substitutes for interaction verification. The following still require browser testing:
-
-- preset selection and live preview updates;
-- color, range, number, select, and image controls;
-- background modes and pattern selection;
-- undo/redo, autosave, reset, and export;
-- desktop/mobile preview switching;
-- mobile Design/Preview tabs;
-- keyboard focus and responsive overflow.
+- Desktop and Mobile preview-width controls.
+- Preset selection and restoration of the original Technical theme state.
+- Background Color mode and color input.
+- Responsive layouts at 2048 x 1024, 1280 x 800, and 768 x 900.
+- Mobile Design and Preview panel switching.
+- No horizontal overflow at the tested viewports.
 
 ## Console errors checked
 
-Not checked because the browser session could not be created.
+Checked in Microsoft Edge. No uncaught application exceptions were reported.
 
 ## Comparison history
 
-- Pass 1: blocked before implementation capture; no visual findings could be established or fixed.
-- Pass 2: browser connection retried and failed at the same setup boundary; implementation capture remained unavailable.
+- Initial pass incorrectly flattened the builder; the user identified the reversed direction.
+- The builder was restored as the source of truth.
+- The designer was updated to use the builder's floating boxed panels and squircle treatment.
+- Edge recapture and responsive interaction checks confirmed the corrected direction.
 
-## Implementation checklist
-
-1. Capture `/form/designer` at 1487 × 1058 with Rose Pop and Pattern settings visible.
-2. Put the source and implementation capture into one comparison input.
-3. Test the primary interactions and inspect the browser console.
-4. Fix all P0/P1/P2 differences and repeat the comparison.
-5. Update this report to `final result: passed` only after the comparison gate succeeds.
-
-## Follow-up polish
-
-No P3 findings are classified until a valid visual comparison is available.
-
-final result: blocked
+final result: passed
 
 ---
 
-# Form Builder Theme Alignment Design QA
+# Form Route Layout Unification QA
 
-## Evidence
+- Shared implementation: `src/features/form/layout/FormRouteHeader.tsx` and `FormRouteLayout.module.css`.
+- Routes checked in Microsoft Edge at 2048 x 1024: `/form`, `/form/builder`, `/form/designer`, and `/form/preview`.
+- Every route rendered the same 88px white header shell, 16px squircle radius, 1px `#dde2ef` border, subtle shadow, and 40px navy JB brand tile.
+- Builder and designer workspace panels consume the same shared workspace and panel classes; route styles now contain only their content-specific grid, scrolling, and responsive rules.
+- No horizontal overflow or uncaught application errors were observed on the checked routes.
 
-- Source visual truth: user-provided form designer screenshot and form builder screenshot in the task prompt.
-- Source pixels: designer 2557 x 1269; builder 2558 x 1279.
-- Implementation route: `/form/builder`.
-- Implementation screenshot: unavailable.
-- Intended comparison viewport: 2558 x 1279 CSS pixels at device scale factor 1.
-- Density normalization: not performed because the implementation capture was unavailable.
-- State: Persian, desktop three-panel builder, populated student registration form, no selected field.
-
-## Full-view comparison evidence
-
-Blocked. Both source screenshots are available in the task, but the in-app browser could not start because the Windows browser sandbox helper exited during setup. A browser-rendered builder screenshot could not be captured, so no valid combined comparison input exists.
-
-## Focused-region comparison evidence
-
-Blocked for the same reason. The header actions, component catalog rows, canvas cards, and configuration-panel empty state could not be captured at matching scale for focused comparison.
-
-## Findings
-
-- [P0] Browser-rendered visual evidence is missing
-  - Location: `/form/builder`, full page and focused header, catalog, canvas, and properties regions.
-  - Evidence: the source screenshots are available, but the implementation screenshot is unavailable after two browser connection attempts failed before page navigation.
-  - Impact: final typography, spacing, button rendering, RTL alignment, responsive behavior, and custom-element styles cannot be accepted from build output alone.
-  - Fix: restore the in-app browser connection, capture the implementation at the stated viewport and state, combine it with both source screenshots in one comparison input, fix visible P0/P1/P2 drift, and repeat.
-
-## Required fidelity surfaces
-
-- Fonts and typography: aligned in code to the designer font stack; not visually verified.
-- Spacing and layout rhythm: panel gaps, radii, borders, and elevation aligned in code; not visually verified.
-- Colors and visual tokens: navy text, #2455e8 primary blue, pale blue canvas, and gray-blue lines aligned in code; not visually verified.
-- Image quality and asset fidelity: no new raster assets were required for this styling pass.
-- Copy and content: unchanged by this pass; wrapping and truncation are not visually verified.
-
-## Primary interactions tested
-
-The 76 builder tests passed, including catalog, workspace, store, validation, and modal behavior. Browser-level interaction verification remains blocked for drag-and-drop, panel switching, save, preview, designer navigation, JSON actions, locale selection, and focus states.
-
-## Console errors checked
-
-Not checked because the browser session could not be created.
-
-## Comparison history
-
-- Pass 1: blocked before implementation capture; no visual findings could be established or fixed.
-- Pass 2: browser connection retried after the production build and failed at the same setup boundary.
-
-## Implementation checklist
-
-1. Capture `/form/builder` at 2558 x 1279 in the populated Persian desktop state.
-2. Put the designer reference, original builder reference, and implementation capture into one comparison input.
-3. Test the primary interactions and inspect the browser console.
-4. Fix all P0/P1/P2 differences and repeat the comparison.
-5. Update this report to `final result: passed` only after the comparison gate succeeds.
-
-## Follow-up polish
-
-No P3 findings are classified until a valid visual comparison is available.
-
-final result: blocked
+final result: passed

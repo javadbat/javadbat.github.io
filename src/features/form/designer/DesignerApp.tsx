@@ -19,9 +19,12 @@ import type { JBFormBuilderElement } from "jb-form-builder/types";
 import "jb-icons/arrow";
 import "jb-icons/edit";
 import "jb-icons/refresh";
-import { getCurrentFormSlug } from "../application/form-page-url";
+import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText, walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
+import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
+import { JBCollapse } from "jb-collapse/react";
+import layoutStyles from "../layout/FormRouteLayout.module.css";
 import { DESIGNER_SAMPLE_FORM } from "./sample-form";
 import {
   GLOBAL_COLOR_TOKENS,
@@ -136,43 +139,18 @@ function SettingRange({
         value={value}
         onInput={event => onChange(numberFromEvent(event, value))}
       />
-      <div className={styles.numberWithSuffix}>
-        <JBNumberInput
-          aria-label={`${label} value`}
-          size="sm"
-          minValue={min}
-          maxValue={max}
-          step={step}
-          value={value}
-          onInput={event => onChange(numberFromEvent(event, value))}
-        />
-        <span aria-hidden="true">{suffix}</span>
-      </div>
+      <JBNumberInput
+        aria-label={`${label} value`}
+        size="sm"
+        minValue={min}
+        maxValue={max}
+        step={step}
+        value={value}
+        onInput={event => onChange(numberFromEvent(event, value))}
+      >
+        <span className={styles.inputSuffix} slot="end-section" aria-hidden="true">{suffix}</span>
+      </JBNumberInput>
     </div>
-  );
-}
-
-function SectionHeader({
-  label,
-  section,
-  active,
-  onToggle,
-}: {
-  label: string;
-  section: DesignerSection;
-  active: boolean;
-  onToggle: (section: DesignerSection) => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={styles.sectionHeader}
-      aria-expanded={active}
-      onClick={() => onToggle(section)}
-    >
-      <span>{label}</span>
-      <jb-icon-arrow direction={active ? "up" : "down"} />
-    </button>
   );
 }
 
@@ -185,7 +163,6 @@ export function DesignerApp() {
   const [history, setHistory] = useState<DesignerThemeConfig[]>([]);
   const [future, setFuture] = useState<DesignerThemeConfig[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
-  const [activeSection, setActiveSection] = useState<DesignerSection>("background");
   const [activePreset, setActivePreset] = useState("rose-pop");
   const [viewport, setViewport] = useState<PreviewViewport>("desktop");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("design");
@@ -461,6 +438,7 @@ export function DesignerApp() {
         <div className={styles.sectionContent}>
           <JBSelect<string>
             size="sm"
+            popoverPosition="fixed"
             label="Font family"
             value={theme.typography.fontFamily}
             hideClear
@@ -477,6 +455,7 @@ export function DesignerApp() {
         <div className={styles.sectionContent}>
           <JBSelect<ThemeAudienceSize>
             size="sm"
+            popoverPosition="fixed"
             label="Audience size"
             value={theme.sizing.audienceSize}
             hideClear
@@ -490,6 +469,7 @@ export function DesignerApp() {
           </JBSelect>
           <JBSelect<ThemeControlSize>
             size="sm"
+            popoverPosition="fixed"
             label="Default control size"
             value={theme.defaults.controlSize}
             hideClear
@@ -541,7 +521,7 @@ export function DesignerApp() {
     }
     return (
       <div className={styles.sectionContent}>
-        <JBSelect<string> size="sm" label="Preview component" value="all" hideClear>
+        <JBSelect<string> size="sm" popoverPosition="fixed" label="Preview component" value="all" hideClear>
           <JBOption value="all">All form controls</JBOption>
           <JBOption value="inputs">Inputs</JBOption>
           <JBOption value="choices">Choices</JBOption>
@@ -587,13 +567,14 @@ export function DesignerApp() {
 
   return (
     <div className={styles.designer}>
-      <header className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={() => setLibraryOpen(true)}>
-          <jb-icon-arrow direction="left" />
-          <span>Back to themes</span>
-        </button>
-        <span className={styles.brandMark}>JB</span>
-        <span className={styles.headerDivider} />
+      <FormRouteHeader layout="editor" className={styles.header}>
+        <FormRouteBrand href={formPageHref("landing")} title="Form builder" subtitle="Theme designer" />
+        <div className={styles.themeIdentity}>
+          <button type="button" className={styles.backButton} onClick={() => setLibraryOpen(true)}>
+            <jb-icon-arrow direction="left" />
+            <span>Back to themes</span>
+          </button>
+          <span className={styles.headerDivider} />
         {isEditingName ? (
           <JBInput
             className={styles.nameInput}
@@ -613,20 +594,21 @@ export function DesignerApp() {
           <span aria-hidden="true" />
           {saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "Save failed" : "Saved"}
         </p>
+        </div>
         <div className={styles.headerActions}>
           <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label="Undo" onClick={undo}>Undo</JBButton>
           <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label="Redo" onClick={redo}>Redo</JBButton>
           <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>Export theme</JBButton>
         </div>
-      </header>
+      </FormRouteHeader>
 
       <div className={styles.mobileTabs}>
         <JBButton size="sm" variant={mobilePanel === "design" ? "solid" : "ghost"} onClick={() => setMobilePanel("design")}>Design</JBButton>
         <JBButton size="sm" variant={mobilePanel === "preview" ? "solid" : "ghost"} onClick={() => setMobilePanel("preview")}>Preview</JBButton>
       </div>
 
-      <main className={styles.workspace} data-mobile-panel={mobilePanel}>
-        <aside className={styles.settingsPanel}>
+      <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={mobilePanel}>
+        <aside className={`${layoutStyles.panel} ${styles.settingsPanel}`}>
           <section className={styles.presets}>
             <h2>Presets</h2>
             <div className={styles.presetRow}>
@@ -646,15 +628,13 @@ export function DesignerApp() {
 
           <div className={styles.sections}>
             {sections.map(section => (
-              <section key={section.id} className={styles.settingsSection}>
-                <SectionHeader
-                  label={section.label}
-                  section={section.id}
-                  active={activeSection === section.id}
-                  onToggle={next => setActiveSection(current => current === next ? "background" : next)}
-                />
-                {activeSection === section.id ? renderSectionContent(section.id) : null}
-              </section>
+              <JBCollapse
+                key={section.id}
+                title={section.label}
+                defaultOpen={section.id === "background"}
+              >
+                {renderSectionContent(section.id)}
+              </JBCollapse>
             ))}
           </div>
           <div className={styles.autosaveNote}>
@@ -662,12 +642,13 @@ export function DesignerApp() {
           </div>
         </aside>
 
-        <section className={styles.previewPanel}>
+        <section className={`${layoutStyles.panel} ${styles.previewPanel}`}>
           <header className={styles.previewToolbar}>
             <div className={styles.previewPicker}>
               <span>Previewing:</span>
               <JBSelect<string>
                 size="sm"
+                popoverPosition="fixed"
                 value={previewSource}
                 hideClear
                 onChange={event => setPreviewSource(valueFromEvent(event))}

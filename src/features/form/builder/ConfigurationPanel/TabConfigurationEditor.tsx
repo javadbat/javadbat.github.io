@@ -6,7 +6,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { getLocalizedText, isTabElement } from "../../domain/form-document";
 import { useBuilderStore } from "../store/BuilderStoreContext";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
 
@@ -24,7 +24,7 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
 
   return (
     <>
-      <CollapsibleConfigurationSection title={copy(locale, "Container behavior", "رفتار ظرف")}>
+      <JBCollapse title={copy(locale, "Container behavior", "رفتار ظرف")}>
         <JBSelect<string>
           size="sm"
           popoverPosition="fixed"
@@ -37,8 +37,8 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
           <JBOption value="all">{copy(locale, "In every tab (default)", "در همه تب‌ها (پیش‌فرض)")}</JBOption>
           <JBOption value="active">{copy(locale, "Only in the active tab", "فقط در تب فعال")}</JBOption>
         </JBSelect>
-      </CollapsibleConfigurationSection>
-      <CollapsibleConfigurationSection title={copy(locale, "Tabs", "تب‌ها")}>
+      </JBCollapse>
+      <JBCollapse title={copy(locale, "Tabs", "تب‌ها")}>
         <div className={styles.tabEditor}>
           {element.tabs.map((tab, index) => {
             const valueIsDuplicate = element.tabs.some((candidate, candidateIndex) => candidateIndex !== index && candidate.value === tab.value);
@@ -99,7 +99,7 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
             {copy(locale, "Add tab", "افزودن تب")}
           </JBButton>
         </div>
-      </CollapsibleConfigurationSection>
+      </JBCollapse>
     </>
   );
 });

@@ -3,7 +3,7 @@ import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { getLocalizedText, isWizardElement } from "../../domain/form-document";
 import { useBuilderStore } from "../store/BuilderStoreContext";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
 
@@ -20,7 +20,7 @@ export const WizardConfigurationEditor = observer(function WizardConfigurationEd
   if (!element || !isWizardElement(element)) return null;
 
   return (
-    <CollapsibleConfigurationSection title={copy(locale, "Steps", "مراحل")}>
+    <JBCollapse title={copy(locale, "Steps", "مراحل")}>
       <div className={styles.tabEditor}>
         {element.steps.map((step, index) => {
           const duplicateValue = element.steps.some((candidate, candidateIndex) => candidateIndex !== index && candidate.value === step.value);
@@ -57,6 +57,6 @@ export const WizardConfigurationEditor = observer(function WizardConfigurationEd
           {copy(locale, "Add step", "افزودن مرحله")}
         </JBButton>
       </div>
-    </CollapsibleConfigurationSection>
+    </JBCollapse>
   );
 });

@@ -11,6 +11,7 @@ import { inferLocaleDirection } from "../../domain/form-document";
 import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
+import { FormRouteBrand, FormRouteHeader } from "../../layout/FormRouteHeader";
 import styles from "./BuilderHeader.module.css";
 import DesignIcon from './design.svg?react'
 import SaveIcon from './save.svg?react'
@@ -127,14 +128,8 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
   };
 
   return (
-    <header className={styles.header}>
-      <a className={styles.brand} href={formPageHref("landing")}>
-        <span className={styles.brandMark}>JB</span>
-        <span>
-          <strong>{messages.productName}</strong>
-          <small>{messages.editorReady}</small>
-        </span>
-      </a>
+    <FormRouteHeader layout="editor" className={styles.header}>
+      <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.editorReady} />
 
       <div className={styles.documentIdentity}>
         <span className={styles.documentName}>{store.formName}</span>
@@ -255,6 +250,6 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
           </JBButton>
         ) : null}
       </nav>
-    </header>
+    </FormRouteHeader>
   );
 });

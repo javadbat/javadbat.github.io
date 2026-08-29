@@ -11,7 +11,7 @@ import {
   type JSONValue,
 } from "../../domain/form-document";
 import { registryByType } from "jb-form-builder/registry/form-element-registry";
-import { CollapsibleConfigurationSection } from "../CollapsibleConfigurationSection/CollapsibleConfigurationSection";
+import { JBCollapse } from "jb-collapse/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
@@ -82,9 +82,10 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
   };
 
   return (
-    <CollapsibleConfigurationSection title="Visibility conditions">
+    <JBCollapse title="Visibility conditions">
       <div className={styles.conditionEditor}>
         <JBSelect<"all" | "any">
+          popoverPosition="fixed"
           name="conditionMatch"
           label="Show when"
           value={element.conditions.match}
@@ -107,6 +108,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                 <JBButton square size="sm" variant="ghost" aria-label="Remove condition" onClick={() => store.removeSelectedConditionRule(rule.id)}>×</JBButton>
               </div>
               <JBSelect<string>
+                popoverPosition="fixed"
                 name={`conditionField_${rule.id}`}
                 label="Field"
                 value={rule.fieldName}
@@ -127,6 +129,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                 {sourceNames.map(name => <JBOption key={name} value={name}>{name}</JBOption>)}
               </JBSelect>
               <JBSelect<JBConditionOperator>
+                popoverPosition="fixed"
                 name={`conditionOperator_${rule.id}`}
                 label="Operator"
                 value={rule.operator}
@@ -141,6 +144,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
               {expectsValue ? (
                 valueType === "boolean" ? (
                   <JBSelect<string>
+                    popoverPosition="fixed"
                     name={`conditionValue_${rule.id}`}
                     label="Value"
                     value={String(rule.value ?? false)}
@@ -167,6 +171,6 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
         <JBButton variant="outline" size="sm" disabled={sourceNames.length === 0} onClick={addRule}>Add condition</JBButton>
         {element.conditions.rules.length === 0 ? <p className={styles.conditionHint}>No conditions means this container is always visible.</p> : null}
       </div>
-    </CollapsibleConfigurationSection>
+    </JBCollapse>
   );
 });
