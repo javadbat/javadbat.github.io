@@ -19,9 +19,10 @@ import type { JBFormBuilderElement } from "jb-form-builder/types";
 import "jb-icons/arrow";
 import "jb-icons/edit";
 import "jb-icons/refresh";
-import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
+import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
-import { getLocalizedText, walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
+import { useStoredTheme } from "../application/use-stored-theme";
+import { getLocalizedText } from "../domain/form-document";
 import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
 import { JBCollapse } from "jb-collapse/react";
 import layoutStyles from "../layout/FormRouteLayout.module.css";
@@ -32,10 +33,10 @@ import {
   GLOBAL_RADIUS_TOKENS,
   PATTERN_ASSETS,
   THEME_PRESETS,
-  THEME_STORAGE_KEY,
-  canonicalTheme,
   cloneTheme,
+  fromPortableThemeConfig,
   readStoredTheme,
+  toPortableThemeConfig,
   type DesignerThemeConfig,
   type GlobalThemeToken,
   type ThemeAudienceSize,
@@ -44,6 +45,9 @@ import {
   type ThemePatternId,
 } from "./theme-config";
 import styles from "./DesignerApp.module.css";
+import { withControlSizeDefault } from "./control-size-default";
+import { themeRepository } from "../storage/theme-repository";
+import type { StoredThemeRecordV1 } from "../storage/storage-types";
 
 type SaveStatus = "saving" | "saved" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
@@ -76,16 +80,6 @@ function valueFromEvent(event: unknown): string {
 function numberFromEvent(event: unknown, fallback: number): number {
   const value = Number(valueFromEvent(event));
   return Number.isFinite(value) ? value : fallback;
-}
-
-function withControlDefault(documentValue: JBFormDocumentV1, size: ThemeControlSize): JBFormDocumentV1 {
-  const documentCopy = structuredClone(documentValue);
-  for (const element of walkFormElements(documentCopy.elements)) {
-    if (!("size" in element.props) || element.props.size === null || element.props.size === "") {
-      element.props.size = size;
-    }
-  }
-  return documentCopy;
 }
 
 function themeSlug(name: string): string {
@@ -156,10 +150,22 @@ function SettingRange({
 
 export function DesignerApp() {
   const formSlug = getCurrentFormSlug();
+  const selectedThemeSlug = getCurrentThemeSlug();
   const storedForm = useStoredForm(formSlug);
+  const storedTheme = useStoredTheme(selectedThemeSlug, formSlug);
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const uploadRef = useRef<HTMLInputElement | null>(null);
+  const initializingThemeRef = useRef(false);
+  const ignoreStaleThemeResolutionRef = useRef(false);
+  const themeRecordRef = useRef<StoredThemeRecordV1 | null>(null);
+  const editVersionRef = useRef(0);
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [theme, setTheme] = useState<DesignerThemeConfig>(() => readStoredTheme());
+  const [themeRecord, setThemeRecord] = useState<StoredThemeRecordV1 | null>(null);
+  const [libraryThemes, setLibraryThemes] = useState<StoredThemeRecordV1[]>([]);
+  const [defaultThemeId, setDefaultThemeId] = useState<string | null>(null);
+  const [boundThemeId, setBoundThemeId] = useState<string | null>(null);
+  const [themeLoadNotice, setThemeLoadNotice] = useState<string>();
   const [history, setHistory] = useState<DesignerThemeConfig[]>([]);
   const [future, setFuture] = useState<DesignerThemeConfig[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
@@ -175,6 +181,7 @@ export function DesignerApp() {
   const [imageNotice, setImageNotice] = useState<string>();
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
+    editVersionRef.current += 1;
     setTheme(current => {
       setHistory(previous => [...previous.slice(-39), cloneTheme(current)]);
       return cloneTheme(nextTheme);
@@ -191,28 +198,151 @@ export function DesignerApp() {
   }, [commitTheme, theme]);
 
   useEffect(() => {
-    if (saveStatus !== "saving") return;
-    const timer = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(canonicalTheme(theme)));
-        setSaveStatus("saved");
-      } catch {
-        setSaveStatus("error");
+    if (storedTheme.status === "ready") {
+      if (themeRecordRef.current?.id === storedTheme.record.id) {
+        if (ignoreStaleThemeResolutionRef.current) {
+          ignoreStaleThemeResolutionRef.current = false;
+          setThemeLoadNotice(undefined);
+          setLibraryOpen(false);
+        }
+        return;
       }
-    }, 450);
+      const editorTheme = fromPortableThemeConfig(storedTheme.record.config);
+      themeRecordRef.current = storedTheme.record;
+      setThemeRecord(storedTheme.record);
+      setTheme(editorTheme);
+      setHistory([]);
+      setFuture([]);
+      setActivePreset("");
+      setSaveStatus("saved");
+      setThemeLoadNotice(undefined);
+      return;
+    }
+    if (storedTheme.status === "not-found") {
+      if (ignoreStaleThemeResolutionRef.current) return;
+      setThemeLoadNotice("The requested theme was not found. Choose a local theme or create one from a preset.");
+      setLibraryOpen(true);
+      return;
+    }
+    if (storedTheme.status === "error") {
+      if (ignoreStaleThemeResolutionRef.current) return;
+      setThemeLoadNotice(storedTheme.issue.message);
+      setLibraryOpen(true);
+      return;
+    }
+    if (storedTheme.status !== "empty" || initializingThemeRef.current) return;
+    initializingThemeRef.current = true;
+    const initialTheme = readStoredTheme();
+    void themeRepository.create(toPortableThemeConfig(initialTheme)).then(async result => {
+      if (!result.ok) {
+        setSaveStatus("error");
+        initializingThemeRef.current = false;
+        return;
+      }
+      themeRecordRef.current = result.value;
+      setThemeRecord(result.value);
+      if (editVersionRef.current === 0) setTheme(fromPortableThemeConfig(result.value.config));
+      const selectedDefault = await themeRepository.setDefault(result.value.id);
+      setSaveStatus(selectedDefault.ok ? (editVersionRef.current === 0 ? "saved" : "saving") : "error");
+      window.history.replaceState(null, "", formPageHref("designer", formSlug, result.value.slug));
+    });
+  }, [formSlug, storedTheme]);
+
+  useEffect(() => {
+    if (saveStatus !== "saving" || !themeRecord) return;
+    const editVersion = editVersionRef.current;
+    const config = toPortableThemeConfig(theme);
+    const timer = window.setTimeout(() => {
+      saveQueueRef.current = saveQueueRef.current.then(async () => {
+        const linked = themeRecordRef.current;
+        if (!linked) return;
+        const result = await themeRepository.save({ id: linked.id, revision: linked.revision, config });
+        if (!result.ok) {
+          setSaveStatus("error");
+          return;
+        }
+        themeRecordRef.current = result.value;
+        setThemeRecord(result.value);
+        if (editVersionRef.current === editVersion) setSaveStatus("saved");
+      });
+    }, 500);
     return () => window.clearTimeout(timer);
-  }, [saveStatus, theme]);
+  }, [saveStatus, theme, themeRecord]);
 
   useEffect(() => () => {
     if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
   }, [temporaryImage]);
+
+  useEffect(() => {
+    if (!libraryOpen) return;
+    let active = true;
+    void Promise.all([themeRepository.list(), themeRepository.getSettings()]).then(([themes, settings]) => {
+      if (!active) return;
+      if (themes.ok) setLibraryThemes(themes.value);
+      if (settings.ok) setDefaultThemeId(settings.value.defaultThemeId);
+    });
+    return () => { active = false; };
+  }, [libraryOpen]);
+
+  useEffect(() => {
+    if (!themeRecord) return;
+    let active = true;
+    void themeRepository.getSettings().then(result => {
+      if (!active || !result.ok) return;
+      setDefaultThemeId(result.value.defaultThemeId);
+      setBoundThemeId(formSlug ? result.value.bindings[formSlug] ?? null : null);
+    });
+    return () => { active = false; };
+  }, [formSlug, themeRecord]);
+
+  const openThemeRecord = (record: StoredThemeRecordV1) => {
+    ignoreStaleThemeResolutionRef.current = true;
+    themeRecordRef.current = record;
+    setThemeRecord(record);
+    setTheme(fromPortableThemeConfig(record.config));
+    setHistory([]);
+    setFuture([]);
+    setActivePreset("");
+    setSaveStatus("saved");
+    setThemeLoadNotice(undefined);
+    window.history.replaceState(null, "", formPageHref("designer", formSlug, record.slug));
+    setLibraryOpen(false);
+  };
+
+  const createFromPreset = async (presetTheme: DesignerThemeConfig, presetId: string) => {
+    const result = await themeRepository.create(toPortableThemeConfig(presetTheme));
+    if (!result.ok) {
+      setSaveStatus("error");
+      return;
+    }
+    openThemeRecord(result.value);
+    setActivePreset(presetId);
+  };
+
+  const setCurrentAsDefault = async () => {
+    if (!themeRecord) return;
+    const result = await themeRepository.setDefault(themeRecord.id);
+    if (result.ok) {
+      setDefaultThemeId(themeRecord.id);
+      setSaveStatus("saved");
+    } else setSaveStatus("error");
+  };
+
+  const bindCurrentForm = async () => {
+    if (!themeRecord || !formSlug) return;
+    const result = await themeRepository.bindForm(formSlug, themeRecord.id);
+    if (result.ok) {
+      setBoundThemeId(themeRecord.id);
+      setSaveStatus("saved");
+    } else setSaveStatus("error");
+  };
 
   const canUseStoredForm = storedForm.status === "ready";
   const selectedDocument = previewSource === "stored" && canUseStoredForm
     ? storedForm.document
     : DESIGNER_SAMPLE_FORM;
   const previewDocument = useMemo(
-    () => withControlDefault(selectedDocument, theme.defaults.controlSize),
+    () => withControlSizeDefault(selectedDocument, theme.defaults.controlSize),
     [selectedDocument, theme.defaults.controlSize],
   );
   const previewName = getLocalizedText(
@@ -239,6 +369,8 @@ export function DesignerApp() {
     fontFamily: theme.typography.fontFamily,
   }), [theme]);
 
+  const portableTheme = useMemo(() => toPortableThemeConfig(theme), [theme]);
+
   const backdropStyle = useMemo<CSSProperties>(() => {
     if (theme.background.mode === "color") return { display: "none" };
     const source = theme.background.mode === "image"
@@ -257,8 +389,8 @@ export function DesignerApp() {
   }, [temporaryImage, theme.background]);
 
   const exportedJson = useMemo(
-    () => JSON.stringify(canonicalTheme(theme), null, 2),
-    [theme],
+    () => JSON.stringify(portableTheme, null, 2),
+    [portableTheme],
   );
 
   const undo = () => {
@@ -268,6 +400,7 @@ export function DesignerApp() {
     setHistory(items => items.slice(0, -1));
     setTheme(cloneTheme(previous));
     setActivePreset("");
+    editVersionRef.current += 1;
     setSaveStatus("saving");
   };
 
@@ -278,6 +411,7 @@ export function DesignerApp() {
     setFuture(items => items.slice(1));
     setTheme(cloneTheme(next));
     setActivePreset("");
+    editVersionRef.current += 1;
     setSaveStatus("saving");
   };
 
@@ -539,13 +673,28 @@ export function DesignerApp() {
           <div><span className={styles.brandMark}>JB</span><h1>Your themes</h1></div>
           <JBButton color="primary" onClick={() => setLibraryOpen(false)}>Open designer</JBButton>
         </header>
-        <p>Start with a preset, then make it yours. Themes stay separate from forms.</p>
+        <p>Open a reusable theme or start with a preset. Themes stay separate from forms.</p>
+        {themeLoadNotice ? <p role="alert">{themeLoadNotice}</p> : null}
+        {libraryThemes.length > 0 ? (
+          <>
+            <h2>My themes</h2>
+            <section className={styles.libraryGrid} aria-label="My themes">
+              {libraryThemes.map(record => (
+                <button key={record.id} type="button" onClick={() => openThemeRecord(record)}>
+                  <img src={record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
+                    ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
+                    : PATTERN_ASSETS["academic-waves"]} alt="" />
+                  <strong>{record.config.name}</strong>
+                  <span>{record.id === defaultThemeId ? "Default theme" : record.config.description ?? "Reusable local theme"}</span>
+                </button>
+              ))}
+            </section>
+          </>
+        ) : null}
+        <h2>Preset gallery</h2>
         <section className={styles.libraryGrid} aria-label="Theme presets">
           {THEME_PRESETS.map(presetItem => (
-            <button key={presetItem.id} type="button" onClick={() => {
-              commitTheme(presetItem.config, presetItem.id);
-              setLibraryOpen(false);
-            }}>
+            <button key={presetItem.id} type="button" onClick={() => void createFromPreset(presetItem.config, presetItem.id)}>
               <img src={presetItem.thumbnail} alt="" />
               <strong>{presetItem.label}</strong>
               <span>{presetItem.config.description}</span>
@@ -598,6 +747,14 @@ export function DesignerApp() {
         <div className={styles.headerActions}>
           <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label="Undo" onClick={undo}>Undo</JBButton>
           <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label="Redo" onClick={redo}>Redo</JBButton>
+          <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => void setCurrentAsDefault()}>
+            {themeRecord && defaultThemeId === themeRecord.id ? "Default" : "Set default"}
+          </JBButton>
+          {formSlug ? (
+            <JBButton size="sm" variant="ghost" disabled={!themeRecord || boundThemeId === themeRecord.id} onClick={() => void bindCurrentForm()}>
+              {themeRecord && boundThemeId === themeRecord.id ? "Used for this form" : "Use for this form"}
+            </JBButton>
+          ) : null}
           <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>Export theme</JBButton>
         </div>
       </FormRouteHeader>
@@ -683,6 +840,7 @@ export function DesignerApp() {
                   <JBFormBuilder
                     ref={rendererRef}
                     formDocument={previewDocument}
+                    themeConfig={portableTheme}
                     locale="en"
                     aria-label={`${previewName} preview`}
                     loadDependencies={loadDependencies}

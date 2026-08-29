@@ -12,6 +12,8 @@ import { configureFormLocale, resolveFormLocale } from "./locale-controller";
 import { RenderStateController } from "./render-state";
 import { ConditionController } from "./condition-controller";
 import type { DependencyFailure, DependencyLoader, FormValues, JBFormBuilderElement, RendererDependency, RendererState, RuntimeJBForm } from "./types";
+import type { ThemeConfigV1 } from "./contract/theme-config";
+import { applyThemeDefaults, applyThemeToRuntime, prepareThemeConfig } from "./theme-controller";
 
 /**
  * Current product routes instantiate the component only in a browser. The
@@ -53,6 +55,7 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
   #shell!: RendererShell;
   #stateController!: RenderStateController;
   #document: JBFormDocumentV1 | null = null;
+  #theme: ThemeConfigV1 | null = null;
   #assignmentIssues: FormIssue[] = [];
   #loadDependencies: DependencyLoader | null = null;
   #locale: string | null = null;
@@ -126,6 +129,17 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
     const cloned = cloneFormDocument(value);
     this.#document = cloned.document ?? null;
     this.#assignmentIssues = cloned.issues;
+    this.requestRender();
+  }
+
+  get themeConfig(): ThemeConfigV1 | null {
+    return this.#theme ? structuredClone(this.#theme) : null;
+  }
+
+  set themeConfig(value: ThemeConfigV1 | null) {
+    const next = value === null ? null : prepareThemeConfig(value);
+    if (JSON.stringify(this.#theme) === JSON.stringify(next)) return;
+    this.#theme = next;
     this.requestRender();
   }
 
@@ -273,7 +287,7 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
         return;
       }
 
-      const formDocument = prepared.document;
+      const formDocument = applyThemeDefaults(prepared.document, this.#theme);
       const dependencies = getRequiredDependencies(formDocument);
       // Expose immutable snapshots rather than the loader's working objects.
       // JavaScript consumers therefore cannot mutate future retry behavior
@@ -327,6 +341,7 @@ export class JBFormBuilderWebComponent extends JBBaseComponent implements JBForm
       const runtime = buildRuntimeForm(formDocument, activeLocale.locale, unavailableTypes, {
         completionDisplay: this.getAttribute("completion-display") ?? undefined,
       });
+      applyThemeToRuntime(runtime.form, this.#theme);
       if (!this.isCurrent(generation)) {
         return;
       }

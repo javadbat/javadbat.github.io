@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formPageHref, readFormSlug } from "./form-page-url";
+import { formPageHref, readFormSlug, readThemeSlug } from "./form-page-url";
 
 describe("form page URLs", () => {
   it.each([
@@ -19,4 +19,11 @@ describe("form page URLs", () => {
     "ignores an invalid form selection in %s",
     search => expect(readFormSlug(search)).toBeUndefined(),
   );
+
+  it("links and reads independent form/theme selections", () => {
+    expect(formPageHref("designer", "form-1", "rose-pop")).toBe("/form/designer?form=form-1&theme=rose-pop");
+    expect(formPageHref("designer", undefined, "rose-pop")).toBe("/form/designer?theme=rose-pop");
+    expect(readThemeSlug("?form=form-1&theme=rose-pop")).toBe("rose-pop");
+    expect(readThemeSlug("?theme=Not%20Valid")).toBeUndefined();
+  });
 });

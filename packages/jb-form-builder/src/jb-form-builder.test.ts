@@ -239,4 +239,41 @@ describe("JBFormBuilderWebComponent", () => {
     expect(renderer.loadDependencies).toBe(loader);
     expect(renderer.getAttribute("locale")).toBe("fa");
   });
+
+  it("applies a theme without mutating the assigned form document", async () => {
+    registerStubDependencies();
+    const renderer = createRenderer();
+    const input = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    const documentValue = createEmptyFormDocument();
+    documentValue.elements = [createDefaultElement(input, "fullName")];
+    delete documentValue.elements[0].props.size;
+    renderer.themeConfig = {
+      schemaVersion: 1,
+      name: "Large blue",
+      global: { "--jb-primary": "#2455e8" },
+      typography: { fontFamily: "system-ui", textScale: 1.1 },
+      defaults: { controlSize: "lg" },
+      components: { "jb-input": { tokens: { "--jb-input-border-color": "#123456" } } },
+    };
+    renderer.formDocument = documentValue;
+
+    await renderer.updateComplete;
+
+    expect(renderer.form?.style.getPropertyValue("--jb-primary")).toBe("#2455e8");
+    expect(renderer.form?.style.fontFamily).toBe("system-ui");
+    const runtimeInput = renderer.shadowRoot?.querySelector<HTMLElement>("jb-input");
+    expect(runtimeInput?.getAttribute("size")).toBe("lg");
+    expect(runtimeInput?.style.getPropertyValue("--jb-input-border-color")).toBe("#123456");
+    expect(documentValue.elements[0].props.size).toBeUndefined();
+  });
+
+  it("rejects invalid theme assignments and preserves the current theme", () => {
+    const renderer = document.createElement("jb-form-builder");
+    renderer.themeConfig = { schemaVersion: 1, name: "Valid" };
+
+    expect(() => {
+      renderer.themeConfig = { schemaVersion: 1, name: "", global: {} };
+    }).toThrow(TypeError);
+    expect(renderer.themeConfig?.name).toBe("Valid");
+  });
 });

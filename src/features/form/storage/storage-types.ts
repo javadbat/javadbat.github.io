@@ -1,14 +1,16 @@
 import type { JBFormDocumentV1 } from "../domain/form-document";
 import type { FormIssue } from "../domain/form-issue";
+import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 
 /** Stable IndexedDB database name shared by every `/form` route. */
 export const FORM_DATABASE_NAME = "jb-form-builder";
 /** Current physical IndexedDB schema version used to trigger migrations. */
-export const FORM_DATABASE_VERSION = 1;
+export const FORM_DATABASE_VERSION = 2;
 /** Application version stamped onto records for support and recovery diagnostics. */
 export const FORM_BUILDER_VERSION = "0.0.1";
 /** Singleton key identifying the browser's one autosaved working draft. */
 export const CURRENT_DRAFT_KEY = "current" as const;
+export const THEME_SETTINGS_KEY = "current" as const;
 
 /** Canonical object-store names for saved forms, the active draft, recovery data, and schema metadata. */
 export const FORM_STORES = {
@@ -16,6 +18,8 @@ export const FORM_STORES = {
   drafts: "drafts",
   recovery: "recovery",
   meta: "meta",
+  themes: "themes",
+  themeSettings: "themeSettings",
 } as const;
 
 /** Business failures that storage callers must distinguish and present to users. */
@@ -120,6 +124,47 @@ export interface StorageMetaRecord {
   builderVersion: string;
   /** Time this metadata snapshot was written. */
   updatedAt: string;
+}
+
+/** Independent reusable theme record stored outside every form document. */
+export interface StoredThemeRecordV1 {
+  recordVersion: 1;
+  builderVersion: string;
+  id: string;
+  /** Stable URL identity generated at creation and retained across renames. */
+  slug: string;
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+  config: ThemeConfigV1;
+}
+
+/** Local-only default selection and form bindings; never included in portable JSON. */
+export interface ThemeSettingsRecordV1 {
+  key: typeof THEME_SETTINGS_KEY;
+  recordVersion: 1;
+  builderVersion: string;
+  defaultThemeId: string | null;
+  bindings: Record<string, string>;
+  updatedAt: string;
+}
+
+export interface SaveThemeCommand {
+  id: string;
+  revision: number;
+  config: ThemeConfigV1;
+}
+
+export interface ThemeRepository {
+  open(): Promise<Result<void, StorageIssue>>;
+  create(config: ThemeConfigV1): Promise<Result<StoredThemeRecordV1, StorageIssue>>;
+  save(command: SaveThemeCommand): Promise<Result<StoredThemeRecordV1, StorageIssue>>;
+  getById(id: string): Promise<Result<StoredThemeRecordV1 | null, StorageIssue>>;
+  getBySlug(slug: string): Promise<Result<StoredThemeRecordV1 | null, StorageIssue>>;
+  list(): Promise<Result<StoredThemeRecordV1[], StorageIssue>>;
+  getSettings(): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
+  setDefault(themeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
+  bindForm(formSlug: string, themeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
 }
 
 /** User intent supplied to the repository's atomic save workflow. */

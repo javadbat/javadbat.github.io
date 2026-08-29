@@ -1,3 +1,5 @@
+import { canonicalizeThemeConfig, type ThemeConfigV1 } from "jb-form-builder/contract/theme";
+
 export type ThemePatternId =
   | "science-doodles"
   | "academic-waves"
@@ -214,4 +216,68 @@ export function canonicalTheme(theme: DesignerThemeConfig): DesignerThemeConfig 
   if (!canonical.description?.trim()) delete canonical.description;
   if (!canonical.background.imageUrl?.trim()) delete canonical.background.imageUrl;
   return JSON.parse(JSON.stringify(canonical)) as DesignerThemeConfig;
+}
+
+/** Converts editor state to the standalone sparse contract used by exports and the renderer. */
+export function toPortableThemeConfig(theme: DesignerThemeConfig): ThemeConfigV1 {
+  const background: ThemeConfigV1["background"] = theme.background.mode === "color"
+    ? { type: "color", color: theme.background.color }
+    : theme.background.mode === "pattern"
+      ? {
+          type: "pattern",
+          patternId: theme.background.patternId,
+          color: theme.background.color,
+          foregroundColor: theme.background.patternColor,
+          opacity: theme.background.opacity,
+          scale: theme.background.scale,
+        }
+      : theme.background.imageUrl
+        ? {
+            type: "image",
+            source: theme.background.imageUrl,
+            opacity: theme.background.opacity,
+            fallbackColor: theme.background.color,
+          }
+        : { type: "color", color: theme.background.color };
+
+  return canonicalizeThemeConfig({
+    schemaVersion: 1,
+    name: theme.name,
+    description: theme.description,
+    global: Object.fromEntries(Object.entries(theme.global).filter((entry): entry is [GlobalThemeToken, string] => typeof entry[1] === "string" && entry[1].trim() !== "")),
+    typography: { ...theme.typography },
+    sizing: { ...theme.sizing },
+    defaults: { ...theme.defaults },
+    background,
+  });
+}
+
+/** Hydrates persisted portable data into the current friendly-control editor model. */
+export function fromPortableThemeConfig(config: ThemeConfigV1): DesignerThemeConfig {
+  const theme = cloneTheme(DEFAULT_DESIGNER_THEME);
+  theme.name = config.name;
+  if (config.description) theme.description = config.description;
+  else delete theme.description;
+  theme.global = { ...(config.global ?? {}) };
+  theme.typography = { ...theme.typography, ...config.typography };
+  theme.sizing = { ...theme.sizing, ...config.sizing };
+  theme.defaults = { ...theme.defaults, ...config.defaults };
+
+  if (config.background?.type === "color") {
+    theme.background.mode = "color";
+    theme.background.color = config.background.color;
+  } else if (config.background?.type === "pattern") {
+    theme.background.mode = "pattern";
+    if (config.background.patternId in PATTERN_ASSETS) theme.background.patternId = config.background.patternId as ThemePatternId;
+    if (config.background.color) theme.background.color = config.background.color;
+    if (config.background.foregroundColor) theme.background.patternColor = config.background.foregroundColor;
+    if (config.background.opacity !== undefined) theme.background.opacity = config.background.opacity;
+    if (config.background.scale !== undefined) theme.background.scale = config.background.scale;
+  } else if (config.background?.type === "image") {
+    theme.background.mode = "image";
+    theme.background.imageUrl = config.background.source;
+    if (config.background.fallbackColor) theme.background.color = config.background.fallbackColor;
+    if (config.background.opacity !== undefined) theme.background.opacity = config.background.opacity;
+  }
+  return theme;
 }

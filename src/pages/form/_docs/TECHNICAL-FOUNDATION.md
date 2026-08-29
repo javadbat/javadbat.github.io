@@ -210,7 +210,7 @@ Database:
 
 ```text
 name: jb-form-builder
-version: 1
+version: 2
 ```
 
 ### Stores
@@ -221,6 +221,8 @@ version: 1
 | `drafts` | `key` | none | Singleton `current` explicitly saved working snapshot |
 | `recovery` | auto-increment | non-unique `sourceId`, `createdAt` | Pre-migration/corrupt-record recovery copies |
 | `meta` | `key` | none | Database/builder migration metadata |
+| `themes` | `id` | unique `slug`, non-unique `updatedAt` | Independent reusable ThemeConfig records |
+| `themeSettings` | `key` | none | Singleton local default selection and form-to-theme bindings |
 
 ### Record envelopes
 
@@ -245,6 +247,17 @@ interface CurrentDraftRecordV1 {
   linkedRevision: number | null;
   updatedAt: string;
   document: JBFormDocumentV1;
+}
+
+interface StoredThemeRecordV1 {
+  recordVersion: 1;
+  builderVersion: string;
+  id: string;
+  slug: string;
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+  config: ThemeConfigV1;
 }
 ```
 
@@ -275,7 +288,9 @@ IndexedDB implementation status:
 
 - `FormDatabase` owns the memoized native connection, version-change closure, and sequential database migration entry point;
 - migration v1 creates `forms`, `drafts`, `recovery`, and `meta` with the approved keys and indexes;
+- migration v2 adds `themes` and `themeSettings` without changing existing form records;
 - `IndexedDbFormRepository` exposes typed draft, slug lookup, list, and save commands without leaking `IDBRequest`;
+- `IndexedDbThemeRepository` validates/canonicalizes portable themes, creates collision-safe stable slugs, serializes autosave with optimistic revisions, and stores default/binding relationships separately;
 - named form and current draft writes share one read-write transaction;
 - unique slug checks and optimistic `revision` checks distinguish collisions from stale multi-tab saves;
 - Save As creates a new form ID while preserving element IDs;

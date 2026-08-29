@@ -8,7 +8,7 @@ import "jb-icons/react";
 import { observer } from "mobx-react-lite";
 import { formPageHref } from "../../application/form-page-url";
 import { inferLocaleDirection } from "../../domain/form-document";
-import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
+import { getStorageIssueMessage, type FormAppLocale, type FormMessages } from "../../i18n/locale-adapter";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { FormRouteBrand, FormRouteHeader } from "../../layout/FormRouteHeader";
@@ -22,6 +22,8 @@ export type BuilderNavigationTarget = "designer" | "preview";
 interface BuilderHeaderProps {
   /** Localized builder-interface copy. */
   messages: FormMessages;
+  /** Switches the builder interface language and writing direction. */
+  onBuilderLocaleChange: (locale: FormAppLocale) => void;
   /** Opens document identity and localization settings. */
   onOpenSettings: () => void;
   /** Navigates to another route while retaining selected form identity. */
@@ -75,7 +77,7 @@ function OverflowMenuIcon() {
  * The component observes the store directly so save-state changes update only
  * the header and the builder sections that actually consume those values.
  */
-export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+export const BuilderHeader = observer(function BuilderHeader({ messages, onBuilderLocaleChange, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   /** Shared builder state observed for document identity, locale, and save status. */
   const store = useBuilderStore();
   /** Whether compact layout should prioritize preview after the draft is safely saved. */
@@ -98,6 +100,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onOpenS
       });
     }
     store.setEditingLocale(nextLocale);
+    if (nextLocale === "en" || nextLocale === "fa") onBuilderLocaleChange(nextLocale);
     setMenuOpen(false);
   };
 

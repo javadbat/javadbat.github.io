@@ -1,4 +1,4 @@
-import { FORM_BUILDER_VERSION, FORM_DATABASE_VERSION, FORM_STORES, type StorageMetaRecord } from "../storage-types";
+import { FORM_BUILDER_VERSION, FORM_STORES, type StorageMetaRecord } from "../storage-types";
 
 /** Creates the initial atomic storage schema for named forms, draft autosave, recovery, and metadata. */
 export function migrateDatabaseToV1(database: IDBDatabase, transaction: IDBTransaction): void {
@@ -27,7 +27,7 @@ export function migrateDatabaseToV1(database: IDBDatabase, transaction: IDBTrans
   const timestamp = new Date().toISOString();
   meta.put({
     key: "database",
-    databaseVersion: FORM_DATABASE_VERSION,
+    databaseVersion: 1,
     builderVersion: FORM_BUILDER_VERSION,
     updatedAt: timestamp,
   } satisfies StorageMetaRecord);

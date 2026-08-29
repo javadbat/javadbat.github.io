@@ -163,7 +163,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - Export stays available as recovery when IndexedDB fails.
 - JSON import remains Phase 2.
 
-Future Theme Designer persistence is intentionally different: valid ThemeConfig changes autosave to independent theme records, while Form Builder continues explicit Save/Save As. Form and theme imports/exports remain separate.
+Theme Designer persistence is intentionally different: valid ThemeConfig changes autosave to independent IndexedDB theme records with stable slugs and optimistic revisions, while Form Builder continues explicit Save/Save As. Local default selection and form bindings stay outside both portable configs. Form and theme imports/exports remain separate.
 
 ## Locale and direction
 

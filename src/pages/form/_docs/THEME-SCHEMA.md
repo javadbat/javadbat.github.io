@@ -1,7 +1,7 @@
 # JB Form ThemeConfig Version 1 Contract
 
-Status: Product contract approved; schema implementation not started
-Reviewed: 2026-08-29
+Status: Runtime types, validation, canonicalization, and renderer property implemented; persistence/import completion pending
+Reviewed: 2026-08-30
 
 ThemeConfig is standalone portable visual configuration. It is not nested in FormConfig, does not own form identity, and is reusable with any form.
 

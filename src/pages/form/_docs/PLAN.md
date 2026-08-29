@@ -1,7 +1,7 @@
 # JB Form — Operational Plan
 
-Status: Phase 1 accepted; Form Builder workflow completion active
-Reviewed: 2026-08-29
+Status: Theme Designer implementation active; backend-dependent Form Builder steps remain deferred
+Reviewed: 2026-08-30
 Owner: Form Builder product owner
 
 This is the execution checklist. Work is handled in order, one active step at a time. Completed implementation detail belongs in the supporting documents; it is not repeated here as open work.
@@ -97,9 +97,9 @@ Status: DEFERRED UNTIL REQUIRED
 
 - Add SSR-safe package imports and scoped i18n only when server rendering or simultaneous locale trees become product requirements.
 
-## Design work — starts after Form Builder completion
+## Design work
 
-Theme contract planning is complete. Do not start Theme Designer UI or runtime implementation until Steps 1–7 are complete or explicitly deferred by the owner.
+Theme contract planning is complete. The owner advanced Theme Designer implementation while backend-dependent Builder Steps 4–7 remain deferred.
 
 ## Step 8 — Theme Designer contract
 
@@ -117,17 +117,18 @@ Contract sources are `DESIGNER-PLAN.md`, `THEME-SCHEMA.md`, `THEME-BEHAVIOR.md`,
 
 ## Step 9 — select the Theme Designer visual direction
 
-Status: LATER; NOT STARTED; BLOCKED BY FORM BUILDER SEQUENCE
+Status: COMPLETE
 
-After the Form Builder gate, use the Product Design workflow to produce exactly three visual directions built on the existing JB design system. Select one target before UI implementation.
+The selected direction aligns Designer with the existing Builder's floating header, boxed panels, compact spacing, and squircle treatment. Browser comparison evidence is recorded in `design-qa.md`.
 
 ## Step 10 — implement Theme Designer
 
-Status: LATER; NOT STARTED
+Status: IN PROGRESS
 
-- Start only after the Form Builder gate and Step 9 visual selection.
-- Replace the identity-preserving placeholder with the one approved Theme Designer feature.
-- Follow `DESIGNER-PLAN.md`; acceptance is defined there and in the theme schema/behavior contracts.
+- The responsive editor, eight presets, friendly controls, sample/saved-form preview, local autosave, session history, and portable export UI are implemented.
+- ThemeConfig v1 now has shared validation/canonicalization and an optional renderer/React property; global tokens, typography, spacing, component tokens, and default control size reach renderer scope.
+- Independent IndexedDB theme records, stable slugs, optimistic autosave revisions, default selection, form bindings, query resolution, and local-theme library selection are implemented.
+- Next: complete import/conflict handling, delete/duplicate library actions, background runtime portability/recovery, and full browser/mobile/RTL acceptance from `DESIGNER-PLAN.md`.
 
 ## Done means
 

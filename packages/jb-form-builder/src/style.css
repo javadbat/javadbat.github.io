@@ -20,7 +20,7 @@
 [part~="form"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  gap: calc(1rem * var(--jb-form-spacing-scale, 1));
 }
 
 [part~="element"] {
@@ -36,7 +36,7 @@
 [part~="repeatable-items"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  gap: calc(1rem * var(--jb-form-spacing-scale, 1));
 }
 
 [part~="element"] > p {
@@ -57,20 +57,20 @@
 [part~="element"][data-element-type="jb-condition"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  gap: calc(1rem * var(--jb-form-spacing-scale, 1));
 }
 
 [part~="element"][data-element-type="jb-tab"] > jb-tab {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.875rem;
+  gap: calc(0.875rem * var(--jb-form-spacing-scale, 1));
   min-inline-size: 0;
   inline-size: 100%;
 }
 
 [part~="element"][data-element-type="jb-tab"] > jb-tab[data-orientation="vertical"] {
   grid-template-columns: max-content minmax(0, 1fr);
-  gap: clamp(1rem, 3vw, 2rem);
+  gap: clamp(1rem, calc(3vw * var(--jb-form-spacing-scale, 1)), 2rem);
   align-items: start;
 }
 
@@ -94,7 +94,7 @@ jb-tab[data-orientation="vertical"] > jb-tab-list {
   box-sizing: border-box;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  gap: calc(1rem * var(--jb-form-spacing-scale, 1));
   min-inline-size: 0;
   inline-size: 100%;
   visibility: hidden;
@@ -125,7 +125,7 @@ jb-tab[data-orientation="vertical"] > jb-tab-list {
 @media (max-width: 40rem) {
   [part~="element"][data-element-type="jb-tab"] > jb-tab[data-orientation="vertical"] {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.875rem;
+    gap: calc(0.875rem * var(--jb-form-spacing-scale, 1));
   }
 
   jb-tab[data-orientation="vertical"] > jb-tab-list {

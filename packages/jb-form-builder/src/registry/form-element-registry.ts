@@ -320,8 +320,44 @@ const persianDisplayNames: Record<JBFormElementType, string> = {
   "jb-button": "دکمه",
 };
 
+const persianDescriptions: Record<JBFormElementType, string> = {
+  text: "متن توضیحی به فرم اضافه می‌کند.",
+  image: "تصویری را از یک نشانی اینترنتی نمایش می‌دهد.",
+  voice: "صوتی را از یک نشانی اینترنتی پخش می‌کند.",
+  link: "پیوندی به یک صفحه وب یا منبع اضافه می‌کند.",
+  divider: "بخش‌های فرم را با جداکننده دیداری و فاصله اختیاری از هم جدا می‌کند.",
+  "section-heading": "عنوانی برای سازمان‌دهی یک بخش فرم اضافه می‌کند.",
+  "jb-input": "یک فیلد متنی تک‌خطی انعطاف‌پذیر.",
+  "jb-number-input": "یک مقدار عددی دریافت می‌کند.",
+  "jb-range-input": "یک مقدار یا بازه عددی انتخاب می‌کند.",
+  "jb-mobile-input": "شماره موبایل را در قالب استاندارد دریافت می‌کند.",
+  "jb-password-input": "گذرواژه را به‌صورت پنهان دریافت می‌کند.",
+  "jb-payment-input": "اطلاعات کارت یا شبا را دریافت می‌کند.",
+  "jb-national-input": "کد ملی را دریافت و اعتبارسنجی می‌کند.",
+  "jb-date-input": "یک تاریخ را از تقویم انتخاب می‌کند.",
+  "jb-time-input": "زمانی از روز را انتخاب می‌کند.",
+  "jb-pin-input": "کد تأیید با طول ثابت را دریافت می‌کند.",
+  "jb-textarea": "متن بلند و چندخطی دریافت می‌کند.",
+  "jb-select": "یک یا چند گزینه را از فهرست انتخاب می‌کند.",
+  "jb-listbox": "از فهرستی که همیشه نمایش داده می‌شود گزینه انتخاب می‌کند.",
+  "jb-checkbox": "یک گزینه قابل انتخاب را روشن یا خاموش می‌کند.",
+  "jb-switch": "یک تنظیم دودویی را روشن یا خاموش می‌کند.",
+  "jb-file-input": "فایلی را برای بارگذاری انتخاب می‌کند.",
+  "jb-image-input": "تصویری را انتخاب و پیش‌نمایش می‌کند.",
+  "jb-button": "یک عملیات به فرم اضافه می‌کند.",
+  "jb-tab": "فیلدها را در پنل‌های تب یک‌سطحی سازمان‌دهی می‌کند.",
+  "jb-condition": "در صورت برقرار بودن شرط‌های مقادیر فرم، فیلدها را نمایش می‌دهد.",
+  "jb-form-wizard": "پاسخ‌دهنده را در یک توالی خطی از مراحل فرم هدایت می‌کند.",
+  "jb-repeatable-group": "گروهی از فیلدها را تکرار و مجموعه‌ای از رکوردهای تو‌در‌تو برمی‌گرداند.",
+};
+
 export function getFormElementDisplayName(entry: FormElementRegistryEntry, locale: string): string {
   return locale.toLowerCase().split("-")[0] === "fa" ? persianDisplayNames[entry.type] : entry.displayName;
+}
+
+/** Resolves the catalog description for a locale, falling back to English. */
+export function getFormElementDescription(entry: FormElementRegistryEntry, locale: string): string {
+  return locale.toLowerCase().split("-")[0] === "fa" ? persianDescriptions[entry.type] : entry.description;
 }
 
 function defaultsForLocale(value: JSONValue, locale: string): JSONValue {

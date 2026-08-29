@@ -9,6 +9,7 @@ const entry = {
   types: resolve(import.meta.dirname, "src/types.ts"),
   contract: resolve(import.meta.dirname, "src/contract/index.ts"),
   "form-document-validation": resolve(import.meta.dirname, "src/contract/form-document-validation.ts"),
+  "theme-config": resolve(import.meta.dirname, "src/contract/theme-config.ts"),
   "form-element-adapter": resolve(import.meta.dirname, "src/registry/form-element-adapter.ts"),
   "form-element-configuration": resolve(import.meta.dirname, "src/registry/form-element-configuration.ts"),
   "form-element-registry": resolve(import.meta.dirname, "src/registry/form-element-registry.ts"),

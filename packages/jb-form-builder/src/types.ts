@@ -1,6 +1,7 @@
 import type { JBFormDocumentV1, JBFormElementType } from "./contract/form-document";
 import type { FormIssue } from "./contract/form-issue";
 import type { CheckValidityAsyncResult } from "jb-form";
+import type { ThemeConfigV1 } from "./contract/theme-config";
 
 /**
  * Keep the public contract in a DOM-light module. Framework wrappers and
@@ -71,6 +72,8 @@ export interface JBFormBuilderElement extends HTMLElement {
    * have practical size/escaping limits.
    */
   formDocument: JBFormDocumentV1 | null;
+  /** Optional standalone visual configuration. Invalid assignments are rejected synchronously. */
+  themeConfig: ThemeConfigV1 | null;
   /**
    * Optional dependency-loading policy supplied by the host application. When
    * omitted, the renderer performs no package imports and reports missing tags.

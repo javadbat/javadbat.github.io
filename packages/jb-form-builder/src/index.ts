@@ -1,6 +1,8 @@
 export { defineJBFormBuilder, JB_FORM_BUILDER_TAG_NAME } from "./define";
 export { JBFormBuilderWebComponent } from "./jb-form-builder";
 export { loadDependencies } from "./dependency-loader";
+export { canonicalizeThemeConfig, validateThemeConfig } from "./contract/theme-config";
+export type { ThemeConfigV1, ThemeConfigIssue, ThemeConfigValidationResult } from "./contract/theme-config";
 export type {
   DependencyFailure,
   DependencyLoader,

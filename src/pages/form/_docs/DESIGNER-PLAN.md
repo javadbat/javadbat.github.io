@@ -1,10 +1,10 @@
 # JB Form Theme Designer Plan
 
-Status: Product and interaction contract approved; implementation not started
-Reviewed: 2026-08-29
+Status: Implementation in progress; shared ThemeConfig/renderer foundation implemented
+Reviewed: 2026-08-30
 Owner: Form Builder product owner
 
-This is the dedicated delivery plan for the visual theme editor at `/form/designer`. Theme Builder and Theme Designer are one feature. This document does not authorize implementation before the remaining Form Builder work in `PLAN.md` is complete or explicitly deferred.
+This is the dedicated delivery plan for the visual theme editor at `/form/designer`. Theme Builder and Theme Designer are one feature. The owner advanced this work while backend-dependent Form Builder work remains deferred in `PLAN.md`.
 
 ## Product outcome
 
@@ -137,7 +137,7 @@ Cover unknown/corrupt themes, unsupported data, conflicts, storage failure, unav
 7. Integrate optional `themeConfig` with final `<jb-form-builder>`.
 8. Run browser, mobile, RTL-preview, performance, and recovery acceptance.
 
-Implementation waits for the Form Builder gate and selection of a Product Design visual direction.
+The selected Builder-aligned visual direction, responsive editor, presets, friendly controls, preview, local autosave/history, export UI, shared ThemeConfig validation/canonicalization, initial renderer handoff, and independent IndexedDB theme records are implemented. Stable slugs, optimistic revisions, query/binding/default resolution, local-theme library selection, and editor actions for default/binding selection are covered. Import conflicts, delete/duplicate library actions, complete background portability/recovery, and final acceptance remain.
 
 ## Acceptance walkthrough
 

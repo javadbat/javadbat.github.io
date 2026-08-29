@@ -1,7 +1,7 @@
 # JB Form Theme Designer Behavior
 
-Status: Product behavior approved; implementation not started
-Reviewed: 2026-08-29
+Status: IndexedDB records, autosave revisions, query/default/binding resolution, preview/history/export implemented; lifecycle and recovery flows pending
+Reviewed: 2026-08-30
 
 This document owns Designer interaction, persistence, and recovery. `THEME-SCHEMA.md` owns portable data; `DESIGNER-PLAN.md` owns full scope and sequence.
 

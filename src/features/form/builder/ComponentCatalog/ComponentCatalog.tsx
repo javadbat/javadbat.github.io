@@ -1,9 +1,10 @@
 import { memo, useCallback, useMemo, useState, type DragEvent } from "react";
+import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { formElementRegistry, getFormElementDisplayName, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import { formElementRegistry, getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
@@ -17,11 +18,12 @@ interface ComponentCatalogProps {
 interface CatalogRowProps {
   entry: FormElementRegistryEntry;
   displayName: string;
+  description: string;
   addLabel: string;
   onAdd: (entry: FormElementRegistryEntry) => void;
 }
 
-const CatalogRow = memo(function CatalogRow({ entry, displayName, addLabel, onAdd }: CatalogRowProps) {
+const CatalogRow = memo(function CatalogRow({ entry, displayName, description, addLabel, onAdd }: CatalogRowProps) {
   return (
     <li
       className={styles.catalogRow}
@@ -38,7 +40,7 @@ const CatalogRow = memo(function CatalogRow({ entry, displayName, addLabel, onAd
       </span>
       <span className={styles.catalogCopy}>
         <strong>{displayName}</strong>
-        <small>{entry.description}</small>
+        <small>{description}</small>
       </span>
       <JBButton variant="ghost" size="sm" onClick={() => onAdd(entry)} aria-label={`${addLabel} ${displayName}`}>
         {addLabel}
@@ -47,7 +49,7 @@ const CatalogRow = memo(function CatalogRow({ entry, displayName, addLabel, onAd
   );
 });
 
-export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogProps) {
+export const ComponentCatalog = observer(function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogProps) {
   const store = useBuilderStore();
   const [query, setQuery] = useState("");
   const addElement = useCallback(
@@ -67,7 +69,7 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
     const normalized = query.trim().toLocaleLowerCase();
     const entries = normalized
       ? formElementRegistry.filter(entry =>
-          [entry.displayName, getFormElementDisplayName(entry, store.editingLocale), entry.type, entry.category, entry.description, ...entry.keywords]
+          [entry.displayName, getFormElementDisplayName(entry, store.editingLocale), entry.type, entry.category, entry.description, getFormElementDescription(entry, store.editingLocale), ...entry.keywords]
             .join(" ")
             .toLocaleLowerCase()
             .includes(normalized),
@@ -105,7 +107,14 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
             <h3>{category}</h3>
             <ul>
               {entries.map(entry => (
-                <CatalogRow key={entry.type} entry={entry} displayName={getFormElementDisplayName(entry, store.editingLocale)} addLabel={messages.add} onAdd={addElement} />
+                <CatalogRow
+                  key={entry.type}
+                  entry={entry}
+                  displayName={getFormElementDisplayName(entry, store.editingLocale)}
+                  description={getFormElementDescription(entry, store.editingLocale)}
+                  addLabel={messages.add}
+                  onAdd={addElement}
+                />
               ))}
             </ul>
           </section>
@@ -113,4 +122,4 @@ export function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogP
       </div>
     </aside>
   );
-}
+});

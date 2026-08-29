@@ -17,7 +17,7 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
-  const { direction, messages } = useFormLocale("en");
+  const { direction, messages, setLocale } = useFormLocale("en");
   const slug = getCurrentFormSlug();
   const actions = useBuilderAppActions();
 
@@ -32,6 +32,7 @@ const BuilderAppContent = observer(function BuilderAppContent() {
     <div className={styles.app} dir={direction}>
       <BuilderHeader
         messages={messages}
+        onBuilderLocaleChange={setLocale}
         onOpenSettings={actions.openSettings}
         onNavigate={actions.navigate}
         onImport={actions.openImport}

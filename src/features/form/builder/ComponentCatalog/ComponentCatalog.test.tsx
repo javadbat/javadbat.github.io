@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 
-import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
+import { makeObservable, observable, runInAction } from "mobx";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { formAppMessages } from "../../i18n/locale-adapter";
-import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
+import { formElementRegistry, getFormElementDescription, getFormElementDisplayName } from "jb-form-builder/registry/form-element-registry";
 import { ComponentCatalog } from "./ComponentCatalog";
 
 const addCatalogElement = vi.fn();
@@ -15,6 +16,7 @@ const store = {
   getElementPosition: () => 0,
   announce,
 };
+makeObservable(store, { editingLocale: observable });
 
 vi.mock("../store/BuilderStoreContext", () => ({
   useBuilderStore: () => store,
@@ -36,6 +38,32 @@ vi.mock("jb-input/react", () => ({
 vi.mock("../../CatalogIcon/CatalogIcon", () => ({ CatalogIcon: () => <span aria-hidden="true" /> }));
 
 describe("ComponentCatalog", () => {
+  beforeEach(() => {
+    runInAction(() => {
+      store.editingLocale = "en";
+    });
+    store.document.elements.length = 0;
+    addCatalogElement.mockReset();
+    announce.mockReset();
+  });
+  afterEach(cleanup);
+
+  it("updates component names when the editing locale changes", () => {
+    const entry = formElementRegistry[0];
+    const view = render(<ComponentCatalog messages={formAppMessages.en} />);
+
+    expect(view.getByRole("button", { name: `Add ${getFormElementDisplayName(entry, "en")}` })).toBeTruthy();
+
+    act(() => {
+      runInAction(() => {
+        store.editingLocale = "fa";
+      });
+    });
+
+    expect(view.getByRole("button", { name: `Add ${getFormElementDisplayName(entry, "fa")}` })).toBeTruthy();
+    expect(view.getByText(getFormElementDescription(entry, "fa"))).toBeTruthy();
+  });
+
   it("adds every registered component through its accessible Add action", () => {
     addCatalogElement.mockImplementation(entry => {
       store.document.elements.push({ type: entry.type });

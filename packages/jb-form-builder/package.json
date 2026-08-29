@@ -18,6 +18,7 @@
     "./types": { "types": "./dist/types.d.ts", "default": "./dist/types.js" },
     "./contract": { "types": "./dist/contract/index.d.ts", "default": "./dist/contract.js" },
     "./contract/validation": { "types": "./dist/contract/form-document-validation.d.ts", "default": "./dist/form-document-validation.js" },
+    "./contract/theme": { "types": "./dist/contract/theme-config.d.ts", "default": "./dist/theme-config.js" },
     "./registry/form-element-adapter": { "types": "./dist/registry/form-element-adapter.d.ts", "default": "./dist/form-element-adapter.js" },
     "./registry/form-element-configuration": { "types": "./dist/registry/form-element-configuration.d.ts", "default": "./dist/form-element-configuration.js" },
     "./registry/form-element-registry": { "types": "./dist/registry/form-element-registry.d.ts", "default": "./dist/form-element-registry.js" },

@@ -3,6 +3,7 @@ import { type JBElementStandardProps, useEvent } from "jb-core/react";
 import type { JBFormDocumentV1 } from "../contract/form-document";
 import { defineJBFormBuilder } from "../define";
 import type { DependencyLoader, JBFormBuilderElement, JBFormBuilderEventMap } from "../types";
+import type { ThemeConfigV1 } from "../contract/theme-config";
 
 // React applications should not need a second registration import. The guarded
 // function is harmless during server module evaluation and registers in the
@@ -11,6 +12,7 @@ defineJBFormBuilder();
 
 interface JBFormBuilderOwnProps {
   formDocument: JBFormDocumentV1 | null;
+  themeConfig?: ThemeConfigV1 | null;
   loadDependencies?: DependencyLoader | null;
   locale?: string | null;
   onReady?: (event: JBFormBuilderEventMap["ready"]) => void;
@@ -30,6 +32,7 @@ export type JBFormBuilderProps = PropsWithChildren<JBFormBuilderOwnProps> &
 export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps>(function JBFormBuilder(
   {
     formDocument,
+    themeConfig = null,
     loadDependencies = null,
     locale = null,
     onReady,
@@ -68,8 +71,9 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
     // JSX attributes would lose types and create escaping/size problems.
     currentElement.loadDependencies = loadDependencies;
     currentElement.locale = locale;
+    currentElement.themeConfig = themeConfig;
     currentElement.formDocument = formDocument;
-  }, [formDocument, loadDependencies, locale]);
+  }, [formDocument, loadDependencies, locale, themeConfig]);
 
   return createElement("jb-form-builder", {
     ...hostAttributes,
