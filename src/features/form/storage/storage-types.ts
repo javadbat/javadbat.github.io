@@ -165,6 +165,9 @@ export interface ThemeRepository {
   getSettings(): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
   setDefault(themeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
   bindForm(formSlug: string, themeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
+  duplicate(id: string): Promise<Result<StoredThemeRecordV1, StorageIssue>>;
+  /** Atomically replaces every local reference and removes the selected theme. */
+  delete(id: string, replacementThemeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>>;
 }
 
 /** User intent supplied to the repository's atomic save workflow. */

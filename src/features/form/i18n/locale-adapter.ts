@@ -11,6 +11,7 @@ import { componentCatalogTranslations } from "../builder/ComponentCatalog/transl
 import { configurationPanelTranslations } from "../builder/ConfigurationPanel/translations";
 import { propertyGuidanceTranslations } from "../builder/ConfigurationPanel/property-guidance.translations";
 import { designerPlaceholderAppTranslations } from "../designer/translations";
+import { designerAppTranslations } from "../designer/DesignerApp.translations";
 import { exportJsonModalTranslations } from "../builder/ExportJsonModal/translations";
 import { formCanvasTranslations } from "../builder/FormCanvas/translations";
 import { formLandingAppTranslations } from "../landing/translations";
@@ -41,6 +42,7 @@ const formTranslationModules = [
   configurationPanelTranslations,
   propertyGuidanceTranslations,
   designerPlaceholderAppTranslations,
+  designerAppTranslations,
   exportJsonModalTranslations,
   formCanvasTranslations,
   formLandingAppTranslations,

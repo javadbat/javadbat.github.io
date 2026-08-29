@@ -1,6 +1,6 @@
 # JB Form Theme Designer Behavior
 
-Status: IndexedDB records, autosave revisions, query/default/binding resolution, preview/history/export implemented; lifecycle and recovery flows pending
+Status: IndexedDB records, autosave revisions, query/default/binding resolution, strict and supported-values-only import, duplicate, atomic delete replacement, portable backgrounds, image fallback/retry, preview/history/export, and Chromium/Firefox/WebKit responsive/keyboard/RTL acceptance implemented
 Reviewed: 2026-08-30
 
 This document owns Designer interaction, persistence, and recovery. `THEME-SCHEMA.md` owns portable data; `DESIGNER-PLAN.md` owns full scope and sequence.
@@ -19,7 +19,7 @@ Keep persisted ThemeConfig, editor draft/intermediate input, preview runtime, an
 
 Committed valid changes reach preview under 100ms. Invalid intermediate input stays local; preview retains last valid value. Preview uses the runtime renderer, is interactive, and keeps responses session-only. Desktop offers Desktop/Mobile viewports; mobile uses real width. Reset preview clears runtime state only.
 
-Preview uses form locale/direction while v1 Designer chrome is English/LTR.
+Preview uses the saved form's default locale/direction while v1 Designer chrome remains explicitly English/LTR.
 
 Components is a selector plus isolated representative preview, not a token editor. Valid preset/import component values apply and persist. State clearly that editing comes later; add no override warnings, propagation, or reset-all action.
 
@@ -43,7 +43,7 @@ Reset removes authored visual overrides while retaining metadata after confirmat
 
 ## Import and export
 
-Accept pasted JSON or `.jb-theme.json`. Parse and validate before changing draft/storage. Default rejects the whole unsupported input; explicit Import supported values only shows/removes unsupported paths.
+Accept pasted JSON or `.jb-theme.json`. Parse and validate before changing draft/storage. Default rejects the whole unsupported input; explicit Import supported values only previews and removes unsupported optional paths. Unsupported schema versions and missing required names remain blocking errors.
 
 Import creates a new local theme and asks on every name/generated-slug conflict. Create copy is the safe default. Failure changes nothing.
 

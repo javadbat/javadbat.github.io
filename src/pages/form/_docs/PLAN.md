@@ -128,7 +128,10 @@ Status: IN PROGRESS
 - The responsive editor, eight presets, friendly controls, sample/saved-form preview, local autosave, session history, and portable export UI are implemented.
 - ThemeConfig v1 now has shared validation/canonicalization and an optional renderer/React property; global tokens, typography, spacing, component tokens, and default control size reach renderer scope.
 - Independent IndexedDB theme records, stable slugs, optimistic autosave revisions, default selection, form bindings, query resolution, and local-theme library selection are implemented.
-- Next: complete import/conflict handling, delete/duplicate library actions, background runtime portability/recovery, and full browser/mobile/RTL acceptance from `DESIGNER-PLAN.md`.
+- Strict paste/file ThemeConfig import, pre-mutation validation, name/slug conflict disclosure, create-copy behavior, and Base64 size confirmation/rejection are implemented.
+- Duplicate creates an independent identity/config snapshot. Delete requires a replacement choice and atomically updates the local default plus every form binding before removing the theme; failed replacement validation rolls everything back.
+- Renderer-scoped color, bundled pattern, and image backgrounds are implemented from portable ThemeConfig. Image fallback color remains visible when the source fails; Designer preflights persistent sources, reports unavailable/mixed-content images, and offers Retry/Edit recovery while invalid intermediate input keeps the last valid preview/config.
+- Supported-values-only import and automated Chromium/Firefox/WebKit desktop/320/375/412/768px keyboard/RTL acceptance are complete. The remaining release check is the physical mobile-device matrix from `DESIGNER-PLAN.md`.
 
 ## Done means
 

@@ -290,7 +290,8 @@ IndexedDB implementation status:
 - migration v1 creates `forms`, `drafts`, `recovery`, and `meta` with the approved keys and indexes;
 - migration v2 adds `themes` and `themeSettings` without changing existing form records;
 - `IndexedDbFormRepository` exposes typed draft, slug lookup, list, and save commands without leaking `IDBRequest`;
-- `IndexedDbThemeRepository` validates/canonicalizes portable themes, creates collision-safe stable slugs, serializes autosave with optimistic revisions, and stores default/binding relationships separately;
+- `IndexedDbThemeRepository` validates/canonicalizes portable themes, creates collision-safe stable slugs, serializes autosave with optimistic revisions, stores default/binding relationships separately, duplicates independent records, and atomically replaces references during deletion;
+- `<jb-form-builder>` materializes bundled pattern IDs without application asset paths and applies color/image fallback, fit, position, overlay, and opacity inside renderer scope;
 - named form and current draft writes share one read-write transaction;
 - unique slug checks and optimistic `revision` checks distinguish collisions from stale multi-tab saves;
 - Save As creates a new form ID while preserving element IDs;

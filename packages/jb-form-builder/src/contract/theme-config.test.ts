@@ -46,4 +46,11 @@ describe("ThemeConfig v1", () => {
       background: { type: "image", source: "blob:https://example.com/id" },
     }).issues).toContainEqual(expect.objectContaining({ path: "/background/source" }));
   });
+
+  it("rejects Base64 background images above the portable size limit", () => {
+    const source = `data:image/png;base64,${"A".repeat(Math.ceil(801 * 1024 * 4 / 3))}`;
+    const result = validateThemeConfig({ schemaVersion: 1, name: "Too large", background: { type: "image", source } });
+
+    expect(result.issues).toContainEqual(expect.objectContaining({ path: "/background/source", message: expect.stringContaining("800 KB") }));
+  });
 });

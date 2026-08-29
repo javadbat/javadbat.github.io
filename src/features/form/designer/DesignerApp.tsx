@@ -11,11 +11,13 @@ import { JBColorInput } from "jb-color-input/react";
 import { JBInput } from "jb-input/react";
 import { JBNumberInput } from "jb-number-input/react";
 import { JBRangeInput } from "jb-range-input/react";
+import { JBTextarea } from "jb-textarea/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
 import type { JBFormBuilderElement } from "jb-form-builder/types";
+import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 import "jb-icons/arrow";
 import "jb-icons/edit";
 import "jb-icons/refresh";
@@ -31,6 +33,7 @@ import {
   GLOBAL_COLOR_TOKENS,
   GLOBAL_CONTROL_HEIGHT_TOKENS,
   GLOBAL_RADIUS_TOKENS,
+  DEFAULT_DESIGNER_THEME,
   PATTERN_ASSETS,
   THEME_PRESETS,
   cloneTheme,
@@ -48,25 +51,22 @@ import styles from "./DesignerApp.module.css";
 import { withControlSizeDefault } from "./control-size-default";
 import { themeRepository } from "../storage/theme-repository";
 import type { StoredThemeRecordV1 } from "../storage/storage-types";
+import { prepareThemeImport } from "./theme-import";
+import { useFormLocale, type FormAppLocale, type FormMessageKey } from "../i18n/locale-adapter";
 
-type SaveStatus = "saving" | "saved" | "error";
+type SaveStatus = "saving" | "saved" | "invalid" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
 type PreviewViewport = "desktop" | "mobile";
 type MobilePanel = "design" | "preview";
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 
-const patternChoices: Array<{ id: ThemePatternId; label: string }> = [
-  { id: "science-doodles", label: "Science doodles" },
-  { id: "academic-waves", label: "Academic waves" },
-  { id: "calm-dots", label: "Calm dots" },
-  { id: "warm-chevrons", label: "Warm chevrons" },
-];
+const patternChoices: ThemePatternId[] = ["science-doodles", "academic-waves", "calm-dots", "warm-chevrons"];
 
 const fontChoices = [
-  { value: "text-font, fa-font, system-ui, sans-serif", label: "JB Sans" },
-  { value: "Georgia, 'Times New Roman', serif", label: "Classic serif" },
-  { value: "Verdana, Geneva, sans-serif", label: "Friendly rounded" },
-  { value: "ui-monospace, SFMono-Regular, Consolas, monospace", label: "Technical mono" },
+  { value: "text-font, fa-font, system-ui, sans-serif", labelKey: "designerJbSans" },
+  { value: "Georgia, 'Times New Roman', serif", labelKey: "designerClassicSerif" },
+  { value: "Verdana, Geneva, sans-serif", labelKey: "designerFriendlyRounded" },
+  { value: "ui-monospace, SFMono-Regular, Consolas, monospace", labelKey: "designerTechnicalMono" },
 ] as const;
 
 function valueFromEvent(event: unknown): string {
@@ -92,7 +92,22 @@ function themeSlug(name: string): string {
     .replace(/^-+|-+$/g, "") || "untitled-theme";
 }
 
-function tokenLabel(token: GlobalThemeToken): string {
+const persianTokenLabels: Partial<Record<GlobalThemeToken, string>> = {
+  "--jb-primary": "اصلی", "--jb-secondary": "ثانویه", "--jb-green": "سبز", "--jb-red": "قرمز", "--jb-yellow": "زرد",
+  "--jb-neutral": "خنثی", "--jb-text-primary": "متن اصلی", "--jb-text-secondary": "متن ثانویه", "--jb-text-contrast": "متن متضاد",
+  "--jb-black": "مشکی", "--jb-white": "سفید", "--jb-highlight": "برجسته", "--jb-radius": "گردی گوشه",
+};
+
+function tokenLabel(token: GlobalThemeToken, locale: FormAppLocale): string {
+  if (locale === "fa") {
+    if (persianTokenLabels[token]) return persianTokenLabels[token]!;
+    const neutral = /^--jb-neutral-(\d+)$/.exec(token);
+    if (neutral) return `خنثی ${neutral[1]}`;
+    const radius = /^--jb-radius-(.+)$/.exec(token);
+    if (radius) return `گردی ${radius[1].toUpperCase()}`;
+    const height = /^--jb-control-height-(.+)$/.exec(token);
+    if (height) return `ارتفاع کنترل ${height[1].toUpperCase()}`;
+  }
   return token
     .replace("--jb-", "")
     .split("-")
@@ -149,23 +164,48 @@ function SettingRange({
 }
 
 export function DesignerApp() {
+  const { locale, direction, setLocale, messages } = useFormLocale("en");
+  const message = (key: FormMessageKey, values: Record<string, string | number> = {}) => Object.entries(values)
+    .reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
   const formSlug = getCurrentFormSlug();
   const selectedThemeSlug = getCurrentThemeSlug();
   const storedForm = useStoredForm(formSlug);
   const storedTheme = useStoredTheme(selectedThemeSlug, formSlug);
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const uploadRef = useRef<HTMLInputElement | null>(null);
+  const importFileRef = useRef<HTMLInputElement | null>(null);
   const initializingThemeRef = useRef(false);
   const ignoreStaleThemeResolutionRef = useRef(false);
   const themeRecordRef = useRef<StoredThemeRecordV1 | null>(null);
   const editVersionRef = useRef(0);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [theme, setTheme] = useState<DesignerThemeConfig>(() => readStoredTheme());
+  const lastValidPortableThemeRef = useRef<ThemeConfigV1>(toPortableThemeConfig(theme));
+  const portableThemeState = useMemo(() => {
+    try {
+      const config = toPortableThemeConfig(theme);
+      lastValidPortableThemeRef.current = config;
+      return { valid: true as const, config };
+    } catch {
+      return { valid: false as const, config: lastValidPortableThemeRef.current };
+    }
+  }, [theme]);
+  const portableTheme = portableThemeState.config;
   const [themeRecord, setThemeRecord] = useState<StoredThemeRecordV1 | null>(null);
   const [libraryThemes, setLibraryThemes] = useState<StoredThemeRecordV1[]>([]);
   const [defaultThemeId, setDefaultThemeId] = useState<string | null>(null);
   const [boundThemeId, setBoundThemeId] = useState<string | null>(null);
+  const [themeBindings, setThemeBindings] = useState<Record<string, string>>({});
   const [themeLoadNotice, setThemeLoadNotice] = useState<string>();
+  const [importOpen, setImportOpen] = useState(false);
+  const [importJson, setImportJson] = useState("");
+  const [importFileName, setImportFileName] = useState("");
+  const [importFileError, setImportFileError] = useState("");
+  const [importWarningsConfirmed, setImportWarningsConfirmed] = useState(false);
+  const [importSupportedOnly, setImportSupportedOnly] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<StoredThemeRecordV1>();
+  const [deleteReplacementId, setDeleteReplacementId] = useState("default");
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const [history, setHistory] = useState<DesignerThemeConfig[]>([]);
   const [future, setFuture] = useState<DesignerThemeConfig[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
@@ -179,6 +219,8 @@ export function DesignerApp() {
   const [exportCopied, setExportCopied] = useState(false);
   const [temporaryImage, setTemporaryImage] = useState<string>();
   const [imageNotice, setImageNotice] = useState<string>();
+  const [imageLoadState, setImageLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [imageRetryVersion, setImageRetryVersion] = useState(0);
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
     editVersionRef.current += 1;
@@ -220,7 +262,7 @@ export function DesignerApp() {
     }
     if (storedTheme.status === "not-found") {
       if (ignoreStaleThemeResolutionRef.current) return;
-      setThemeLoadNotice("The requested theme was not found. Choose a local theme or create one from a preset.");
+      setThemeLoadNotice(messages.designerThemeNotFound);
       setLibraryOpen(true);
       return;
     }
@@ -246,12 +288,16 @@ export function DesignerApp() {
       setSaveStatus(selectedDefault.ok ? (editVersionRef.current === 0 ? "saved" : "saving") : "error");
       window.history.replaceState(null, "", formPageHref("designer", formSlug, result.value.slug));
     });
-  }, [formSlug, storedTheme]);
+  }, [formSlug, messages.designerThemeNotFound, storedTheme]);
 
   useEffect(() => {
     if (saveStatus !== "saving" || !themeRecord) return;
+    if (!portableThemeState.valid) {
+      setSaveStatus("invalid");
+      return;
+    }
     const editVersion = editVersionRef.current;
-    const config = toPortableThemeConfig(theme);
+    const config = portableTheme;
     const timer = window.setTimeout(() => {
       saveQueueRef.current = saveQueueRef.current.then(async () => {
         const linked = themeRecordRef.current;
@@ -267,11 +313,48 @@ export function DesignerApp() {
       });
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [saveStatus, theme, themeRecord]);
+  }, [portableTheme, portableThemeState.valid, saveStatus, themeRecord]);
 
   useEffect(() => () => {
     if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
   }, [temporaryImage]);
+
+  useEffect(() => {
+    if (theme.background.mode !== "image" || temporaryImage) {
+      setImageLoadState("idle");
+      return;
+    }
+    const source = theme.background.imageUrl?.trim();
+    if (!source || source.startsWith("blob:") || source.startsWith("file:")) {
+      setImageLoadState("idle");
+      return;
+    }
+    let active = true;
+    setImageLoadState("loading");
+    const timer = window.setTimeout(() => {
+      if (window.location.protocol === "https:" && source.startsWith("http:")) {
+        setImageLoadState("error");
+        setImageNotice(messages.designerMixedContentNotice);
+        return;
+      }
+      const candidate = new Image();
+      candidate.onload = () => {
+        if (!active) return;
+        setImageLoadState("ready");
+        setImageNotice(undefined);
+      };
+      candidate.onerror = () => {
+        if (!active) return;
+        setImageLoadState("error");
+        setImageNotice(messages.designerUnavailableNotice);
+      };
+      candidate.src = source;
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [imageRetryVersion, messages.designerMixedContentNotice, messages.designerUnavailableNotice, temporaryImage, theme.background.imageUrl, theme.background.mode]);
 
   useEffect(() => {
     if (!libraryOpen) return;
@@ -279,7 +362,10 @@ export function DesignerApp() {
     void Promise.all([themeRepository.list(), themeRepository.getSettings()]).then(([themes, settings]) => {
       if (!active) return;
       if (themes.ok) setLibraryThemes(themes.value);
-      if (settings.ok) setDefaultThemeId(settings.value.defaultThemeId);
+      if (settings.ok) {
+        setDefaultThemeId(settings.value.defaultThemeId);
+        setThemeBindings(settings.value.bindings);
+      }
     });
     return () => { active = false; };
   }, [libraryOpen]);
@@ -290,6 +376,7 @@ export function DesignerApp() {
     void themeRepository.getSettings().then(result => {
       if (!active || !result.ok) return;
       setDefaultThemeId(result.value.defaultThemeId);
+      setThemeBindings(result.value.bindings);
       setBoundThemeId(formSlug ? result.value.bindings[formSlug] ?? null : null);
     });
     return () => { active = false; };
@@ -319,6 +406,41 @@ export function DesignerApp() {
     setActivePreset(presetId);
   };
 
+  const openImport = () => {
+    setImportJson("");
+    setImportFileName("");
+    setImportFileError("");
+    setImportWarningsConfirmed(false);
+    setImportSupportedOnly(false);
+    setImportOpen(true);
+  };
+
+  const chooseImportFile = async (file: File | undefined) => {
+    if (!file) return;
+    setImportFileName(file.name);
+    setImportWarningsConfirmed(false);
+    setImportSupportedOnly(false);
+    try {
+      setImportJson(await file.text());
+      setImportFileError("");
+    } catch (cause) {
+      setImportJson("");
+      setImportFileError(cause instanceof Error ? cause.message : messages.designerFileReadFailed);
+    }
+  };
+
+  const importTheme = async () => {
+    if (!importValidation?.valid) return;
+    if (importValidation.warnings.length > 0 && !importWarningsConfirmed) return;
+    const result = await themeRepository.create(importValidation.config);
+    if (!result.ok) {
+      setImportFileError(result.error.message);
+      return;
+    }
+    setImportOpen(false);
+    openThemeRecord(result.value);
+  };
+
   const setCurrentAsDefault = async () => {
     if (!themeRecord) return;
     const result = await themeRepository.setDefault(themeRecord.id);
@@ -337,6 +459,55 @@ export function DesignerApp() {
     } else setSaveStatus("error");
   };
 
+  const duplicateTheme = async (record: StoredThemeRecordV1) => {
+    const result = await themeRepository.duplicate(record.id);
+    if (!result.ok) {
+      setThemeLoadNotice(result.error.message);
+      return;
+    }
+    setLibraryThemes(items => [result.value, ...items]);
+    setThemeLoadNotice(message("designerDuplicateSuccess", { name: result.value.config.name }));
+  };
+
+  const requestThemeDelete = (record: StoredThemeRecordV1) => {
+    setPendingDelete(record);
+    setDeleteReplacementId("default");
+  };
+
+  const confirmThemeDelete = async () => {
+    if (!pendingDelete) return;
+    const replacementId = deleteReplacementId === "default" ? null : deleteReplacementId;
+    setDeleteBusy(true);
+    const result = await themeRepository.delete(pendingDelete.id, replacementId);
+    setDeleteBusy(false);
+    if (!result.ok) {
+      setThemeLoadNotice(result.error.message);
+      return;
+    }
+    const replacement = replacementId ? libraryThemes.find(record => record.id === replacementId) : undefined;
+    setLibraryThemes(items => items.filter(record => record.id !== pendingDelete.id));
+    setDefaultThemeId(result.value.defaultThemeId);
+    setThemeBindings(result.value.bindings);
+    if (formSlug) setBoundThemeId(result.value.bindings[formSlug] ?? null);
+    const deletedCurrent = themeRecordRef.current?.id === pendingDelete.id;
+    setPendingDelete(undefined);
+    if (deletedCurrent && replacement) {
+      openThemeRecord(replacement);
+      return;
+    }
+    if (deletedCurrent) {
+      ignoreStaleThemeResolutionRef.current = true;
+      themeRecordRef.current = null;
+      setThemeRecord(null);
+      setTheme(cloneTheme(DEFAULT_DESIGNER_THEME));
+      setHistory([]);
+      setFuture([]);
+      setSaveStatus("saved");
+      window.history.replaceState(null, "", formPageHref("designer", formSlug));
+    }
+    setThemeLoadNotice(message("designerDeleteSuccess", { name: pendingDelete.config.name }));
+  };
+
   const canUseStoredForm = storedForm.status === "ready";
   const selectedDocument = previewSource === "stored" && canUseStoredForm
     ? storedForm.document
@@ -345,15 +516,17 @@ export function DesignerApp() {
     () => withControlSizeDefault(selectedDocument, theme.defaults.controlSize),
     [selectedDocument, theme.defaults.controlSize],
   );
+  const previewLocale = previewDocument.localization.defaultLocale;
+  const previewDirection = previewDocument.localization.locales[previewLocale]?.direction ?? "ltr";
   const previewName = getLocalizedText(
     previewDocument.metadata.name,
-    "en",
-    previewDocument.localization.defaultLocale,
+    previewLocale,
+    previewLocale,
   );
   const previewDescription = getLocalizedText(
     previewDocument.metadata.description,
-    "en",
-    previewDocument.localization.defaultLocale,
+    previewLocale,
+    previewLocale,
   );
 
   const previewThemeStyle = useMemo<CSSVariables>(() => ({
@@ -369,28 +542,39 @@ export function DesignerApp() {
     fontFamily: theme.typography.fontFamily,
   }), [theme]);
 
-  const portableTheme = useMemo(() => toPortableThemeConfig(theme), [theme]);
-
   const backdropStyle = useMemo<CSSProperties>(() => {
     if (theme.background.mode === "color") return { display: "none" };
     const source = theme.background.mode === "image"
-      ? temporaryImage || theme.background.imageUrl
+      ? temporaryImage || (imageLoadState === "ready" ? theme.background.imageUrl : undefined)
       : PATTERN_ASSETS[theme.background.patternId];
     if (!source) return { display: "none" };
+    const imageSource = `url(${JSON.stringify(source)})`;
     return {
-      backgroundImage: `url(${JSON.stringify(source)})`,
-      backgroundPosition: "center",
+      backgroundImage: theme.background.mode === "image" && theme.background.imageOverlayColor
+        ? `linear-gradient(${theme.background.imageOverlayColor}, ${theme.background.imageOverlayColor}), ${imageSource}`
+        : imageSource,
+      backgroundPosition: theme.background.mode === "image" ? theme.background.imagePosition ?? "center" : "center",
       backgroundRepeat: theme.background.mode === "pattern" ? "repeat" : "no-repeat",
       backgroundSize: theme.background.mode === "pattern"
         ? `${Math.max(180, 700 * (theme.background.scale / 100))}px`
-        : "cover",
+        : theme.background.imageFit ?? "cover",
       opacity: theme.background.opacity / 100,
     };
-  }, [temporaryImage, theme.background]);
+  }, [imageLoadState, temporaryImage, theme.background]);
 
   const exportedJson = useMemo(
     () => JSON.stringify(portableTheme, null, 2),
     [portableTheme],
+  );
+
+  const importValidation = useMemo(
+    () => importJson.trim() ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: importSupportedOnly }) : null,
+    [importJson, importSupportedOnly, libraryThemes],
+  );
+
+  const supportedImportValidation = useMemo(
+    () => importJson.trim() && !importSupportedOnly ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: true }) : null,
+    [importJson, importSupportedOnly, libraryThemes],
   );
 
   const undo = () => {
@@ -418,16 +602,16 @@ export function DesignerApp() {
   const chooseFile = (file: File | undefined) => {
     if (!file) return;
     if (file.size > 800 * 1024) {
-      setImageNotice("This image is larger than 800 KB and cannot be used.");
+      setImageNotice(messages.designerImageTooLarge);
       return;
     }
-    if (file.size > 400 * 1024 && !window.confirm("This image is larger than 400 KB. Use it for this preview anyway?")) {
+    if (file.size > 400 * 1024 && !window.confirm(messages.designerImageConfirm)) {
       return;
     }
     if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
     const source = URL.createObjectURL(file);
     setTemporaryImage(source);
-    setImageNotice("Local images are temporary. Upload the image and use its URL before sharing this theme.");
+    setImageNotice(messages.designerLocalImageNotice);
     updateTheme(draft => {
       draft.background.mode = "image";
       draft.background.imageUrl = undefined;
@@ -436,7 +620,7 @@ export function DesignerApp() {
 
   const renderBackgroundSettings = () => (
     <div className={styles.sectionContent}>
-      <div className={styles.segmented} aria-label="Background type">
+      <div className={styles.segmented} aria-label={messages.designerBackgroundType}>
         {(["color", "pattern", "image"] as ThemeBackgroundMode[]).map(mode => (
           <JBButton
             key={mode}
@@ -445,28 +629,33 @@ export function DesignerApp() {
             color="primary"
             onClick={() => updateTheme(draft => { draft.background.mode = mode; })}
           >
-            {mode[0].toUpperCase() + mode.slice(1)}
+            {mode === "color" ? messages.designerColor : mode === "pattern" ? messages.designerPattern : messages.designerImage}
           </JBButton>
         ))}
       </div>
 
       {theme.background.mode === "pattern" ? (
         <>
-          <p className={styles.settingLabel}>Choose a pattern</p>
+          <p className={styles.settingLabel}>{messages.designerChoosePattern}</p>
           <div className={styles.patternGrid}>
-            {patternChoices.map(pattern => (
+            {patternChoices.map(patternId => {
+              const patternLabel = patternId === "science-doodles" ? messages.designerScienceDoodles
+                : patternId === "academic-waves" ? messages.designerAcademicWaves
+                  : patternId === "calm-dots" ? messages.designerCalmDots : messages.designerWarmChevrons;
+              return (
               <button
-                key={pattern.id}
+                key={patternId}
                 type="button"
-                className={theme.background.patternId === pattern.id ? styles.patternSelected : styles.patternButton}
-                aria-label={pattern.label}
-                aria-pressed={theme.background.patternId === pattern.id}
-                onClick={() => updateTheme(draft => { draft.background.patternId = pattern.id; })}
+                className={theme.background.patternId === patternId ? styles.patternSelected : styles.patternButton}
+                aria-label={patternLabel}
+                aria-pressed={theme.background.patternId === patternId}
+                onClick={() => updateTheme(draft => { draft.background.patternId = patternId; })}
               >
-                <img src={PATTERN_ASSETS[pattern.id]} alt="" />
-                {theme.background.patternId === pattern.id ? <span>Selected</span> : null}
+                <img src={PATTERN_ASSETS[patternId]} alt="" />
+                {theme.background.patternId === patternId ? <span>{messages.designerSelected}</span> : null}
               </button>
-            ))}
+              );
+            })}
           </div>
         </>
       ) : null}
@@ -476,17 +665,42 @@ export function DesignerApp() {
           <JBInput
             size="sm"
             type="url"
-            label="Background image URL"
+            label={messages.designerImageUrl}
             placeholder="https://, data:, blob:, or file:"
             value={theme.background.imageUrl ?? ""}
             onInput={event => {
               setTemporaryImage(undefined);
               const value = valueFromEvent(event);
               setImageNotice(value.startsWith("blob:") || value.startsWith("file:")
-                ? "Blob and file URLs are temporary. Use a persistent URL before sharing."
+                ? messages.designerTemporaryUrlNotice
                 : undefined);
               updateTheme(draft => { draft.background.imageUrl = value || undefined; });
             }}
+          />
+          <JBSelect<"cover" | "contain" | "fill">
+            size="sm"
+            label={messages.designerImageFit}
+            value={theme.background.imageFit ?? "cover"}
+            hideClear
+            onChange={event => updateTheme(draft => { draft.background.imageFit = valueFromEvent(event) as "cover" | "contain" | "fill"; })}
+          >
+            <JBOption value="cover">{messages.designerCover}</JBOption>
+            <JBOption value="contain">{messages.designerContain}</JBOption>
+            <JBOption value="fill">{messages.designerFill}</JBOption>
+          </JBSelect>
+          <JBInput
+            size="sm"
+            label={messages.designerImagePosition}
+            placeholder="center"
+            value={theme.background.imagePosition ?? ""}
+            onInput={event => updateTheme(draft => { draft.background.imagePosition = valueFromEvent(event) || undefined; })}
+          />
+          <JBInput
+            size="sm"
+            label={messages.designerOverlayColor}
+            placeholder="rgb(0 0 0 / 20%)"
+            value={theme.background.imageOverlayColor ?? ""}
+            onInput={event => updateTheme(draft => { draft.background.imageOverlayColor = valueFromEvent(event) || undefined; })}
           />
           <input
             ref={uploadRef}
@@ -496,23 +710,26 @@ export function DesignerApp() {
             onChange={event => chooseFile(event.currentTarget.files?.[0])}
           />
           <JBButton size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
-            Choose local image
+            {messages.designerChooseLocalImage}
           </JBButton>
-          {imageNotice ? <p className={styles.notice}>{imageNotice}</p> : null}
+          {imageLoadState === "error" ? (
+            <JBButton size="sm" variant="ghost" onClick={() => setImageRetryVersion(version => version + 1)}>{messages.designerRetryImage}</JBButton>
+          ) : null}
+          {imageLoadState === "loading" ? <p className={styles.notice} role="status">{messages.designerCheckingImage}</p> : imageNotice ? <p className={styles.notice}>{imageNotice}</p> : null}
         </div>
       ) : null}
 
       <div className={styles.colorRows}>
         <JBColorInput
           size="sm"
-          label="Background color"
+          label={messages.designerBackgroundColor}
           value={theme.background.color}
           onInput={event => updateTheme(draft => { draft.background.color = valueFromEvent(event); })}
         />
         {theme.background.mode === "pattern" ? (
           <JBColorInput
             size="sm"
-            label="Pattern color"
+            label={messages.designerPatternColor}
             value={theme.background.patternColor}
             onInput={event => updateTheme(draft => { draft.background.patternColor = valueFromEvent(event); })}
           />
@@ -520,7 +737,7 @@ export function DesignerApp() {
       </div>
       {theme.background.mode !== "color" ? (
         <SettingRange
-          label={`${theme.background.mode === "pattern" ? "Pattern" : "Image"} opacity`}
+          label={theme.background.mode === "pattern" ? messages.designerPatternOpacity : messages.designerImageOpacity}
           value={theme.background.opacity}
           min={0}
           max={100}
@@ -532,7 +749,7 @@ export function DesignerApp() {
       ) : null}
       {theme.background.mode === "pattern" ? (
         <SettingRange
-          label="Pattern scale"
+          label={messages.designerPatternScale}
           value={theme.background.scale}
           min={40}
           max={180}
@@ -671,7 +888,10 @@ export function DesignerApp() {
       <main className={styles.libraryPage}>
         <header className={styles.libraryHeader}>
           <div><span className={styles.brandMark}>JB</span><h1>Your themes</h1></div>
-          <JBButton color="primary" onClick={() => setLibraryOpen(false)}>Open designer</JBButton>
+          <div className={styles.libraryActions}>
+            <JBButton variant="outline" onClick={openImport}>Import theme</JBButton>
+            <JBButton color="primary" onClick={() => setLibraryOpen(false)}>Open designer</JBButton>
+          </div>
         </header>
         <p>Open a reusable theme or start with a preset. Themes stay separate from forms.</p>
         {themeLoadNotice ? <p role="alert">{themeLoadNotice}</p> : null}
@@ -680,13 +900,19 @@ export function DesignerApp() {
             <h2>My themes</h2>
             <section className={styles.libraryGrid} aria-label="My themes">
               {libraryThemes.map(record => (
-                <button key={record.id} type="button" onClick={() => openThemeRecord(record)}>
-                  <img src={record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
-                    ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
-                    : PATTERN_ASSETS["academic-waves"]} alt="" />
-                  <strong>{record.config.name}</strong>
-                  <span>{record.id === defaultThemeId ? "Default theme" : record.config.description ?? "Reusable local theme"}</span>
-                </button>
+                <article key={record.id} className={styles.libraryCard}>
+                  <button className={styles.libraryCardOpen} type="button" onClick={() => openThemeRecord(record)}>
+                    <img src={record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
+                      ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
+                      : PATTERN_ASSETS["academic-waves"]} alt="" />
+                    <strong>{record.config.name}</strong>
+                    <span>{record.id === defaultThemeId ? "Default theme" : record.config.description ?? "Reusable local theme"}</span>
+                  </button>
+                  <div className={styles.libraryCardActions}>
+                    <button type="button" onClick={() => void duplicateTheme(record)}>Duplicate</button>
+                    <button type="button" onClick={() => requestThemeDelete(record)}>Delete</button>
+                  </div>
+                </article>
               ))}
             </section>
           </>
@@ -701,6 +927,112 @@ export function DesignerApp() {
             </button>
           ))}
         </section>
+        {importOpen ? (
+          <div className={styles.modalBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) setImportOpen(false); }}>
+            <section className={`${styles.exportModal} ${styles.importModal}`} role="dialog" aria-modal="true" aria-labelledby="import-theme-title" onKeyDown={event => { if (event.key === "Escape") setImportOpen(false); }}>
+              <h2 id="import-theme-title">Import theme</h2>
+              <p>Paste portable ThemeConfig JSON or choose a <code>.jb-theme.json</code> file. Existing themes are never overwritten.</p>
+              <JBTextarea
+                className={styles.importJsonInput}
+                name="themeImportJson"
+                label="Theme JSON"
+                placeholder="Paste ThemeConfig JSON"
+                value={importJson}
+                autoHeight={false}
+                autoFocus
+                onInput={event => {
+                  setImportJson(valueFromEvent(event));
+                  setImportFileName("");
+                  setImportFileError("");
+                  setImportWarningsConfirmed(false);
+                  setImportSupportedOnly(false);
+                }}
+              />
+              <div className={styles.importFileRow}>
+                <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>Choose theme file</JBButton>
+                {importFileName ? <span>{importFileName}</span> : null}
+                <input
+                  ref={importFileRef}
+                  className={styles.hiddenFileInput}
+                  type="file"
+                  accept="application/json,.json,.jb-theme.json"
+                  onChange={event => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = "";
+                    void chooseImportFile(file);
+                  }}
+                />
+              </div>
+              {importFileError ? <p className={styles.importError} role="alert">{importFileError}</p> : null}
+              {importValidation?.valid ? (
+                <>
+                  {importSupportedOnly && importValidation.omittedIssues.length > 0 ? (
+                    <div className={styles.importConflict} role="status">
+                      <strong>Only supported values will be imported.</strong>
+                      <p>The following paths will be omitted:</p>
+                      <ul>{importValidation.omittedIssues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code></li>)}</ul>
+                    </div>
+                  ) : null}
+                  {importValidation.conflicts.name || importValidation.conflicts.slug ? (
+                    <p className={styles.importConflict} role="status">
+                      A theme already uses this name or URL slug. Import will create an independent copy with a numbered slug.
+                    </p>
+                  ) : <p className={styles.importValid} role="status">ThemeConfig is valid and ready to import.</p>}
+                </>
+              ) : importValidation ? (
+                <div className={styles.importError} role="alert">
+                  <strong>ThemeConfig is not valid.</strong>
+                  <ul>{importValidation.issues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code> {issue.message}</li>)}</ul>
+                  {supportedImportValidation?.valid && supportedImportValidation.omittedIssues.length > 0 ? (
+                    <JBButton variant="outline" onClick={() => {
+                      setImportSupportedOnly(true);
+                      setImportWarningsConfirmed(false);
+                    }}>Review supported values only</JBButton>
+                  ) : null}
+                </div>
+              ) : null}
+              {importValidation?.valid && importValidation.warnings.length > 0 ? (
+                <label className={styles.importWarningConsent}>
+                  <input type="checkbox" checked={importWarningsConfirmed} onChange={event => setImportWarningsConfirmed(event.currentTarget.checked)} />
+                  <span>{importValidation.warnings.join(" ")} Import anyway.</span>
+                </label>
+              ) : null}
+              <div className={styles.importActions}>
+                <JBButton variant="ghost" onClick={() => setImportOpen(false)}>Cancel</JBButton>
+                {importSupportedOnly ? <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>Use strict import</JBButton> : null}
+                <JBButton color="primary" disabled={!importValidation?.valid || (importValidation.warnings.length > 0 && !importWarningsConfirmed)} onClick={() => void importTheme()}>
+                  {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug) ? "Create copy" : importSupportedOnly ? "Import supported values" : "Import theme"}
+                </JBButton>
+              </div>
+            </section>
+          </div>
+        ) : null}
+        {pendingDelete ? (
+          <div className={styles.modalBackdrop} onMouseDown={event => { if (!deleteBusy && event.target === event.currentTarget) setPendingDelete(undefined); }}>
+            <section className={`${styles.exportModal} ${styles.deleteModal}`} role="dialog" aria-modal="true" aria-labelledby="delete-theme-title" onKeyDown={event => { if (!deleteBusy && event.key === "Escape") setPendingDelete(undefined); }}>
+              <h2 id="delete-theme-title">Delete {pendingDelete.config.name}?</h2>
+              <p>
+                This theme is {pendingDelete.id === defaultThemeId ? "the current default" : "not the default"} and is used by {Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length} saved form(s).
+                Choose what should replace every reference before deletion.
+              </p>
+              <JBSelect<string>
+                label="Replacement theme"
+                value={deleteReplacementId}
+                hideClear
+                onChange={event => setDeleteReplacementId(valueFromEvent(event))}
+              >
+                <JBOption value="default">Built-in Default</JBOption>
+                {libraryThemes.filter(record => record.id !== pendingDelete.id).map(record => (
+                  <JBOption key={record.id} value={record.id}>{record.config.name}</JBOption>
+                ))}
+              </JBSelect>
+              <div>
+                <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>Cancel</JBButton>
+                <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>{deleteBusy ? "Deleting…" : "Replace and delete"}</JBButton>
+              </div>
+            </section>
+          </div>
+        ) : null}
       </main>
     );
   }
@@ -715,7 +1047,7 @@ export function DesignerApp() {
   ];
 
   return (
-    <div className={styles.designer}>
+    <div className={styles.designer} dir="ltr">
       <FormRouteHeader layout="editor" className={styles.header}>
         <FormRouteBrand href={formPageHref("landing")} title="Form builder" subtitle="Theme designer" />
         <div className={styles.themeIdentity}>
@@ -741,7 +1073,7 @@ export function DesignerApp() {
         )}
         <p className={`${styles.saveState} ${styles[`saveState_${saveStatus}`]}`} aria-live="polite">
           <span aria-hidden="true" />
-          {saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "Save failed" : "Saved"}
+          {saveStatus === "saving" ? "Saving…" : saveStatus === "invalid" ? "Finish editing" : saveStatus === "error" ? "Save failed" : "Saved"}
         </p>
         </div>
         <div className={styles.headerActions}>
@@ -813,7 +1145,11 @@ export function DesignerApp() {
                 <JBOption value="sample">Parent permission form</JBOption>
                 {canUseStoredForm ? (
                   <JBOption value="stored">
-                    {getLocalizedText(storedForm.document.metadata.name, "en", storedForm.document.localization.defaultLocale)}
+                    {getLocalizedText(
+                      storedForm.document.metadata.name,
+                      storedForm.document.localization.defaultLocale,
+                      storedForm.document.localization.defaultLocale,
+                    )}
                   </JBOption>
                 ) : null}
               </JBSelect>
@@ -832,7 +1168,7 @@ export function DesignerApp() {
           <div className={styles.previewStage} style={previewThemeStyle}>
             <div className={styles.previewBackdrop} style={backdropStyle} />
             <div className={viewport === "mobile" ? styles.previewMobile : styles.previewDesktop}>
-              <div className={styles.formPreview}>
+              <div className={styles.formPreview} dir={previewDirection}>
                 <img className={styles.emblem} src="/form/theme-patterns/science-club-emblem.png" alt="" />
                 <h1>{previewName}</h1>
                 {previewDescription ? <p>{previewDescription}</p> : null}
@@ -841,7 +1177,7 @@ export function DesignerApp() {
                     ref={rendererRef}
                     formDocument={previewDocument}
                     themeConfig={portableTheme}
-                    locale="en"
+                    locale={previewLocale}
                     aria-label={`${previewName} preview`}
                     loadDependencies={loadDependencies}
                   />

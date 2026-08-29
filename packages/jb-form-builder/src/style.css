@@ -17,6 +17,25 @@
   inline-size: 100%;
 }
 
+[part~="form"][data-theme-background] {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--jb-form-background-color, transparent);
+}
+
+[part~="form"][data-theme-background]:not([data-theme-background="color"])::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-image: var(--jb-form-background-image, none);
+  background-position: var(--jb-form-background-position, center);
+  background-repeat: var(--jb-form-background-repeat, no-repeat);
+  background-size: var(--jb-form-background-size, cover);
+  opacity: var(--jb-form-background-opacity, 1);
+}
+
 [part~="form"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

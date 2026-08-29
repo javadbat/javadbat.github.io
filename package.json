@@ -12,6 +12,7 @@
     "test": "vitest run",
     "pretest:form": "npm run build:form-packages",
     "test:form": "vitest run src/features/form packages/jb-collapse/src packages/jb-form-builder/src",
+    "test:form:e2e": "playwright test",
     "prebuild": "npm run build:form-packages",
     "build": "astro build",
     "preview": "astro preview",
@@ -83,6 +84,7 @@
     "@rollup/rollup-linux-x64-gnu": "^4.62.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "fake-indexeddb": "^6.2.5",

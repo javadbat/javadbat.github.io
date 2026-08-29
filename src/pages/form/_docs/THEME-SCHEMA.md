@@ -1,6 +1,6 @@
 # JB Form ThemeConfig Version 1 Contract
 
-Status: Runtime types, validation, canonicalization, and renderer property implemented; persistence/import completion pending
+Status: Runtime types, validation, canonicalization, renderer property/backgrounds, strict/supported-values-only import, and persistence implemented
 Reviewed: 2026-08-30
 
 ThemeConfig is standalone portable visual configuration. It is not nested in FormConfig, does not own form identity, and is reusable with any form.
@@ -87,7 +87,7 @@ UUID, slug, timestamps, source preset, default selection, bindings, save state, 
 - Compatible missing fields use current defaults without materializing them.
 - Validate before persistence or draft replacement.
 - Default import is all-or-nothing.
-- Explicit Import supported values only strips and reports unsupported paths.
+- Explicit Import supported values only strips and reports unsupported optional paths before persistence. It never downgrades `schemaVersion` or invents a missing required name.
 - Failure changes nothing.
 - Export filename is `{theme-slug}.jb-theme.json`.
 - Export is canonical snapshot, not a preset reference.

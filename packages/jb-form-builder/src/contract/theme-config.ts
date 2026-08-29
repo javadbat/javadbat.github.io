@@ -39,6 +39,8 @@ export const GLOBAL_THEME_TOKENS = [
 export type GlobalThemeToken = typeof GLOBAL_THEME_TOKENS[number];
 export type ThemeControlSize = "sm" | "md" | "lg";
 export type ThemeAudienceSize = "compact" | "standard" | "large" | "extra-large" | "custom";
+export const THEME_PATTERN_IDS = ["science-doodles", "academic-waves", "calm-dots", "warm-chevrons"] as const;
+export type ThemePatternId = typeof THEME_PATTERN_IDS[number];
 
 export interface ThemeColorBackground {
   type: "color";
@@ -47,7 +49,7 @@ export interface ThemeColorBackground {
 
 export interface ThemePatternBackground {
   type: "pattern";
-  patternId: string;
+  patternId: ThemePatternId;
   color?: string;
   foregroundColor?: string;
   opacity?: number;
@@ -102,6 +104,7 @@ export interface ThemeConfigValidationResult {
 const globalTokenSet = new Set<string>(GLOBAL_THEME_TOKENS);
 const controlSizes = new Set<ThemeControlSize>(["sm", "md", "lg"]);
 const audienceSizes = new Set<ThemeAudienceSize>(["compact", "standard", "large", "extra-large", "custom"]);
+const patternIds = new Set<string>(THEME_PATTERN_IDS);
 const topLevelKeys = new Set(["$schema", "schemaVersion", "name", "description", "global", "typography", "sizing", "defaults", "background", "components"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -114,6 +117,14 @@ function nonEmptyString(value: unknown): value is string {
 
 function finitePositive(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+export function getThemeDataImageBytes(source: string): number | null {
+  const match = /^data:image\/(?:png|jpeg|webp);base64,([a-z0-9+/]*={0,2})$/i.exec(source);
+  if (!match) return null;
+  const encoded = match[1];
+  const padding = encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0;
+  return Math.max(0, Math.floor(encoded.length * 3 / 4) - padding);
 }
 
 function rejectUnknownKeys(value: Record<string, unknown>, allowed: readonly string[], path: string, issues: ThemeConfigIssue[]): void {
@@ -175,12 +186,17 @@ export function validateThemeConfig(value: unknown): ThemeConfigValidationResult
     } else if (value.background.type === "pattern") {
       rejectUnknownKeys(value.background, ["type", "patternId", "color", "foregroundColor", "opacity", "scale"], "/background", issues);
       if (!nonEmptyString(value.background.patternId)) issues.push({ path: "/background/patternId", message: "Pattern ID is required." });
+      else if (!patternIds.has(value.background.patternId)) issues.push({ path: "/background/patternId", message: "Unsupported bundled pattern ID." });
       for (const key of ["color", "foregroundColor"] as const) if (value.background[key] !== undefined && !nonEmptyString(value.background[key])) issues.push({ path: `/background/${key}`, message: "Background colors must be non-empty strings." });
       if (value.background.opacity !== undefined && (typeof value.background.opacity !== "number" || value.background.opacity < 0 || value.background.opacity > 100)) issues.push({ path: "/background/opacity", message: "Pattern opacity must be between 0 and 100." });
       if (value.background.scale !== undefined && !finitePositive(value.background.scale)) issues.push({ path: "/background/scale", message: "Pattern scale must be a positive number." });
     } else if (value.background.type === "image") {
       rejectUnknownKeys(value.background, ["type", "source", "fit", "position", "opacity", "overlayColor", "fallbackColor"], "/background", issues);
       if (!nonEmptyString(value.background.source) || !/^(https?:|data:image\/(?:png|jpeg|webp);base64,)/i.test(value.background.source)) issues.push({ path: "/background/source", message: "Image source must be HTTP(S) or Base64 PNG, JPEG, or WebP." });
+      if (typeof value.background.source === "string") {
+        const decodedBytes = getThemeDataImageBytes(value.background.source);
+        if (decodedBytes !== null && decodedBytes > 800 * 1024) issues.push({ path: "/background/source", message: "Base64 background images cannot exceed 800 KB decoded." });
+      }
       if (value.background.fit !== undefined && !new Set(["cover", "contain", "fill"]).has(value.background.fit as string)) issues.push({ path: "/background/fit", message: "Unsupported image fit." });
       if (value.background.position !== undefined && !nonEmptyString(value.background.position)) issues.push({ path: "/background/position", message: "Image position must be a non-empty string." });
       if (value.background.opacity !== undefined && (typeof value.background.opacity !== "number" || value.background.opacity < 0 || value.background.opacity > 100)) issues.push({ path: "/background/opacity", message: "Image opacity must be between 0 and 100." });

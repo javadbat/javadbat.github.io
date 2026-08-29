@@ -125,6 +125,11 @@
   background: #fff1f2;
 }
 
+.saveState_invalid {
+  color: #8a5a0a;
+  background: #fff6df;
+}
+
 .headerActions {
   display: flex;
   align-items: center;
@@ -606,6 +611,11 @@
   margin: 0;
 }
 
+.libraryActions {
+  display: flex;
+  gap: 0.65rem;
+}
+
 .libraryPage > p {
   color: #697390;
 }
@@ -617,18 +627,59 @@
   gap: 1rem;
 }
 
-.libraryGrid button {
+.libraryGrid > button,
+.libraryCard {
   border: 0.0625rem solid #dde2ef;
   border-radius: 1rem;
   corner-shape: squircle;
+  color: #101b48;
+  background: #fff;
+  overflow: hidden;
+}
+
+.libraryGrid > button,
+.libraryCardOpen {
   padding: 0.8rem;
   display: grid;
   gap: 0.65rem;
-  color: #101b48;
-  background: #fff;
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+.libraryCardOpen {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.libraryCardActions {
+  padding: 0.65rem 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 0.0625rem solid #e8ebf3;
+}
+
+.libraryCardActions button {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: 0.6rem;
+  padding-inline: 0.75rem;
+  color: #3156b8;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.libraryCardActions button:last-child {
+  color: #a23232;
+}
+
+.libraryCardActions button:hover {
+  background: #f2f5fc;
 }
 
 .libraryGrid img {
@@ -641,6 +692,118 @@
 .libraryGrid span {
   color: #697390;
   font-size: 0.8rem;
+}
+
+.importModal {
+  display: grid;
+  gap: 1rem;
+}
+
+.importModal > p,
+.importModal > div {
+  margin: 0;
+}
+
+.importJsonInput {
+  --jb-textarea-height: 15rem;
+  --jb-textarea-textarea-direction: ltr;
+  --jb-textarea-textarea-text-align: left;
+  --jb-textarea-value-font-size: 0.78rem;
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.importModal > .importFileRow {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.importFileRow span {
+  overflow: hidden;
+  color: var(--designer-muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hiddenFileInput {
+  position: absolute;
+  width: 0.0625rem;
+  height: 0.0625rem;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.importModal > .importValid,
+.importModal > .importConflict,
+.importModal > .importError {
+  display: block;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.importValid {
+  color: #17623a;
+  background: #eaf8ef;
+}
+
+.importConflict {
+  color: #774b08;
+  background: #fff6df;
+}
+
+.importError {
+  color: #9a2e2e;
+  background: #fff0f0;
+}
+
+.importError ul {
+  margin-block-end: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.importWarningConsent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: #774b08;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.importWarningConsent input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.1rem;
+  flex: 0 0 auto;
+}
+
+.importModal > .importActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.deleteModal {
+  width: min(34rem, 100%);
+  display: grid;
+  gap: 1rem;
+}
+
+.deleteModal > p,
+.deleteModal > div {
+  margin: 0;
+}
+
+.deleteModal > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 @media (max-width: 75rem) {
@@ -689,6 +852,7 @@
   }
 
   .headerActions jb-button:last-child {
+    --jb-button-height: 2.75rem;
     min-width: 7rem;
   }
 
@@ -703,6 +867,10 @@
     gap: 0.5rem;
     border-bottom: 0.0625rem solid var(--designer-line);
     background: #fff;
+  }
+
+  .mobileTabs jb-button {
+    --jb-button-height-sm: 2.75rem;
   }
 
   .workspace {
@@ -740,6 +908,15 @@
 }
 
 @media (max-width: 40rem) {
+  .libraryHeader,
+  .libraryActions,
+  .importModal > .importFileRow,
+  .importModal > .importActions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .header {
     gap: 0.55rem;
   }

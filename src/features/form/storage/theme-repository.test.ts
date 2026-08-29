@@ -122,4 +122,78 @@ describe("IndexedDbThemeRepository", () => {
     expect(invalid.ok).toBe(false);
     if (!invalid.ok) expect(invalid.error.code).toBe("validation-failed");
   });
+
+  it("duplicates into a new identity and collision-safe slug", async () => {
+    let id = 0;
+    const repository = createRepository({ createId: () => `theme-${++id}` });
+    const source = await repository.create(config("Calm"));
+    expect(source.ok).toBe(true);
+    if (!source.ok) return;
+
+    const duplicate = await repository.duplicate(source.value.id);
+
+    expect(duplicate.ok).toBe(true);
+    if (duplicate.ok) {
+      expect(duplicate.value.id).toBe("theme-2");
+      expect(duplicate.value.slug).toBe("calm-copy");
+      expect(duplicate.value.config.name).toBe("Calm copy");
+      expect(duplicate.value.config.global).toEqual(source.value.config.global);
+    }
+  });
+
+  it("atomically replaces default and form references before deletion", async () => {
+    const repository = createRepository();
+    const source = await repository.create(config("Source"));
+    const replacement = await repository.create(config("Replacement"));
+    expect(source.ok && replacement.ok).toBe(true);
+    if (!source.ok || !replacement.ok) return;
+    await repository.setDefault(source.value.id);
+    await repository.bindForm("contact-form", source.value.id);
+    await repository.bindForm("survey", source.value.id);
+
+    const deleted = await repository.delete(source.value.id, replacement.value.id);
+
+    expect(deleted).toEqual({
+      ok: true,
+      value: expect.objectContaining({
+        defaultThemeId: replacement.value.id,
+        bindings: { "contact-form": replacement.value.id, survey: replacement.value.id },
+      }),
+    });
+    expect(await repository.getById(source.value.id)).toEqual({ ok: true, value: null });
+    expect((await repository.getById(replacement.value.id)).ok).toBe(true);
+  });
+
+  it("rolls back deletion when the replacement is missing", async () => {
+    const repository = createRepository();
+    const source = await repository.create(config("Keep me"));
+    expect(source.ok).toBe(true);
+    if (!source.ok) return;
+    await repository.setDefault(source.value.id);
+
+    const deleted = await repository.delete(source.value.id, "missing");
+
+    expect(deleted.ok).toBe(false);
+    expect((await repository.getById(source.value.id)).ok).toBe(true);
+    expect(await repository.getSettings()).toEqual({
+      ok: true,
+      value: expect.objectContaining({ defaultThemeId: source.value.id }),
+    });
+  });
+
+  it("removes references when deletion falls back to the built-in Default", async () => {
+    const repository = createRepository();
+    const source = await repository.create(config("Remove"));
+    expect(source.ok).toBe(true);
+    if (!source.ok) return;
+    await repository.setDefault(source.value.id);
+    await repository.bindForm("contact-form", source.value.id);
+
+    const deleted = await repository.delete(source.value.id, null);
+
+    expect(deleted).toEqual({
+      ok: true,
+      value: expect.objectContaining({ defaultThemeId: null, bindings: {} }),
+    });
+  });
 });

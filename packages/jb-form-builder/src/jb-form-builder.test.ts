@@ -253,6 +253,7 @@ describe("JBFormBuilderWebComponent", () => {
       global: { "--jb-primary": "#2455e8" },
       typography: { fontFamily: "system-ui", textScale: 1.1 },
       defaults: { controlSize: "lg" },
+      background: { type: "pattern", patternId: "calm-dots", color: "#f8faff", foregroundColor: "#3156b8", opacity: 25 },
       components: { "jb-input": { tokens: { "--jb-input-border-color": "#123456" } } },
     };
     renderer.formDocument = documentValue;
@@ -261,6 +262,9 @@ describe("JBFormBuilderWebComponent", () => {
 
     expect(renderer.form?.style.getPropertyValue("--jb-primary")).toBe("#2455e8");
     expect(renderer.form?.style.fontFamily).toBe("system-ui");
+    expect(renderer.form?.dataset.themeBackground).toBe("pattern");
+    expect(renderer.form?.style.getPropertyValue("--jb-form-background-color")).toBe("#f8faff");
+    expect(renderer.form?.style.getPropertyValue("--jb-form-background-image")).toContain("data:image/svg+xml");
     const runtimeInput = renderer.shadowRoot?.querySelector<HTMLElement>("jb-input");
     expect(runtimeInput?.getAttribute("size")).toBe("lg");
     expect(runtimeInput?.style.getPropertyValue("--jb-input-border-color")).toBe("#123456");

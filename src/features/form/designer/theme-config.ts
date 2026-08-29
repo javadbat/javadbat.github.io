@@ -81,6 +81,9 @@ export interface DesignerThemeConfig {
     opacity: number;
     scale: number;
     imageUrl?: string;
+    imageFit?: "cover" | "contain" | "fill";
+    imagePosition?: string;
+    imageOverlayColor?: string;
   };
 }
 
@@ -235,7 +238,10 @@ export function toPortableThemeConfig(theme: DesignerThemeConfig): ThemeConfigV1
         ? {
             type: "image",
             source: theme.background.imageUrl,
+            fit: theme.background.imageFit,
+            position: theme.background.imagePosition,
             opacity: theme.background.opacity,
+            overlayColor: theme.background.imageOverlayColor,
             fallbackColor: theme.background.color,
           }
         : { type: "color", color: theme.background.color };
@@ -276,6 +282,9 @@ export function fromPortableThemeConfig(config: ThemeConfigV1): DesignerThemeCon
   } else if (config.background?.type === "image") {
     theme.background.mode = "image";
     theme.background.imageUrl = config.background.source;
+    theme.background.imageFit = config.background.fit;
+    theme.background.imagePosition = config.background.position;
+    theme.background.imageOverlayColor = config.background.overlayColor;
     if (config.background.fallbackColor) theme.background.color = config.background.fallbackColor;
     if (config.background.opacity !== undefined) theme.background.opacity = config.background.opacity;
   }

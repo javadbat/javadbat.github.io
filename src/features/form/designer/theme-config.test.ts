@@ -39,4 +39,30 @@ describe("Designer ThemeConfig adapter", () => {
     expect(result.typography.textScale).toBe(1.2);
     expect(result.background).toEqual(expect.objectContaining({ mode: "color", color: "#abcdef" }));
   });
+
+  it("preserves portable image presentation fields through editor hydration", () => {
+    const editor = fromPortableThemeConfig({
+      schemaVersion: 1,
+      name: "Image",
+      background: {
+        type: "image",
+        source: "https://example.com/background.webp",
+        fit: "contain",
+        position: "top center",
+        opacity: 60,
+        overlayColor: "rgb(0 0 0 / 20%)",
+        fallbackColor: "#eeeeee",
+      },
+    });
+
+    expect(toPortableThemeConfig(editor).background).toEqual({
+      type: "image",
+      source: "https://example.com/background.webp",
+      fit: "contain",
+      position: "top center",
+      opacity: 60,
+      overlayColor: "rgb(0 0 0 / 20%)",
+      fallbackColor: "#eeeeee",
+    });
+  });
 });

@@ -236,6 +236,57 @@ export class IndexedDbThemeRepository implements ThemeRepository {
     return this.updateSettings(undefined, { formSlug, themeId });
   }
 
+  async duplicate(id: string): Promise<Result<StoredThemeRecordV1, StorageIssue>> {
+    const source = await this.getById(id);
+    if (!source.ok) return source;
+    if (!source.value) return failure("validation-failed", "The theme to duplicate was not found.");
+    return this.create({
+      ...source.value.config,
+      name: `${source.value.config.name} copy`,
+    });
+  }
+
+  async delete(id: string, replacementThemeId: string | null): Promise<Result<ThemeSettingsRecordV1, StorageIssue>> {
+    if (!id) return failure("validation-failed", "Theme id is required.");
+    if (replacementThemeId === id) return failure("validation-failed", "A deleted theme cannot replace itself.");
+    const connection = await this.database.open();
+    if (!connection.ok) return connection;
+    const transaction = connection.value.transaction([FORM_STORES.themes, FORM_STORES.themeSettings], "readwrite");
+    try {
+      const themes = transaction.objectStore(FORM_STORES.themes);
+      if (await requestToPromise(themes.getKey(id)) === undefined) {
+        transaction.abort();
+        return failure("validation-failed", "The theme to delete was not found.");
+      }
+      if (replacementThemeId && await requestToPromise(themes.getKey(replacementThemeId)) === undefined) {
+        transaction.abort();
+        return failure("validation-failed", "The replacement theme was not found.");
+      }
+
+      const settingsStore = transaction.objectStore(FORM_STORES.themeSettings);
+      const current = validateSettings(await requestToPromise(settingsStore.get(THEME_SETTINGS_KEY)));
+      if (!current.ok) {
+        transaction.abort();
+        return current;
+      }
+      const next = portableClone(current.value);
+      if (next.defaultThemeId === id) next.defaultThemeId = replacementThemeId;
+      for (const [formSlug, themeId] of Object.entries(next.bindings)) {
+        if (themeId !== id) continue;
+        if (replacementThemeId) next.bindings[formSlug] = replacementThemeId;
+        else delete next.bindings[formSlug];
+      }
+      next.updatedAt = this.now().toISOString();
+      next.builderVersion = FORM_BUILDER_VERSION;
+      settingsStore.put(next);
+      themes.delete(id);
+      await transactionToPromise(transaction);
+      return success(portableClone(next));
+    } catch (cause) {
+      return mapStorageError(cause);
+    }
+  }
+
   private async readTheme(request: (store: IDBObjectStore) => IDBRequest): Promise<Result<StoredThemeRecordV1 | null, StorageIssue>> {
     const connection = await this.database.open();
     if (!connection.ok) return connection;
