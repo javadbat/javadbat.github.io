@@ -29,8 +29,9 @@ test("supports keyboard compact navigation and 44px primary targets", async ({ p
   await openDesigner(page);
   await page.setViewportSize({ width: 320, height: 900 });
   const workspace = page.locator("main[data-mobile-panel]");
-  const design = page.getByRole("button", { name: "Design", exact: true });
-  const preview = page.getByRole("button", { name: "Preview", exact: true });
+  const mobileTabs = page.locator("[class*=mobileTabs]");
+  const design = mobileTabs.getByRole("button", { name: "Design", exact: true });
+  const preview = mobileTabs.getByRole("button", { name: "Preview", exact: true });
 
   await design.focus();
   await design.press("Enter");
@@ -157,7 +158,17 @@ test("creates a named blank theme and finds it through library search", async ({
   await expect(page.getByRole("button", { name: /Minimal Ocean/ })).toBeVisible();
   await page.getByRole("button", { name: "Back to themes" }).click();
   await page.getByLabel("Search themes").fill("ocean");
-  await expect(page.getByRole("button", { name: /Minimal Ocean/ })).toBeVisible();
+  const card = page.locator("article").filter({ hasText: "Minimal Ocean" });
+  await expect(card.getByRole("button", { name: /Minimal Ocean/ })).toBeVisible();
+  await card.getByRole("button", { name: "Set default" }).click();
+  await expect(card.getByRole("button", { name: "Default", exact: true })).toBeDisabled();
+  await expect(page.getByText("Minimal Ocean is now the default theme.")).toBeVisible();
+
+  const downloadPromise = page.waitForEvent("download");
+  await card.getByRole("button", { name: "Export theme" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("minimal-ocean.jb-theme.json");
+
   await page.getByLabel("Search themes").fill("missing theme");
   await expect(page.getByText("No themes match your search.")).toBeVisible();
 });

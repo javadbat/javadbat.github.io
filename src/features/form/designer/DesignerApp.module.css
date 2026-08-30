@@ -686,6 +686,7 @@
   padding: 0.65rem 0.8rem;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.5rem;
   border-top: 0.0625rem solid #e8ebf3;
 }
@@ -707,6 +708,12 @@
 }
 
 .libraryCardActions button:hover {
+  background: #f2f5fc;
+}
+
+.libraryCardActions button:disabled {
+  color: #7a849f;
+  cursor: default;
   background: #f2f5fc;
 }
 

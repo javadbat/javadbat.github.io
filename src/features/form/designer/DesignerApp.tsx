@@ -144,6 +144,16 @@ function themeSlug(name: string): string {
     .replace(/^-+|-+$/g, "") || "untitled-theme";
 }
 
+function downloadThemeJson(json: string, slug: string): void {
+  const blob = new Blob([json], { type: "application/json" });
+  const href = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.download = `${slug}.jb-theme.json`;
+  anchor.click();
+  URL.revokeObjectURL(href);
+}
+
 const BLANK_DESIGNER_THEME: DesignerThemeConfig = {
   schemaVersion: 1,
   name: "Untitled theme",
@@ -603,6 +613,21 @@ export function DesignerApp() {
     }
     setLibraryThemes(items => [result.value, ...items]);
     setThemeLoadNotice(message("designerDuplicateSuccess", { name: result.value.config.name }));
+  };
+
+  const exportThemeRecord = (record: StoredThemeRecordV1) => {
+    downloadThemeJson(JSON.stringify(record.config, null, 2), record.slug);
+  };
+
+  const setLibraryThemeAsDefault = async (record: StoredThemeRecordV1) => {
+    const result = await themeRepository.setDefault(record.id);
+    if (!result.ok) {
+      setThemeLoadNotice(result.error.message);
+      return;
+    }
+    setDefaultThemeId(record.id);
+    setThemeBindings(result.value.bindings);
+    setThemeLoadNotice(message("designerDefaultSuccess", { name: record.config.name }));
   };
 
   const requestThemeDelete = (record: StoredThemeRecordV1) => {
@@ -1068,7 +1093,12 @@ export function DesignerApp() {
                     <span>{record.id === defaultThemeId ? messages.designerDefaultTheme : record.config.description ?? messages.designerReusableTheme}</span>
                   </button>
                   <div className={styles.libraryCardActions}>
+                    <button type="button" onClick={() => openThemeRecord(record)}>{messages.designerEdit}</button>
                     <button type="button" onClick={() => void duplicateTheme(record)}>{messages.designerDuplicate}</button>
+                    <button type="button" onClick={() => exportThemeRecord(record)}>{messages.designerExportTheme}</button>
+                    <button type="button" disabled={record.id === defaultThemeId} onClick={() => void setLibraryThemeAsDefault(record)}>
+                      {record.id === defaultThemeId ? messages.designerDefault : messages.designerSetDefault}
+                    </button>
                     <button type="button" onClick={() => requestThemeDelete(record)}>{messages.designerDelete}</button>
                   </div>
                 </article>
@@ -1391,13 +1421,7 @@ export function DesignerApp() {
                   await navigator.clipboard.writeText(exportedJson);
                   setExportCopied(true);
                 } catch {
-                  const blob = new Blob([exportedJson], { type: "application/json" });
-                  const href = URL.createObjectURL(blob);
-                  const anchor = document.createElement("a");
-                  anchor.href = href;
-                  anchor.download = `${themeSlug(theme.name)}.jb-theme.json`;
-                  anchor.click();
-                  URL.revokeObjectURL(href);
+                  downloadThemeJson(exportedJson, themeSlug(theme.name));
                 }
               }}>{exportCopied ? messages.designerCopied : messages.designerCopyJson}</JBButton>
             </div>

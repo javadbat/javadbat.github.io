@@ -19,6 +19,7 @@ export const designerAppTranslations = {
     designerMyThemes: "My themes",
     designerDefaultTheme: "Default theme",
     designerReusableTheme: "Reusable local theme",
+    designerEdit: "Edit",
     designerDuplicate: "Duplicate",
     designerDelete: "Delete",
     designerPresetGallery: "Preset gallery",
@@ -146,6 +147,7 @@ export const designerAppTranslations = {
     designerFileReadFailed: "The theme file could not be read.",
     designerDuplicateSuccess: "{name} was created as an independent theme.",
     designerDeleteSuccess: "{name} was deleted.",
+    designerDefaultSuccess: "{name} is now the default theme.",
   },
   fa: {
     designerLanguage: "زبان",
@@ -167,6 +169,7 @@ export const designerAppTranslations = {
     designerMyThemes: "پوسته‌های من",
     designerDefaultTheme: "پوسته پیش‌فرض",
     designerReusableTheme: "پوسته محلی قابل استفاده مجدد",
+    designerEdit: "ویرایش",
     designerDuplicate: "تکثیر",
     designerDelete: "حذف",
     designerPresetGallery: "گالری پیش‌تنظیم‌ها",
@@ -294,5 +297,6 @@ export const designerAppTranslations = {
     designerFileReadFailed: "فایل پوسته خوانده نشد.",
     designerDuplicateSuccess: "{name} به‌عنوان یک پوسته مستقل ساخته شد.",
     designerDeleteSuccess: "{name} حذف شد.",
+    designerDefaultSuccess: "{name} اکنون پوسته پیش‌فرض است.",
   },
 } as const;
