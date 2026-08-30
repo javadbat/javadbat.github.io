@@ -1,5 +1,4 @@
 import { migrateDatabaseToV1 } from "./migrations/v1";
-import { migrateDatabaseToV2 } from "./migrations/v2";
 import { FORM_DATABASE_NAME, FORM_DATABASE_VERSION, type Result, type StorageIssue } from "./storage-types";
 
 /** Injectable database configuration used to isolate production storage and deterministic tests. */
@@ -87,9 +86,6 @@ export class FormDatabase {
           }
           if (oldVersion < 1) {
             migrateDatabaseToV1(request.result, transaction);
-          }
-          if (oldVersion < 2) {
-            migrateDatabaseToV2(request.result, transaction);
           }
         } catch (cause) {
           request.transaction?.abort();

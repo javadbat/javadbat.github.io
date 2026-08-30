@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { JBButton } from "jb-button/react";
 import styles from "./FormRouteLayout.module.css";
 
 type HeaderProps = ComponentPropsWithoutRef<"header"> & {
@@ -8,6 +9,10 @@ type BrandMarkProps = ComponentPropsWithoutRef<"span">;
 type BrandProps = ComponentPropsWithoutRef<"a"> & {
   title: ReactNode;
   subtitle: ReactNode;
+};
+type LinkButtonProps = ComponentPropsWithoutRef<"a"> & {
+  variant?: "ghost" | "outline" | "solid";
+  square?: boolean;
 };
 
 /** Shared outer header container for every interactive `/form` sub-route. */
@@ -29,6 +34,27 @@ export function FormRouteBrand({ className, title, subtitle, ...props }: BrandPr
         <strong>{title}</strong>
         <small>{subtitle}</small>
       </span>
+    </a>
+  );
+}
+
+/** Semantic route link with the visual treatment used by header buttons. */
+export function FormRouteLinkButton({ className, variant = "ghost", square = false, ...props }: LinkButtonProps) {
+  const { children, ...linkProps } = props;
+  return (
+    <a
+      className={`${styles.linkButton} ${className ?? ""}`}
+      {...linkProps}
+    >
+      <JBButton
+        variant={variant}
+        color={variant === "solid" ? "primary" : undefined}
+        size="sm"
+        square={square}
+        tabIndex={-1}
+      >
+        {children}
+      </JBButton>
     </a>
   );
 }

@@ -11,13 +11,10 @@ import { inferLocaleDirection } from "../../domain/form-document";
 import { getStorageIssueMessage, type FormAppLocale, type FormMessages } from "../../i18n/locale-adapter";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { FormRouteBrand, FormRouteHeader } from "../../layout/FormRouteHeader";
+import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../../layout/FormRouteHeader";
 import styles from "./BuilderHeader.module.css";
 import DesignIcon from './design.svg?react'
 import SaveIcon from './save.svg?react'
-/** Builder destinations available from primary navigation actions. */
-export type BuilderNavigationTarget = "designer" | "preview";
-
 /** Primary document and workflow actions owned by the builder header. */
 interface BuilderHeaderProps {
   /** Localized builder-interface copy. */
@@ -26,8 +23,6 @@ interface BuilderHeaderProps {
   onBuilderLocaleChange: (locale: FormAppLocale) => void;
   /** Opens document identity and localization settings. */
   onOpenSettings: () => void;
-  /** Navigates to another route while retaining selected form identity. */
-  onNavigate: (target: BuilderNavigationTarget) => void;
   /** Opens portable JSON import. */
   onImport: () => void;
   /** Restores the previous document state. */
@@ -77,7 +72,7 @@ function OverflowMenuIcon() {
  * The component observes the store directly so save-state changes update only
  * the header and the builder sections that actually consume those values.
  */
-export const BuilderHeader = observer(function BuilderHeader({ messages, onBuilderLocaleChange, onOpenSettings, onNavigate, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+export const BuilderHeader = observer(function BuilderHeader({ messages, onBuilderLocaleChange, onOpenSettings, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
   /** Shared builder state observed for document identity, locale, and save status. */
   const store = useBuilderStore();
   /** Whether compact layout should prioritize preview after the draft is safely saved. */
@@ -88,6 +83,7 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
   const menuRef = useRef<HTMLDivElement>(null);
   /** Built-in and document-configured locales available for content editing. */
   const selectableLocales = [...new Set(["en", "fa", ...Object.keys(store.document.localization.locales)])];
+  const selectedFormSlug = store.linkedRecord?.slug;
   /** Adds a locale when necessary, selects it for editing, and closes compact navigation. */
   const selectLocale = (nextLocale: string) => {
     if (!store.document.localization.locales[nextLocale]) {
@@ -199,14 +195,14 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
                 </JBButton>
               </JBTooltip>
             </div>
-            <JBButton variant="outline" size="sm" onClick={() => runMenuAction(() => onNavigate("preview"))}>
+            <FormRouteLinkButton href={formPageHref("preview", selectedFormSlug)} variant="outline">
               <jb-icon-eye open size="sm" />
               {messages.preview}
-            </JBButton>
-            <JBButton variant="outline" size="sm" onClick={() => runMenuAction(() => onNavigate("designer"))}>
+            </FormRouteLinkButton>
+            <FormRouteLinkButton href={formPageHref("designer", selectedFormSlug)} variant="outline">
               <DesignIcon />
               {messages.designer}
-            </JBButton>
+            </FormRouteLinkButton>
             <div className={styles.localeControls}>
               <CatalogIcon iconId="language" />
               <JBSelect<string>
@@ -240,17 +236,16 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
           <span className={styles.saveLabel}>{store.status === "saving" ? messages.saving : messages.save}</span>
         </JBButton>
         {showMobilePreview ? (
-          <JBButton
+          <FormRouteLinkButton
             className={styles.mobilePreviewButton}
             square
-            color="primary"
-            size="sm"
+            variant="solid"
             aria-label={messages.preview}
-            onClick={() => onNavigate("preview")}
+            href={formPageHref("preview", selectedFormSlug)}
           >
             <jb-icon-eye open size="sm" />
             <span className={styles.saveLabel}>{messages.preview}</span>
-          </JBButton>
+          </FormRouteLinkButton>
         ) : null}
       </nav>
     </FormRouteHeader>

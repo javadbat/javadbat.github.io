@@ -101,7 +101,8 @@
   justify-content: flex-end;
 }
 
-.headerActions :global(jb-button) {
+.headerActions :global(jb-button),
+.headerActions > a {
   flex: 0 0 auto;
 }
 
@@ -361,6 +362,12 @@
       min-inline-size: 0;
     }
 
+  .overflowMenuPanel > a {
+      inline-size: 100%;
+      justify-content: flex-start;
+      min-inline-size: 0;
+    }
+
   .overflowMenuPanel .documentActions {
       display: grid;
       gap: 0.2rem;
@@ -415,11 +422,15 @@
     }
 
   .headerActions > .mobilePreviewButton {
-      --jb-button-height: 2.75rem;
-      --jb-button-height-sm: 2.75rem;
       display: inline-flex;
       inline-size: 2.75rem;
+      min-block-size: 2.75rem;
       min-inline-size: 2.75rem;
+    }
+
+  .mobilePreviewButton :global(jb-button) {
+      --jb-button-height: 2.75rem;
+      --jb-button-height-sm: 2.75rem;
     }
    }
 

@@ -168,7 +168,7 @@ export function useFormLocale(initialLocale: FormAppLocale = "en") {
   /** Translation function and isolated form i18n controller for the current React tree. */
   const { t, i18n } = useTranslation(undefined, { i18n: formAppI18n });
   /** Canonical supported locale even when i18next reports a regional or fallback language. */
-  const locale = (i18n.resolvedLanguage === "fa" ? "fa" : "en") satisfies FormAppLocale;
+  const locale: FormAppLocale = i18n.resolvedLanguage === "fa" ? "fa" : "en";
   /** Complete localized copy contract consumed by form components. */
   const messages = useMemo(() => resolveFormMessages(t), [t, locale]);
 

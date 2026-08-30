@@ -56,6 +56,22 @@
   corner-shape: squircle;
 }
 
+.linkButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.linkButton > :global(jb-button) {
+  pointer-events: none;
+}
+
+.linkButton:focus-visible {
+  outline: 0.125rem solid rgba(36, 85, 232, 0.28);
+  outline-offset: 0.125rem;
+  border-radius: 0.625rem;
+}
+
 .workspace {
   box-sizing: border-box;
   gap: 0.6rem;

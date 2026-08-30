@@ -30,7 +30,7 @@ function createRepository(options: { factory?: IDBFactory; name?: string; now?: 
 afterEach(() => repositories.splice(0).forEach(repository => repository.close()));
 
 describe("IndexedDbThemeRepository", () => {
-  it("upgrades an existing form database without changing its v1 stores", async () => {
+  it("creates every form and theme store in the v1 database", async () => {
     const factory = new IDBFactory();
     const name = `jb-theme-migration-${crypto.randomUUID()}`;
     await new Promise<void>((resolve, reject) => {

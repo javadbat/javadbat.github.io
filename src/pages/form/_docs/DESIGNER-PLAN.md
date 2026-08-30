@@ -29,7 +29,7 @@ Version 1 includes:
 - ThemeConfig import/export, autosave, history, reset, and recovery;
 - local form-to-theme bindings and query theme selection.
 
-Deferred: component-token editing, per-element styles, `::part`/raw CSS, deep state styling, cloud/collaboration, Designer localization, and font uploading/remote stylesheets. Common states continue to follow effective shared/component tokens; there is no separate state editor. Valid component values from presets/imports remain preserved and rendered.
+Deferred: component-token editing, per-element styles, `::part`/raw CSS, deep state styling, cloud/collaboration, and font uploading/remote stylesheets. Common states continue to follow effective shared/component tokens; there is no separate state editor. Valid component values from presets/imports remain preserved and rendered.
 
 ## Library and routes
 
@@ -54,13 +54,13 @@ Desktop has Back, editable name, autosave state, Undo, Redo, and Export; setting
 
 Preview is interactive; responses/validation are runtime-only. Component selection shows an isolated representative preview. Version 1 explains that component editing comes later and adds no override warning, recalculation, or reset-all action.
 
-Automated browser acceptance runs in Chromium, Firefox, and WebKit and covers desktop plus 320px, 375px, 412px, and 768px viewports with no page-level horizontal overflow, keyboard activation/focus for compact navigation, 44px primary compact targets, and a saved Persian form rendered RTL inside English/LTR Designer chrome. Run it with `npm run test:form:e2e`.
+Automated browser acceptance runs in Chromium, Firefox, and WebKit and covers desktop plus 320px, 375px, 412px, and 768px viewports with no page-level horizontal overflow, keyboard activation/focus for compact navigation, 44px primary compact targets, independent form-preview direction, and persistent English/Persian Designer chrome. Run it with `npm run test:form:e2e`.
 
 GitHub Actions runs this matrix for pull requests and main-branch deployments. A deployment waits for both the production build and browser job; the Playwright report is retained as an artifact for failed-run diagnosis.
 
 Mobile is a complete authoring surface: 320px minimum, no page overflow, compact Back/name/save-state/More header, Design/Preview tabs, one category at a time, persistent Preview action, real-width preview, and `2.75rem` important targets.
 
-Designer chrome is English/LTR. Preview uses the form's actual locale/direction.
+Designer chrome supports English/LTR and Persian/RTL through the shared form-language preference. Preview independently uses the form's actual locale/direction.
 
 ## Friendly controls
 
@@ -141,7 +141,7 @@ Cover unknown/corrupt themes, unsupported data, conflicts, storage failure, unav
 7. Integrate optional `themeConfig` with final `<jb-form-builder>`.
 8. Run browser, mobile, RTL-preview, performance, and recovery acceptance.
 
-The selected Builder-aligned visual direction, responsive editor, presets, friendly controls, preview, local autosave/history, export UI, shared ThemeConfig validation/canonicalization, renderer handoff, and independent IndexedDB theme records are implemented. Stable slugs, optimistic revisions, query/binding/default resolution, local-theme library selection, editor actions for default/binding selection, strict paste/file import with create-copy conflict handling, duplication, atomic delete/reference replacement, renderer-scoped portable backgrounds, and image fallback/retry recovery are covered. Supported-values-only import and final browser/mobile/RTL acceptance remain.
+The selected Builder-aligned visual direction, responsive editor, presets, friendly controls, preview, local autosave/history, export UI, shared ThemeConfig validation/canonicalization, renderer handoff, and independent IndexedDB theme records are implemented. Stable slugs, optimistic revisions, query/binding/default resolution, localized library search and named Blank/Preset creation, editor actions for default/binding selection, strict paste/file import with create-copy conflict handling, duplication, atomic delete/reference replacement, renderer-scoped portable backgrounds, image fallback/retry recovery, supported-values-only import, and automated browser/mobile/RTL acceptance are covered. The physical mobile-device matrix remains a release check.
 
 ## Acceptance walkthrough
 

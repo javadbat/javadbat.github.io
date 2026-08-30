@@ -5,7 +5,7 @@ import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 /** Stable IndexedDB database name shared by every `/form` route. */
 export const FORM_DATABASE_NAME = "jb-form-builder";
 /** Current physical IndexedDB schema version used to trigger migrations. */
-export const FORM_DATABASE_VERSION = 2;
+export const FORM_DATABASE_VERSION = 1;
 /** Application version stamped onto records for support and recovery diagnostics. */
 export const FORM_BUILDER_VERSION = "0.0.1";
 /** Singleton key identifying the browser's one autosaved working draft. */

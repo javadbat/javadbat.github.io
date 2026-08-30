@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
-import { formPageHref } from "../../application/form-page-url";
-import type { BuilderNavigationTarget } from "../BuilderHeader/BuilderHeader";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
 const EXPORT_MODAL_EXIT_DURATION_MS = 300;
@@ -26,16 +24,6 @@ export function useBuilderAppActions() {
     setSettingsOpen(false);
     setFocusFormName(false);
   }, []);
-  const navigate = useCallback(
-    (target: BuilderNavigationTarget) => {
-      if (store.isDirty || !store.hasSavedDraft) {
-        openSettings();
-        return;
-      }
-      window.location.assign(formPageHref(target, store.linkedRecord?.slug));
-    },
-    [openSettings, store],
-  );
   const openExport = useCallback(() => {
     setExportDocument(store.createDocumentSnapshot());
     setExportOpen(true);
@@ -59,7 +47,6 @@ export function useBuilderAppActions() {
     importOpen,
     exportDocument,
     exportOpen,
-    navigate,
     openSettings,
     openSettingsForFormName,
     closeSettings,

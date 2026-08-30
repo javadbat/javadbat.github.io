@@ -19,7 +19,7 @@ Keep persisted ThemeConfig, editor draft/intermediate input, preview runtime, an
 
 Committed valid changes reach preview under 100ms. Invalid intermediate input stays local; preview retains last valid value. Preview uses the runtime renderer, is interactive, and keeps responses session-only. Desktop offers Desktop/Mobile viewports; mobile uses real width. Reset preview clears runtime state only.
 
-Preview uses the saved form's default locale/direction while v1 Designer chrome remains explicitly English/LTR.
+Preview uses the saved form's default locale/direction independently of the Designer chrome, which supports English/LTR and Persian/RTL.
 
 Components is a selector plus isolated representative preview, not a token editor. Valid preset/import component values apply and persist. State clearly that editing comes later; add no override warnings, propagation, or reset-all action.
 

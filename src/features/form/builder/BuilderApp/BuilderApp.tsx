@@ -34,7 +34,6 @@ const BuilderAppContent = observer(function BuilderAppContent() {
         messages={messages}
         onBuilderLocaleChange={setLocale}
         onOpenSettings={actions.openSettings}
-        onNavigate={actions.navigate}
         onImport={actions.openImport}
         onUndo={store.undo}
         onRedo={store.redo}

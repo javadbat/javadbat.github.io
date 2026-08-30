@@ -46,7 +46,13 @@ const formBuilderExportImports = ["@mantine/code-highlight", "@mantine/core", "s
 // route that imports mobx-react-lite, so an Astro production build can otherwise
 // replace the shared Vite cache without this entry while the dev server still
 // has a transformed Builder module pointing at the previous cache hash.
-const formBuilderRuntimeImports = ["mobx", "mobx-react-lite"];
+const formBuilderRuntimeImports = [
+  "mobx",
+  "mobx-react-lite",
+  "jb-tab/react",
+  "jb-tab/list/react",
+  "jb-tab/trigger/react",
+];
 
 // https://astro.build/config
 export default defineConfig({

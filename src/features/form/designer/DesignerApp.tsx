@@ -25,7 +25,7 @@ import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../applic
 import { useStoredForm } from "../application/use-stored-form";
 import { useStoredTheme } from "../application/use-stored-theme";
 import { getLocalizedText } from "../domain/form-document";
-import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
+import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../layout/FormRouteHeader";
 import { JBCollapse } from "jb-collapse/react";
 import layoutStyles from "../layout/FormRouteLayout.module.css";
 import { DESIGNER_SAMPLE_FORM } from "./sample-form";
@@ -59,6 +59,58 @@ type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shap
 type PreviewViewport = "desktop" | "mobile";
 type MobilePanel = "design" | "preview";
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
+type ThemeSizeCode = "xs" | "sm" | "md" | "lg" | "xl";
+
+const allGlobalThemeTokens: readonly GlobalThemeToken[] = [
+  ...GLOBAL_COLOR_TOKENS,
+  ...GLOBAL_RADIUS_TOKENS,
+  ...GLOBAL_CONTROL_HEIGHT_TOKENS,
+];
+
+const legacyColorFallbacks: Partial<Record<GlobalThemeToken, `--${string}`>> = {
+  "--jb-neutral-0": "--jb-neutral",
+  "--jb-text-primary": "--jb-content-primary",
+  "--jb-text-secondary": "--jb-content-secondary",
+  "--jb-text-contrast": "--jb-content-inverse",
+};
+
+function readCssVariableDefaults(): Partial<Record<GlobalThemeToken, string>> {
+  if (typeof document === "undefined") return {};
+  const rootStyle = getComputedStyle(document.documentElement);
+  const values: Partial<Record<GlobalThemeToken, string>> = {};
+  for (const token of allGlobalThemeTokens) {
+    if (GLOBAL_COLOR_TOKENS.includes(token as typeof GLOBAL_COLOR_TOKENS[number])) {
+      const probe = document.createElement("span");
+      const fallback = legacyColorFallbacks[token];
+      probe.style.color = `var(${token}${fallback ? `, var(${fallback}, transparent)` : ", transparent"})`;
+      probe.style.display = "none";
+      document.body.append(probe);
+      const resolved = getComputedStyle(probe).color.trim();
+      probe.remove();
+      if (resolved && resolved !== "transparent" && resolved !== "rgba(0, 0, 0, 0)") values[token] = resolved;
+      continue;
+    }
+    const resolved = rootStyle.getPropertyValue(token).trim();
+    if (resolved) values[token] = resolved;
+  }
+  return values;
+}
+
+function useCssVariableDefaults(): Partial<Record<GlobalThemeToken, string>> {
+  const [defaults, setDefaults] = useState<Partial<Record<GlobalThemeToken, string>>>(readCssVariableDefaults);
+  useEffect(() => setDefaults(readCssVariableDefaults()), []);
+  return defaults;
+}
+
+function cssLengthToRem(value: string): number {
+  const numeric = Number.parseFloat(value);
+  if (!Number.isFinite(numeric)) return Number.NaN;
+  if (value.trim().toLowerCase().endsWith("px") && typeof document !== "undefined") {
+    const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return rootFontSize > 0 ? numeric / rootFontSize : numeric / 16;
+  }
+  return numeric;
+}
 
 const patternChoices: ThemePatternId[] = ["science-doodles", "academic-waves", "calm-dots", "warm-chevrons"];
 
@@ -92,6 +144,29 @@ function themeSlug(name: string): string {
     .replace(/^-+|-+$/g, "") || "untitled-theme";
 }
 
+const BLANK_DESIGNER_THEME: DesignerThemeConfig = {
+  schemaVersion: 1,
+  name: "Untitled theme",
+  global: {},
+  typography: {
+    fontFamily: "text-font, fa-font, system-ui, sans-serif",
+    textScale: 1,
+  },
+  sizing: {
+    audienceSize: "standard",
+    spacingScale: 1,
+  },
+  defaults: { controlSize: "md" },
+  background: {
+    mode: "color",
+    color: "#FFFFFF",
+    patternId: "academic-waves",
+    patternColor: "#3156B8",
+    opacity: 20,
+    scale: 100,
+  },
+};
+
 const persianTokenLabels: Partial<Record<GlobalThemeToken, string>> = {
   "--jb-primary": "اصلی", "--jb-secondary": "ثانویه", "--jb-green": "سبز", "--jb-red": "قرمز", "--jb-yellow": "زرد",
   "--jb-neutral": "خنثی", "--jb-text-primary": "متن اصلی", "--jb-text-secondary": "متن ثانویه", "--jb-text-contrast": "متن متضاد",
@@ -117,6 +192,7 @@ function tokenLabel(token: GlobalThemeToken, locale: FormAppLocale): string {
 
 function SettingRange({
   label,
+  message,
   value,
   min,
   max,
@@ -126,6 +202,7 @@ function SettingRange({
   onChange,
 }: {
   label: string;
+  message?: string;
   value: number;
   min: number;
   max: number;
@@ -139,6 +216,7 @@ function SettingRange({
       <span>{label}</span>
       <JBRangeInput
         aria-label={label}
+        message={message}
         size="sm"
         min={min}
         max={max}
@@ -167,6 +245,14 @@ export function DesignerApp() {
   const { locale, direction, setLocale, messages } = useFormLocale("en");
   const message = (key: FormMessageKey, values: Record<string, string | number> = {}) => Object.entries(values)
     .reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
+  const cssVariableDefaults = useCssVariableDefaults();
+  const sizeLabel = (size: ThemeSizeCode): string => ({
+    xs: messages.designerExtraSmall,
+    sm: messages.designerSmall,
+    md: messages.designerMedium,
+    lg: messages.designerLarge,
+    xl: messages.designerExtraLarge,
+  })[size];
   const formSlug = getCurrentFormSlug();
   const selectedThemeSlug = getCurrentThemeSlug();
   const storedForm = useStoredForm(formSlug);
@@ -191,12 +277,24 @@ export function DesignerApp() {
     }
   }, [theme]);
   const portableTheme = portableThemeState.config;
+  const rendererTheme = useMemo<ThemeConfigV1>(() => {
+    const config = structuredClone(portableTheme);
+    delete config.background;
+    return config;
+  }, [portableTheme]);
   const [themeRecord, setThemeRecord] = useState<StoredThemeRecordV1 | null>(null);
   const [libraryThemes, setLibraryThemes] = useState<StoredThemeRecordV1[]>([]);
   const [defaultThemeId, setDefaultThemeId] = useState<string | null>(null);
   const [boundThemeId, setBoundThemeId] = useState<string | null>(null);
   const [themeBindings, setThemeBindings] = useState<Record<string, string>>({});
   const [themeLoadNotice, setThemeLoadNotice] = useState<string>();
+  const [themeSearch, setThemeSearch] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
+  const [createSource, setCreateSource] = useState("blank");
+  const [createError, setCreateError] = useState("");
+  const [createBusy, setCreateBusy] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importJson, setImportJson] = useState("");
   const [importFileName, setImportFileName] = useState("");
@@ -221,6 +319,11 @@ export function DesignerApp() {
   const [imageNotice, setImageNotice] = useState<string>();
   const [imageLoadState, setImageLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [imageRetryVersion, setImageRetryVersion] = useState(0);
+  const filteredLibraryThemes = useMemo(() => {
+    const query = themeSearch.trim().toLocaleLowerCase(locale);
+    if (!query) return libraryThemes;
+    return libraryThemes.filter(record => `${record.config.name} ${record.config.description ?? ""}`.toLocaleLowerCase(locale).includes(query));
+  }, [libraryThemes, locale, themeSearch]);
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
     editVersionRef.current += 1;
@@ -404,6 +507,39 @@ export function DesignerApp() {
     }
     openThemeRecord(result.value);
     setActivePreset(presetId);
+  };
+
+  const openCreate = () => {
+    setCreateName("");
+    setCreateDescription("");
+    setCreateSource("blank");
+    setCreateError("");
+    setCreateBusy(false);
+    setCreateOpen(true);
+  };
+
+  const createTheme = async () => {
+    const name = createName.trim();
+    if (!name) {
+      setCreateError(messages.designerThemeNameRequired);
+      return;
+    }
+    const preset = THEME_PRESETS.find(item => item.id === createSource);
+    const config = cloneTheme(preset?.config ?? BLANK_DESIGNER_THEME);
+    config.name = name;
+    const description = createDescription.trim();
+    if (description) config.description = description;
+    else delete config.description;
+    setCreateBusy(true);
+    const result = await themeRepository.create(toPortableThemeConfig(config));
+    setCreateBusy(false);
+    if (!result.ok) {
+      setCreateError(result.error.message);
+      return;
+    }
+    setCreateOpen(false);
+    openThemeRecord(result.value);
+    setActivePreset(preset?.id ?? "");
   };
 
   const openImport = () => {
@@ -767,14 +903,15 @@ export function DesignerApp() {
     if (section === "colors") {
       return (
         <div className={styles.sectionContent}>
-          <p className={styles.sectionIntro}>Set only the colors you want to override. Empty values inherit the JB default.</p>
+          <p className={styles.sectionIntro}>{messages.designerColorsIntro}</p>
           <div className={styles.tokenList}>
             {GLOBAL_COLOR_TOKENS.map(token => (
               <div className={styles.tokenField} key={token}>
                 <JBColorInput
                   size="sm"
-                  label={tokenLabel(token)}
-                  value={theme.global[token] ?? ""}
+                  label={tokenLabel(token, locale)}
+                  message={theme.global[token] == null ? messages.designerInheritedDefault : ""}
+                  value={theme.global[token] ?? cssVariableDefaults[token] ?? ""}
                   onInput={event => updateTheme(draft => { draft.global[token] = valueFromEvent(event) || null; })}
                 />
                 <code>{token}</code>
@@ -790,14 +927,14 @@ export function DesignerApp() {
           <JBSelect<string>
             size="sm"
             popoverPosition="fixed"
-            label="Font family"
+            label={messages.designerFontFamily}
             value={theme.typography.fontFamily}
             hideClear
             onChange={event => updateTheme(draft => { draft.typography.fontFamily = valueFromEvent(event); })}
           >
-            {fontChoices.map(font => <JBOption key={font.value} value={font.value}>{font.label}</JBOption>)}
+            {fontChoices.map(font => <JBOption key={font.value} value={font.value}>{messages[font.labelKey]}</JBOption>)}
           </JBSelect>
-          <SettingRange label="Text scale" value={theme.typography.textScale} min={0.8} max={1.5} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.typography.textScale = value; })} />
+          <SettingRange label={messages.designerTextScale} value={theme.typography.textScale} min={0.8} max={1.5} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.typography.textScale = value; })} />
         </div>
       );
     }
@@ -807,38 +944,40 @@ export function DesignerApp() {
           <JBSelect<ThemeAudienceSize>
             size="sm"
             popoverPosition="fixed"
-            label="Audience size"
+            label={messages.designerAudienceSize}
             value={theme.sizing.audienceSize}
             hideClear
             onChange={event => updateTheme(draft => { draft.sizing.audienceSize = valueFromEvent(event) as ThemeAudienceSize; })}
           >
-            <JBOption value="compact">Compact</JBOption>
-            <JBOption value="standard">Standard</JBOption>
-            <JBOption value="large">Large</JBOption>
-            <JBOption value="extra-large">Extra large</JBOption>
-            <JBOption value="custom">Custom</JBOption>
+            <JBOption value="compact">{messages.designerCompact}</JBOption>
+            <JBOption value="standard">{messages.designerStandard}</JBOption>
+            <JBOption value="large">{messages.designerLarge}</JBOption>
+            <JBOption value="extra-large">{messages.designerExtraLarge}</JBOption>
+            <JBOption value="custom">{messages.designerCustom}</JBOption>
           </JBSelect>
           <JBSelect<ThemeControlSize>
             size="sm"
             popoverPosition="fixed"
-            label="Default control size"
+            label={messages.designerDefaultControlSize}
             value={theme.defaults.controlSize}
             hideClear
             onChange={event => updateTheme(draft => { draft.defaults.controlSize = valueFromEvent(event) as ThemeControlSize; })}
           >
-            <JBOption value="sm">Small</JBOption>
-            <JBOption value="md">Medium</JBOption>
-            <JBOption value="lg">Large</JBOption>
+            <JBOption value="sm">{messages.designerSmall}</JBOption>
+            <JBOption value="md">{messages.designerMedium}</JBOption>
+            <JBOption value="lg">{messages.designerLarge}</JBOption>
           </JBSelect>
-          <SettingRange label="Spacing scale" value={theme.sizing.spacingScale} min={0.75} max={1.6} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.sizing.spacingScale = value; draft.sizing.audienceSize = "custom"; })} />
+          <SettingRange label={messages.designerSpacingScale} value={theme.sizing.spacingScale} min={0.75} max={1.6} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.sizing.spacingScale = value; draft.sizing.audienceSize = "custom"; })} />
           <div className={styles.tokenList}>
             {GLOBAL_CONTROL_HEIGHT_TOKENS.map(token => (
               <div className={styles.tokenField} key={token}>
                 <JBInput
                   size="sm"
-                  label={tokenLabel(token)}
-                  placeholder="Use JB default"
-                  value={theme.global[token] ?? ""}
+                  label={message("designerControlHeightLabel", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
+                  message={theme.global[token] == null
+                    ? `${message("designerControlHeightHelp", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })} ${messages.designerInheritedDefault}`
+                    : message("designerControlHeightHelp", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
+                  value={theme.global[token] ?? cssVariableDefaults[token] ?? ""}
                   onInput={event => updateTheme(draft => { draft.global[token] = valueFromEvent(event) || null; })}
                 />
                 <code>{token}</code>
@@ -849,76 +988,97 @@ export function DesignerApp() {
       );
     }
     if (section === "shape") {
-      const radius = Number.parseFloat(theme.global["--jb-radius"] ?? "");
+      const radiusSize: Record<typeof GLOBAL_RADIUS_TOKENS[number], ThemeSizeCode> = {
+        "--jb-radius": "md",
+        "--jb-radius-xs": "xs",
+        "--jb-radius-sm": "sm",
+        "--jb-radius-lg": "lg",
+        "--jb-radius-xl": "xl",
+      };
       return (
         <div className={styles.sectionContent}>
-          <SettingRange label="Corner radius" value={Number.isFinite(radius) ? radius : 0.75} min={0} max={2} step={0.125} tickStep={0.5} suffix="rem" onChange={value => updateTheme(draft => { draft.global["--jb-radius"] = `${value}rem`; })} />
-          <div className={styles.tokenList}>
-            {GLOBAL_RADIUS_TOKENS.filter(token => token !== "--jb-radius").map(token => (
+          {GLOBAL_RADIUS_TOKENS.map(token => {
+            const size = sizeLabel(radiusSize[token]);
+            const inherited = theme.global[token] == null;
+            const radius = cssLengthToRem(theme.global[token] ?? cssVariableDefaults[token] ?? "");
+            return (
               <div className={styles.tokenField} key={token}>
-                <JBInput
-                  size="sm"
-                  label={tokenLabel(token)}
-                  placeholder="Use JB default"
-                  value={theme.global[token] ?? ""}
-                  onInput={event => updateTheme(draft => { draft.global[token] = valueFromEvent(event) || null; })}
+                <SettingRange
+                  label={message("designerCornerRadiusLabel", { size })}
+                  message={`${message("designerCornerRadiusHelp", { size })}${inherited ? ` ${messages.designerInheritedDefault}` : ""}`}
+                  value={Number.isFinite(radius) ? radius : 0}
+                  min={0}
+                  max={2}
+                  step={0.125}
+                  tickStep={0.5}
+                  suffix="rem"
+                  onChange={value => updateTheme(draft => { draft.global[token] = `${value}rem`; })}
                 />
                 <code>{token}</code>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       );
     }
     return (
       <div className={styles.sectionContent}>
-        <JBSelect<string> size="sm" popoverPosition="fixed" label="Preview component" value="all" hideClear>
-          <JBOption value="all">All form controls</JBOption>
-          <JBOption value="inputs">Inputs</JBOption>
-          <JBOption value="choices">Choices</JBOption>
-          <JBOption value="actions">Buttons</JBOption>
+        <JBSelect<string> size="sm" popoverPosition="fixed" label={messages.designerPreviewComponent} value="all" hideClear>
+          <JBOption value="all">{messages.designerAllControls}</JBOption>
+          <JBOption value="inputs">{messages.designerInputs}</JBOption>
+          <JBOption value="choices">{messages.designerChoices}</JBOption>
+          <JBOption value="actions">{messages.designerButtons}</JBOption>
         </JBSelect>
-        <p className={styles.notice}>Component-specific styling is planned for a later version. This selector only changes the isolated preview.</p>
+        <p className={styles.notice}>{messages.designerComponentsNotice}</p>
       </div>
     );
   };
 
   if (libraryOpen) {
     return (
-      <main className={styles.libraryPage}>
+      <main className={styles.libraryPage} dir={direction}>
         <header className={styles.libraryHeader}>
-          <div><span className={styles.brandMark}>JB</span><h1>Your themes</h1></div>
+          <div><span className={styles.brandMark}>JB</span><h1>{messages.designerYourThemes}</h1></div>
           <div className={styles.libraryActions}>
-            <JBButton variant="outline" onClick={openImport}>Import theme</JBButton>
-            <JBButton color="primary" onClick={() => setLibraryOpen(false)}>Open designer</JBButton>
+            <JBSelect<FormAppLocale> className={styles.languageSelect} size="sm" aria-label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
+              <JBOption value="en">EN</JBOption>
+              <JBOption value="fa">FA</JBOption>
+            </JBSelect>
+            <JBButton variant="outline" onClick={openCreate}>{messages.designerCreateTheme}</JBButton>
+            <JBButton variant="outline" onClick={openImport}>{messages.designerImportTheme}</JBButton>
+            <JBButton color="primary" onClick={() => setLibraryOpen(false)}>{messages.designerOpenDesigner}</JBButton>
           </div>
         </header>
-        <p>Open a reusable theme or start with a preset. Themes stay separate from forms.</p>
+        <p>{messages.designerLibraryDescription}</p>
+        <div className={styles.libraryToolbar}>
+          <JBInput size="sm" label={messages.designerSearchThemes} value={themeSearch} onInput={event => setThemeSearch(valueFromEvent(event))} />
+        </div>
         {themeLoadNotice ? <p role="alert">{themeLoadNotice}</p> : null}
         {libraryThemes.length > 0 ? (
           <>
-            <h2>My themes</h2>
-            <section className={styles.libraryGrid} aria-label="My themes">
-              {libraryThemes.map(record => (
+            <h2>{messages.designerMyThemes}</h2>
+            <section className={styles.libraryGrid} aria-label={messages.designerMyThemes}>
+              {filteredLibraryThemes.map(record => (
                 <article key={record.id} className={styles.libraryCard}>
                   <button className={styles.libraryCardOpen} type="button" onClick={() => openThemeRecord(record)}>
                     <img src={record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
                       ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
                       : PATTERN_ASSETS["academic-waves"]} alt="" />
                     <strong>{record.config.name}</strong>
-                    <span>{record.id === defaultThemeId ? "Default theme" : record.config.description ?? "Reusable local theme"}</span>
+                    <span>{record.id === defaultThemeId ? messages.designerDefaultTheme : record.config.description ?? messages.designerReusableTheme}</span>
                   </button>
                   <div className={styles.libraryCardActions}>
-                    <button type="button" onClick={() => void duplicateTheme(record)}>Duplicate</button>
-                    <button type="button" onClick={() => requestThemeDelete(record)}>Delete</button>
+                    <button type="button" onClick={() => void duplicateTheme(record)}>{messages.designerDuplicate}</button>
+                    <button type="button" onClick={() => requestThemeDelete(record)}>{messages.designerDelete}</button>
                   </div>
                 </article>
               ))}
             </section>
+            {filteredLibraryThemes.length === 0 ? <p className={styles.libraryEmpty}>{messages.designerNoThemeResults}</p> : null}
           </>
         ) : null}
-        <h2>Preset gallery</h2>
-        <section className={styles.libraryGrid} aria-label="Theme presets">
+        <h2>{messages.designerPresetGallery}</h2>
+        <section className={styles.libraryGrid} aria-label={messages.designerThemePresets}>
           {THEME_PRESETS.map(presetItem => (
             <button key={presetItem.id} type="button" onClick={() => void createFromPreset(presetItem.config, presetItem.id)}>
               <img src={presetItem.thumbnail} alt="" />
@@ -927,16 +1087,35 @@ export function DesignerApp() {
             </button>
           ))}
         </section>
+        {createOpen ? (
+          <div className={styles.modalBackdrop} onMouseDown={event => { if (!createBusy && event.target === event.currentTarget) setCreateOpen(false); }}>
+            <section className={`${styles.exportModal} ${styles.createModal}`} role="dialog" aria-modal="true" aria-labelledby="create-theme-title" onKeyDown={event => { if (!createBusy && event.key === "Escape") setCreateOpen(false); }}>
+              <h2 id="create-theme-title">{messages.designerCreateTheme}</h2>
+              <p>{messages.designerCreateDescription}</p>
+              <JBSelect<string> label={messages.designerStartFrom} value={createSource} hideClear onChange={event => setCreateSource(valueFromEvent(event))}>
+                <JBOption value="blank">{messages.designerBlankTheme}</JBOption>
+                {THEME_PRESETS.map(presetItem => <JBOption key={presetItem.id} value={presetItem.id}>{presetItem.label}</JBOption>)}
+              </JBSelect>
+              <JBInput label={messages.designerThemeName} value={createName} autoFocus onInput={event => { setCreateName(valueFromEvent(event)); setCreateError(""); }} />
+              <JBTextarea name="themeDescription" label={messages.designerThemeDescription} value={createDescription} onInput={event => setCreateDescription(valueFromEvent(event))} />
+              {createError ? <p className={styles.importError} role="alert">{createError}</p> : null}
+              <div>
+                <JBButton variant="ghost" disabled={createBusy} onClick={() => setCreateOpen(false)}>{messages.designerCancel}</JBButton>
+                <JBButton color="primary" disabled={createBusy} onClick={() => void createTheme()}>{createBusy ? messages.designerCreating : messages.designerCreateTheme}</JBButton>
+              </div>
+            </section>
+          </div>
+        ) : null}
         {importOpen ? (
           <div className={styles.modalBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) setImportOpen(false); }}>
             <section className={`${styles.exportModal} ${styles.importModal}`} role="dialog" aria-modal="true" aria-labelledby="import-theme-title" onKeyDown={event => { if (event.key === "Escape") setImportOpen(false); }}>
-              <h2 id="import-theme-title">Import theme</h2>
-              <p>Paste portable ThemeConfig JSON or choose a <code>.jb-theme.json</code> file. Existing themes are never overwritten.</p>
+              <h2 id="import-theme-title">{messages.designerImportTheme}</h2>
+              <p>{messages.designerImportDescription}</p>
               <JBTextarea
                 className={styles.importJsonInput}
                 name="themeImportJson"
-                label="Theme JSON"
-                placeholder="Paste ThemeConfig JSON"
+                label={messages.designerThemeJson}
+                placeholder={messages.designerPasteThemeJson}
                 value={importJson}
                 autoHeight={false}
                 autoFocus
@@ -949,7 +1128,7 @@ export function DesignerApp() {
                 }}
               />
               <div className={styles.importFileRow}>
-                <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>Choose theme file</JBButton>
+                <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>{messages.designerChooseThemeFile}</JBButton>
                 {importFileName ? <span>{importFileName}</span> : null}
                 <input
                   ref={importFileRef}
@@ -968,40 +1147,40 @@ export function DesignerApp() {
                 <>
                   {importSupportedOnly && importValidation.omittedIssues.length > 0 ? (
                     <div className={styles.importConflict} role="status">
-                      <strong>Only supported values will be imported.</strong>
-                      <p>The following paths will be omitted:</p>
+                      <strong>{messages.designerSupportedOnly}</strong>
+                      <p>{messages.designerOmittedPaths}</p>
                       <ul>{importValidation.omittedIssues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code></li>)}</ul>
                     </div>
                   ) : null}
                   {importValidation.conflicts.name || importValidation.conflicts.slug ? (
                     <p className={styles.importConflict} role="status">
-                      A theme already uses this name or URL slug. Import will create an independent copy with a numbered slug.
+                      {messages.designerImportConflict}
                     </p>
-                  ) : <p className={styles.importValid} role="status">ThemeConfig is valid and ready to import.</p>}
+                  ) : <p className={styles.importValid} role="status">{messages.designerImportReady}</p>}
                 </>
               ) : importValidation ? (
                 <div className={styles.importError} role="alert">
-                  <strong>ThemeConfig is not valid.</strong>
+                  <strong>{messages.designerImportInvalid}</strong>
                   <ul>{importValidation.issues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code> {issue.message}</li>)}</ul>
                   {supportedImportValidation?.valid && supportedImportValidation.omittedIssues.length > 0 ? (
                     <JBButton variant="outline" onClick={() => {
                       setImportSupportedOnly(true);
                       setImportWarningsConfirmed(false);
-                    }}>Review supported values only</JBButton>
+                    }}>{messages.designerReviewSupported}</JBButton>
                   ) : null}
                 </div>
               ) : null}
               {importValidation?.valid && importValidation.warnings.length > 0 ? (
                 <label className={styles.importWarningConsent}>
                   <input type="checkbox" checked={importWarningsConfirmed} onChange={event => setImportWarningsConfirmed(event.currentTarget.checked)} />
-                  <span>{importValidation.warnings.join(" ")} Import anyway.</span>
+                  <span>{importValidation.warnings.join(" ")} {messages.designerImportAnyway}</span>
                 </label>
               ) : null}
               <div className={styles.importActions}>
-                <JBButton variant="ghost" onClick={() => setImportOpen(false)}>Cancel</JBButton>
-                {importSupportedOnly ? <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>Use strict import</JBButton> : null}
+                <JBButton variant="ghost" onClick={() => setImportOpen(false)}>{messages.designerCancel}</JBButton>
+                {importSupportedOnly ? <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>{messages.designerUseStrictImport}</JBButton> : null}
                 <JBButton color="primary" disabled={!importValidation?.valid || (importValidation.warnings.length > 0 && !importWarningsConfirmed)} onClick={() => void importTheme()}>
-                  {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug) ? "Create copy" : importSupportedOnly ? "Import supported values" : "Import theme"}
+                  {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug) ? messages.designerCreateCopy : importSupportedOnly ? messages.designerImportSupported : messages.designerImportTheme}
                 </JBButton>
               </div>
             </section>
@@ -1010,25 +1189,27 @@ export function DesignerApp() {
         {pendingDelete ? (
           <div className={styles.modalBackdrop} onMouseDown={event => { if (!deleteBusy && event.target === event.currentTarget) setPendingDelete(undefined); }}>
             <section className={`${styles.exportModal} ${styles.deleteModal}`} role="dialog" aria-modal="true" aria-labelledby="delete-theme-title" onKeyDown={event => { if (!deleteBusy && event.key === "Escape") setPendingDelete(undefined); }}>
-              <h2 id="delete-theme-title">Delete {pendingDelete.config.name}?</h2>
+              <h2 id="delete-theme-title">{message("designerDeleteTitle", { name: pendingDelete.config.name })}</h2>
               <p>
-                This theme is {pendingDelete.id === defaultThemeId ? "the current default" : "not the default"} and is used by {Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length} saved form(s).
-                Choose what should replace every reference before deletion.
+                {message("designerDeleteDescription", {
+                  status: pendingDelete.id === defaultThemeId ? messages.designerCurrentDefault : messages.designerNotDefault,
+                  count: Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length,
+                })}
               </p>
               <JBSelect<string>
-                label="Replacement theme"
+                label={messages.designerReplacementTheme}
                 value={deleteReplacementId}
                 hideClear
                 onChange={event => setDeleteReplacementId(valueFromEvent(event))}
               >
-                <JBOption value="default">Built-in Default</JBOption>
+                <JBOption value="default">{messages.designerBuiltInDefault}</JBOption>
                 {libraryThemes.filter(record => record.id !== pendingDelete.id).map(record => (
                   <JBOption key={record.id} value={record.id}>{record.config.name}</JBOption>
                 ))}
               </JBSelect>
               <div>
-                <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>Cancel</JBButton>
-                <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>{deleteBusy ? "Deleting…" : "Replace and delete"}</JBButton>
+                <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>{messages.designerCancel}</JBButton>
+                <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>{deleteBusy ? messages.designerDeleting : messages.designerReplaceDelete}</JBButton>
               </div>
             </section>
           </div>
@@ -1038,29 +1219,29 @@ export function DesignerApp() {
   }
 
   const sections: Array<{ id: DesignerSection; label: string }> = [
-    { id: "background", label: "Background" },
-    { id: "colors", label: "Colors" },
-    { id: "typography", label: "Typography" },
-    { id: "sizing", label: "Size & spacing" },
-    { id: "shape", label: "Shape" },
-    { id: "components", label: "Components" },
+    { id: "background", label: messages.designerBackground },
+    { id: "colors", label: messages.designerColors },
+    { id: "typography", label: messages.designerTypography },
+    { id: "sizing", label: messages.designerSizeSpacing },
+    { id: "shape", label: messages.designerShape },
+    { id: "components", label: messages.designerComponents },
   ];
 
   return (
-    <div className={styles.designer} dir="ltr">
+    <div className={styles.designer} dir={direction}>
       <FormRouteHeader layout="editor" className={styles.header}>
-        <FormRouteBrand href={formPageHref("landing")} title="Form builder" subtitle="Theme designer" />
+        <FormRouteBrand href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
         <div className={styles.themeIdentity}>
           <button type="button" className={styles.backButton} onClick={() => setLibraryOpen(true)}>
-            <jb-icon-arrow direction="left" />
-            <span>Back to themes</span>
+            <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
+            <span>{messages.designerBackThemes}</span>
           </button>
           <span className={styles.headerDivider} />
         {isEditingName ? (
           <JBInput
             className={styles.nameInput}
             size="sm"
-            aria-label="Theme name"
+            aria-label={messages.designerThemeName}
             value={theme.name}
             onInput={event => updateTheme(draft => { draft.name = valueFromEvent(event); })}
             onBlur={() => setIsEditingName(false)}
@@ -1073,33 +1254,39 @@ export function DesignerApp() {
         )}
         <p className={`${styles.saveState} ${styles[`saveState_${saveStatus}`]}`} aria-live="polite">
           <span aria-hidden="true" />
-          {saveStatus === "saving" ? "Saving…" : saveStatus === "invalid" ? "Finish editing" : saveStatus === "error" ? "Save failed" : "Saved"}
+          {saveStatus === "saving" ? messages.designerSaving : saveStatus === "invalid" ? messages.designerFinishEditing : saveStatus === "error" ? messages.designerSaveFailed : messages.designerSaved}
         </p>
         </div>
         <div className={styles.headerActions}>
-          <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label="Undo" onClick={undo}>Undo</JBButton>
-          <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label="Redo" onClick={redo}>Redo</JBButton>
+          <FormRouteLinkButton href={formPageHref("builder", formSlug)}>{messages.builder}</FormRouteLinkButton>
+          <FormRouteLinkButton href={formPageHref("preview", formSlug, themeRecord?.slug)} variant="outline">{messages.preview}</FormRouteLinkButton>
+          <JBSelect<FormAppLocale> className={styles.languageSelect} size="sm" aria-label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
+            <JBOption value="en">EN</JBOption>
+            <JBOption value="fa">FA</JBOption>
+          </JBSelect>
+          <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label={messages.designerUndo} onClick={undo}>{messages.designerUndo}</JBButton>
+          <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label={messages.designerRedo} onClick={redo}>{messages.designerRedo}</JBButton>
           <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => void setCurrentAsDefault()}>
-            {themeRecord && defaultThemeId === themeRecord.id ? "Default" : "Set default"}
+            {themeRecord && defaultThemeId === themeRecord.id ? messages.designerDefault : messages.designerSetDefault}
           </JBButton>
           {formSlug ? (
             <JBButton size="sm" variant="ghost" disabled={!themeRecord || boundThemeId === themeRecord.id} onClick={() => void bindCurrentForm()}>
-              {themeRecord && boundThemeId === themeRecord.id ? "Used for this form" : "Use for this form"}
+              {themeRecord && boundThemeId === themeRecord.id ? messages.designerUsedForForm : messages.designerUseForForm}
             </JBButton>
           ) : null}
-          <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>Export theme</JBButton>
+          <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>{messages.designerExportTheme}</JBButton>
         </div>
       </FormRouteHeader>
 
       <div className={styles.mobileTabs}>
-        <JBButton size="sm" variant={mobilePanel === "design" ? "solid" : "ghost"} onClick={() => setMobilePanel("design")}>Design</JBButton>
-        <JBButton size="sm" variant={mobilePanel === "preview" ? "solid" : "ghost"} onClick={() => setMobilePanel("preview")}>Preview</JBButton>
+        <JBButton size="sm" variant={mobilePanel === "design" ? "solid" : "ghost"} onClick={() => setMobilePanel("design")}>{messages.designerDesign}</JBButton>
+        <JBButton size="sm" variant={mobilePanel === "preview" ? "solid" : "ghost"} onClick={() => setMobilePanel("preview")}>{messages.designerPreview}</JBButton>
       </div>
 
       <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={mobilePanel}>
         <aside className={`${layoutStyles.panel} ${styles.settingsPanel}`}>
           <section className={styles.presets}>
-            <h2>Presets</h2>
+            <h2>{messages.designerPresets}</h2>
             <div className={styles.presetRow}>
               {THEME_PRESETS.slice(0, 4).map(presetItem => (
                 <button
@@ -1127,14 +1314,14 @@ export function DesignerApp() {
             ))}
           </div>
           <div className={styles.autosaveNote}>
-            Changes are saved automatically
+            {messages.designerAutosave}
           </div>
         </aside>
 
         <section className={`${layoutStyles.panel} ${styles.previewPanel}`}>
           <header className={styles.previewToolbar}>
             <div className={styles.previewPicker}>
-              <span>Previewing:</span>
+              <span>{messages.designerPreviewing}</span>
               <JBSelect<string>
                 size="sm"
                 popoverPosition="fixed"
@@ -1142,7 +1329,7 @@ export function DesignerApp() {
                 hideClear
                 onChange={event => setPreviewSource(valueFromEvent(event))}
               >
-                <JBOption value="sample">Parent permission form</JBOption>
+                <JBOption value="sample">{messages.designerSampleForm}</JBOption>
                 {canUseStoredForm ? (
                   <JBOption value="stored">
                     {getLocalizedText(
@@ -1155,12 +1342,12 @@ export function DesignerApp() {
               </JBSelect>
             </div>
             <div className={styles.previewTools}>
-              <div className={styles.segmented} aria-label="Preview width">
-                <JBButton size="sm" variant={viewport === "desktop" ? "solid" : "ghost"} onClick={() => setViewport("desktop")}>Desktop</JBButton>
-                <JBButton size="sm" variant={viewport === "mobile" ? "solid" : "ghost"} onClick={() => setViewport("mobile")}>Mobile</JBButton>
+              <div className={styles.segmented} aria-label={messages.designerPreviewWidth}>
+                <JBButton size="sm" variant={viewport === "desktop" ? "solid" : "ghost"} onClick={() => setViewport("desktop")}>{messages.designerDesktop}</JBButton>
+                <JBButton size="sm" variant={viewport === "mobile" ? "solid" : "ghost"} onClick={() => setViewport("mobile")}>{messages.designerMobile}</JBButton>
               </div>
               <JBButton size="sm" variant="ghost" onClick={() => rendererRef.current?.reset()}>
-                <jb-icon-refresh /> Reset
+                <jb-icon-refresh /> {messages.designerReset}
               </JBButton>
             </div>
           </header>
@@ -1176,13 +1363,13 @@ export function DesignerApp() {
                   <JBFormBuilder
                     ref={rendererRef}
                     formDocument={previewDocument}
-                    themeConfig={portableTheme}
+                    themeConfig={rendererTheme}
                     locale={previewLocale}
-                    aria-label={`${previewName} preview`}
+                    aria-label={`${previewName} ${messages.designerPreview}`}
                     loadDependencies={loadDependencies}
                   />
                 </div>
-                <small className={styles.privacyNote}>Your information is kept private and used only for this activity.</small>
+                <small className={styles.privacyNote}>{messages.designerPrivacy}</small>
               </div>
             </div>
           </div>
@@ -1194,11 +1381,11 @@ export function DesignerApp() {
           if (event.target === event.currentTarget) setExportOpen(false);
         }}>
           <section className={styles.exportModal} role="dialog" aria-modal="true" aria-labelledby="export-title">
-            <h2 id="export-title">Export {theme.name}</h2>
-            <p>This is the current saved snapshot. Use it as the theme config for JB Form Builder.</p>
+            <h2 id="export-title">{messages.designerExportTheme}: {theme.name}</h2>
+            <p>{messages.designerExportDescription}</p>
             <pre tabIndex={0}>{exportedJson}</pre>
             <div>
-              <JBButton variant="ghost" onClick={() => setExportOpen(false)}>Close</JBButton>
+              <JBButton variant="ghost" onClick={() => setExportOpen(false)}>{messages.designerClose}</JBButton>
               <JBButton color="primary" onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(exportedJson);
@@ -1212,7 +1399,7 @@ export function DesignerApp() {
                   anchor.click();
                   URL.revokeObjectURL(href);
                 }
-              }}>{exportCopied ? "Copied" : "Copy JSON"}</JBButton>
+              }}>{exportCopied ? messages.designerCopied : messages.designerCopyJson}</JBButton>
             </div>
           </section>
         </div>

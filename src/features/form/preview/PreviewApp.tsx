@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { JBButton } from "jb-button/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
-import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
+import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
+import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
+import { useStoredTheme } from "../application/use-stored-theme";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
 import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
 import styles from "../shell/RouteShell.module.css";
 import { PreviewFormPanel } from "./PreviewFormPanel";
+import { PATTERN_ASSETS, type ThemePatternId } from "../designer/theme-config";
 
 const PREVIEW_LANGUAGE_QUERY_PARAMETER = "lang";
+type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 
 function getRequestedLanguage(): string | null {
   if (typeof window === "undefined") return null;
@@ -48,6 +52,50 @@ export function PreviewApp() {
   const { locale, direction, messages } = useFormLocale("en");
   const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
+  const themeResolution = useStoredTheme(getCurrentThemeSlug(), slug);
+  const themeConfig = themeResolution.status === "ready" ? themeResolution.record.config : null;
+  const rendererTheme = useMemo<ThemeConfigV1 | null>(() => {
+    if (!themeConfig) return null;
+    const config = structuredClone(themeConfig);
+    delete config.background;
+    return config;
+  }, [themeConfig]);
+  const pageThemeStyle = useMemo<CSSVariables | undefined>(() => {
+    if (!themeConfig) return undefined;
+    const background = themeConfig.background;
+    const backgroundColor = background?.type === "image"
+      ? background.fallbackColor
+      : background?.color;
+    return {
+      ...themeConfig.global,
+      color: themeConfig.global?.["--jb-text-primary"],
+      background: backgroundColor,
+      fontFamily: themeConfig.typography?.fontFamily,
+    };
+  }, [themeConfig]);
+  const pageBackdropStyle = useMemo<CSSProperties>(() => {
+    const background = themeConfig?.background;
+    if (!background || background.type === "color") return { display: "none" };
+    if (background.type === "pattern") {
+      return {
+        backgroundImage: `url(${JSON.stringify(PATTERN_ASSETS[background.patternId as ThemePatternId])})`,
+        backgroundPosition: "center",
+        backgroundRepeat: "repeat",
+        backgroundSize: `${Math.max(180, 700 * ((background.scale ?? 100) / 100))}px`,
+        opacity: (background.opacity ?? 100) / 100,
+      };
+    }
+    const source = `url(${JSON.stringify(background.source)})`;
+    return {
+      backgroundImage: background.overlayColor
+        ? `linear-gradient(${background.overlayColor}, ${background.overlayColor}), ${source}`
+        : source,
+      backgroundPosition: background.position ?? "center",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: background.fit ?? "cover",
+      opacity: (background.opacity ?? 100) / 100,
+    };
+  }, [themeConfig]);
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -105,7 +153,8 @@ export function PreviewApp() {
             : "";
 
   return (
-    <div className={styles.page} dir={direction}>
+    <div className={styles.page} dir={direction} style={pageThemeStyle} data-theme-background={themeConfig?.background?.type}>
+      <div className={styles.themePageBackdrop} style={pageBackdropStyle} aria-hidden="true" />
       <FormRouteHeader className={styles.topbar}>
         <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.preview} />
         <div className={styles.topActions}>
@@ -183,6 +232,7 @@ export function PreviewApp() {
             locale={selectedLanguage}
             accessibleName={formName || messages.previewReadyTitle}
             messages={messages}
+            themeConfig={rendererTheme}
           />
         </main>
       ) : (

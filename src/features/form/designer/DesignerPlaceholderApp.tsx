@@ -1,9 +1,8 @@
-import { JBButton } from "jb-button/react";
 import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
 import { useFormLocale } from "../i18n/locale-adapter";
-import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
+import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../layout/FormRouteHeader";
 import styles from "../shell/RouteShell.module.css";
 
 export function DesignerPlaceholderApp() {
@@ -19,12 +18,12 @@ export function DesignerPlaceholderApp() {
       <FormRouteHeader className={styles.topbar}>
         <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.designer} />
         <div className={styles.topActions}>
-          <JBButton variant="ghost" onClick={() => window.location.assign(formPageHref("builder", slug))}>
+          <FormRouteLinkButton href={formPageHref("builder", slug)}>
             {messages.builder}
-          </JBButton>
-          <JBButton variant="outline" onClick={() => window.location.assign(formPageHref("preview", slug))}>
+          </FormRouteLinkButton>
+          <FormRouteLinkButton href={formPageHref("preview", slug)} variant="outline">
             {messages.preview}
-          </JBButton>
+          </FormRouteLinkButton>
         </div>
       </FormRouteHeader>
       <main className={styles.placeholder}>

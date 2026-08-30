@@ -5,6 +5,7 @@ import type { FormMessages } from "../i18n/locale-adapter";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
 import type { FormValues, JBFormBuilderElement, JBFormBuilderEventMap } from "jb-form-builder/types";
+import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 import { ModalLoadingFallback } from "../shell/ModalLoadingFallback";
 import styles from "../shell/RouteShell.module.css";
 
@@ -19,6 +20,7 @@ interface PreviewFormPanelProps {
   locale: string;
   accessibleName: string;
   messages: FormMessages;
+  themeConfig?: ThemeConfigV1 | null;
 }
 
 /**
@@ -26,7 +28,7 @@ interface PreviewFormPanelProps {
  * keeps <jb-form-builder> framework-independent and lets any host application
  * choose its own validation and reset controls.
  */
-export function PreviewFormPanel({ document, locale, accessibleName, messages }: PreviewFormPanelProps) {
+export function PreviewFormPanel({ document, locale, accessibleName, messages, themeConfig = null }: PreviewFormPanelProps) {
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>("preparing");
   const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
@@ -116,6 +118,7 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages }:
       <JBFormBuilder
         ref={rendererRef}
         formDocument={document}
+        themeConfig={themeConfig}
         locale={locale}
         aria-label={accessibleName}
         loadDependencies={loadDependencies}

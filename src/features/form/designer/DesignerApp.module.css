@@ -136,6 +136,11 @@
   gap: 0.35rem;
 }
 
+.languageSelect {
+  width: 5.25rem;
+  flex: 0 0 5.25rem;
+}
+
 .workspace {
   height: calc(100dvh - 5.95rem);
   margin: 0;
@@ -336,21 +341,31 @@
 
 .rangeSetting {
   display: grid;
-  grid-template-columns: 7.2rem minmax(5rem, 1fr) 4.7rem;
-  align-items: center;
-  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr) 5.25rem;
+  align-items: start;
+  gap: 0.55rem 0.75rem;
 }
 
 .rangeSetting > span {
+  grid-column: 1 / -1;
   color: #535e7c;
   font-size: 0.82rem;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .rangeSetting jb-range-input,
 .rangeSetting jb-number-input {
   min-width: 0;
   width: 100%;
+}
+
+.rangeSetting jb-range-input {
+  grid-column: 1;
+}
+
+.rangeSetting jb-number-input {
+  grid-column: 2;
 }
 
 .inputSuffix {
@@ -620,6 +635,19 @@
   color: #697390;
 }
 
+.libraryToolbar {
+  width: min(24rem, 100%);
+  margin-block: 1.5rem 0.5rem;
+}
+
+.libraryToolbar jb-input {
+  width: 100%;
+}
+
+.libraryEmpty {
+  margin-block: 1rem 2rem;
+}
+
 .libraryGrid {
   margin-top: 2rem;
   display: grid;
@@ -697,6 +725,23 @@
 .importModal {
   display: grid;
   gap: 1rem;
+}
+
+.createModal {
+  width: min(34rem, 100%);
+  display: grid;
+  gap: 1rem;
+}
+
+.createModal > p,
+.createModal > div {
+  margin: 0;
+}
+
+.createModal > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 .importModal > p,
@@ -847,11 +892,11 @@
   .backButton span,
   .headerDivider,
   .saveState,
-  .headerActions jb-button:nth-child(-n + 2) {
+  .headerActions > jb-button:nth-of-type(-n + 2) {
     display: none;
   }
 
-  .headerActions jb-button:last-child {
+  .headerActions > jb-button:last-child {
     --jb-button-height: 2.75rem;
     min-width: 7rem;
   }
@@ -933,7 +978,7 @@
     min-width: 0;
   }
 
-  .headerActions jb-button:last-child {
+  .headerActions > jb-button:last-child {
     min-width: 0;
   }
 
@@ -957,11 +1002,7 @@
   }
 
   .rangeSetting {
-    grid-template-columns: minmax(0, 1fr) 4.8rem;
-  }
-
-  .rangeSetting > span {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) 5rem;
   }
 
   .previewToolbar,
