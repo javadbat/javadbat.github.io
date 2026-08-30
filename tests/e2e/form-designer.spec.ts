@@ -59,6 +59,42 @@ test("uses the demo canvas as the only preview background layer", async ({ page 
   expect(rendererBackground).toBeNull();
 });
 
+test("isolates inputs, choices, and actions through the component preview selector", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+  const selector = page.getByRole("group", { name: "Preview component" });
+  const renderedTypes = () => page.locator("jb-form-builder").evaluate(element => Array.from(
+    element.shadowRoot?.querySelectorAll<HTMLElement>("[data-element-type]") ?? [],
+    item => item.dataset.elementType,
+  ));
+  const choose = async (label: string) => {
+    await selector.scrollIntoViewIfNeeded();
+    await selector.getByRole("button", { name: label, exact: true }).click();
+  };
+
+  await choose("Choices");
+  await expect.poll(renderedTypes).toEqual(["jb-select", "jb-checkbox"]);
+  await choose("Buttons");
+  await expect.poll(renderedTypes).toEqual(["jb-button"]);
+  await choose("Inputs");
+  await expect.poll(renderedTypes).toEqual(["jb-input", "jb-input"]);
+  await choose("All form controls");
+  await expect.poll(renderedTypes).toEqual(["jb-input", "jb-select", "jb-input", "jb-checkbox", "jb-button"]);
+});
+
+test("flushes a pending autosave before returning to the theme library", async ({ page }) => {
+  await openDesigner(page);
+  await page.locator("[class*=presetRow]").getByRole("button", { name: "Academic", exact: true }).click();
+  await page.getByRole("button", { name: "Back to themes" }).click();
+  await expect(page.getByRole("heading", { name: "Your themes" })).toBeVisible();
+
+  const card = page.locator("article").filter({ hasText: "Academic" }).first();
+  await card.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Export theme" }).click();
+  const exported = JSON.parse(await page.getByRole("dialog").locator("pre").textContent() ?? "{}");
+  expect(exported.global?.["--jb-primary"]).toBe("#3156B8");
+});
+
 test("applies a bound theme to the standalone preview without nesting its background", async ({ page }) => {
   await openDesigner(page);
   await page.evaluate(async () => {
@@ -169,6 +205,15 @@ test("creates a named blank theme and finds it through library search", async ({
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("minimal-ocean.jb-theme.json");
 
+  await page.getByLabel("Search themes").fill("");
+  const builtInCard = page.locator("article").filter({ hasText: "Original JB styling" });
+  await builtInCard.getByRole("button", { name: "Set default" }).click();
+  await expect(builtInCard.getByRole("button", { name: "Default", exact: true })).toBeDisabled();
+  await expect(page.getByText("Built-in Default is now the default theme.")).toBeVisible();
+
+  await page.getByLabel("Search themes").fill("academic");
+  await expect(page.getByRole("button", { name: /Academic/ })).toBeVisible();
+  await expect(builtInCard).toBeHidden();
   await page.getByLabel("Search themes").fill("missing theme");
   await expect(page.getByText("No themes match your search.")).toBeVisible();
 });

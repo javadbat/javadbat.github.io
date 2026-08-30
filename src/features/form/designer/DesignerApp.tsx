@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
 } from "react";
 import { JBButton } from "jb-button/react";
 import { JBColorInput } from "jb-color-input/react";
@@ -16,6 +17,7 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
+import { registryByType } from "jb-form-builder/registry/form-element-registry";
 import type { JBFormBuilderElement } from "jb-form-builder/types";
 import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 import "jb-icons/arrow";
@@ -24,7 +26,7 @@ import "jb-icons/refresh";
 import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { useStoredTheme } from "../application/use-stored-theme";
-import { getLocalizedText } from "../domain/form-document";
+import { getLocalizedText, walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
 import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../layout/FormRouteHeader";
 import { JBCollapse } from "jb-collapse/react";
 import layoutStyles from "../layout/FormRouteLayout.module.css";
@@ -41,6 +43,7 @@ import {
   readStoredTheme,
   toPortableThemeConfig,
   type DesignerThemeConfig,
+  type GlobalColorToken,
   type GlobalThemeToken,
   type ThemeAudienceSize,
   type ThemeBackgroundMode,
@@ -53,11 +56,19 @@ import { themeRepository } from "../storage/theme-repository";
 import type { StoredThemeRecordV1 } from "../storage/storage-types";
 import { prepareThemeImport } from "./theme-import";
 import { useFormLocale, type FormAppLocale, type FormMessageKey } from "../i18n/locale-adapter";
+import {
+  BASE_THEME_COLOR_TOKENS,
+  calculateColorGroup,
+  recalculateAllThemeColors,
+  withCalculatedThemeColors,
+  type BaseThemeColorToken,
+} from "./theme-color-calculator";
 
 type SaveStatus = "saving" | "saved" | "invalid" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
 type PreviewViewport = "desktop" | "mobile";
 type MobilePanel = "design" | "preview";
+type ComponentPreview = "all" | "inputs" | "choices" | "actions";
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 type ThemeSizeCode = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -73,6 +84,21 @@ const legacyColorFallbacks: Partial<Record<GlobalThemeToken, `--${string}`>> = {
   "--jb-text-secondary": "--jb-content-secondary",
   "--jb-text-contrast": "--jb-content-inverse",
 };
+
+function isolateComponentPreview(document: JBFormDocumentV1, preview: ComponentPreview): JBFormDocumentV1 {
+  if (preview === "all") return document;
+  const categoryMatches = (category: string | undefined): boolean => preview === "choices"
+    ? category === "Choice"
+    : preview === "actions"
+      ? category === "Action"
+      : category !== undefined && !new Set(["Container", "Content", "Choice", "Action"]).has(category);
+  const matchingElements = walkFormElements(document.elements).filter(element => categoryMatches(registryByType.get(element.type)?.category));
+  const fallbackElements = walkFormElements(DESIGNER_SAMPLE_FORM.elements).filter(element => categoryMatches(registryByType.get(element.type)?.category));
+  return {
+    ...document,
+    elements: matchingElements.length > 0 ? matchingElements : fallbackElements,
+  };
+}
 
 function readCssVariableDefaults(): Partial<Record<GlobalThemeToken, string>> {
   if (typeof document === "undefined") return {};
@@ -200,6 +226,22 @@ function tokenLabel(token: GlobalThemeToken, locale: FormAppLocale): string {
     .join(" ");
 }
 
+function colorVariantLabel(token: GlobalColorToken, baseToken: BaseThemeColorToken | undefined, locale: FormAppLocale): string {
+  if (!baseToken || token === baseToken || !token.startsWith(`${baseToken}-`)) return tokenLabel(token, locale);
+  const variant = token.slice(baseToken.length + 1);
+  if (/^\d+$/.test(variant)) return locale === "fa" ? `درجه ${variant}` : `Shade ${variant}`;
+  const labels: Record<string, readonly [string, string]> = {
+    l: ["Light", "روشن"],
+    d: ["Dark", "تیره"],
+    contrast: ["Contrast", "متضاد"],
+    subtle: ["Subtle", "ملایم"],
+    hover: ["Hover", "اشاره‌گر"],
+    pressed: ["Pressed", "فشرده"],
+  };
+  const label = labels[variant];
+  return label ? label[locale === "fa" ? 1 : 0] : tokenLabel(token, locale);
+}
+
 function SettingRange({
   label,
   message,
@@ -275,6 +317,7 @@ export function DesignerApp() {
   const themeRecordRef = useRef<StoredThemeRecordV1 | null>(null);
   const editVersionRef = useRef(0);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const saveInFlightRef = useRef<Promise<boolean> | null>(null);
   const [theme, setTheme] = useState<DesignerThemeConfig>(() => readStoredTheme());
   const lastValidPortableThemeRef = useRef<ThemeConfigV1>(toPortableThemeConfig(theme));
   const portableThemeState = useMemo(() => {
@@ -321,19 +364,30 @@ export function DesignerApp() {
   const [viewport, setViewport] = useState<PreviewViewport>("desktop");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("design");
   const [previewSource, setPreviewSource] = useState("sample");
+  const [componentPreview, setComponentPreview] = useState<ComponentPreview>("all");
   const [isEditingName, setIsEditingName] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportCopied, setExportCopied] = useState(false);
+  const [advancedColorsOpen, setAdvancedColorsOpen] = useState(false);
+  const [advancedColorDraft, setAdvancedColorDraft] = useState<DesignerThemeConfig["global"]>({});
   const [temporaryImage, setTemporaryImage] = useState<string>();
   const [imageNotice, setImageNotice] = useState<string>();
   const [imageLoadState, setImageLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [imageRetryVersion, setImageRetryVersion] = useState(0);
+  const normalizedThemeSearch = themeSearch.trim().toLocaleLowerCase(locale);
   const filteredLibraryThemes = useMemo(() => {
-    const query = themeSearch.trim().toLocaleLowerCase(locale);
-    if (!query) return libraryThemes;
-    return libraryThemes.filter(record => `${record.config.name} ${record.config.description ?? ""}`.toLocaleLowerCase(locale).includes(query));
-  }, [libraryThemes, locale, themeSearch]);
+    if (!normalizedThemeSearch) return libraryThemes;
+    return libraryThemes.filter(record => `${record.config.name} ${record.config.description ?? ""}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch));
+  }, [libraryThemes, locale, normalizedThemeSearch]);
+  const filteredThemePresets = useMemo(() => {
+    if (!normalizedThemeSearch) return THEME_PRESETS;
+    return THEME_PRESETS.filter(presetItem => `${presetItem.label} ${presetItem.config.description ?? ""}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch));
+  }, [locale, normalizedThemeSearch]);
+  const showBuiltInTheme = !normalizedThemeSearch || `${messages.designerDefaultTheme} ${messages.designerBuiltInDefault} ${messages.designerBuiltInThemeDescription}`
+    .toLocaleLowerCase(locale)
+    .includes(normalizedThemeSearch);
+  const hasThemeSearchResults = showBuiltInTheme || filteredLibraryThemes.length > 0 || filteredThemePresets.length > 0;
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
     editVersionRef.current += 1;
@@ -403,30 +457,46 @@ export function DesignerApp() {
     });
   }, [formSlug, messages.designerThemeNotFound, storedTheme]);
 
-  useEffect(() => {
-    if (saveStatus !== "saving" || !themeRecord) return;
+  const saveCurrentTheme = useCallback((): Promise<boolean> => {
+    if (saveInFlightRef.current) return saveInFlightRef.current;
     if (!portableThemeState.valid) {
       setSaveStatus("invalid");
-      return;
+      return Promise.resolve(false);
     }
     const editVersion = editVersionRef.current;
     const config = portableTheme;
+    setSaveStatus("saving");
+    const operation = saveQueueRef.current.then(async () => {
+      const linked = themeRecordRef.current;
+      if (!linked) {
+        setSaveStatus("error");
+        return false;
+      }
+      const result = await themeRepository.save({ id: linked.id, revision: linked.revision, config });
+      if (!result.ok) {
+        setSaveStatus("error");
+        return false;
+      }
+      themeRecordRef.current = result.value;
+      setThemeRecord(result.value);
+      if (editVersionRef.current === editVersion) setSaveStatus("saved");
+      return true;
+    });
+    saveInFlightRef.current = operation;
+    saveQueueRef.current = operation.then(() => undefined, () => undefined);
+    void operation.finally(() => {
+      if (saveInFlightRef.current === operation) saveInFlightRef.current = null;
+    });
+    return operation;
+  }, [portableTheme, portableThemeState.valid]);
+
+  useEffect(() => {
+    if (saveStatus !== "saving" || !themeRecord) return;
     const timer = window.setTimeout(() => {
-      saveQueueRef.current = saveQueueRef.current.then(async () => {
-        const linked = themeRecordRef.current;
-        if (!linked) return;
-        const result = await themeRepository.save({ id: linked.id, revision: linked.revision, config });
-        if (!result.ok) {
-          setSaveStatus("error");
-          return;
-        }
-        themeRecordRef.current = result.value;
-        setThemeRecord(result.value);
-        if (editVersionRef.current === editVersion) setSaveStatus("saved");
-      });
+      void saveCurrentTheme();
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [portableTheme, portableThemeState.valid, saveStatus, themeRecord]);
+  }, [saveCurrentTheme, saveStatus, themeRecord]);
 
   useEffect(() => () => {
     if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
@@ -630,6 +700,17 @@ export function DesignerApp() {
     setThemeLoadNotice(message("designerDefaultSuccess", { name: record.config.name }));
   };
 
+  const setBuiltInThemeAsDefault = async () => {
+    const result = await themeRepository.setDefault(null);
+    if (!result.ok) {
+      setThemeLoadNotice(result.error.message);
+      return;
+    }
+    setDefaultThemeId(null);
+    setThemeBindings(result.value.bindings);
+    setThemeLoadNotice(messages.designerBuiltInDefaultSuccess);
+  };
+
   const requestThemeDelete = (record: StoredThemeRecordV1) => {
     setPendingDelete(record);
     setDeleteReplacementId("default");
@@ -669,13 +750,46 @@ export function DesignerApp() {
     setThemeLoadNotice(message("designerDeleteSuccess", { name: pendingDelete.config.name }));
   };
 
+  const requestDesignerLeave = useCallback(async (leave: () => void) => {
+    if (saveStatus === "invalid" || saveStatus === "error") {
+      window.alert(messages.designerNavigationBlocked);
+      return;
+    }
+    if (saveStatus === "saving" && !await saveCurrentTheme()) return;
+    if (temporaryImage && !window.confirm(messages.designerTemporaryLeaveConfirm)) return;
+    leave();
+  }, [messages.designerNavigationBlocked, messages.designerTemporaryLeaveConfirm, saveCurrentTheme, saveStatus, temporaryImage]);
+
+  const handleDesignerNavigationCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (saveStatus === "saved" && !temporaryImage) return;
+    const anchor = (event.target as Element).closest("a[href]") as HTMLAnchorElement | null;
+    if (!anchor || event.button !== 0) return;
+    event.preventDefault();
+    const href = anchor.href;
+    void requestDesignerLeave(() => window.location.assign(href));
+  };
+
+  useEffect(() => {
+    if (saveStatus === "saved" && !temporaryImage) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [saveStatus, temporaryImage]);
+
   const canUseStoredForm = storedForm.status === "ready";
   const selectedDocument = previewSource === "stored" && canUseStoredForm
     ? storedForm.document
     : DESIGNER_SAMPLE_FORM;
+  const componentPreviewDocument = useMemo(
+    () => isolateComponentPreview(selectedDocument, componentPreview),
+    [componentPreview, selectedDocument],
+  );
   const previewDocument = useMemo(
-    () => withControlSizeDefault(selectedDocument, theme.defaults.controlSize),
-    [selectedDocument, theme.defaults.controlSize],
+    () => withControlSizeDefault(componentPreviewDocument, theme.defaults.controlSize),
+    [componentPreviewDocument, theme.defaults.controlSize],
   );
   const previewLocale = previewDocument.localization.defaultLocale;
   const previewDirection = previewDocument.localization.locales[previewLocale]?.direction ?? "ltr";
@@ -778,6 +892,43 @@ export function DesignerApp() {
       draft.background.imageUrl = undefined;
     });
   };
+
+  const setBaseThemeColor = (token: BaseThemeColorToken, value: string) => {
+    updateTheme(draft => {
+      Object.assign(draft.global, calculateColorGroup(token, value));
+    });
+  };
+
+  const openAdvancedColors = () => {
+    setAdvancedColorDraft(withCalculatedThemeColors(theme.global) as DesignerThemeConfig["global"]);
+    setAdvancedColorsOpen(true);
+  };
+
+  const saveAdvancedColors = () => {
+    updateTheme(draft => { draft.global = { ...advancedColorDraft }; });
+    setAdvancedColorsOpen(false);
+  };
+
+  const advancedColorGroups: Array<{
+    id: string;
+    title: string;
+    description: string;
+    baseToken?: BaseThemeColorToken;
+    tokens: GlobalColorToken[];
+  }> = [
+    { id: "primary", title: messages.designerPrimaryPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-primary", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-primary" || token.startsWith("--jb-primary-")) },
+    { id: "secondary", title: messages.designerSecondaryPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-secondary", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-secondary" || token.startsWith("--jb-secondary-")) },
+    { id: "green", title: messages.designerSuccessPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-green", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-green" || token.startsWith("--jb-green-")) },
+    { id: "red", title: messages.designerErrorPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-red", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-red" || token.startsWith("--jb-red-")) },
+    { id: "yellow", title: messages.designerWarningPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-yellow", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-yellow" || token.startsWith("--jb-yellow-")) },
+    { id: "neutral", title: messages.designerNeutralPalette, description: messages.designerNeutralPaletteHelp, baseToken: "--jb-neutral", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-neutral" || token.startsWith("--jb-neutral-")) },
+    {
+      id: "foundations",
+      title: messages.designerFoundationColors,
+      description: messages.designerFoundationColorsHelp,
+      tokens: ["--jb-text-primary", "--jb-text-secondary", "--jb-text-contrast", "--jb-black", "--jb-white", "--jb-highlight"],
+    },
+  ];
 
   const renderBackgroundSettings = () => (
     <div className={styles.sectionContent}>
@@ -926,22 +1077,57 @@ export function DesignerApp() {
   const renderSectionContent = (section: DesignerSection) => {
     if (section === "background") return renderBackgroundSettings();
     if (section === "colors") {
+      const quickColorGroups: Array<{ title: string; description: string; tokens: BaseThemeColorToken[] }> = [
+        {
+          title: messages.designerBrandColors,
+          description: messages.designerBrandColorsHelp,
+          tokens: ["--jb-primary", "--jb-secondary", "--jb-neutral"],
+        },
+        {
+          title: messages.designerFeedbackColors,
+          description: messages.designerFeedbackColorsHelp,
+          tokens: ["--jb-green", "--jb-red", "--jb-yellow"],
+        },
+      ];
       return (
         <div className={styles.sectionContent}>
           <p className={styles.sectionIntro}>{messages.designerColorsIntro}</p>
-          <div className={styles.tokenList}>
-            {GLOBAL_COLOR_TOKENS.map(token => (
-              <div className={styles.tokenField} key={token}>
-                <JBColorInput
-                  size="sm"
-                  label={tokenLabel(token, locale)}
-                  message={theme.global[token] == null ? messages.designerInheritedDefault : ""}
-                  value={theme.global[token] ?? cssVariableDefaults[token] ?? ""}
-                  onInput={event => updateTheme(draft => { draft.global[token] = valueFromEvent(event) || null; })}
-                />
-                <code>{token}</code>
+          {quickColorGroups.map(group => (
+            <section className={styles.colorGroupCard} key={group.title}>
+              <div className={styles.colorGroupHeading}>
+                <strong>{group.title}</strong>
+                <span>{group.description}</span>
               </div>
-            ))}
+              <div className={styles.quickColorGrid}>
+                {group.tokens.map(token => {
+                  const baseValue = theme.global[token] ?? cssVariableDefaults[token] ?? "";
+                  const calculated = calculateColorGroup(token, baseValue);
+                  return (
+                    <div className={styles.quickColorField} key={token}>
+                      <JBColorInput
+                        size="sm"
+                        label={tokenLabel(token, locale)}
+                        message={theme.global[token] == null ? messages.designerInheritedDefault : messages.designerShadesCalculated}
+                        value={baseValue}
+                        onInput={event => setBaseThemeColor(token, valueFromEvent(event))}
+                      />
+                      <div className={styles.calculatedSwatches} aria-label={messages.designerCalculatedPalette}>
+                        {Object.entries(calculated).slice(0, token === "--jb-neutral" ? 12 : 7).map(([shadeToken, color]) => (
+                          <span key={shadeToken} style={{ backgroundColor: color ?? "transparent" }} title={shadeToken} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+          <div className={styles.advancedColorCallout}>
+            <div>
+              <strong>{messages.designerAdvancedColors}</strong>
+              <span>{messages.designerAdvancedColorsHelp}</span>
+            </div>
+            <JBButton size="sm" variant="outline" onClick={openAdvancedColors}>{messages.designerCustomizeEveryColor}</JBButton>
           </div>
         </div>
       );
@@ -1048,12 +1234,15 @@ export function DesignerApp() {
     }
     return (
       <div className={styles.sectionContent}>
-        <JBSelect<string> size="sm" popoverPosition="fixed" label={messages.designerPreviewComponent} value="all" hideClear>
-          <JBOption value="all">{messages.designerAllControls}</JBOption>
-          <JBOption value="inputs">{messages.designerInputs}</JBOption>
-          <JBOption value="choices">{messages.designerChoices}</JBOption>
-          <JBOption value="actions">{messages.designerButtons}</JBOption>
-        </JBSelect>
+        <div className={styles.componentPreviewControl} role="group" aria-label={messages.designerPreviewComponent}>
+          <span>{messages.designerPreviewComponent}</span>
+          <div>
+            <JBButton size="sm" variant={componentPreview === "all" ? "solid" : "outline"} onClick={() => setComponentPreview("all")}>{messages.designerAllControls}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "inputs" ? "solid" : "outline"} onClick={() => setComponentPreview("inputs")}>{messages.designerInputs}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "choices" ? "solid" : "outline"} onClick={() => setComponentPreview("choices")}>{messages.designerChoices}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "actions" ? "solid" : "outline"} onClick={() => setComponentPreview("actions")}>{messages.designerButtons}</JBButton>
+          </div>
+        </div>
         <p className={styles.notice}>{messages.designerComponentsNotice}</p>
       </div>
     );
@@ -1079,7 +1268,26 @@ export function DesignerApp() {
           <JBInput size="sm" label={messages.designerSearchThemes} value={themeSearch} onInput={event => setThemeSearch(valueFromEvent(event))} />
         </div>
         {themeLoadNotice ? <p role="alert">{themeLoadNotice}</p> : null}
-        {libraryThemes.length > 0 ? (
+        {showBuiltInTheme ? (
+          <>
+            <h2>{messages.designerDefaultTheme}</h2>
+            <section className={styles.libraryGrid} aria-label={messages.designerDefaultTheme}>
+              <article className={styles.libraryCard}>
+                <div className={`${styles.libraryCardOpen} ${styles.libraryCardStatic}`}>
+                  <div className={styles.builtInThemePreview} aria-hidden="true"><span>JB</span></div>
+                  <strong>{messages.designerBuiltInDefault}</strong>
+                  <span>{messages.designerBuiltInThemeDescription}</span>
+                </div>
+                <div className={styles.libraryCardActions}>
+                  <button type="button" disabled={defaultThemeId === null} onClick={() => void setBuiltInThemeAsDefault()}>
+                    {defaultThemeId === null ? messages.designerDefault : messages.designerSetDefault}
+                  </button>
+                </div>
+              </article>
+            </section>
+          </>
+        ) : null}
+        {filteredLibraryThemes.length > 0 ? (
           <>
             <h2>{messages.designerMyThemes}</h2>
             <section className={styles.libraryGrid} aria-label={messages.designerMyThemes}>
@@ -1099,24 +1307,28 @@ export function DesignerApp() {
                     <button type="button" disabled={record.id === defaultThemeId} onClick={() => void setLibraryThemeAsDefault(record)}>
                       {record.id === defaultThemeId ? messages.designerDefault : messages.designerSetDefault}
                     </button>
-                    <button type="button" onClick={() => requestThemeDelete(record)}>{messages.designerDelete}</button>
+                    <button className={styles.deleteThemeAction} type="button" onClick={() => requestThemeDelete(record)}>{messages.designerDelete}</button>
                   </div>
                 </article>
               ))}
             </section>
-            {filteredLibraryThemes.length === 0 ? <p className={styles.libraryEmpty}>{messages.designerNoThemeResults}</p> : null}
           </>
         ) : null}
-        <h2>{messages.designerPresetGallery}</h2>
-        <section className={styles.libraryGrid} aria-label={messages.designerThemePresets}>
-          {THEME_PRESETS.map(presetItem => (
-            <button key={presetItem.id} type="button" onClick={() => void createFromPreset(presetItem.config, presetItem.id)}>
-              <img src={presetItem.thumbnail} alt="" />
-              <strong>{presetItem.label}</strong>
-              <span>{presetItem.config.description}</span>
-            </button>
-          ))}
-        </section>
+        {filteredThemePresets.length > 0 ? (
+          <>
+            <h2>{messages.designerPresetGallery}</h2>
+            <section className={styles.libraryGrid} aria-label={messages.designerThemePresets}>
+              {filteredThemePresets.map(presetItem => (
+                <button key={presetItem.id} type="button" onClick={() => void createFromPreset(presetItem.config, presetItem.id)}>
+                  <img src={presetItem.thumbnail} alt="" />
+                  <strong>{presetItem.label}</strong>
+                  <span>{presetItem.config.description}</span>
+                </button>
+              ))}
+            </section>
+          </>
+        ) : null}
+        {!hasThemeSearchResults ? <p className={styles.libraryEmpty}>{messages.designerNoThemeResults}</p> : null}
         {createOpen ? (
           <div className={styles.modalBackdrop} onMouseDown={event => { if (!createBusy && event.target === event.currentTarget) setCreateOpen(false); }}>
             <section className={`${styles.exportModal} ${styles.createModal}`} role="dialog" aria-modal="true" aria-labelledby="create-theme-title" onKeyDown={event => { if (!createBusy && event.key === "Escape") setCreateOpen(false); }}>
@@ -1258,11 +1470,11 @@ export function DesignerApp() {
   ];
 
   return (
-    <div className={styles.designer} dir={direction}>
+    <div className={styles.designer} dir={direction} onClickCapture={handleDesignerNavigationCapture}>
       <FormRouteHeader layout="editor" className={styles.header}>
         <FormRouteBrand href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
         <div className={styles.themeIdentity}>
-          <button type="button" className={styles.backButton} onClick={() => setLibraryOpen(true)}>
+          <button type="button" className={styles.backButton} onClick={() => void requestDesignerLeave(() => setLibraryOpen(true))}>
             <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
             <span>{messages.designerBackThemes}</span>
           </button>
@@ -1296,6 +1508,7 @@ export function DesignerApp() {
           </JBSelect>
           <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label={messages.designerUndo} onClick={undo}>{messages.designerUndo}</JBButton>
           <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label={messages.designerRedo} onClick={redo}>{messages.designerRedo}</JBButton>
+          {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => void saveCurrentTheme()}>{messages.designerRetrySave}</JBButton> : null}
           <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => void setCurrentAsDefault()}>
             {themeRecord && defaultThemeId === themeRecord.id ? messages.designerDefault : messages.designerSetDefault}
           </JBButton>
@@ -1425,6 +1638,84 @@ export function DesignerApp() {
                 }
               }}>{exportCopied ? messages.designerCopied : messages.designerCopyJson}</JBButton>
             </div>
+          </section>
+        </div>
+      ) : null}
+      {advancedColorsOpen ? (
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => {
+          if (event.target === event.currentTarget) setAdvancedColorsOpen(false);
+        }}>
+          <section className={`${styles.exportModal} ${styles.advancedColorsModal}`} role="dialog" aria-modal="true" aria-labelledby="advanced-colors-title" onKeyDown={event => {
+            if (event.key === "Escape") setAdvancedColorsOpen(false);
+          }}>
+            <header>
+              <div>
+                <h2 id="advanced-colors-title">{messages.designerAdvancedColors}</h2>
+                <p>{messages.designerAdvancedColorsModalHelp}</p>
+              </div>
+              <JBButton size="sm" variant="ghost" onClick={() => setAdvancedColorDraft(recalculateAllThemeColors(advancedColorDraft) as DesignerThemeConfig["global"])}>
+                {messages.designerRestoreCalculatedColors}
+              </JBButton>
+            </header>
+            <div className={styles.advancedColorGroups}>
+              {advancedColorGroups.map(group => {
+                const baseValue = group.baseToken
+                  ? advancedColorDraft[group.baseToken] ?? cssVariableDefaults[group.baseToken] ?? ""
+                  : undefined;
+                const derivedTokens = group.baseToken ? group.tokens.filter(token => token !== group.baseToken) : group.tokens;
+                return (
+                  <section
+                    className={`${styles.advancedColorGroup} ${group.baseToken ? styles.calculatedColorGroup : styles.foundationColorGroup}`}
+                    key={group.id}
+                    style={baseValue ? ({ "--advanced-group-color": baseValue } as CSSVariables) : undefined}
+                  >
+                    <header className={styles.advancedColorGroupHeader}>
+                      {baseValue ? <span className={styles.advancedGroupSwatch} style={{ backgroundColor: baseValue }} /> : null}
+                      <div>
+                        <h3>{group.title}</h3>
+                        <p>{group.description}</p>
+                      </div>
+                    </header>
+                    {group.baseToken ? (
+                      <div className={styles.advancedBaseToken}>
+                        <span className={styles.baseColorBadge}>{messages.designerBaseColor}</span>
+                        <JBColorInput
+                          size="md"
+                          label={tokenLabel(group.baseToken, locale)}
+                          message={messages.designerBaseColorHelp}
+                          value={baseValue}
+                          onInput={event => {
+                            const value = valueFromEvent(event);
+                            setAdvancedColorDraft(current => ({ ...current, ...calculateColorGroup(group.baseToken!, value) }));
+                          }}
+                        />
+                        <code>{group.baseToken}</code>
+                      </div>
+                    ) : null}
+                    <div className={styles.advancedDerivedGrid}>
+                      {derivedTokens.map(token => (
+                        <div className={`${styles.tokenField} ${styles.advancedDerivedToken}`} key={token}>
+                          <JBColorInput
+                            size="sm"
+                            label={colorVariantLabel(token, group.baseToken, locale)}
+                            value={advancedColorDraft[token] ?? cssVariableDefaults[token] ?? ""}
+                            onInput={event => setAdvancedColorDraft(current => ({ ...current, [token]: valueFromEvent(event) || null }))}
+                          />
+                          <code>{token}</code>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+            <footer>
+              <span>{messages.designerAdvancedChangesApplyOnSave}</span>
+              <div>
+                <JBButton variant="ghost" onClick={() => setAdvancedColorsOpen(false)}>{messages.designerCancel}</JBButton>
+                <JBButton color="primary" onClick={saveAdvancedColors}>{messages.designerApplyColors}</JBButton>
+              </div>
+            </footer>
           </section>
         </div>
       ) : null}

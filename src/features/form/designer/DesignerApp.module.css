@@ -261,6 +261,76 @@
   white-space: nowrap;
 }
 
+.colorGroupCard {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 0.9rem;
+  background: #fbfcff;
+}
+
+.colorGroupHeading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.colorGroupHeading strong {
+  color: var(--designer-ink);
+  font-size: 0.86rem;
+}
+
+.colorGroupHeading span,
+.advancedColorCallout span {
+  color: var(--designer-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.quickColorGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.quickColorField {
+  min-width: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.calculatedSwatches {
+  display: flex;
+  min-height: 0.5rem;
+  overflow: hidden;
+  border: 0.0625rem solid rgba(16, 27, 72, 0.1);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.calculatedSwatches span {
+  min-width: 0;
+  min-height: 0.5rem;
+  flex: 1 1 0;
+}
+
+.advancedColorCallout {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  color: #24315f;
+  background: #f2f5fc;
+}
+
+.advancedColorCallout > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.advancedColorCallout jb-button {
+  justify-self: start;
+}
+
 .segmented {
   min-height: 2.6rem;
   padding: 0.2rem;
@@ -394,6 +464,26 @@
   background: #fff8e8;
   font-size: 0.75rem;
   line-height: 1.45;
+}
+
+.componentPreviewControl {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.componentPreviewControl > span {
+  color: var(--designer-muted);
+  font-size: 0.75rem;
+}
+
+.componentPreviewControl > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.componentPreviewControl jb-button {
+  width: 100%;
 }
 
 .autosaveNote {
@@ -682,6 +772,28 @@
   background: transparent;
 }
 
+.libraryCardStatic {
+  cursor: default;
+}
+
+.builtInThemePreview {
+  aspect-ratio: 1.6;
+  border-radius: 0.7rem;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background:
+    radial-gradient(circle at 78% 24%, rgba(255, 255, 255, 0.28), transparent 28%),
+    linear-gradient(135deg, #173b73, #3156b8 55%, #08a3a3);
+}
+
+.builtInThemePreview span {
+  color: inherit;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+}
+
 .libraryCardActions {
   padding: 0.65rem 0.8rem;
   display: flex;
@@ -703,7 +815,7 @@
   cursor: pointer;
 }
 
-.libraryCardActions button:last-child {
+.libraryCardActions .deleteThemeAction {
   color: #a23232;
 }
 
@@ -738,6 +850,184 @@
   width: min(34rem, 100%);
   display: grid;
   gap: 1rem;
+}
+
+.advancedColorsModal {
+  width: min(68rem, calc(100vw - 2rem));
+  max-height: min(52rem, calc(100vh - 2rem));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.advancedColorsModal > header,
+.advancedColorsModal > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.advancedColorsModal > header > div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.advancedColorsModal h2,
+.advancedColorsModal p {
+  margin: 0;
+}
+
+.advancedColorsModal p,
+.advancedColorsModal footer > span {
+  color: var(--designer-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.advancedColorsModal > .advancedColorGroups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  justify-content: stretch;
+  gap: 1rem;
+  overflow: auto;
+  padding: 0.2rem 0.35rem 1rem 0.1rem;
+}
+
+.advancedColorGroups jb-color-input {
+  --jb-input-input-direction: ltr;
+  --jb-input-input-text-align: left;
+  width: 100%;
+  min-width: 0;
+}
+
+.advancedColorGroup {
+  min-width: 0;
+  display: grid;
+  gap: 0.9rem;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fbfcff;
+}
+
+.calculatedColorGroup {
+  border-block-start: 0.22rem solid var(--advanced-group-color, var(--designer-line));
+}
+
+.advancedColorGroupHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.advancedColorGroupHeader > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.advancedColorGroupHeader h3 {
+  margin: 0;
+  color: var(--designer-ink);
+  font-size: 0.95rem;
+}
+
+.advancedColorGroupHeader p {
+  font-size: 0.7rem;
+}
+
+.advancedGroupSwatch {
+  width: 1.55rem;
+  height: 1.55rem;
+  flex: 0 0 auto;
+  border: 0.16rem solid #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 0.0625rem rgba(16, 27, 72, 0.16);
+}
+
+.advancedBaseToken {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--advanced-group-color, #3156b8) 42%, var(--designer-line));
+  border-radius: 0.85rem;
+  padding: 1rem 0.8rem 0.75rem;
+  background: color-mix(in srgb, var(--advanced-group-color, #3156b8) 7%, #fff);
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--advanced-group-color, #3156b8) 8%, transparent);
+}
+
+.advancedBaseToken code,
+.advancedDerivedToken code {
+  overflow: hidden;
+  color: #7a849f;
+  font-size: 0.64rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.baseColorBadge {
+  position: absolute;
+  inset-block-start: -0.65rem;
+  inset-inline-end: 0.65rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--advanced-group-color, #3156b8) 32%, #fff);
+  border-radius: 999px;
+  padding: 0.16rem 0.48rem;
+  color: color-mix(in srgb, var(--advanced-group-color, #3156b8) 72%, #101b48);
+  background: #fff;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+.advancedDerivedGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.foundationColorGroup {
+  grid-column: 1 / -1;
+}
+
+.foundationColorGroup .advancedDerivedGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.advancedColorsModal footer > div {
+  display: flex;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 52rem) {
+  .advancedColorsModal > header,
+  .advancedColorsModal > footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .advancedColorsModal > .advancedColorGroups {
+    grid-template-columns: 1fr;
+  }
+
+  .foundationColorGroup {
+    grid-column: auto;
+  }
+
+  .foundationColorGroup .advancedDerivedGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .advancedDerivedGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .advancedColorsModal footer > div {
+    justify-content: flex-end;
+  }
 }
 
 .createModal > p,
