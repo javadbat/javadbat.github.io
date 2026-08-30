@@ -14,7 +14,9 @@ import { BuilderStoreProvider } from "./BuilderStoreContext";
 import { CATALOG_DRAG_TYPE } from "../builder-drag";
 import { FormCanvas } from "../FormCanvas/FormCanvas";
 import { PropertyField } from "../ConfigurationPanel/PropertyField";
-import { CommonFieldsEditor } from "../ConfigurationPanel/CommonFieldsEditor";
+import { CommonBehaviorEditor, CommonFieldsEditor } from "../ConfigurationPanel/CommonFieldsEditor";
+import { DataFieldsEditor } from "../ConfigurationPanel/DataFieldsEditor";
+import { ConfigurationPanel } from "../ConfigurationPanel/ConfigurationPanel";
 
 // Happy DOM lacks the ElementInternals API used by jb-tooltip. Real supported
 // browsers provide it; this shim keeps these component tests on the real UI path.
@@ -113,12 +115,43 @@ describe("Builder shell performance baseline", () => {
       store.updateSelectedElement({ name: "benchmarkField" });
     });
 
-    expect(view.getByText("benchmarkField")).toBeTruthy();
+    expect(store.selectedElement?.name).toBe("benchmarkField");
+    expect(view.queryByText("benchmarkField")).toBeNull();
     expect(view.container.querySelectorAll("[data-selected='true']")).toHaveLength(1);
   });
 });
 
 describe("Builder core editing", () => {
+  it("prioritizes user-facing content and keeps the data name in the last collapsed group", () => {
+    const store = new BuilderStore();
+    const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
+    store.addElement(inputEntry);
+
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <ConfigurationPanel messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const collapses = Array.from(view.container.querySelectorAll("jb-collapse"));
+    const titles = collapses.map(collapse => collapse.querySelector('[slot="title"]')?.textContent);
+    const contentFields = Array.from(collapses[0].querySelectorAll("jb-input"), field => field.getAttribute("name"));
+
+    expect(titles).toEqual([
+      formAppMessages.en.contentSettings,
+      formAppMessages.en.componentSettings,
+      formAppMessages.en.behaviorSettings,
+      formAppMessages.en.validationRules,
+      formAppMessages.en.advancedSettings,
+      formAppMessages.en.dataSettings,
+    ]);
+    expect(contentFields).toEqual(["elementLabel", "prop-message", "elementPlaceholder"]);
+    expect(collapses[0].hasAttribute("open")).toBe(true);
+    expect(collapses[1].hasAttribute("open")).toBe(true);
+    expect(collapses.slice(2).every(collapse => !collapse.hasAttribute("open"))).toBe(true);
+    expect(collapses.at(-1)?.querySelector('jb-input[name="elementName"]')).toBeTruthy();
+    expect(collapses[0].querySelector('jb-input[name="elementName"]')).toBeNull();
+  });
+
   it.each([
     ["jb-mobile-input", 'jb-input[name="elementInitialValue"]'],
     ["jb-password-input", 'jb-input[name="elementInitialValue"]'],
@@ -135,7 +168,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
 
@@ -152,7 +185,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={entry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+        <CommonBehaviorEditor entry={entry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
       </BuilderStoreProvider>,
     );
     const options = Array.from(view.container.querySelectorAll("jb-option"), option => option.textContent);
@@ -169,7 +202,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
 
@@ -183,7 +216,7 @@ describe("Builder core editing", () => {
     store.addElement(entry);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
     const timeInput = view.container.querySelector("jb-time-input") as HTMLElement & {
@@ -205,7 +238,7 @@ describe("Builder core editing", () => {
     const originalName = store.selectedElement!.name;
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={inputEntry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <DataFieldsEditor messages={formAppMessages.en} />
       </BuilderStoreProvider>,
     );
     const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
@@ -223,7 +256,7 @@ describe("Builder core editing", () => {
     store.addElement(inputEntry);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={inputEntry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+        <DataFieldsEditor messages={formAppMessages.fa} />
       </BuilderStoreProvider>,
     );
     const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
@@ -575,6 +608,40 @@ describe("Builder core editing", () => {
     expect(store.selectedElementId).toBe(firstId);
     expect(store.selectedElementId).not.toBe(secondId);
     expect(onSelectElement).toHaveBeenCalledWith(firstId);
+  });
+
+  it("renders action captions and keeps action bars available for unselected touch cards", () => {
+    const matchMedia = vi.spyOn(window, "matchMedia").mockImplementation(query => ({
+      matches: query === "(hover: none) and (pointer: coarse), (max-width: 30rem)",
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    const store = new BuilderStore();
+    store.addElement(formElementRegistry[0]);
+    store.addElement(formElementRegistry[1]);
+    const view = render(
+      <BuilderStoreProvider value={store}>
+        <FormCanvas messages={formAppMessages.en} />
+      </BuilderStoreProvider>,
+    );
+    const unselectedCard = view.container.querySelector<HTMLElement>('[data-selected="false"]')!;
+    const actionButtons = unselectedCard.querySelectorAll("jb-button[aria-label]:not([draggable])");
+
+    expect(actionButtons).toHaveLength(5);
+    expect(Array.from(actionButtons, button => button.textContent?.trim())).toEqual([
+      formAppMessages.en.configure,
+      formAppMessages.en.moveUp,
+      formAppMessages.en.moveDown,
+      formAppMessages.en.duplicate,
+      formAppMessages.en.remove,
+    ]);
+    view.unmount();
+    matchMedia.mockRestore();
   });
 
   it("shows card actions when a field inside a tab is selected", () => {

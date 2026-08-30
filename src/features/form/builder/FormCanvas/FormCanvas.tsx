@@ -15,6 +15,7 @@ import { RepeatableGroupCanvasCard } from "./RepeatableGroupCanvasCard";
 import styles from "./FormCanvas.module.css";
 import { useCanvasInteractions } from "./useCanvasInteractions";
 import { InsertionTarget } from "./InsertionTarget";
+import { useMediaQuery } from "usehooks-ts";
 
 const RemoveElementModal = lazy(() => import("./RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
 
@@ -31,6 +32,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
   const defaultLocale = store.document.localization.defaultLocale;
   const count = store.document.elements.length;
   const interactions = useCanvasInteractions({ messages, onSelectElement, onConfigureElement });
+  const alwaysShowActions = useMediaQuery("(hover: none) and (pointer: coarse), (max-width: 30rem)");
   const { dragOverIndex, pendingRemoval, pendingRemovalEntry, acceptDrop, markDropTarget } = interactions;
 
   return (
@@ -75,6 +77,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 index={index}
                 count={count}
                 isSelected={element.id === store.selectedElementId}
+                alwaysShowActions={alwaysShowActions}
                 locale={locale}
                 defaultLocale={defaultLocale}
                 messages={messages}
@@ -89,6 +92,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 index={index}
                 count={count}
                 isSelected={element.id === store.selectedElementId}
+                alwaysShowActions={alwaysShowActions}
                 locale={locale}
                 defaultLocale={defaultLocale}
                 messages={messages}
@@ -103,6 +107,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 index={index}
                 count={count}
                 isSelected={element.id === store.selectedElementId}
+                alwaysShowActions={alwaysShowActions}
                 locale={locale}
                 defaultLocale={defaultLocale}
                 messages={messages}
@@ -117,6 +122,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 index={index}
                 count={count}
                 isSelected={element.id === store.selectedElementId}
+                alwaysShowActions={alwaysShowActions}
                 locale={locale}
                 defaultLocale={defaultLocale}
                 messages={messages}
@@ -131,6 +137,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 index={index}
                 count={count}
                 isSelected={element.id === store.selectedElementId}
+                alwaysShowActions={alwaysShowActions}
                 locale={locale}
                 defaultLocale={defaultLocale}
                 messages={messages}

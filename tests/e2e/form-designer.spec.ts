@@ -30,8 +30,11 @@ test("supports keyboard compact navigation and 44px primary targets", async ({ p
   await page.setViewportSize({ width: 320, height: 900 });
   const workspace = page.locator("main[data-mobile-panel]");
   const mobileTabs = page.locator("[class*=mobileTabs]");
+  const mobileHeader = page.locator("[class*=mobileHeaderActions]");
   const design = mobileTabs.getByRole("button", { name: "Design", exact: true });
   const preview = mobileTabs.getByRole("button", { name: "Preview", exact: true });
+  const previewRoute = mobileHeader.getByRole("link", { name: "Preview", exact: true });
+  const more = mobileHeader.getByRole("button", { name: "More", exact: true });
 
   await design.focus();
   await design.press("Enter");
@@ -40,10 +43,18 @@ test("supports keyboard compact navigation and 44px primary targets", async ({ p
   await preview.press("Enter");
   await expect(workspace).toHaveAttribute("data-mobile-panel", "preview");
 
-  for (const control of [design, preview, page.getByRole("button", { name: "Export theme" })]) {
+  for (const control of [design, preview, previewRoute, more]) {
     const box = await control.boundingBox();
     expect(Math.round(box?.height ?? 0)).toBeGreaterThanOrEqual(44);
   }
+
+  await more.focus();
+  await more.press("Enter");
+  const actions = page.getByRole("dialog", { name: "Theme actions" });
+  await expect(actions.getByRole("link", { name: "Builder" })).toBeVisible();
+  const exportTheme = actions.getByRole("button", { name: "Export theme" });
+  await expect(exportTheme).toBeVisible();
+  expect(Math.round((await exportTheme.boundingBox())?.height ?? 0)).toBeGreaterThanOrEqual(44);
 });
 
 test("uses the demo canvas as the only preview background layer", async ({ page }) => {
@@ -232,7 +243,7 @@ test("shows inherited JB defaults without saving overrides and uses consistent r
   expect(await inheritedGreen.evaluate(element => (element as HTMLElement & { value: string }).value)).not.toBe("");
   await expect(inheritedGreen).toHaveAttribute("message", /will not be saved/i);
   const inheritedColors = page.locator('jb-color-input[message*="will not be saved"]');
-  await expect(inheritedColors).toHaveCount(23);
+  await expect(inheritedColors).toHaveCount(6);
   expect(await inheritedColors.evaluateAll(elements => elements
     .filter(element => !(element as HTMLElement & { value: string }).value)
     .map(element => element.getAttribute("label")))).toEqual([]);
@@ -243,17 +254,22 @@ test("shows inherited JB defaults without saving overrides and uses consistent r
   await page.getByRole("button", { name: "Close" }).click();
 
   await page.getByRole("button", { name: "Size & spacing" }).click();
-  const controlHeights = page.locator('jb-input[message*="Used by controls set to"]');
+  const baseControlHeight = page.locator('jb-input[label="Medium control height"]');
+  await expect(baseControlHeight).toBeVisible();
+  expect(await baseControlHeight.evaluate(element => (element as HTMLElement & { value: string }).value)).toBe("40px");
+
+  await page.getByRole("button", { name: "Customize size scale" }).first().click();
+  const advancedSizes = page.getByRole("dialog", { name: "Need precise size control?" });
+  const controlHeights = advancedSizes.locator('jb-input[label$="control height"]');
   await expect(controlHeights).toHaveCount(5);
   expect(await controlHeights.evaluateAll(elements => elements.map(element => (element as HTMLElement & { value: string }).value))).toEqual([
+    "40px",
     "24px",
     "32px",
-    "40px",
     "48px",
     "64px",
   ]);
 
-  await page.getByRole("button", { name: "Shape" }).click();
   const radiusControls = [
     ["Medium element corner radius", 1],
     ["Extra small element corner radius", 0.5],
@@ -262,12 +278,11 @@ test("shows inherited JB defaults without saving overrides and uses consistent r
     ["Extra large element corner radius", 1.5],
   ];
   for (const [label, expectedValue] of radiusControls) {
-    const range = page.locator(`jb-range-input[aria-label="${label}"]`);
+    const range = advancedSizes.locator(`jb-range-input[aria-label="${label}"]`);
     await expect(range).toBeVisible();
-    await expect(range).toHaveAttribute("message", new RegExp(`set to ${String(label).replace(" element corner radius", "")}`, "i"));
     expect(await range.evaluate(element => (element as HTMLElement & { value: number }).value)).toBe(expectedValue);
   }
-  const radiusLayout = await page.locator('jb-range-input[aria-label="Medium element corner radius"]').evaluate(element => {
+  const radiusLayout = await advancedSizes.locator('jb-range-input[aria-label="Medium element corner radius"]').evaluate(element => {
     const setting = element.parentElement!;
     const label = setting.querySelector(":scope > span")!;
     const number = setting.querySelector("jb-number-input")!;
@@ -280,6 +295,10 @@ test("shows inherited JB defaults without saving overrides and uses consistent r
     };
   });
   expect(radiusLayout).toEqual({ labelAboveControls: true, valueBesideRange: true });
+  await advancedSizes.getByRole("button", { name: "Cancel" }).click();
+
+  await page.getByRole("button", { name: "Shape" }).click();
+  await expect(page.locator('jb-range-input[aria-label="Medium element corner radius"]')).toBeVisible();
 });
 
 test("keeps English Designer chrome LTR while a saved Persian form previews RTL", async ({ page }) => {
@@ -360,13 +379,9 @@ test("switches Designer chrome to persistent Persian RTL without changing the En
   expect(await page.evaluate(() => localStorage.getItem("jb-form:locale"))).toBe("fa");
 
   await page.getByRole("button", { name: "شکل" }).click();
-  await expect(page.locator('jb-range-input[aria-label="گردی گوشه عنصر خیلی کوچک"]')).toBeVisible();
   await expect(page.locator('jb-range-input[aria-label="گردی گوشه عنصر متوسط"]')).toBeVisible();
-  await expect(page.locator('jb-range-input[aria-label="گردی گوشه عنصر خیلی بزرگ"]')).toBeVisible();
   await page.getByRole("button", { name: "اندازه و فاصله" }).click();
-  await expect(page.locator('jb-input[label="ارتفاع کنترل خیلی کوچک"]')).toBeVisible();
   await expect(page.locator('jb-input[label="ارتفاع کنترل متوسط"]')).toBeVisible();
-  await expect(page.locator('jb-input[label="ارتفاع کنترل خیلی بزرگ"]')).toBeVisible();
 
   await page.reload();
   await expect(page.locator("[class*=designer]").first()).toHaveAttribute("dir", "rtl");

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { useRef } from "react";
+import type { ReactNode } from "react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { getLocalizedText } from "../../domain/form-document";
@@ -16,37 +16,15 @@ interface CommonFieldsEditorProps {
   locale: string;
   defaultLocale: string;
   messages: FormMessages;
+  children?: ReactNode;
 }
 
-export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, locale, defaultLocale, messages }: CommonFieldsEditorProps) {
+export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, locale, defaultLocale, messages, children }: CommonFieldsEditorProps) {
   const store = useBuilderStore();
   const element = store.selectedElement;
-  const lastNonEmptyName = useRef<{ elementId: string; value: string } | null>(null);
   if (!element) return null;
-  const nameError = store.getElementNameError(element.id);
-  if (lastNonEmptyName.current?.elementId !== element.id) {
-    lastNonEmptyName.current = { elementId: element.id, value: element.name };
-  } else if (element.name !== "") {
-    lastNonEmptyName.current.value = element.name;
-  }
   return (
-    <JBCollapse title={messages.commonSettings}>
-      <JBInput
-        size="sm"
-        id={`element-name-${element.id}`}
-        name="elementName"
-        label={messages.elementName}
-        value={element.name}
-        error={nameError === "required" ? messages.nameRequired : nameError === "invalid" ? messages.nameInvalid : undefined}
-        aria-invalid={nameError !== null}
-        onInput={event => store.updateSelectedElement({ name: inputValue(event as unknown as Event) })}
-        onBlur={event => {
-          if (inputValue(event as unknown as Event) === "" && lastNonEmptyName.current) {
-            store.updateSelectedElement({ name: lastNonEmptyName.current.value });
-          }
-        }}
-        message={messages.elementNameDescription}
-      />
+    <>
       {entry.commonFields.label ? (
         <JBInput
           size="sm"
@@ -56,6 +34,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
           onInput={event => store.updateSelectedText("label", inputValue(event as unknown as Event), locale)}
         />
       ) : null}
+      {children}
       {entry.commonFields.placeholder ? (
         <JBInput
           size="sm"
@@ -65,6 +44,16 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
           onInput={event => store.updateSelectedText("placeholder", inputValue(event as unknown as Event), locale)}
         />
       ) : null}
+    </>
+  );
+});
+
+export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ entry, locale, defaultLocale, messages }: CommonFieldsEditorProps) {
+  const store = useBuilderStore();
+  const element = store.selectedElement;
+  if (!element) return null;
+  return (
+    <JBCollapse title={messages.behaviorSettings} defaultOpen={false}>
       {entry.commonFields.initialValue ? (
         <InitialValueEditor
           entry={entry}

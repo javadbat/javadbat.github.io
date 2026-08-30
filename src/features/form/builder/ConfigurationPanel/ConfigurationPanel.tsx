@@ -6,7 +6,8 @@ import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { JBCollapse } from "jb-collapse/react";
 import { ValidationRulesEditor } from "../ValidationRulesEditor/ValidationRulesEditor";
-import { CommonFieldsEditor } from "./CommonFieldsEditor";
+import { CommonBehaviorEditor, CommonFieldsEditor } from "./CommonFieldsEditor";
+import { DataFieldsEditor } from "./DataFieldsEditor";
 import { PropertyField } from "./PropertyField";
 import { TabConfigurationEditor } from "./TabConfigurationEditor";
 import { ConditionConfigurationEditor } from "./ConditionConfigurationEditor";
@@ -50,7 +51,10 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
   const entry = element ? registryByType.get(element.type) : undefined;
   const visibleProperties = entry?.propertyDefinitions.filter(definition => !removedPropertyKeys.has(definition.key) && definition.builderVisible !== false) ?? [];
   const advancedProperties = visibleProperties.filter(definition => advancedPropertyKeys.has(definition.key));
-  const standardProperties = visibleProperties.filter(definition => !advancedPropertyKeys.has(definition.key));
+  const contentProperties = visibleProperties.filter(definition => definition.localized && !advancedPropertyKeys.has(definition.key));
+  const standardProperties = visibleProperties.filter(definition => !definition.localized && !advancedPropertyKeys.has(definition.key));
+  const hasCommonContent = Boolean(entry && (entry.commonFields.label || entry.commonFields.placeholder));
+  const hasCommonBehavior = Boolean(entry && (entry.commonFields.initialValue || entry.commonFields.required || entry.commonFields.disabled));
   return (
     <aside className={`${layoutStyles.panel} ${styles.configuration}`} data-builder-panel="properties" aria-labelledby="properties-title">
       <div className={styles.panelHeading}>
@@ -64,7 +68,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           </span>
         ) : null}
       </div>
-      <p className={styles.panelDescription}>{element ? `${entry ? getFormElementDisplayName(entry, locale) : element.type} · ${element.name}` : messages.propertiesDescription}</p>
+      <p className={styles.panelDescription}>{element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription}</p>
       {!element || !entry ? (
         <div className={styles.noSelection}>
           <span className={styles.selectionRing} />
@@ -73,17 +77,27 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
         </div>
       ) : (
         <div className={styles.configurationFields}>
-          <CommonFieldsEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+          {hasCommonContent || contentProperties.length > 0 ? (
+            <JBCollapse title={messages.contentSettings} defaultOpen>
+              <CommonFieldsEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages}>
+                {contentProperties.map(definition => (
+                  <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+                ))}
+              </CommonFieldsEditor>
+            </JBCollapse>
+          ) : null}
           {isTabElement(element) ? <TabConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
           {isConditionElement(element) ? <ConditionConfigurationEditor /> : null}
           {isWizardElement(element) ? <WizardConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
           {standardProperties.length > 0 ? (
-            <JBCollapse title={messages.componentSettings}>
+            <JBCollapse title={messages.componentSettings} defaultOpen>
               {standardProperties.map(definition => (
                 <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
               ))}
             </JBCollapse>
           ) : null}
+          {hasCommonBehavior ? <CommonBehaviorEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages} /> : null}
+          {!isContainerElement(element) ? <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} /> : null}
           {advancedProperties.length > 0 ? (
             <JBCollapse title={messages.advancedSettings} defaultOpen={false}>
               {advancedProperties.map(definition => (
@@ -91,7 +105,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
               ))}
             </JBCollapse>
           ) : null}
-          {!isContainerElement(element) ? <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} /> : null}
+          <DataFieldsEditor messages={messages} />
         </div>
       )}
     </aside>

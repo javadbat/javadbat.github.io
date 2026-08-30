@@ -136,6 +136,47 @@
   gap: 0.35rem;
 }
 
+.mobileHeaderActions {
+  display: none;
+}
+
+.mobileActionsBackdrop {
+  position: fixed;
+  z-index: 29;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(10, 18, 52, 0.12);
+}
+
+.mobileActionsMenu {
+  position: fixed;
+  z-index: 30;
+  inset-block-start: 5.55rem;
+  inset-inline-end: 1rem;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.5rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgba(8, 17, 53, 0.2);
+}
+
+.mobileActionsMenu > a,
+.mobileActionsMenu > jb-button,
+.mobileActionsMenu > jb-select,
+.mobileActionsMenu > a jb-button {
+  width: 100%;
+}
+
+.mobileActionsMenu > jb-button,
+.mobileActionsMenu > a jb-button {
+  --jb-button-height: 2.75rem;
+  --jb-button-height-sm: 2.75rem;
+}
+
 .languageSelect {
   width: 5.25rem;
   flex: 0 0 5.25rem;
@@ -259,6 +300,114 @@
   font-size: 0.66rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sizeFamilyCard {
+  display: grid;
+  gap: 1rem;
+  padding: 0.95rem;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 0.9rem;
+  background: #fbfcff;
+}
+
+.sizeGroupHeading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.sizeGroupHeading h3,
+.sizeGroupHeading p {
+  margin: 0;
+}
+
+.sizeGroupHeading h3 {
+  color: var(--designer-ink);
+  font-size: 0.9rem;
+}
+
+.sizeGroupHeading p {
+  color: var(--designer-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.baseSizeToken {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 0.8rem 0.75rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--designer-blue) 38%, var(--designer-line));
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--designer-blue) 6%, #fff);
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--designer-blue) 7%, transparent);
+}
+
+.baseSizeToken code {
+  overflow: hidden;
+  color: #7a849f;
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.baseSizeBadge {
+  position: absolute;
+  inset-block-start: -0.65rem;
+  inset-inline-end: 0.65rem;
+  padding: 0.16rem 0.48rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--designer-blue) 28%, #fff);
+  border-radius: 999px;
+  color: var(--designer-blue);
+  background: #fff;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+.baseSizeLink {
+  margin-block-start: 0.25rem;
+  padding-block-start: 0.65rem;
+  border-block-start: 0.0625rem solid color-mix(in srgb, var(--designer-blue) 16%, var(--designer-line));
+}
+
+.baseSizeLink::part(label) {
+  font-weight: 650;
+}
+
+.derivedSizeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.advancedSizeCallout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-block-start: 0.1rem;
+}
+
+.advancedSizeCallout > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.advancedSizeCallout strong {
+  color: var(--designer-ink);
+  font-size: 0.76rem;
+}
+
+.advancedSizeCallout span {
+  color: var(--designer-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.advancedSizeCallout jb-button {
+  flex: 0 0 auto;
 }
 
 .colorGroupCard {
@@ -693,6 +842,26 @@
   gap: 0.6rem;
 }
 
+.modalLoading {
+  width: min(26rem, 100%);
+  min-height: 13rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.modalLoading p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.modalLoadingProgress {
+  width: min(12rem, 70%);
+  accent-color: var(--designer-blue);
+}
+
 .libraryPage {
   min-height: 100dvh;
   padding: 2.5rem clamp(1rem, 5vw, 5rem);
@@ -969,6 +1138,16 @@
   white-space: nowrap;
 }
 
+.baseColorLink {
+  margin-block-start: 0.25rem;
+  padding-block-start: 0.65rem;
+  border-block-start: 0.0625rem solid color-mix(in srgb, var(--advanced-group-color, #3156b8) 18%, var(--designer-line));
+}
+
+.baseColorLink::part(label) {
+  font-weight: 650;
+}
+
 .baseColorBadge {
   position: absolute;
   inset-block-start: -0.65rem;
@@ -1180,6 +1359,23 @@
     z-index: 10;
     top: 0;
     padding-inline: 1rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .headerBrand,
+  .desktopHeaderActions {
+    display: none;
+  }
+
+  .mobileHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .mobileHeaderActions > a jb-button,
+  .mobileHeaderActions > jb-button {
+    --jb-button-height-sm: 2.75rem;
   }
 
   .backButton {
@@ -1188,7 +1384,6 @@
 
   .backButton span,
   .headerDivider,
-  .saveState,
   .headerActions > jb-button:nth-of-type(-n + 2) {
     display: none;
   }
@@ -1250,6 +1445,15 @@
 }
 
 @media (max-width: 40rem) {
+  .derivedSizeGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .advancedSizeCallout {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .libraryHeader,
   .libraryActions,
   .importModal > .importFileRow,
@@ -1265,10 +1469,15 @@
 
   .themeName {
     min-width: 0;
-    max-width: 8rem;
+    max-width: 5rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .saveState {
+    padding: 0.45rem;
+    font-size: 0;
   }
 
   .headerActions {

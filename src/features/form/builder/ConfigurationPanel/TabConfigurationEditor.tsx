@@ -38,7 +38,7 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
           <JBOption value="active">{copy(locale, "Only in the active tab", "فقط در تب فعال")}</JBOption>
         </JBSelect>
       </JBCollapse>
-      <JBCollapse title={copy(locale, "Tabs", "تب‌ها")}>
+      <JBCollapse title={copy(locale, "Tabs", "تب‌ها")} defaultOpen>
         <div className={styles.tabEditor}>
           {element.tabs.map((tab, index) => {
             const valueIsDuplicate = element.tabs.some((candidate, candidateIndex) => candidateIndex !== index && candidate.value === tab.value);

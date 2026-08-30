@@ -20,7 +20,7 @@ export const WizardConfigurationEditor = observer(function WizardConfigurationEd
   if (!element || !isWizardElement(element)) return null;
 
   return (
-    <JBCollapse title={copy(locale, "Steps", "مراحل")}>
+    <JBCollapse title={copy(locale, "Steps", "مراحل")} defaultOpen>
       <div className={styles.tabEditor}>
         {element.steps.map((step, index) => {
           const duplicateValue = element.steps.some((candidate, candidateIndex) => candidateIndex !== index && candidate.value === step.value);

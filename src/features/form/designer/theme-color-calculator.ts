@@ -105,6 +105,18 @@ export function calculateColorGroup(token: BaseThemeColorToken, value: string): 
   return calculateSemanticGroup(token.slice("--jb-".length) as ThemeColorGroup, value);
 }
 
+/** Updates a base token, optionally keeping its calculated family synchronized. */
+export function updateBaseThemeColor(
+  values: ThemeColorValues,
+  token: BaseThemeColorToken,
+  value: string,
+  variantsLinked: boolean,
+): ThemeColorValues {
+  return variantsLinked
+    ? { ...values, ...calculateColorGroup(token, value) }
+    : { ...values, [token]: value || null };
+}
+
 /** Adds missing calculated shades while preserving explicit expert overrides. */
 export function withCalculatedThemeColors(values: ThemeColorValues): ThemeColorValues {
   const calculated: ThemeColorValues = {};

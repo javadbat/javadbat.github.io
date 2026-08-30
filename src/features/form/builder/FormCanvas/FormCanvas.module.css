@@ -3,7 +3,6 @@
 .emptyCanvas,
 .emptyIllustration,
 .canvasCard,
-.canvasCardCopy code,
 .insertionTarget {
   corner-shape: squircle;
 }
@@ -431,15 +430,6 @@
   white-space: nowrap;
 }
 
-.canvasCardCopy code {
-  padding: 0.15rem 0.4rem;
-  border-radius: 0.35rem;
-  color: #53617f;
-  background: #f1f4fa;
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.65rem;
-}
-
 .canvasCardCopy small {
   color: var(--form-muted);
   font-size: 0.65rem;
@@ -456,6 +446,20 @@
   background: #f8faff;
   box-shadow: none;
   corner-shape: squircle;
+}
+
+.canvasCard:not([data-selected="true"]) .cardActions {
+  display: none;
+}
+
+.actionContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionLabel {
+  display: none;
 }
 
 .cardActions :global(jb-button) {
@@ -548,10 +552,49 @@
     }
    }
 
-@media (hover: none) and (pointer: coarse) {
+@media (hover: none) and (pointer: coarse), (max-width: 30rem) {
   .canvasSelect {
       min-block-size: 2.75rem;
       touch-action: pan-y;
+    }
+
+  .canvasCard:not([data-selected="true"]) .cardActions {
+      display: grid;
+    }
+
+  .cardActions {
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      inline-size: 100%;
+    }
+
+  .cardActions :global(jb-tooltip),
+  .cardActions :global(jb-button) {
+      inline-size: 100%;
+    }
+
+  .cardActions :global(jb-button) {
+      --jb-button-height: 3.75rem;
+      --jb-button-height-sm: 3.75rem;
+      --jb-button-inline-padding-sm: 0.2rem;
+    }
+
+  .actionContent {
+      flex-direction: column;
+      gap: 0.25rem;
+      min-inline-size: 0;
+    }
+
+  .actionLabel {
+      display: block;
+      max-inline-size: 100%;
+      overflow: hidden;
+      font-size: 0.62rem;
+      font-weight: 650;
+      line-height: 1.1;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
    }
 
@@ -573,15 +616,6 @@
 @media (max-width: 30rem) {
   .canvasCardCopy>span {
       flex-wrap: wrap;
-    }
-   }
-
-@media (max-width: 30rem) {
-  .cardActions {
-      display: grid;
-      grid-column: 1 / -1;
-      grid-template-columns: repeat(5, minmax(2.5rem, 1fr));
-      padding: 0.2rem;
     }
    }
 

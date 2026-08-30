@@ -59,12 +59,18 @@
 
 .configurationFields {
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, max-content));
+  grid-auto-rows: max-content;
   gap: 0.75rem;
+  align-content: start;
   min-block-size: 0;
   overflow-y: auto;
   padding: 0.5rem 0.15rem 1rem;
   padding-inline-end: 0;
+}
+
+.configurationFields :global(jb-collapse) > :not([slot="title"]) + :not([slot="title"]) {
+  display: block;
+  margin-block-start: 0.75rem;
 }
 
 .configurationFields :global(jb-input),

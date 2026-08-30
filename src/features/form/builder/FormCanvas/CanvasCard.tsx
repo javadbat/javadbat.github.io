@@ -20,6 +20,8 @@ export interface CanvasCardProps {
   count: number;
   /** Whether this element owns the active builder configuration selection. */
   isSelected: boolean;
+  /** Whether a touch/non-hover device needs persistent visible actions. */
+  alwaysShowActions: boolean;
   /** Locale currently edited by the builder. */
   locale: string;
   /** Document fallback locale for missing element text. */
@@ -61,22 +63,34 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
           onBlur={() => setActiveIcon(null)}
           onClick={() => onConfigure(element.id)}
         >
-          <CatalogIcon iconId="configure" active={activeIcon === "configure"} />
+          <span className={styles.actionContent}>
+            <CatalogIcon iconId="configure" active={activeIcon === "configure"} />
+            <span className={styles.actionLabel}>{messages.configure}</span>
+          </span>
         </JBButton>
       </JBTooltip>
       <JBTooltip content={messages.moveUp} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
-          <CatalogIcon iconId="move-up" />
+          <span className={styles.actionContent}>
+            <CatalogIcon iconId="move-up" />
+            <span className={styles.actionLabel}>{messages.moveUp}</span>
+          </span>
         </JBButton>
       </JBTooltip>
       <JBTooltip content={messages.moveDown} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.moveDown} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
-          <CatalogIcon iconId="move-down" />
+          <span className={styles.actionContent}>
+            <CatalogIcon iconId="move-down" />
+            <span className={styles.actionLabel}>{messages.moveDown}</span>
+          </span>
         </JBButton>
       </JBTooltip>
       <JBTooltip content={messages.duplicate} positionArea="top" tail>
         <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} onClick={() => onDuplicate(element.id)}>
-          <CatalogIcon iconId="duplicate" />
+          <span className={styles.actionContent}>
+            <CatalogIcon iconId="duplicate" />
+            <span className={styles.actionLabel}>{messages.duplicate}</span>
+          </span>
         </JBButton>
       </JBTooltip>
       <JBTooltip content={messages.remove} positionArea="top" tail>
@@ -92,7 +106,10 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
           onBlur={() => setActiveIcon(null)}
           onClick={() => onRemove(element.id)}
         >
-          <CatalogIcon iconId="remove" active={activeIcon === "remove"} />
+          <span className={styles.actionContent}>
+            <CatalogIcon iconId="remove" active={activeIcon === "remove"} />
+            <span className={styles.actionLabel}>{messages.remove}</span>
+          </span>
         </JBButton>
       </JBTooltip>
     </div>
@@ -102,7 +119,7 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
 /** Renders one selectable, draggable, keyboard-reorderable form element summary. */
 export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
   /** Business data and callbacks supplied by the owning canvas collection. */
-  const { element, index, count, isSelected, locale, defaultLocale, messages, onSelect, onConfigure, onMove, onDuplicate, onRemove, onFocusOffset } = props;
+  const { element, index, count, isSelected, alwaysShowActions, locale, defaultLocale, messages, onSelect, onConfigure, onMove, onDuplicate, onRemove, onFocusOffset } = props;
   /** Registry metadata that defines the element's display and icon identity. */
   const entry = registryByType.get(element.type);
   if (!entry) return null;
@@ -159,12 +176,11 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
             <strong>{label}</strong>
           </span>
           <span>
-            <code>{element.name || "—"}</code>
             <small>{componentName}</small>
           </span>
         </span>
       </button>
-      {isSelected ? (
+      {isSelected || alwaysShowActions ? (
         <CanvasCardActions
           element={element}
           index={index}

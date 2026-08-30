@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculateColorGroup,
   recalculateAllThemeColors,
+  updateBaseThemeColor,
   withCalculatedThemeColors,
 } from "./theme-color-calculator";
 
@@ -41,6 +42,26 @@ describe("theme color calculator", () => {
       "--jb-primary-hover": "#ffffff",
     });
 
+    expect(colors["--jb-primary-hover"]).not.toBe("#ffffff");
+  });
+
+  it("preserves derived colors when a base color family is unlinked", () => {
+    const colors = updateBaseThemeColor({
+      "--jb-primary": "#2455e8",
+      "--jb-primary-hover": "#ffffff",
+    }, "--jb-primary", "#3156b8", false);
+
+    expect(colors["--jb-primary"]).toBe("#3156b8");
+    expect(colors["--jb-primary-hover"]).toBe("#ffffff");
+  });
+
+  it("recalculates derived colors when a base color family is linked", () => {
+    const colors = updateBaseThemeColor({
+      "--jb-primary": "#2455e8",
+      "--jb-primary-hover": "#ffffff",
+    }, "--jb-primary", "#3156b8", true);
+
+    expect(colors["--jb-primary"]).toBe("#3156b8");
     expect(colors["--jb-primary-hover"]).not.toBe("#ffffff");
   });
 });

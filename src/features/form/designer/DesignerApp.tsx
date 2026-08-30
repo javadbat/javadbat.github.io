@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -8,6 +10,7 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import { JBButton } from "jb-button/react";
+import { JBCheckbox } from "jb-checkbox/react";
 import { JBColorInput } from "jb-color-input/react";
 import { JBInput } from "jb-input/react";
 import { JBNumberInput } from "jb-number-input/react";
@@ -60,9 +63,14 @@ import {
   BASE_THEME_COLOR_TOKENS,
   calculateColorGroup,
   recalculateAllThemeColors,
+  updateBaseThemeColor,
   withCalculatedThemeColors,
   type BaseThemeColorToken,
 } from "./theme-color-calculator";
+import {
+  updateBaseThemeSize,
+  type BaseThemeSizeToken,
+} from "./theme-size-calculator";
 
 type SaveStatus = "saving" | "saved" | "invalid" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
@@ -71,6 +79,17 @@ type MobilePanel = "design" | "preview";
 type ComponentPreview = "all" | "inputs" | "choices" | "actions";
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 type ThemeSizeCode = "xs" | "sm" | "md" | "lg" | "xl";
+
+const AdvancedSizesModal = lazy(() => import("./AdvancedSizesModal"));
+
+const defaultColorGroupLinks = Object.fromEntries(
+  BASE_THEME_COLOR_TOKENS.map(token => [token, true]),
+) as Record<BaseThemeColorToken, boolean>;
+
+const defaultSizeGroupLinks: Record<BaseThemeSizeToken, boolean> = {
+  "--jb-control-height-md": true,
+  "--jb-radius": true,
+};
 
 const allGlobalThemeTokens: readonly GlobalThemeToken[] = [
   ...GLOBAL_COLOR_TOKENS,
@@ -363,6 +382,7 @@ export function DesignerApp() {
   const [activePreset, setActivePreset] = useState("rose-pop");
   const [viewport, setViewport] = useState<PreviewViewport>("desktop");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("design");
+  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
   const [previewSource, setPreviewSource] = useState("sample");
   const [componentPreview, setComponentPreview] = useState<ComponentPreview>("all");
   const [isEditingName, setIsEditingName] = useState(false);
@@ -371,6 +391,9 @@ export function DesignerApp() {
   const [exportCopied, setExportCopied] = useState(false);
   const [advancedColorsOpen, setAdvancedColorsOpen] = useState(false);
   const [advancedColorDraft, setAdvancedColorDraft] = useState<DesignerThemeConfig["global"]>({});
+  const [advancedSizesOpen, setAdvancedSizesOpen] = useState(false);
+  const [linkedColorGroups, setLinkedColorGroups] = useState<Record<BaseThemeColorToken, boolean>>(() => ({ ...defaultColorGroupLinks }));
+  const [linkedSizeGroups, setLinkedSizeGroups] = useState<Record<BaseThemeSizeToken, boolean>>(() => ({ ...defaultSizeGroupLinks }));
   const [temporaryImage, setTemporaryImage] = useState<string>();
   const [imageNotice, setImageNotice] = useState<string>();
   const [imageLoadState, setImageLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -899,6 +922,12 @@ export function DesignerApp() {
     });
   };
 
+  const setBaseThemeSize = (token: BaseThemeSizeToken, value: string) => {
+    updateTheme(draft => {
+      draft.global = updateBaseThemeSize(draft.global, token, value, linkedSizeGroups[token]) as DesignerThemeConfig["global"];
+    });
+  };
+
   const openAdvancedColors = () => {
     setAdvancedColorDraft(withCalculatedThemeColors(theme.global) as DesignerThemeConfig["global"]);
     setAdvancedColorsOpen(true);
@@ -1179,56 +1208,86 @@ export function DesignerApp() {
             <JBOption value="lg">{messages.designerLarge}</JBOption>
           </JBSelect>
           <SettingRange label={messages.designerSpacingScale} value={theme.sizing.spacingScale} min={0.75} max={1.6} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.sizing.spacingScale = value; draft.sizing.audienceSize = "custom"; })} />
-          <div className={styles.tokenList}>
-            {GLOBAL_CONTROL_HEIGHT_TOKENS.map(token => (
-              <div className={styles.tokenField} key={token}>
-                <JBInput
-                  size="sm"
-                  label={message("designerControlHeightLabel", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
-                  message={theme.global[token] == null
-                    ? `${message("designerControlHeightHelp", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })} ${messages.designerInheritedDefault}`
-                    : message("designerControlHeightHelp", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
-                  value={theme.global[token] ?? cssVariableDefaults[token] ?? ""}
-                  onInput={event => updateTheme(draft => { draft.global[token] = valueFromEvent(event) || null; })}
-                />
-                <code>{token}</code>
+          <div className={styles.sizeFamilyCard}>
+            <div className={styles.sizeGroupHeading}>
+              <h3>{messages.designerControlHeightScale}</h3>
+              <p>{messages.designerControlHeightScaleHelp}</p>
+            </div>
+            <div className={styles.baseSizeToken}>
+              <span className={styles.baseSizeBadge}>{messages.designerBaseSize}</span>
+              <JBInput
+                size="md"
+                label={message("designerControlHeightLabel", { size: sizeLabel("md") })}
+                message={linkedSizeGroups["--jb-control-height-md"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                value={theme.global["--jb-control-height-md"] ?? cssVariableDefaults["--jb-control-height-md"] ?? ""}
+                onInput={event => setBaseThemeSize("--jb-control-height-md", valueFromEvent(event))}
+              />
+              <JBCheckbox
+                className={styles.baseSizeLink}
+                size="sm"
+                name="link-control-height-scale"
+                label={messages.designerLinkCalculatedSizes}
+                message={linkedSizeGroups["--jb-control-height-md"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                value={linkedSizeGroups["--jb-control-height-md"]}
+                onChange={event => setLinkedSizeGroups(current => ({ ...current, "--jb-control-height-md": Boolean(event.target.value) }))}
+              />
+              <code>--jb-control-height-md</code>
+            </div>
+            <div className={styles.advancedSizeCallout}>
+              <div>
+                <strong>{messages.designerAdvancedSizes}</strong>
+                <span>{messages.designerAdvancedSizesHelp}</span>
               </div>
-            ))}
+              <JBButton size="sm" variant="outline" onClick={() => setAdvancedSizesOpen(true)}>
+                {messages.designerCustomizeSizeScale}
+              </JBButton>
+            </div>
           </div>
         </div>
       );
     }
     if (section === "shape") {
-      const radiusSize: Record<typeof GLOBAL_RADIUS_TOKENS[number], ThemeSizeCode> = {
-        "--jb-radius": "md",
-        "--jb-radius-xs": "xs",
-        "--jb-radius-sm": "sm",
-        "--jb-radius-lg": "lg",
-        "--jb-radius-xl": "xl",
-      };
       return (
         <div className={styles.sectionContent}>
-          {GLOBAL_RADIUS_TOKENS.map(token => {
-            const size = sizeLabel(radiusSize[token]);
-            const inherited = theme.global[token] == null;
-            const radius = cssLengthToRem(theme.global[token] ?? cssVariableDefaults[token] ?? "");
-            return (
-              <div className={styles.tokenField} key={token}>
-                <SettingRange
-                  label={message("designerCornerRadiusLabel", { size })}
-                  message={`${message("designerCornerRadiusHelp", { size })}${inherited ? ` ${messages.designerInheritedDefault}` : ""}`}
-                  value={Number.isFinite(radius) ? radius : 0}
-                  min={0}
-                  max={2}
-                  step={0.125}
-                  tickStep={0.5}
-                  suffix="rem"
-                  onChange={value => updateTheme(draft => { draft.global[token] = `${value}rem`; })}
-                />
-                <code>{token}</code>
+          <div className={styles.sizeFamilyCard}>
+            <div className={styles.sizeGroupHeading}>
+              <h3>{messages.designerRadiusScale}</h3>
+              <p>{messages.designerRadiusScaleHelp}</p>
+            </div>
+            <div className={styles.baseSizeToken}>
+              <span className={styles.baseSizeBadge}>{messages.designerBaseSize}</span>
+              <SettingRange
+                label={message("designerCornerRadiusLabel", { size: sizeLabel("md") })}
+                message={linkedSizeGroups["--jb-radius"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                value={cssLengthToRem(theme.global["--jb-radius"] ?? cssVariableDefaults["--jb-radius"] ?? "")}
+                min={0}
+                max={2}
+                step={0.125}
+                tickStep={0.5}
+                suffix="rem"
+                onChange={value => setBaseThemeSize("--jb-radius", `${value}rem`)}
+              />
+              <JBCheckbox
+                className={styles.baseSizeLink}
+                size="sm"
+                name="link-radius-scale"
+                label={messages.designerLinkCalculatedSizes}
+                message={linkedSizeGroups["--jb-radius"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                value={linkedSizeGroups["--jb-radius"]}
+                onChange={event => setLinkedSizeGroups(current => ({ ...current, "--jb-radius": Boolean(event.target.value) }))}
+              />
+              <code>--jb-radius</code>
+            </div>
+            <div className={styles.advancedSizeCallout}>
+              <div>
+                <strong>{messages.designerAdvancedSizes}</strong>
+                <span>{messages.designerAdvancedSizesHelp}</span>
               </div>
-            );
-          })}
+              <JBButton size="sm" variant="outline" onClick={() => setAdvancedSizesOpen(true)}>
+                {messages.designerCustomizeSizeScale}
+              </JBButton>
+            </div>
+          </div>
         </div>
       );
     }
@@ -1472,7 +1531,7 @@ export function DesignerApp() {
   return (
     <div className={styles.designer} dir={direction} onClickCapture={handleDesignerNavigationCapture}>
       <FormRouteHeader layout="editor" className={styles.header}>
-        <FormRouteBrand href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
+        <FormRouteBrand className={styles.headerBrand} href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
         <div className={styles.themeIdentity}>
           <button type="button" className={styles.backButton} onClick={() => void requestDesignerLeave(() => setLibraryOpen(true))}>
             <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
@@ -1499,7 +1558,7 @@ export function DesignerApp() {
           {saveStatus === "saving" ? messages.designerSaving : saveStatus === "invalid" ? messages.designerFinishEditing : saveStatus === "error" ? messages.designerSaveFailed : messages.designerSaved}
         </p>
         </div>
-        <div className={styles.headerActions}>
+        <div className={`${styles.headerActions} ${styles.desktopHeaderActions}`}>
           <FormRouteLinkButton href={formPageHref("builder", formSlug)}>{messages.builder}</FormRouteLinkButton>
           <FormRouteLinkButton href={formPageHref("preview", formSlug, themeRecord?.slug)} variant="outline">{messages.preview}</FormRouteLinkButton>
           <JBSelect<FormAppLocale> className={styles.languageSelect} size="sm" aria-label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
@@ -1518,6 +1577,42 @@ export function DesignerApp() {
             </JBButton>
           ) : null}
           <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>{messages.designerExportTheme}</JBButton>
+        </div>
+        <div className={styles.mobileHeaderActions}>
+          <FormRouteLinkButton href={formPageHref("preview", formSlug, themeRecord?.slug)} variant="outline">{messages.preview}</FormRouteLinkButton>
+          <JBButton
+            size="sm"
+            variant="ghost"
+            aria-expanded={mobileActionsOpen}
+            aria-haspopup="dialog"
+            onClick={() => setMobileActionsOpen(open => !open)}
+          >
+            {messages.designerMore}
+          </JBButton>
+          {mobileActionsOpen ? (
+            <>
+              <button className={styles.mobileActionsBackdrop} type="button" aria-label={messages.designerCloseActions} onClick={() => setMobileActionsOpen(false)} />
+              <div className={styles.mobileActionsMenu} role="dialog" aria-label={messages.designerActions} onKeyDown={event => { if (event.key === "Escape") setMobileActionsOpen(false); }}>
+                <FormRouteLinkButton href={formPageHref("builder", formSlug)}>{messages.builder}</FormRouteLinkButton>
+                <JBSelect<FormAppLocale> size="sm" label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
+                  <JBOption value="en">EN</JBOption>
+                  <JBOption value="fa">FA</JBOption>
+                </JBSelect>
+                <JBButton size="sm" variant="ghost" disabled={!history.length} onClick={() => { undo(); setMobileActionsOpen(false); }}>{messages.designerUndo}</JBButton>
+                <JBButton size="sm" variant="ghost" disabled={!future.length} onClick={() => { redo(); setMobileActionsOpen(false); }}>{messages.designerRedo}</JBButton>
+                {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => { setMobileActionsOpen(false); void saveCurrentTheme(); }}>{messages.designerRetrySave}</JBButton> : null}
+                <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => { setMobileActionsOpen(false); void setCurrentAsDefault(); }}>
+                  {themeRecord && defaultThemeId === themeRecord.id ? messages.designerDefault : messages.designerSetDefault}
+                </JBButton>
+                {formSlug ? (
+                  <JBButton size="sm" variant="ghost" disabled={!themeRecord || boundThemeId === themeRecord.id} onClick={() => { setMobileActionsOpen(false); void bindCurrentForm(); }}>
+                    {themeRecord && boundThemeId === themeRecord.id ? messages.designerUsedForForm : messages.designerUseForForm}
+                  </JBButton>
+                ) : null}
+                <JBButton color="primary" onClick={() => { setMobileActionsOpen(false); setExportCopied(false); setExportOpen(true); }}>{messages.designerExportTheme}</JBButton>
+              </div>
+            </>
+          ) : null}
         </div>
       </FormRouteHeader>
 
@@ -1662,6 +1757,7 @@ export function DesignerApp() {
                 const baseValue = group.baseToken
                   ? advancedColorDraft[group.baseToken] ?? cssVariableDefaults[group.baseToken] ?? ""
                   : undefined;
+                const variantsLinked = group.baseToken ? linkedColorGroups[group.baseToken] : false;
                 const derivedTokens = group.baseToken ? group.tokens.filter(token => token !== group.baseToken) : group.tokens;
                 return (
                   <section
@@ -1682,12 +1778,21 @@ export function DesignerApp() {
                         <JBColorInput
                           size="md"
                           label={tokenLabel(group.baseToken, locale)}
-                          message={messages.designerBaseColorHelp}
+                          message={variantsLinked ? messages.designerBaseColorHelp : messages.designerBaseColorIndependentHelp}
                           value={baseValue}
                           onInput={event => {
                             const value = valueFromEvent(event);
-                            setAdvancedColorDraft(current => ({ ...current, ...calculateColorGroup(group.baseToken!, value) }));
+                            setAdvancedColorDraft(current => updateBaseThemeColor(current, group.baseToken!, value, variantsLinked) as DesignerThemeConfig["global"]);
                           }}
+                        />
+                        <JBCheckbox
+                          className={styles.baseColorLink}
+                          size="sm"
+                          name={`link-${group.id}-color-variants`}
+                          label={messages.designerLinkCalculatedColors}
+                          message={variantsLinked ? messages.designerLinkedColorsHelp : messages.designerUnlinkedColorsHelp}
+                          value={variantsLinked}
+                          onChange={event => setLinkedColorGroups(current => ({ ...current, [group.baseToken!]: Boolean(event.target.value) }))}
                         />
                         <code>{group.baseToken}</code>
                       </div>
@@ -1718,6 +1823,29 @@ export function DesignerApp() {
             </footer>
           </section>
         </div>
+      ) : null}
+      {advancedSizesOpen ? (
+        <Suspense fallback={(
+          <div className={styles.modalBackdrop} role="presentation">
+            <section className={`${styles.exportModal} ${styles.modalLoading}`} role="dialog" aria-modal="true" aria-label={messages.designerLoadingAdvancedSizes}>
+              <progress className={styles.modalLoadingProgress} aria-label={messages.designerLoadingAdvancedSizes} />
+              <strong>{messages.designerLoadingAdvancedSizes}</strong>
+              <p>{messages.designerLoadingAdvancedSizesHelp}</p>
+            </section>
+          </div>
+        )}>
+          <AdvancedSizesModal
+            values={theme.global}
+            defaults={cssVariableDefaults}
+            linkedGroups={linkedSizeGroups}
+            onLinkChange={(token, linked) => setLinkedSizeGroups(current => ({ ...current, [token]: linked }))}
+            onClose={() => setAdvancedSizesOpen(false)}
+            onApply={values => {
+              updateTheme(draft => { draft.global = { ...values }; });
+              setAdvancedSizesOpen(false);
+            }}
+          />
+        </Suspense>
       ) : null}
     </div>
   );

@@ -82,7 +82,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
   };
 
   return (
-    <JBCollapse title="Visibility conditions">
+    <JBCollapse title="Visibility conditions" defaultOpen>
       <div className={styles.conditionEditor}>
         <JBSelect<"all" | "any">
           popoverPosition="fixed"

@@ -1,5 +1,6 @@
 import { canonicalizeThemeConfig, type ThemeConfigV1 } from "jb-form-builder/contract/theme";
 import { withCalculatedThemeColors } from "./theme-color-calculator";
+import { withCalculatedThemeSizes } from "./theme-size-calculator";
 
 export type ThemePatternId =
   | "science-doodles"
@@ -281,7 +282,7 @@ export function toPortableThemeConfig(theme: DesignerThemeConfig): ThemeConfigV1
     schemaVersion: 1,
     name: theme.name,
     description: theme.description,
-    global: Object.fromEntries(Object.entries(withCalculatedThemeColors(theme.global)).filter((entry): entry is [GlobalThemeToken, string] => typeof entry[1] === "string" && entry[1].trim() !== "")),
+    global: Object.fromEntries(Object.entries(withCalculatedThemeSizes(withCalculatedThemeColors(theme.global))).filter((entry): entry is [GlobalThemeToken, string] => typeof entry[1] === "string" && entry[1].trim() !== "")),
     typography: { ...theme.typography },
     sizing: { ...theme.sizing },
     defaults: { ...theme.defaults },
