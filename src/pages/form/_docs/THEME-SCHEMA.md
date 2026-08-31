@@ -1,7 +1,7 @@
 # JB Form ThemeConfig Version 1 Contract
 
 Status: Runtime types, validation, canonicalization, renderer property/backgrounds, strict/supported-values-only import, and persistence implemented
-Reviewed: 2026-08-30
+Reviewed: 2026-08-31
 
 ThemeConfig is standalone portable visual configuration. It is not nested in FormConfig, does not own form identity, and is reusable with any form.
 
@@ -61,7 +61,7 @@ URL sources permit HTTP/HTTPS; load failure is runtime state. Data sources accep
 
 ## Component compatibility
 
-`components` lets presets/imports preserve supported component CSS variables. Keys must be supported JB tags and public manifest properties. Maps are sparse and non-null. Version 1 renders/preserves but does not edit them.
+`components` stores supported component CSS-variable overrides. Keys are restricted to form-renderer JB tags, and tokens are restricted to the exact public properties captured from their installed custom-element manifests. Derived input controls may also use the public `jb-input` properties they inherit; image input may use inherited file-input properties. Maps are sparse and non-null. Designer edits these values through component selection and searchable public-token controls.
 
 `::part`, selectors, declaration maps, arbitrary CSS, and per-element maps are invalid.
 

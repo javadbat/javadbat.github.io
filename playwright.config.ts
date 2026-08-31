@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:8080";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
@@ -7,13 +9,13 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "line",
   use: {
-    baseURL: "http://127.0.0.1:8080",
+    baseURL,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
   webServer: {
     command: "npm run dev -- --host 127.0.0.1",
-    url: "http://127.0.0.1:8080/form/designer",
+    url: `${baseURL}/form/designer`,
     reuseExistingServer: true,
     timeout: 120_000,
   },

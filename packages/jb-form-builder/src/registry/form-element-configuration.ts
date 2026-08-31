@@ -127,6 +127,22 @@ const sizeOptions = [
   { value: "xl", label: label("Extra large", "خیلی بزرگ") },
 ];
 
+const checkboxVariantOptions = [
+  { value: "solid", label: label("Solid", "توپر") },
+  { value: "outline", label: label("Outline", "خطی") },
+  { value: "filled-outline", label: label("Filled outline", "خطی پُرشده") },
+];
+
+const checkboxColorOptions = [
+  { value: "primary", label: label("Primary", "اصلی") },
+  { value: "secondary", label: label("Secondary", "ثانویه") },
+  { value: "positive", label: label("Positive", "مثبت") },
+  { value: "danger", label: label("Danger", "خطر") },
+  { value: "warning", label: label("Warning", "هشدار") },
+  { value: "light", label: label("Light", "روشن") },
+  { value: "dark", label: label("Dark", "تیره") },
+];
+
 const inputModeOptions = [
   ["text", "Text", "متن"],
   ["numeric", "Numeric", "عددی"],
@@ -630,9 +646,11 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       },
     ],
   ),
-  "jb-checkbox": configuration(booleanControlCommon, "boolean", { size: "md" }, [
+  "jb-checkbox": configuration(booleanControlCommon, "boolean", { size: "md", variant: "solid", color: "primary" }, [
     textProperty("message", "Helper message", "پیام راهنما", true),
     selectProperty("size", "Size", "اندازه", sizeOptions),
+    selectProperty("variant", "Variant", "گونه", checkboxVariantOptions),
+    selectProperty("color", "Color", "رنگ", checkboxColorOptions),
   ]),
   "jb-switch": configuration(
     {

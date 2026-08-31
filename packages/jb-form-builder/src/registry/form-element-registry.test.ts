@@ -54,4 +54,19 @@ describe("form element localized defaults", () => {
       { value: "xl", label: { en: "Extra large", fa: "خیلی بزرگ" } },
     ]);
   });
+
+  it("exposes the jb-checkbox v2 color and variant controls", () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-checkbox")!;
+    const checkbox = createDefaultElement(entry, "permission");
+
+    expect(checkbox.props).toMatchObject({ size: "md", variant: "solid", color: "primary" });
+    expect(entry.propertyDefinitions.find(definition => definition.key === "variant")?.options?.map(option => option.value))
+      .toEqual(["solid", "outline", "filled-outline"]);
+    expect(entry.propertyDefinitions.find(definition => definition.key === "color")?.options?.map(option => option.value))
+      .toEqual(["primary", "secondary", "positive", "danger", "warning", "light", "dark"]);
+
+    checkbox.props.variant = "unsupported";
+    checkbox.props.color = "brand";
+    expect(entry.validate(checkbox, entry).filter(issue => issue.code === "invalid-property-option")).toHaveLength(2);
+  });
 });

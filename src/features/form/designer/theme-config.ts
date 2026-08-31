@@ -117,6 +117,7 @@ export interface DesignerThemeConfig {
     imagePosition?: string;
     imageOverlayColor?: string;
   };
+  components: NonNullable<ThemeConfigV1["components"]>;
 }
 
 export interface ThemePreset {
@@ -160,6 +161,7 @@ const rosePop: DesignerThemeConfig = {
     opacity: 28,
     scale: 100,
   },
+  components: {},
 };
 
 function preset(
@@ -287,6 +289,7 @@ export function toPortableThemeConfig(theme: DesignerThemeConfig): ThemeConfigV1
     sizing: { ...theme.sizing },
     defaults: { ...theme.defaults },
     background,
+    components: structuredClone(theme.components ?? {}),
   });
 }
 
@@ -300,6 +303,7 @@ export function fromPortableThemeConfig(config: ThemeConfigV1): DesignerThemeCon
   theme.typography = { ...theme.typography, ...config.typography };
   theme.sizing = { ...theme.sizing, ...config.sizing };
   theme.defaults = { ...theme.defaults, ...config.defaults };
+  theme.components = structuredClone(config.components ?? {});
 
   if (config.background?.type === "color") {
     theme.background.mode = "color";

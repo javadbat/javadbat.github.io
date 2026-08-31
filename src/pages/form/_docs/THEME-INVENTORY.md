@@ -1,7 +1,7 @@
 # JB Theme Token and Styling-Hook Inventory
 
-Status: Theme Designer v1 input; first pass complete, implementation audit pending
-Reviewed: 2026-08-29
+Status: Theme Designer v1 input; manifest-backed component token allowlist implemented
+Reviewed: 2026-08-31
 
 This inventory records styling surfaces available to Theme Designer. It is based on `jb-core/theme` and installed `custom-elements.json` manifests. Designer consumes public surfaces only.
 
@@ -33,7 +33,7 @@ Each component manifest exposes its supported CSS custom properties under a comp
 | File controls | `--jb-file-input-*`, `--jb-image-input-*` | Includes upload, loading, overlay, and file-state presentation. |
 | Actions and overlays | `--jb-button-*`, `--jb-popover-*`, `--jb-modal-*` | Includes control geometry, overlay colors, radius, and elevation. |
 
-The complete property names/descriptions remain the manifests' `cssProperties`. ThemeConfig v1 preserves valid component maps from presets/imports, but Designer v1 does not edit them. Components UI is selection plus isolated preview.
+The complete property names/descriptions remain the manifests' `cssProperties`. The renderer contract captures those names in a checked-in allowlist, rejects unknown tags and cross-component or invented token names, and permits the documented inherited input/file surfaces. ThemeConfig v1 preserves valid component maps from presets/imports, and Designer exposes the allowlist through searchable sparse override controls with an isolated preview.
 
 ## Public Shadow DOM styling hooks
 

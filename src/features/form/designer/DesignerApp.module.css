@@ -635,6 +635,385 @@
   width: 100%;
 }
 
+.componentEditor {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.componentEditor > jb-select,
+.componentEditor > jb-input,
+.componentTokenEditor jb-input,
+.componentTokenEditor jb-color-input {
+  width: 100%;
+}
+
+.componentOverrideSummary {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #34405f;
+  font-size: 0.75rem;
+}
+
+.componentOverrideSummary > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.componentOverrideSummary jb-button {
+  flex: 0 0 auto;
+}
+
+.componentOverrideSummary code,
+.componentTokenOption code,
+.componentTokenSelected code {
+  direction: ltr;
+  font-size: 0.65rem;
+  text-align: left;
+}
+
+.componentOverrideSummary code {
+  display: block;
+  overflow: hidden;
+  color: var(--designer-muted);
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 30rem) {
+  .componentOverrideSummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .componentOverrideSummary jb-button {
+    width: 100%;
+  }
+}
+
+.componentTokenList {
+  max-height: 18rem;
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.35rem;
+  overflow-y: auto;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 0.75rem;
+  background: #fbfcff;
+}
+
+.componentTokenFilters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem;
+  align-items: end;
+  gap: 0.65rem;
+}
+
+.componentTokenFilters jb-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.componentAccessibility {
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.45rem;
+  border: 0.0625rem solid #d7e0f8;
+  border-radius: 0.65rem;
+  color: #34405f;
+  background: #fff;
+}
+
+.componentAccessibility > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.55rem;
+  font-size: 0.7rem;
+}
+
+.componentAccessibility span {
+  color: var(--designer-muted);
+}
+
+.accessibilityPass {
+  color: #176b4b;
+}
+
+.accessibilityFail {
+  color: #a12835;
+}
+
+.componentAudit {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.componentAuditHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.componentAuditHeader > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  color: #34405f;
+  font-size: 0.72rem;
+}
+
+.componentAuditHeader span {
+  color: var(--designer-muted);
+  line-height: 1.4;
+}
+
+.componentAudit ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+.componentAudit li {
+  padding: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  border: 0.0625rem solid #f0c6cc;
+  border-radius: 0.55rem;
+  color: #7e2530;
+  background: #fff7f8;
+  font-size: 0.68rem;
+}
+
+.componentAudit li > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.componentAudit li code {
+  overflow-wrap: anywhere;
+}
+
+.componentAuditActions {
+  display: flex !important;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem !important;
+}
+
+.componentFixPreviewStatus {
+  padding: 0.35rem 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.4rem;
+  color: #31533f;
+  background: #eefaf3;
+}
+
+.componentFixPreviewStatus i {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  border: 0.0625rem solid #9aa6b8;
+  border-radius: 50%;
+}
+
+.componentAuditPass {
+  margin: 0;
+  padding: 0.55rem;
+  border-radius: 0.55rem;
+  color: #176b4b;
+  background: #eefaf5;
+  font-size: 0.7rem;
+}
+
+.componentTokenGroup {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.componentTokenGroup > strong {
+  position: sticky;
+  z-index: 1;
+  inset-block-start: -0.35rem;
+  padding: 0.45rem 0.55rem 0.3rem;
+  color: #53617d;
+  background: #fbfcff;
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.componentTokenList > p {
+  margin: 0;
+  padding: 0.8rem;
+  color: var(--designer-muted);
+  font-size: 0.75rem;
+}
+
+.componentTokenOption,
+.componentTokenSelected {
+  position: relative;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  gap: 0.2rem;
+  border: 0.0625rem solid transparent;
+  border-radius: 0.6rem;
+  color: #24315f;
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.componentTokenOption:hover,
+.componentTokenSelected {
+  border-color: #b9c9fb;
+  background: #edf2ff;
+}
+
+.componentTokenOption span,
+.componentTokenSelected span {
+  padding-inline-end: 4.5rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.componentTokenOption code,
+.componentTokenSelected code {
+  overflow: hidden;
+  color: var(--designer-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.componentTokenOption small,
+.componentTokenSelected small {
+  justify-self: start;
+  padding: 0.12rem 0.35rem;
+  border-radius: 999px;
+  color: #3d56a1;
+  background: #e6ecff;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.componentTokenOption i,
+.componentTokenSelected i {
+  position: absolute;
+  inset-block-start: 0.55rem;
+  inset-inline-end: 0.6rem;
+  border-radius: 999px;
+  padding: 0.18rem 0.4rem;
+  color: #1c6b4d;
+  background: #def7eb;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.componentTokenEditor {
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+  border: 0.0625rem solid #cfd8f3;
+  border-radius: 0.75rem;
+  background: #f7f9ff;
+}
+
+.componentTokenEffectiveValue {
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.55rem;
+  border: 0.0625rem solid #d7e0f8;
+  border-radius: 0.6rem;
+  color: #34405f;
+  background: #fff;
+}
+
+.componentTokenEffectiveValue > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.55rem;
+  font-size: 0.7rem;
+}
+
+.componentTokenEffectiveValue span {
+  color: var(--designer-muted);
+}
+
+.componentTokenEffectiveValue strong,
+.componentTokenEffectiveValue code {
+  overflow-wrap: anywhere;
+}
+
+.componentTokenEffectiveValue code {
+  direction: ltr;
+  text-align: left;
+}
+
+.componentTokenTypedControl {
+  padding-block-end: 0.65rem;
+  display: grid;
+  gap: 0.65rem;
+  border-block-end: 0.0625rem solid var(--designer-line);
+}
+
+.componentTokenTypedControl > div {
+  display: grid;
+  gap: 0.2rem;
+  color: #34405f;
+  font-size: 0.72rem;
+}
+
+.componentTokenTypedControl > div span {
+  color: var(--designer-muted);
+  line-height: 1.45;
+}
+
+.componentTokenLengthFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.5rem;
+  gap: 0.55rem;
+}
+
+.componentTokenLengthFields jb-number-input,
+.componentTokenLengthFields jb-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.componentTokenOpacityFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.5rem;
+  align-items: end;
+  gap: 0.55rem;
+}
+
+.componentTokenOpacityFields jb-range-input,
+.componentTokenOpacityFields jb-number-input,
+.componentTokenTypedControl > jb-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.componentTokenEditor jb-button {
+  justify-self: start;
+}
+
 .autosaveNote {
   margin: 1.15rem 1rem;
   min-height: 3rem;

@@ -26,6 +26,8 @@ describe("form element adapter runtime assignment", () => {
     { type: "jb-select", property: "multiple", propertyValue: true, initialValue: ["option_1"], runtimeInitialValue: ["option_1"] },
     { type: "jb-listbox", property: "multiple", propertyValue: true, initialValue: ["option_1"], runtimeInitialValue: ["option_1"] },
     { type: "jb-checkbox", property: "size", propertyValue: "sm", initialValue: true, runtimeInitialValue: true },
+    { type: "jb-checkbox", property: "variant", propertyValue: "filled-outline", initialValue: true, runtimeInitialValue: true },
+    { type: "jb-checkbox", property: "color", propertyValue: "positive", initialValue: true, runtimeInitialValue: true },
     { type: "jb-switch", property: "isLoading", propertyValue: false, initialValue: true, runtimeInitialValue: true },
   ] satisfies Array<{
     type: JBFormElementType;

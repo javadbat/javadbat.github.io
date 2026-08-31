@@ -74,7 +74,7 @@ The remaining catalog entries are JB controls, an action, and structural contain
 | Text | Textarea | `jb-textarea@3.13.1` | `string` | Verified | Yes |
 | Choice | Select | `jb-select@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
 | Choice | Listbox | `jb-select/listbox@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
-| Choice | Checkbox | `jb-checkbox@1.4.0` | `boolean` | Verified | Yes |
+| Choice | Checkbox | `jb-checkbox@2.0.0` | `boolean` | Verified | Yes |
 | Choice | Switch | `jb-switch@1.7.3` | `boolean` | Verified; DSR-003 resolved | Yes |
 | File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
 | File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
@@ -130,7 +130,7 @@ Common input-family styling:
 | `jb-textarea` | `name`, `label`, `message`, `placeholder`, `value`, `initialValue`, `autoHeight`, `disabled`, `required`, declarative validation rules | `load`, `init`, `change`, `input`, `beforeinput`, keyboard events, `enter`, `focus`, `blur` | Required and forced custom error |
 | `jb-select` | `name`, `label`, `message`, `placeholder`, `searchPlaceholder`, `value`, `initialValue`, `multiple`, `size`, `popoverPosition`, `hideClear`, `disabled`, `required`, declarative option list and validation rules | `load`, `init`, `change`, `input`, `keyup`; web component also emits `filter-change` | Required and forced custom error |
 | `jb-listbox` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `useCheckbox`, `disabled`, `required`, declarative option list and validation rules | `load`, `init`, `change`, `input`, `invalid`; options respond to `filter-change` | Required and forced custom error |
-| `jb-checkbox` | `name`, `label`, `message`, `value`, `initialValue`, `size`, `disabled`, `required`, declarative validation rules | `change`, `before-change` | Required and forced custom error |
+| `jb-checkbox` | `name`, `label`, `message`, `value`, `initialValue`, `size`, `variant`, `color`, `disabled`, `required`, declarative validation rules | `change`, `before-change` | Required and forced custom error |
 | `jb-switch` | `name`, `value`, `initialValue`, `trueTitle`, `falseTitle`, `isLoading`, `disabled`, `required`, declarative validation rules | `load`, `init`, `change`, `before-change` | Required with native `valueMissing` mapping |
 | `jb-file-input` | `name`, `acceptTypes`, `placeholderTitle`, upload presentation state, `required`, declarative validation rules; runtime `File` values are not builder configuration | `load`, `init`, `change`; web component also emits `delete` and `download` | Required; source contains a pending file-size validation TODO |
 | `jb-image-input` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `acceptTypes`, `maxFileSize`, serializable upload configuration, `required`, declarative validation rules | `load`, `init`, `change`, `imageSelected`, `maxSizeExceed` | Required and maximum file size |

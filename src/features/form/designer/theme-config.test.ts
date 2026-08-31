@@ -65,4 +65,18 @@ describe("Designer ThemeConfig adapter", () => {
       fallbackColor: "#eeeeee",
     });
   });
+
+  it("preserves supported component overrides through editor hydration and export", () => {
+    const editor = fromPortableThemeConfig({
+      schemaVersion: 1,
+      name: "Component overrides",
+      components: {
+        "jb-input": { tokens: { "--jb-input-border-color": "#123456" } },
+      },
+    });
+
+    expect(toPortableThemeConfig(editor).components).toEqual({
+      "jb-input": { tokens: { "--jb-input-border-color": "#123456" } },
+    });
+  });
 });

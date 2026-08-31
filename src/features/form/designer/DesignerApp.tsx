@@ -20,9 +20,14 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
-import { registryByType } from "jb-form-builder/registry/form-element-registry";
+import { createDefaultElement, getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
 import type { JBFormBuilderElement } from "jb-form-builder/types";
-import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
+import {
+  getSupportedThemeComponentTokens,
+  THEME_COMPONENT_TAGS,
+  type ThemeComponentTag,
+  type ThemeConfigV1,
+} from "jb-form-builder/contract/theme";
 import "jb-icons/arrow";
 import "jb-icons/edit";
 import "jb-icons/refresh";
@@ -77,6 +82,20 @@ type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shap
 type PreviewViewport = "desktop" | "mobile";
 type MobilePanel = "design" | "preview";
 type ComponentPreview = "all" | "inputs" | "choices" | "actions";
+type ComponentLengthUnit = "px" | "rem" | "em" | "%" | "vh" | "vw";
+type ComponentTokenState = "all" | "default" | "hover" | "focus" | "active" | "disabled";
+type ComponentPreviewState = Exclude<ComponentTokenState, "all">;
+type ComponentTokenGroup = "colors" | "typography" | "borders" | "sizing" | "layout" | "effects" | "interaction" | "other";
+type ComponentAccessibility = {
+  ratio: number | null;
+  level: "aaa" | "aa" | "fail" | "unavailable";
+  focusIndicator: boolean | null;
+  foreground?: RgbaColor;
+  background: RgbaColor;
+  requiredRatio: number;
+};
+type ComponentAuditIssue = { state: ComponentPreviewState; kind: "contrast" | "focus"; ratio?: number; token?: string; suggestion?: string; suggestedRatio?: number };
+type ComponentFixPreview = { issueKey: string; state: ComponentPreviewState; token: string; value: string; ratio: number };
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 type ThemeSizeCode = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -104,19 +123,360 @@ const legacyColorFallbacks: Partial<Record<GlobalThemeToken, `--${string}`>> = {
   "--jb-text-contrast": "--jb-content-inverse",
 };
 
-function isolateComponentPreview(document: JBFormDocumentV1, preview: ComponentPreview): JBFormDocumentV1 {
-  if (preview === "all") return document;
-  const categoryMatches = (category: string | undefined): boolean => preview === "choices"
+function componentMatchesPreview(category: string | undefined, preview: ComponentPreview): boolean {
+  if (preview === "all") return true;
+  return preview === "choices"
     ? category === "Choice"
     : preview === "actions"
       ? category === "Action"
       : category !== undefined && !new Set(["Container", "Content", "Choice", "Action"]).has(category);
-  const matchingElements = walkFormElements(document.elements).filter(element => categoryMatches(registryByType.get(element.type)?.category));
-  const fallbackElements = walkFormElements(DESIGNER_SAMPLE_FORM.elements).filter(element => categoryMatches(registryByType.get(element.type)?.category));
+}
+
+function isolateComponentPreview(document: JBFormDocumentV1, preview: ComponentPreview, selectedTag: ThemeComponentTag | null): JBFormDocumentV1 {
+  if (selectedTag) {
+    const matchingElements = walkFormElements(document.elements).filter(element => element.type === selectedTag);
+    const fallbackElements = walkFormElements(DESIGNER_SAMPLE_FORM.elements).filter(element => element.type === selectedTag);
+    const entry = registryByType.get(selectedTag);
+    const generated = entry
+      ? [createDefaultElement(entry, "componentPreview", document.localization.defaultLocale)]
+      : [];
+    return { ...document, elements: matchingElements.length > 0 ? matchingElements : fallbackElements.length > 0 ? fallbackElements : generated };
+  }
+  if (preview === "all") return document;
+  const matchingElements = walkFormElements(document.elements).filter(element => componentMatchesPreview(registryByType.get(element.type)?.category, preview));
+  const fallbackElements = walkFormElements(DESIGNER_SAMPLE_FORM.elements).filter(element => componentMatchesPreview(registryByType.get(element.type)?.category, preview));
   return {
     ...document,
     elements: matchingElements.length > 0 ? matchingElements : fallbackElements,
   };
+}
+
+function componentTokenLabel(token: string, tagName: ThemeComponentTag): string {
+  const ownPrefix = `--${tagName}-`;
+  const compact = token.startsWith(ownPrefix) ? token.slice(ownPrefix.length) : token.slice("--jb-".length);
+  return compact.replaceAll("-", " ").replace(/^./, character => character.toUpperCase());
+}
+
+function componentTokenCssProperty(token: string): string | null {
+  if (token.includes("color")) return "color";
+  if (token.includes("background")) return "background";
+  if (token.includes("border-radius") || token.endsWith("radius")) return "border-radius";
+  if (token.includes("border-width")) return "border-width";
+  if (token.includes("border-style")) return "border-style";
+  if (token.includes("box-shadow") || token.endsWith("shadow")) return "box-shadow";
+  if (token.includes("font-family")) return "font-family";
+  if (token.includes("font-size")) return "font-size";
+  if (token.includes("font-weight")) return "font-weight";
+  if (token.includes("line-height")) return "line-height";
+  if (token.endsWith("height")) return "height";
+  if (token.endsWith("width")) return "width";
+  if (token.includes("padding")) return "padding";
+  if (token.includes("margin")) return "margin";
+  if (token.endsWith("gap")) return "gap";
+  if (token.includes("opacity")) return "opacity";
+  if (token.endsWith("z-index")) return "z-index";
+  if (token.includes("transition")) return "transition";
+  if (token.includes("transform")) return "transform";
+  if (token.includes("display")) return "display";
+  if (token.includes("text-align")) return "text-align";
+  if (token.endsWith("direction")) return "direction";
+  if (token.includes("overflow")) return "overflow";
+  if (token.endsWith("cursor")) return "cursor";
+  return null;
+}
+
+function componentTokenState(token: string): Exclude<ComponentTokenState, "all"> {
+  if (token.includes("disabled")) return "disabled";
+  if (token.includes("focus")) return "focus";
+  if (token.includes("hover")) return "hover";
+  if (token.includes("active") || token.includes("pressed")) return "active";
+  return "default";
+}
+
+const componentTokenGroupOrder: ComponentTokenGroup[] = ["colors", "typography", "borders", "sizing", "layout", "effects", "interaction", "other"];
+
+function componentTokenGroup(token: string): ComponentTokenGroup {
+  const property = componentTokenCssProperty(token);
+  if (property === "color" || property === "background") return "colors";
+  if (["font-family", "font-size", "font-weight", "line-height", "text-align", "direction"].includes(property ?? "")) return "typography";
+  if (["border-radius", "border-width", "border-style"].includes(property ?? "")) return "borders";
+  if (["height", "width", "padding", "margin", "gap"].includes(property ?? "")) return "sizing";
+  if (["display", "overflow", "z-index"].includes(property ?? "")) return "layout";
+  if (["box-shadow", "opacity", "transition", "transform"].includes(property ?? "")) return "effects";
+  if (property === "cursor") return "interaction";
+  return "other";
+}
+
+function isValidComponentTokenValue(token: string, value: string): boolean {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return true;
+  if (/[;{}]/.test(trimmedValue)) return false;
+  const property = componentTokenCssProperty(token);
+  return !property || typeof CSS === "undefined" || CSS.supports(property, trimmedValue);
+}
+
+const componentLengthUnits: ComponentLengthUnit[] = ["px", "rem", "em", "%", "vh", "vw"];
+const simpleLengthProperties = new Set(["height", "width", "border-radius", "border-width", "font-size", "padding", "margin", "gap"]);
+const componentPropertyOptions: Record<string, string[]> = {
+  "border-style": ["none", "solid", "dashed", "dotted", "double"],
+  "font-weight": ["300", "400", "500", "600", "700"],
+  "text-align": ["start", "center", "end", "left", "right"],
+  direction: ["ltr", "rtl"],
+  display: ["none", "block", "inline", "inline-block", "flex", "grid"],
+  overflow: ["visible", "hidden", "clip", "auto", "scroll"],
+  cursor: ["default", "pointer", "text", "move", "not-allowed"],
+};
+
+function parseSimpleCssLength(value: string): { number: string; unit: ComponentLengthUnit } | null {
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(px|rem|em|%|vh|vw)$/i.exec(value.trim());
+  if (!match || !componentLengthUnits.includes(match[2].toLowerCase() as ComponentLengthUnit)) return null;
+  return { number: match[1], unit: match[2].toLowerCase() as ComponentLengthUnit };
+}
+
+function componentShadowCss(element: HTMLElement): string {
+  const shadowRoot = element.shadowRoot;
+  if (!shadowRoot) return "";
+  const inlineCss = Array.from(shadowRoot.querySelectorAll("style"), style => style.textContent ?? "").join("\n");
+  const adoptedCss = Array.from(shadowRoot.adoptedStyleSheets, sheet => {
+    try {
+      return Array.from(sheet.cssRules, rule => rule.cssText).join("\n");
+    } catch {
+      return "";
+    }
+  }).join("\n");
+  return `${inlineCss}\n${adoptedCss}`;
+}
+
+function componentTokenFallback(cssText: string, token: string): string | null {
+  const escapedToken = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(`var\\(\\s*${escapedToken}\\s*,`).exec(cssText);
+  if (!match) return null;
+  const start = match.index + match[0].length;
+  let depth = 1;
+  for (let index = start; index < cssText.length; index += 1) {
+    if (cssText[index] === "(") depth += 1;
+    if (cssText[index] !== ")") continue;
+    depth -= 1;
+    if (depth === 0) return cssText.slice(start, index).trim();
+  }
+  return null;
+}
+
+function resolveComponentCssExpression(element: HTMLElement, property: string | null, expression: string): string {
+  if (!property) return expression;
+  const probe = document.createElement("span");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.pointerEvents = "none";
+  probe.style.setProperty(property, expression);
+  element.append(probe);
+  const value = getComputedStyle(probe).getPropertyValue(property).trim();
+  probe.remove();
+  return value || expression;
+}
+
+function forcedComponentStateCss(element: HTMLElement, state: Exclude<ComponentPreviewState, "default">): string {
+  const shadowRoot = element.shadowRoot;
+  if (!shadowRoot) return "";
+  const statePatterns: Record<Exclude<ComponentPreviewState, "default">, RegExp> = {
+    hover: /:hover/g,
+    focus: /:focus-within|:focus-visible|:focus/g,
+    active: /:active/g,
+    disabled: /:disabled|:state\(disabled\)|\[disabled\]/g,
+  };
+  const pattern = statePatterns[state];
+  const attribute = `[data-designer-preview-state="${state}"]`;
+  const output: string[] = [];
+  const visitRules = (rules: CSSRuleList) => {
+    for (const rule of Array.from(rules)) {
+      if ("selectorText" in rule && "style" in rule) {
+        const styleRule = rule as CSSStyleRule;
+        if (!pattern.test(styleRule.selectorText)) {
+          pattern.lastIndex = 0;
+          continue;
+        }
+        pattern.lastIndex = 0;
+        const selectors = styleRule.selectorText.split(",").map(selector => {
+          let forcedSelector = selector.replace(pattern, "").trim();
+          pattern.lastIndex = 0;
+          if (forcedSelector.includes(":host(")) {
+            forcedSelector = forcedSelector.replace(/:host\(([^)]*)\)/g, (_match, inner: string) => `:host(${attribute}${inner})`);
+          } else if (forcedSelector.includes(":host")) {
+            forcedSelector = forcedSelector.replace(/:host/g, `:host(${attribute})`);
+          } else {
+            forcedSelector = `:host(${attribute}) ${forcedSelector}`;
+          }
+          return forcedSelector;
+        });
+        output.push(`${selectors.join(", ")} { ${styleRule.style.cssText} }`);
+        continue;
+      }
+      if ("cssRules" in rule) visitRules((rule as CSSGroupingRule).cssRules);
+    }
+  };
+  for (const sheet of shadowRoot.adoptedStyleSheets) {
+    try { visitRules(sheet.cssRules); } catch { /* Cross-origin sheets are ignored. */ }
+  }
+  for (const style of shadowRoot.querySelectorAll<HTMLStyleElement>("style:not([data-designer-preview-state-style])")) {
+    if (style.sheet) visitRules(style.sheet.cssRules);
+  }
+  return output.join("\n");
+}
+
+function clearForcedComponentState(element: HTMLElement): void {
+  element.removeAttribute("data-designer-preview-state");
+  element.shadowRoot?.querySelector("style[data-designer-preview-state-style]")?.remove();
+}
+
+function applyForcedComponentState(element: HTMLElement, state: ComponentPreviewState): void {
+  clearForcedComponentState(element);
+  if (state === "default" || !element.shadowRoot) return;
+  const css = forcedComponentStateCss(element, state);
+  element.setAttribute("data-designer-preview-state", state);
+  if (!css) return;
+  const style = document.createElement("style");
+  style.dataset.designerPreviewStateStyle = state;
+  style.textContent = css;
+  element.shadowRoot.append(style);
+}
+
+type RgbaColor = { red: number; green: number; blue: number; alpha: number };
+
+function rasterizeCssColor(value: string): RgbaColor | null {
+  if (!value || value === "transparent") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return null;
+  context.clearRect(0, 0, 1, 1);
+  context.fillStyle = value;
+  context.fillRect(0, 0, 1, 1);
+  const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data;
+  return { red, green, blue, alpha: alpha / 255 };
+}
+
+function compositeColor(foreground: RgbaColor, background: RgbaColor): RgbaColor {
+  const alpha = foreground.alpha + background.alpha * (1 - foreground.alpha);
+  if (alpha === 0) return { red: 0, green: 0, blue: 0, alpha: 0 };
+  return {
+    red: (foreground.red * foreground.alpha + background.red * background.alpha * (1 - foreground.alpha)) / alpha,
+    green: (foreground.green * foreground.alpha + background.green * background.alpha * (1 - foreground.alpha)) / alpha,
+    blue: (foreground.blue * foreground.alpha + background.blue * background.alpha * (1 - foreground.alpha)) / alpha,
+    alpha,
+  };
+}
+
+function composedParent(element: HTMLElement): HTMLElement | null {
+  if (element.parentElement) return element.parentElement;
+  const root = element.getRootNode();
+  return root instanceof ShadowRoot && root.host instanceof HTMLElement ? root.host : null;
+}
+
+function effectiveBackground(element: HTMLElement): RgbaColor {
+  const layers: RgbaColor[] = [];
+  let current: HTMLElement | null = element;
+  while (current) {
+    const color = rasterizeCssColor(getComputedStyle(current).backgroundColor);
+    if (color && color.alpha > 0) layers.push(color);
+    current = composedParent(current);
+  }
+  return layers.reverse().reduce(
+    (background, layer) => compositeColor(layer, background),
+    { red: 255, green: 255, blue: 255, alpha: 1 },
+  );
+}
+
+function relativeLuminance(color: RgbaColor): number {
+  const channel = (value: number) => {
+    const normalized = value / 255;
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(color.red) + 0.7152 * channel(color.green) + 0.0722 * channel(color.blue);
+}
+
+function contrastRatio(foreground: RgbaColor, background: RgbaColor): number {
+  const effectiveForeground = compositeColor(foreground, background);
+  const light = Math.max(relativeLuminance(effectiveForeground), relativeLuminance(background));
+  const dark = Math.min(relativeLuminance(effectiveForeground), relativeLuminance(background));
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function colorToHex(color: RgbaColor): string {
+  const channel = (value: number) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
+  return `#${channel(color.red)}${channel(color.green)}${channel(color.blue)}`;
+}
+
+function suggestAccessibleColor(color: RgbaColor, counterpart: RgbaColor, requiredRatio: number): { value: string; ratio: number } | null {
+  const candidates = [
+    { red: 0, green: 0, blue: 0, alpha: 1 },
+    { red: 255, green: 255, blue: 255, alpha: 1 },
+  ].flatMap(endpoint => {
+    if (contrastRatio(endpoint, counterpart) < requiredRatio) return [];
+    let failing = 0;
+    let passing = 1;
+    for (let iteration = 0; iteration < 24; iteration += 1) {
+      const amount = (failing + passing) / 2;
+      const candidate = {
+        red: color.red + (endpoint.red - color.red) * amount,
+        green: color.green + (endpoint.green - color.green) * amount,
+        blue: color.blue + (endpoint.blue - color.blue) * amount,
+        alpha: 1,
+      };
+      if (contrastRatio(candidate, counterpart) >= requiredRatio) passing = amount;
+      else failing = amount;
+    }
+    // Move a tiny amount farther toward the endpoint so 8-bit rounding remains compliant.
+    const amount = Math.min(1, passing + 0.004);
+    const candidate = {
+      red: color.red + (endpoint.red - color.red) * amount,
+      green: color.green + (endpoint.green - color.green) * amount,
+      blue: color.blue + (endpoint.blue - color.blue) * amount,
+      alpha: 1,
+    };
+    const rounded = rasterizeCssColor(colorToHex(candidate));
+    if (!rounded) return [];
+    return [{
+      color: rounded,
+      distance: (rounded.red - color.red) ** 2 + (rounded.green - color.green) ** 2 + (rounded.blue - color.blue) ** 2,
+      ratio: contrastRatio(rounded, counterpart),
+    }];
+  });
+  const best = candidates.sort((left, right) => left.distance - right.distance)[0];
+  return best ? { value: colorToHex(best.color), ratio: best.ratio } : null;
+}
+
+function componentVisualSignature(element: HTMLElement): string {
+  const shadowRoot = element.shadowRoot;
+  const nodes = [element, ...Array.from(shadowRoot?.querySelectorAll<HTMLElement>("*") ?? [])];
+  return nodes.map(node => {
+    const style = getComputedStyle(node);
+    return [style.outlineStyle, style.outlineWidth, style.outlineColor, style.boxShadow, style.borderColor, style.backgroundColor].join("|");
+  }).join("\n");
+}
+
+function analyzeComponentAccessibility(element: HTMLElement, state: ComponentPreviewState): ComponentAccessibility {
+  const shadowRoot = element.shadowRoot;
+  const target = shadowRoot?.querySelector<HTMLElement>('input, textarea, select, button, [role="button"], [part~="input"], [part~="button"]') ?? element;
+  const style = getComputedStyle(target);
+  const foreground = rasterizeCssColor(style.color);
+  const background = effectiveBackground(target);
+  const ratio = foreground ? contrastRatio(foreground, background) : null;
+  const fontSize = Number.parseFloat(style.fontSize);
+  const fontWeight = style.fontWeight === "bold" ? 700 : Number.parseInt(style.fontWeight, 10) || 400;
+  const largeText = fontSize >= 24 || (fontSize >= 18.66 && fontWeight >= 700);
+  const aaThreshold = largeText ? 3 : 4.5;
+  const aaaThreshold = largeText ? 4.5 : 7;
+  const level = ratio == null ? "unavailable" : ratio >= aaaThreshold ? "aaa" : ratio >= aaThreshold ? "aa" : "fail";
+  let focusIndicator: boolean | null = null;
+  if (state === "focus") {
+    const focusedSignature = componentVisualSignature(element);
+    element.removeAttribute("data-designer-preview-state");
+    const defaultSignature = componentVisualSignature(element);
+    element.setAttribute("data-designer-preview-state", "focus");
+    focusIndicator = focusedSignature !== defaultSignature;
+  }
+  return { ratio, level, focusIndicator, foreground: foreground ?? undefined, background, requiredRatio: aaThreshold };
 }
 
 function readCssVariableDefaults(): Partial<Record<GlobalThemeToken, string>> {
@@ -220,6 +580,7 @@ const BLANK_DESIGNER_THEME: DesignerThemeConfig = {
     opacity: 20,
     scale: 100,
   },
+  components: {},
 };
 
 const persianTokenLabels: Partial<Record<GlobalThemeToken, string>> = {
@@ -385,6 +746,21 @@ export function DesignerApp() {
   const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
   const [previewSource, setPreviewSource] = useState("sample");
   const [componentPreview, setComponentPreview] = useState<ComponentPreview>("all");
+  const [selectedComponentTag, setSelectedComponentTag] = useState<ThemeComponentTag | null>(null);
+  const [componentTokenSearch, setComponentTokenSearch] = useState("");
+  const [selectedComponentToken, setSelectedComponentToken] = useState<string>();
+  const [componentTokenDraft, setComponentTokenDraft] = useState("");
+  const [componentTokenError, setComponentTokenError] = useState<string>();
+  const [componentLengthValue, setComponentLengthValue] = useState("");
+  const [componentLengthUnit, setComponentLengthUnit] = useState<ComponentLengthUnit>("px");
+  const [effectiveComponentToken, setEffectiveComponentToken] = useState<{ source: "component" | "global" | "default"; value: string }>();
+  const [showComponentOverridesOnly, setShowComponentOverridesOnly] = useState(false);
+  const [componentTokenStateFilter, setComponentTokenStateFilter] = useState<ComponentTokenState>("all");
+  const [componentPreviewState, setComponentPreviewState] = useState<ComponentPreviewState>("default");
+  const [componentAccessibility, setComponentAccessibility] = useState<ComponentAccessibility>();
+  const [componentAuditIssues, setComponentAuditIssues] = useState<ComponentAuditIssue[]>();
+  const [componentAuditRunning, setComponentAuditRunning] = useState(false);
+  const [componentFixPreview, setComponentFixPreview] = useState<ComponentFixPreview>();
   const [isEditingName, setIsEditingName] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -806,14 +1182,166 @@ export function DesignerApp() {
   const selectedDocument = previewSource === "stored" && canUseStoredForm
     ? storedForm.document
     : DESIGNER_SAMPLE_FORM;
+  const availableComponentTags = useMemo(
+    () => THEME_COMPONENT_TAGS.filter(tag => componentMatchesPreview(registryByType.get(tag)?.category, componentPreview)),
+    [componentPreview],
+  );
+  const supportedComponentTokens = useMemo(
+    () => selectedComponentTag ? getSupportedThemeComponentTokens(selectedComponentTag) : [],
+    [selectedComponentTag],
+  );
+  const componentTokenOverrides = selectedComponentTag ? theme.components[selectedComponentTag]?.tokens ?? {} : {};
+  const selectedComponentTokenOverride = selectedComponentToken ? componentTokenOverrides[selectedComponentToken] : undefined;
+  const selectedComponentTokenProperty = selectedComponentToken ? componentTokenCssProperty(selectedComponentToken) : null;
+  const selectedComponentTokenUsesLengthControl = selectedComponentTokenProperty != null && simpleLengthProperties.has(selectedComponentTokenProperty);
+  const selectedComponentTokenOptions = selectedComponentTokenProperty ? componentPropertyOptions[selectedComponentTokenProperty] ?? [] : [];
+  const componentOpacityValue = selectedComponentTokenProperty === "opacity"
+    && componentTokenDraft.trim()
+    && Number.isFinite(Number(componentTokenDraft))
+    && Number(componentTokenDraft) >= 0
+    && Number(componentTokenDraft) <= 1
+    ? Number(componentTokenDraft)
+    : 1;
+
+  useEffect(() => {
+    if (!selectedComponentTag || !selectedComponentToken) {
+      setEffectiveComponentToken(undefined);
+      return;
+    }
+    const override = selectedComponentTokenOverride;
+    if (override) {
+      setEffectiveComponentToken({ source: "component", value: override });
+      return;
+    }
+    let cancelled = false;
+    let attempts = 0;
+    const resolveValue = () => {
+      if (cancelled) return;
+      const element = rendererRef.current?.shadowRoot?.querySelector<HTMLElement>(selectedComponentTag);
+      if (!element && attempts < 6) {
+        attempts += 1;
+        window.setTimeout(resolveValue, 50);
+        return;
+      }
+      if (!element) {
+        setEffectiveComponentToken({ source: "default", value: messages.designerComponentResolvedInternally });
+        return;
+      }
+      if (element.style.getPropertyValue(selectedComponentToken) && attempts < 10) {
+        attempts += 1;
+        window.setTimeout(resolveValue, 50);
+        return;
+      }
+      const inheritedValue = getComputedStyle(element).getPropertyValue(selectedComponentToken).trim();
+      if (inheritedValue) {
+        const source = Object.prototype.hasOwnProperty.call(theme.global, selectedComponentToken) ? "global" : "default";
+        setEffectiveComponentToken({ source, value: inheritedValue });
+        return;
+      }
+      const fallback = componentTokenFallback(componentShadowCss(element), selectedComponentToken);
+      if (!fallback) {
+        if (attempts < 6) {
+          attempts += 1;
+          window.setTimeout(resolveValue, 50);
+          return;
+        }
+        setEffectiveComponentToken({ source: "default", value: messages.designerComponentResolvedInternally });
+        return;
+      }
+      const source = Object.keys(theme.global).some(token => fallback.includes(token)) ? "global" : "default";
+      setEffectiveComponentToken({
+        source,
+        value: resolveComponentCssExpression(element, selectedComponentTokenProperty, fallback),
+      });
+    };
+    resolveValue();
+    return () => { cancelled = true; };
+  }, [messages.designerComponentResolvedInternally, selectedComponentTag, selectedComponentToken, selectedComponentTokenOverride, selectedComponentTokenProperty, theme.global]);
+  const visibleComponentTokens = useMemo(() => {
+    const query = componentTokenSearch.trim().toLocaleLowerCase(locale);
+    return supportedComponentTokens
+      .filter(token => (!showComponentOverridesOnly || token in componentTokenOverrides)
+        && (componentTokenStateFilter === "all" || componentTokenState(token) === componentTokenStateFilter)
+        && (!query || `${token} ${selectedComponentTag ? componentTokenLabel(token, selectedComponentTag) : ""}`.toLocaleLowerCase(locale).includes(query)))
+      .sort((left, right) => Number(right in componentTokenOverrides) - Number(left in componentTokenOverrides) || left.localeCompare(right));
+  }, [componentTokenOverrides, componentTokenSearch, componentTokenStateFilter, locale, selectedComponentTag, showComponentOverridesOnly, supportedComponentTokens]);
+  const groupedVisibleComponentTokens = useMemo(() => componentTokenGroupOrder
+    .map(group => ({ group, tokens: visibleComponentTokens.filter(token => componentTokenGroup(token) === group) }))
+    .filter(entry => entry.tokens.length > 0), [visibleComponentTokens]);
+  const componentTokenGroupLabels: Record<ComponentTokenGroup, string> = {
+    colors: messages.designerComponentGroupColors,
+    typography: messages.designerComponentGroupTypography,
+    borders: messages.designerComponentGroupBorders,
+    sizing: messages.designerComponentGroupSizing,
+    layout: messages.designerComponentGroupLayout,
+    effects: messages.designerComponentGroupEffects,
+    interaction: messages.designerComponentGroupInteraction,
+    other: messages.designerComponentGroupOther,
+  };
+  const componentTokenStateLabels: Record<Exclude<ComponentTokenState, "all">, string> = {
+    default: messages.designerComponentStateDefault,
+    hover: messages.designerComponentStateHover,
+    focus: messages.designerComponentStateFocus,
+    active: messages.designerComponentStateActive,
+    disabled: messages.designerComponentStateDisabled,
+  };
   const componentPreviewDocument = useMemo(
-    () => isolateComponentPreview(selectedDocument, componentPreview),
-    [componentPreview, selectedDocument],
+    () => isolateComponentPreview(selectedDocument, componentPreview, selectedComponentTag),
+    [componentPreview, selectedComponentTag, selectedDocument],
   );
   const previewDocument = useMemo(
     () => withControlSizeDefault(componentPreviewDocument, theme.defaults.controlSize),
     [componentPreviewDocument, theme.defaults.controlSize],
   );
+  useEffect(() => {
+    let cancelled = false;
+    setComponentAccessibility(undefined);
+    const applyPreviewState = async () => {
+      const renderer = rendererRef.current;
+      if (!renderer || !selectedComponentTag) return;
+      await renderer.updateComplete;
+      if (cancelled) return;
+      const elements = Array.from(renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []);
+      for (const element of elements) {
+        applyForcedComponentState(element, componentPreviewState);
+      }
+      setComponentAccessibility(elements[0] ? analyzeComponentAccessibility(elements[0], componentPreviewState) : undefined);
+    };
+    void applyPreviewState();
+    return () => {
+      cancelled = true;
+      const renderer = rendererRef.current;
+      if (!renderer || !selectedComponentTag) return;
+      for (const element of renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []) {
+        clearForcedComponentState(element);
+      }
+    };
+  }, [componentPreviewState, rendererTheme, previewDocument, selectedComponentTag]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer || !selectedComponentTag || !componentFixPreview) return;
+    let cancelled = false;
+    const applyPreview = async () => {
+      await renderer.updateComplete;
+      if (cancelled) return;
+      const elements = Array.from(renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []);
+      for (const element of elements) element.style.setProperty(componentFixPreview.token, componentFixPreview.value);
+      setComponentAccessibility(elements[0] ? analyzeComponentAccessibility(elements[0], componentFixPreview.state) : undefined);
+    };
+    void applyPreview();
+    return () => {
+      cancelled = true;
+      for (const element of renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []) {
+        element.style.removeProperty(componentFixPreview.token);
+      }
+    };
+  }, [componentFixPreview, rendererTheme, selectedComponentTag]);
+
+  useEffect(() => {
+    setComponentAuditIssues(undefined);
+    setComponentFixPreview(undefined);
+  }, [theme]);
   const previewLocale = previewDocument.localization.defaultLocale;
   const previewDirection = previewDocument.localization.locales[previewLocale]?.direction ?? "ltr";
   const previewName = getLocalizedText(
@@ -926,6 +1454,174 @@ export function DesignerApp() {
     updateTheme(draft => {
       draft.global = updateBaseThemeSize(draft.global, token, value, linkedSizeGroups[token]) as DesignerThemeConfig["global"];
     });
+  };
+
+  const chooseComponentPreview = (preview: ComponentPreview) => {
+    setComponentPreview(preview);
+    setSelectedComponentTag(null);
+    setSelectedComponentToken(undefined);
+    setComponentTokenDraft("");
+    setComponentTokenError(undefined);
+    setComponentLengthValue("");
+    setComponentLengthUnit("px");
+    setComponentTokenSearch("");
+    setShowComponentOverridesOnly(false);
+    setComponentTokenStateFilter("all");
+    setComponentPreviewState("default");
+    setComponentAuditIssues(undefined);
+    setComponentFixPreview(undefined);
+  };
+
+  const chooseComponentTag = (value: string) => {
+    const tagName = THEME_COMPONENT_TAGS.find(tag => tag === value) ?? null;
+    setSelectedComponentTag(tagName);
+    setSelectedComponentToken(undefined);
+    setComponentTokenDraft("");
+    setComponentTokenError(undefined);
+    setComponentLengthValue("");
+    setComponentLengthUnit("px");
+    setComponentTokenSearch("");
+    setShowComponentOverridesOnly(false);
+    setComponentTokenStateFilter("all");
+    setComponentPreviewState("default");
+    setComponentAuditIssues(undefined);
+    setComponentFixPreview(undefined);
+  };
+
+  const chooseComponentToken = (token: string) => {
+    const value = componentTokenOverrides[token] ?? "";
+    const parsedLength = parseSimpleCssLength(value);
+    setSelectedComponentToken(token);
+    setComponentTokenDraft(value);
+    setComponentTokenError(undefined);
+    setComponentLengthValue(parsedLength?.number ?? "");
+    setComponentLengthUnit(parsedLength?.unit ?? "px");
+  };
+
+  const setComponentTokenOverride = (token: string, value: string) => {
+    if (!selectedComponentTag) return;
+    updateTheme(draft => {
+      const tokens = { ...(draft.components[selectedComponentTag]?.tokens ?? {}) };
+      if (value.trim()) tokens[token] = value;
+      else delete tokens[token];
+      if (Object.keys(tokens).length > 0) draft.components[selectedComponentTag] = { tokens };
+      else delete draft.components[selectedComponentTag];
+    });
+  };
+
+  const commitComponentTokenValue = (draftValue: string) => {
+    if (!selectedComponentToken) return;
+    const value = draftValue.trim();
+    if (!isValidComponentTokenValue(selectedComponentToken, value)) {
+      setComponentTokenError(messages.designerInvalidComponentTokenValue);
+      return;
+    }
+    setComponentTokenDraft(value);
+    setComponentTokenError(undefined);
+    if (value !== (componentTokenOverrides[selectedComponentToken] ?? "")) {
+      setComponentTokenOverride(selectedComponentToken, value);
+    }
+  };
+
+  const commitComponentTokenDraft = () => commitComponentTokenValue(componentTokenDraft);
+
+  const useInheritedComponentTokenValue = () => {
+    if (!selectedComponentToken) return;
+    setComponentTokenDraft("");
+    setComponentTokenError(undefined);
+    setComponentLengthValue("");
+    if (componentTokenOverrides[selectedComponentToken]) setComponentTokenOverride(selectedComponentToken, "");
+  };
+
+  const resetSelectedComponentOverrides = () => {
+    if (!selectedComponentTag || !theme.components[selectedComponentTag]) return;
+    if (!window.confirm(message("designerResetComponentConfirm", {
+      component: getFormElementDisplayName(registryByType.get(selectedComponentTag)!, locale),
+    }))) return;
+    updateTheme(draft => { delete draft.components[selectedComponentTag]; });
+    setComponentTokenDraft("");
+    setComponentTokenError(undefined);
+    setComponentLengthValue("");
+    setComponentLengthUnit("px");
+  };
+
+  const componentAuditToken = (state: ComponentPreviewState, kind: ComponentAuditIssue["kind"]): string | undefined => {
+    const stateTokens = supportedComponentTokens.filter(token => componentTokenState(token) === state);
+    const patterns = kind === "focus"
+      ? [/border-color/, /box-shadow/, /outline/, /color/]
+      : [/-value-color/, /-text(?:area)?-color/, /-input-color/, /-color$/, /(?:caption|label).*color/, /(?<!bg-)color/, /bg-color/, /background/];
+    return patterns.flatMap(pattern => stateTokens.filter(token => pattern.test(token)))[0];
+  };
+
+  const runComponentAccessibilityAudit = async () => {
+    const renderer = rendererRef.current;
+    if (!renderer || !selectedComponentTag) return;
+    setComponentAuditRunning(true);
+    setComponentAuditIssues(undefined);
+    await new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
+    await renderer.updateComplete;
+    const elements = Array.from(renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []);
+    const issues: ComponentAuditIssue[] = [];
+    const states: ComponentPreviewState[] = ["default", "hover", "focus", "active", "disabled"];
+    for (const state of states) {
+      for (const element of elements) applyForcedComponentState(element, state);
+      const results = elements.map(element => analyzeComponentAccessibility(element, state));
+      const failedResults = results.filter(result => result.level === "fail" && result.ratio != null);
+      if (failedResults.length > 0) {
+        const worst = failedResults.sort((left, right) => left.ratio! - right.ratio!)[0];
+        const token = componentAuditToken(state, "contrast");
+        const changesBackground = Boolean(token && /(?:bg-color|background)/.test(token));
+        const adjustableColor = changesBackground ? worst.background : worst.foreground;
+        const counterpart = changesBackground ? worst.foreground : worst.background;
+        const suggestion = adjustableColor && counterpart
+          ? suggestAccessibleColor(adjustableColor, counterpart, worst.requiredRatio)
+          : null;
+        issues.push({
+          state,
+          kind: "contrast",
+          ratio: worst.ratio!,
+          token,
+          suggestion: suggestion?.value,
+          suggestedRatio: suggestion?.ratio,
+        });
+      }
+      if (state === "focus" && results.some(result => result.focusIndicator === false)) {
+        issues.push({ state, kind: "focus", token: componentAuditToken(state, "focus") });
+      }
+    }
+    for (const element of elements) applyForcedComponentState(element, componentPreviewState);
+    setComponentAccessibility(elements[0] ? analyzeComponentAccessibility(elements[0], componentPreviewState) : undefined);
+    setComponentAuditIssues(issues);
+    setComponentAuditRunning(false);
+  };
+
+  const reviewComponentAuditIssue = (issue: ComponentAuditIssue) => {
+    setComponentPreviewState(issue.state);
+    setComponentTokenStateFilter(issue.state);
+    setComponentTokenSearch("");
+    if (issue.token) chooseComponentToken(issue.token);
+  };
+
+  const previewComponentAuditFix = (issue: ComponentAuditIssue, issueKey: string) => {
+    if (!issue.token || !issue.suggestion) return;
+    reviewComponentAuditIssue(issue);
+    setComponentFixPreview({
+      issueKey,
+      state: issue.state,
+      token: issue.token,
+      value: issue.suggestion,
+      ratio: issue.suggestedRatio ?? 0,
+    });
+  };
+
+  const applyComponentAuditFix = () => {
+    if (!componentFixPreview) return;
+    const { token, value } = componentFixPreview;
+    chooseComponentToken(token);
+    setComponentTokenDraft(value);
+    setComponentTokenError(undefined);
+    setComponentTokenOverride(token, value);
+    setComponentFixPreview(undefined);
   };
 
   const openAdvancedColors = () => {
@@ -1296,13 +1992,360 @@ export function DesignerApp() {
         <div className={styles.componentPreviewControl} role="group" aria-label={messages.designerPreviewComponent}>
           <span>{messages.designerPreviewComponent}</span>
           <div>
-            <JBButton size="sm" variant={componentPreview === "all" ? "solid" : "outline"} onClick={() => setComponentPreview("all")}>{messages.designerAllControls}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "inputs" ? "solid" : "outline"} onClick={() => setComponentPreview("inputs")}>{messages.designerInputs}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "choices" ? "solid" : "outline"} onClick={() => setComponentPreview("choices")}>{messages.designerChoices}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "actions" ? "solid" : "outline"} onClick={() => setComponentPreview("actions")}>{messages.designerButtons}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "all" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("all")}>{messages.designerAllControls}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "inputs" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("inputs")}>{messages.designerInputs}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "choices" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("choices")}>{messages.designerChoices}</JBButton>
+            <JBButton size="sm" variant={componentPreview === "actions" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("actions")}>{messages.designerButtons}</JBButton>
           </div>
         </div>
-        <p className={styles.notice}>{messages.designerComponentsNotice}</p>
+        <div className={styles.componentEditor}>
+          <JBSelect<string>
+            size="sm"
+            label={messages.designerChooseComponent}
+            value={selectedComponentTag ?? ""}
+            hideClear
+            onChange={event => chooseComponentTag(valueFromEvent(event))}
+          >
+            <JBOption value="">{messages.designerSelectComponent}</JBOption>
+            {availableComponentTags.map(tag => {
+              const entry = registryByType.get(tag);
+              return <JBOption key={tag} value={tag}>{entry ? getFormElementDisplayName(entry, locale) : tag}</JBOption>;
+            })}
+          </JBSelect>
+          {selectedComponentTag ? (
+            <>
+              <div className={styles.componentOverrideSummary}>
+                <div>
+                  <strong>{message("designerComponentOverrides", { count: Object.keys(componentTokenOverrides).length })}</strong>
+                  <code>{selectedComponentTag}</code>
+                </div>
+                <JBButton size="sm" variant="outline" disabled={Object.keys(componentTokenOverrides).length === 0} onClick={resetSelectedComponentOverrides}>
+                  {messages.designerResetComponent}
+                </JBButton>
+              </div>
+              <JBSelect<ComponentPreviewState>
+                size="sm"
+                label={messages.designerComponentPreviewState}
+                message={messages.designerComponentPreviewStateHelp}
+                value={componentPreviewState}
+                hideClear
+                onChange={event => {
+                  const state = valueFromEvent(event) as ComponentPreviewState;
+                  setComponentPreviewState(state);
+                  setComponentTokenStateFilter(state);
+                }}
+              >
+                <JBOption value="default">{messages.designerComponentStateDefault}</JBOption>
+                <JBOption value="hover">{messages.designerComponentStateHover}</JBOption>
+                <JBOption value="focus">{messages.designerComponentStateFocus}</JBOption>
+                <JBOption value="active">{messages.designerComponentStateActive}</JBOption>
+                <JBOption value="disabled">{messages.designerComponentStateDisabled}</JBOption>
+              </JBSelect>
+              <div className={styles.componentAccessibility} aria-label={messages.designerComponentAccessibilityPanel} role="status">
+                <div>
+                  <span>{messages.designerComponentContrastRatio}</span>
+                  <strong>{componentAccessibility?.ratio != null ? `${componentAccessibility.ratio.toFixed(2)}:1` : messages.designerResolvingValue}</strong>
+                </div>
+                <div>
+                  <span>{messages.designerComponentContrastResult}</span>
+                  <strong className={componentAccessibility?.level === "fail" ? styles.accessibilityFail : styles.accessibilityPass}>
+                    {componentAccessibility ? ({
+                      aaa: messages.designerComponentContrastAaa,
+                      aa: messages.designerComponentContrastAa,
+                      fail: messages.designerComponentContrastFail,
+                      unavailable: messages.designerComponentContrastUnavailable,
+                    })[componentAccessibility.level] : messages.designerResolvingValue}
+                  </strong>
+                </div>
+                <div>
+                  <span>{messages.designerComponentFocusIndicator}</span>
+                  <strong className={componentAccessibility?.focusIndicator === false ? styles.accessibilityFail : undefined}>
+                    {componentPreviewState !== "focus"
+                      ? messages.designerComponentSelectFocusState
+                      : componentAccessibility?.focusIndicator == null
+                        ? messages.designerResolvingValue
+                        : componentAccessibility.focusIndicator
+                          ? messages.designerComponentFocusDetected
+                          : messages.designerComponentFocusMissing}
+                  </strong>
+                </div>
+              </div>
+              <div className={styles.componentAudit} aria-label={messages.designerComponentAuditPanel}>
+                <div className={styles.componentAuditHeader}>
+                  <div>
+                    <strong>{messages.designerComponentAuditTitle}</strong>
+                    <span>{messages.designerComponentAuditHelp}</span>
+                  </div>
+                  <JBButton size="sm" variant="outline" disabled={componentAuditRunning} onClick={() => void runComponentAccessibilityAudit()}>
+                    {componentAuditRunning ? messages.designerComponentAuditRunning : messages.designerComponentRunAudit}
+                  </JBButton>
+                </div>
+                {componentAuditIssues ? componentAuditIssues.length === 0 ? (
+                  <p className={styles.componentAuditPass}>{messages.designerComponentAuditPassed}</p>
+                ) : (
+                  <ul>
+                    {componentAuditIssues.map((issue, index) => {
+                      const issueKey = `${issue.state}-${issue.kind}-${index}`;
+                      const isPreviewingFix = componentFixPreview?.issueKey === issueKey;
+                      return <li key={issueKey}>
+                        <div>
+                          <strong>{componentTokenStateLabels[issue.state]}</strong>
+                          <span>{issue.kind === "contrast"
+                            ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
+                            : messages.designerComponentAuditFocusIssue}</span>
+                          {issue.token ? <code>{issue.token}</code> : null}
+                          {isPreviewingFix ? (
+                            <span className={styles.componentFixPreviewStatus} role="status">
+                              <i style={{ backgroundColor: componentFixPreview.value }} />
+                              {message("designerComponentFixPreviewStatus", {
+                                value: componentFixPreview.value,
+                                ratio: componentFixPreview.ratio.toFixed(2),
+                              })}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className={styles.componentAuditActions}>
+                          {issue.token ? <JBButton size="sm" variant="ghost" onClick={() => reviewComponentAuditIssue(issue)}>{messages.designerComponentReviewIssue}</JBButton> : null}
+                          {issue.suggestion && !isPreviewingFix ? <JBButton size="sm" variant="outline" onClick={() => previewComponentAuditFix(issue, issueKey)}>{messages.designerComponentPreviewFix}</JBButton> : null}
+                          {isPreviewingFix ? (
+                            <>
+                              <JBButton size="sm" variant="solid" onClick={applyComponentAuditFix}>{messages.designerComponentApplyFix}</JBButton>
+                              <JBButton size="sm" variant="ghost" onClick={() => setComponentFixPreview(undefined)}>{messages.designerComponentCancelFix}</JBButton>
+                            </>
+                          ) : null}
+                        </div>
+                      </li>
+                    })}
+                  </ul>
+                ) : null}
+              </div>
+              <div className={styles.componentTokenFilters}>
+                <JBCheckbox
+                  size="sm"
+                  name="show-component-overrides-only"
+                  label={messages.designerShowOverridesOnly}
+                  value={showComponentOverridesOnly}
+                  onChange={event => setShowComponentOverridesOnly(Boolean(event.target.value))}
+                />
+                <JBSelect<ComponentTokenState>
+                  size="sm"
+                  label={messages.designerComponentStateFilter}
+                  value={componentTokenStateFilter}
+                  hideClear
+                  onChange={event => setComponentTokenStateFilter(valueFromEvent(event) as ComponentTokenState)}
+                >
+                  <JBOption value="all">{messages.designerComponentStateAll}</JBOption>
+                  <JBOption value="default">{messages.designerComponentStateDefault}</JBOption>
+                  <JBOption value="hover">{messages.designerComponentStateHover}</JBOption>
+                  <JBOption value="focus">{messages.designerComponentStateFocus}</JBOption>
+                  <JBOption value="active">{messages.designerComponentStateActive}</JBOption>
+                  <JBOption value="disabled">{messages.designerComponentStateDisabled}</JBOption>
+                </JBSelect>
+              </div>
+              <JBInput
+                size="sm"
+                label={messages.designerSearchComponentTokens}
+                message={messages.designerSearchComponentTokensHelp}
+                value={componentTokenSearch}
+                onInput={event => setComponentTokenSearch(valueFromEvent(event))}
+              />
+              <div className={styles.componentTokenList} role="listbox" aria-label={messages.designerComponentTokens}>
+                {groupedVisibleComponentTokens.map(({ group, tokens }) => (
+                  <div className={styles.componentTokenGroup} role="group" aria-label={componentTokenGroupLabels[group]} key={group}>
+                    <strong>{componentTokenGroupLabels[group]}</strong>
+                    {tokens.map(token => {
+                      const state = componentTokenState(token);
+                      return (
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={selectedComponentToken === token}
+                          className={selectedComponentToken === token ? styles.componentTokenSelected : styles.componentTokenOption}
+                          key={token}
+                          onClick={() => chooseComponentToken(token)}
+                        >
+                          <span>{componentTokenLabel(token, selectedComponentTag)}</span>
+                          <code>{token}</code>
+                          {state !== "default" ? <small>{componentTokenStateLabels[state]}</small> : null}
+                          {componentTokenOverrides[token] ? <i>{messages.designerOverridden}</i> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+                {visibleComponentTokens.length === 0 ? <p>{showComponentOverridesOnly ? messages.designerNoComponentOverrides : messages.designerNoComponentTokens}</p> : null}
+              </div>
+              {selectedComponentToken ? (
+                <div className={styles.componentTokenEditor}>
+                  <div className={styles.componentTokenEffectiveValue} aria-label={messages.designerComponentEffectiveValuePanel} role="status">
+                    <div>
+                      <span>{messages.designerComponentValueSource}</span>
+                      <strong>{effectiveComponentToken ? ({
+                        component: messages.designerComponentOverrideSource,
+                        global: messages.designerGlobalThemeSource,
+                        default: messages.designerJbDefaultSource,
+                      })[effectiveComponentToken.source] : messages.designerResolvingValue}</strong>
+                    </div>
+                    <div>
+                      <span>{messages.designerComponentEffectiveValue}</span>
+                      <code>{effectiveComponentToken?.value ?? messages.designerResolvingValue}</code>
+                    </div>
+                  </div>
+                  {selectedComponentTokenProperty === "color" ? (
+                    <div className={styles.componentTokenTypedControl}>
+                      <div>
+                        <strong>{messages.designerComponentColorControl}</strong>
+                        <span>{messages.designerComponentColorControlHelp}</span>
+                      </div>
+                      <JBColorInput
+                        size="sm"
+                        label={messages.designerComponentColorPicker}
+                        value={componentTokenDraft}
+                        onInput={event => {
+                          setComponentTokenDraft(valueFromEvent(event));
+                          setComponentTokenError(undefined);
+                        }}
+                        onChange={event => commitComponentTokenValue(valueFromEvent(event))}
+                      />
+                    </div>
+                  ) : null}
+                  {selectedComponentTokenUsesLengthControl ? (
+                    <div className={styles.componentTokenTypedControl}>
+                      <div>
+                        <strong>{messages.designerComponentSizeControl}</strong>
+                        <span>{messages.designerComponentSizeControlHelp}</span>
+                      </div>
+                      <div className={styles.componentTokenLengthFields}>
+                        <JBNumberInput
+                          size="sm"
+                          label={messages.designerComponentSizeValue}
+                          value={componentLengthValue}
+                          acceptNegative
+                          decimalPrecision={3}
+                          onInput={event => {
+                            const number = valueFromEvent(event);
+                            setComponentLengthValue(number);
+                            setComponentTokenDraft(number ? `${number}${componentLengthUnit}` : "");
+                            setComponentTokenError(undefined);
+                          }}
+                          onChange={event => {
+                            const number = valueFromEvent(event);
+                            commitComponentTokenValue(number ? `${number}${componentLengthUnit}` : "");
+                          }}
+                        />
+                        <JBSelect<ComponentLengthUnit>
+                          size="sm"
+                          label={messages.designerComponentSizeUnit}
+                          value={componentLengthUnit}
+                          hideClear
+                          onChange={event => {
+                            const unit = valueFromEvent(event) as ComponentLengthUnit;
+                            setComponentLengthUnit(unit);
+                            const value = componentLengthValue ? `${componentLengthValue}${unit}` : "";
+                            setComponentTokenDraft(value);
+                            if (value) commitComponentTokenValue(value);
+                          }}
+                        >
+                          {componentLengthUnits.map(unit => <JBOption value={unit} key={unit}>{unit}</JBOption>)}
+                        </JBSelect>
+                      </div>
+                    </div>
+                  ) : null}
+                  {selectedComponentTokenProperty === "opacity" ? (
+                    <div className={styles.componentTokenTypedControl}>
+                      <div>
+                        <strong>{messages.designerComponentOpacityControl}</strong>
+                        <span>{messages.designerComponentOpacityControlHelp}</span>
+                      </div>
+                      <div className={styles.componentTokenOpacityFields}>
+                        <JBRangeInput
+                          aria-label={messages.designerComponentOpacitySlider}
+                          size="sm"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          tickStep={0.25}
+                          minorTickStep={null}
+                          value={componentOpacityValue}
+                          onInput={event => {
+                            setComponentTokenDraft(valueFromEvent(event));
+                            setComponentTokenError(undefined);
+                          }}
+                          onChange={event => commitComponentTokenValue(valueFromEvent(event))}
+                        />
+                        <JBNumberInput
+                          size="sm"
+                          label={messages.designerComponentOpacityValue}
+                          minValue={0}
+                          maxValue={1}
+                          step={0.05}
+                          decimalPrecision={2}
+                          value={componentTokenDraft}
+                          onInput={event => {
+                            setComponentTokenDraft(valueFromEvent(event));
+                            setComponentTokenError(undefined);
+                          }}
+                          onChange={event => commitComponentTokenValue(valueFromEvent(event))}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  {selectedComponentTokenOptions.length > 0 ? (
+                    <div className={styles.componentTokenTypedControl}>
+                      <div>
+                        <strong>{messages.designerComponentOptionControl}</strong>
+                        <span>{messages.designerComponentOptionControlHelp}</span>
+                      </div>
+                      <JBSelect<string>
+                        size="sm"
+                        label={messages.designerComponentSuggestedValue}
+                        value={selectedComponentTokenOptions.includes(componentTokenDraft) ? componentTokenDraft : ""}
+                        hideClear
+                        onChange={event => {
+                          const value = valueFromEvent(event);
+                          if (!value) return;
+                          setComponentTokenDraft(value);
+                          commitComponentTokenValue(value);
+                        }}
+                      >
+                        <JBOption value="">{messages.designerComponentCustomValue}</JBOption>
+                        {selectedComponentTokenOptions.map(value => <JBOption value={value} key={value}>{value}</JBOption>)}
+                      </JBSelect>
+                    </div>
+                  ) : null}
+                  <JBInput
+                    size="sm"
+                    label={message("designerTokenOverride", { token: componentTokenLabel(selectedComponentToken, selectedComponentTag) })}
+                    message={componentTokenError ?? message("designerComponentTokenCommitHelp", { token: selectedComponentToken })}
+                    value={componentTokenDraft}
+                    onInput={event => {
+                      const value = valueFromEvent(event);
+                      const parsedLength = parseSimpleCssLength(value);
+                      setComponentTokenDraft(value);
+                      setComponentTokenError(undefined);
+                      setComponentLengthValue(parsedLength?.number ?? "");
+                      if (parsedLength) setComponentLengthUnit(parsedLength.unit);
+                    }}
+                    onBlur={commitComponentTokenDraft}
+                    onKeyDown={event => {
+                      if (event.key !== "Enter") return;
+                      event.preventDefault();
+                      commitComponentTokenDraft();
+                    }}
+                  />
+                  <JBButton
+                    size="sm"
+                    variant="outline"
+                    disabled={!componentTokenOverrides[selectedComponentToken]}
+                    onClick={useInheritedComponentTokenValue}
+                  >
+                    {messages.designerUseInheritedValue}
+                  </JBButton>
+                </div>
+              ) : <p className={styles.notice}>{messages.designerSelectTokenHelp}</p>}
+            </>
+          ) : <p className={styles.notice}>{messages.designerComponentsNotice}</p>}
+        </div>
       </div>
     );
   };

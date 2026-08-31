@@ -1,3 +1,7 @@
+import { COMPONENT_THEME_TOKENS } from "./component-theme-tokens";
+
+export { COMPONENT_THEME_TOKENS } from "./component-theme-tokens";
+
 export const THEME_SCHEMA_VERSION = 1 as const;
 
 export const GLOBAL_THEME_TOKENS = [
@@ -69,6 +73,28 @@ export const GLOBAL_THEME_TOKENS = [
 export type GlobalThemeToken = typeof GLOBAL_THEME_TOKENS[number];
 export type ThemeControlSize = "sm" | "md" | "lg";
 export type ThemeAudienceSize = "compact" | "standard" | "large" | "extra-large" | "custom";
+export const THEME_COMPONENT_TAGS = [
+  "jb-button",
+  "jb-checkbox",
+  "jb-date-input",
+  "jb-file-input",
+  "jb-image-input",
+  "jb-input",
+  "jb-listbox",
+  "jb-mobile-input",
+  "jb-national-input",
+  "jb-number-input",
+  "jb-password-input",
+  "jb-payment-input",
+  "jb-pin-input",
+  "jb-range-input",
+  "jb-select",
+  "jb-switch",
+  "jb-tab",
+  "jb-textarea",
+  "jb-time-input",
+] as const;
+export type ThemeComponentTag = typeof THEME_COMPONENT_TAGS[number];
 export const THEME_PATTERN_IDS = ["science-doodles", "academic-waves", "calm-dots", "warm-chevrons"] as const;
 export type ThemePatternId = typeof THEME_PATTERN_IDS[number];
 
@@ -117,7 +143,7 @@ export interface ThemeConfigV1 {
     controlSize?: ThemeControlSize;
   };
   background?: ThemeBackground;
-  components?: Record<string, { tokens: Record<string, string> }>;
+  components?: Partial<Record<ThemeComponentTag, { tokens: Record<string, string> }>>;
 }
 
 export interface ThemeConfigIssue {
@@ -135,7 +161,34 @@ const globalTokenSet = new Set<string>(GLOBAL_THEME_TOKENS);
 const controlSizes = new Set<ThemeControlSize>(["sm", "md", "lg"]);
 const audienceSizes = new Set<ThemeAudienceSize>(["compact", "standard", "large", "extra-large", "custom"]);
 const patternIds = new Set<string>(THEME_PATTERN_IDS);
+const componentTags = new Set<string>(THEME_COMPONENT_TAGS);
 const topLevelKeys = new Set(["$schema", "schemaVersion", "name", "description", "global", "typography", "sizing", "defaults", "background", "components"]);
+
+const inheritedInputTokenTags = new Set<ThemeComponentTag>([
+  "jb-date-input",
+  "jb-file-input",
+  "jb-image-input",
+  "jb-mobile-input",
+  "jb-national-input",
+  "jb-number-input",
+  "jb-password-input",
+  "jb-payment-input",
+  "jb-pin-input",
+  "jb-time-input",
+]);
+
+export function getSupportedThemeComponentTokens(tagName: ThemeComponentTag): readonly string[] {
+  return [...new Set([
+    ...COMPONENT_THEME_TOKENS[tagName],
+    ...(inheritedInputTokenTags.has(tagName) ? COMPONENT_THEME_TOKENS["jb-input"] : []),
+    ...(tagName === "jb-image-input" ? COMPONENT_THEME_TOKENS["jb-file-input"] : []),
+  ])].sort((left, right) => left.localeCompare(right));
+}
+
+function isSupportedComponentToken(tagName: ThemeComponentTag, token: string): boolean {
+  return /^--jb-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(token)
+    && getSupportedThemeComponentTokens(tagName).includes(token);
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -237,14 +290,14 @@ export function validateThemeConfig(value: unknown): ThemeConfigValidationResult
   if (value.components !== undefined) {
     if (!isRecord(value.components)) issues.push({ path: "/components", message: "Components must be an object." });
     else for (const [tagName, component] of Object.entries(value.components)) {
-      if (!/^[a-z][a-z0-9]*-[a-z0-9-]+$/.test(tagName)) issues.push({ path: `/components/${tagName}`, message: "Component keys must be custom-element tag names." });
+      if (!componentTags.has(tagName)) issues.push({ path: `/components/${tagName}`, message: "Unsupported theme component." });
       if (!isRecord(component) || !isRecord(component.tokens)) {
         issues.push({ path: `/components/${tagName}/tokens`, message: "Component tokens must be an object." });
         continue;
       }
       rejectUnknownKeys(component, ["tokens"], `/components/${tagName}`, issues);
       for (const [token, tokenValue] of Object.entries(component.tokens)) {
-        if (!token.startsWith("--jb-")) issues.push({ path: `/components/${tagName}/tokens/${token}`, message: "Unsupported component token name." });
+        if (!componentTags.has(tagName) || !isSupportedComponentToken(tagName as ThemeComponentTag, token)) issues.push({ path: `/components/${tagName}/tokens/${token}`, message: "Unsupported component token name." });
         if (!nonEmptyString(tokenValue)) issues.push({ path: `/components/${tagName}/tokens/${token}`, message: "Component token values must be non-empty strings." });
       }
     }

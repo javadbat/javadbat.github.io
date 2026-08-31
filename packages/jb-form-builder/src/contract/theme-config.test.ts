@@ -53,4 +53,35 @@ describe("ThemeConfig v1", () => {
 
     expect(result.issues).toContainEqual(expect.objectContaining({ path: "/background/source", message: expect.stringContaining("800 KB") }));
   });
+
+  it("accepts supported component tokens, including inherited input tokens", () => {
+    const result = validateThemeConfig({
+      schemaVersion: 1,
+      name: "Component theme",
+      components: {
+        "jb-input": { tokens: { "--jb-input-border-color": "#123456" } },
+        "jb-mobile-input": { tokens: { "--jb-input-border-radius": "1rem", "--jb-mobile-input-input-direction": "ltr" } },
+      },
+    });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects unknown component tags and cross-component token namespaces", () => {
+    const result = validateThemeConfig({
+      schemaVersion: 1,
+      name: "Unsafe component theme",
+      components: {
+        "jb-unknown": { tokens: { "--jb-unknown-color": "red" } },
+        "jb-button": { tokens: { "--jb-input-border-color": "red", "--jb-button-color);display": "none", "--jb-button-does-not-exist": "red" } },
+      },
+    });
+
+    expect(result.issues.map(issue => issue.path)).toEqual(expect.arrayContaining([
+      "/components/jb-unknown",
+      "/components/jb-button/tokens/--jb-input-border-color",
+      "/components/jb-button/tokens/--jb-button-color);display",
+      "/components/jb-button/tokens/--jb-button-does-not-exist",
+    ]));
+  });
 });

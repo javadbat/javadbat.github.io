@@ -93,6 +93,253 @@ test("isolates inputs, choices, and actions through the component preview select
   await expect.poll(renderedTypes).toEqual(["jb-input", "jb-select", "jb-input", "jb-checkbox", "jb-button"]);
 });
 
+test("groups component tokens and filters them by interaction state", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+
+  const tokenList = page.getByRole("listbox", { name: "Component style properties" });
+  await expect(tokenList.getByRole("group", { name: "Colors" })).toBeVisible();
+  await expect(tokenList.getByRole("group", { name: "Border & shape" })).toBeVisible();
+  await expect.poll(() => tokenList.getByRole("option").count()).toBeGreaterThan(36);
+
+  const stateFilter = page.locator('jb-select[label="State"]');
+  await stateFilter.getByRole("button", { name: "Toggle options" }).click();
+  await stateFilter.locator("jb-option").filter({ hasText: "Focus", visible: true }).click();
+  const focusTokens = await tokenList.getByRole("option").locator("code").allTextContents();
+  expect(focusTokens.length).toBeGreaterThan(0);
+  expect(focusTokens.every(token => token.includes("focus"))).toBe(true);
+
+  await stateFilter.getByRole("button", { name: "Toggle options" }).click();
+  await stateFilter.locator("jb-option").filter({ hasText: "Default", visible: true }).click();
+  const defaultTokens = await tokenList.getByRole("option").locator("code").allTextContents();
+  expect(defaultTokens.length).toBeGreaterThan(0);
+  expect(defaultTokens.every(token => !/(?:hover|focus|active|pressed|disabled)/.test(token))).toBe(true);
+});
+
+test("forces an interaction state in the isolated component preview", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+  await page.getByLabel("Search style properties").fill("border color focus");
+  await page.getByRole("listbox", { name: "Component style properties" })
+    .getByRole("option").filter({ hasText: "--jb-input-border-color-focus" }).click();
+  await page.getByLabel("Border color focus override").fill("#123456");
+  await page.getByLabel("Border color focus override").press("Enter");
+
+  const previewState = page.locator('jb-select[label="Preview state"]');
+  const chooseState = async (state: string) => {
+    await previewState.getByRole("button", { name: "Toggle options" }).click();
+    await previewState.locator("jb-option").filter({ hasText: state, visible: true }).click();
+  };
+  const previewBorderColor = () => page.locator("jb-form-builder").evaluate(element => {
+    const input = element.shadowRoot?.querySelector<HTMLElement>("jb-input");
+    const inputBox = input?.shadowRoot?.querySelector<HTMLElement>(".input-box");
+    return {
+      state: input?.getAttribute("data-designer-preview-state") ?? "",
+      borderColor: inputBox ? getComputedStyle(inputBox).borderColor : "",
+      hasForcedStyle: Boolean(input?.shadowRoot?.querySelector("style[data-designer-preview-state-style]")),
+    };
+  });
+
+  await chooseState("Focus");
+  await expect.poll(previewBorderColor).toEqual({ state: "focus", borderColor: "rgb(18, 52, 86)", hasForcedStyle: true });
+  const accessibility = page.getByLabel("Component accessibility diagnostics");
+  await expect(accessibility).toContainText(/\d+\.\d{2}:1/);
+  await expect(accessibility).toContainText(/Passes AAA|Passes AA|Needs attention/);
+  await expect(accessibility).toContainText("Visible change detected");
+  await chooseState("Default");
+  await expect.poll(previewBorderColor).not.toEqual({ state: "focus", borderColor: "rgb(18, 52, 86)", hasForcedStyle: true });
+});
+
+test("audits every component state and jumps to a failing token", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+
+  const setToken = async (search: string, token: string, label: string, value: string) => {
+    await page.getByLabel("Search style properties").fill(search);
+    await page.getByRole("listbox", { name: "Component style properties" })
+      .getByText(token, { exact: true }).locator("..").click();
+    await page.getByLabel(label).fill(value);
+    await page.getByLabel(label).press("Enter");
+  };
+  await setToken("value color", "--jb-input-value-color", "Value color override", "#ffffff");
+  await setToken("bg color", "--jb-input-bg-color", "Bg color override", "#ffffff");
+
+  await page.getByRole("button", { name: "Run accessibility audit" }).click();
+  const audit = page.getByLabel("Component accessibility audit");
+  await expect(audit).toContainText(/Text contrast is 1\.00:1/);
+  await expect(audit.locator("code").first()).toContainText("--jb-input-value-color");
+  await audit.getByRole("button", { name: "Review" }).first().click();
+  await expect(page.getByLabel("Value color override")).toBeVisible();
+
+  await audit.getByRole("button", { name: "Preview fix" }).first().click();
+  const fixStatus = audit.getByRole("status");
+  await expect(fixStatus).toContainText(/Previewing #[0-9a-f]{6} at [4-9]\.[0-9]{2}:1/);
+  await expect(fixStatus).toContainText("The theme has not changed");
+  await expect(page.getByLabel("Value color override")).toHaveValue("#ffffff");
+  await audit.getByRole("button", { name: "Apply fix" }).click();
+  await expect(page.getByLabel("Value color override")).not.toHaveValue("#ffffff");
+  await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
+});
+
+test("edits and removes a validated component token override", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+
+  await expect.poll(() => page.locator("jb-form-builder").evaluate(element => Array.from(
+    element.shadowRoot?.querySelectorAll<HTMLElement>("[data-element-type]") ?? [],
+    item => item.dataset.elementType,
+  ))).toEqual(["jb-input", "jb-input"]);
+
+  await page.getByLabel("Search style properties").fill("border color");
+  const tokenList = page.getByRole("listbox", { name: "Component style properties" });
+  await tokenList.getByRole("option").filter({ hasText: "--jb-input-border-color" }).first().click();
+  const overrideInput = page.getByLabel("Border color override");
+  await overrideInput.fill("#123456");
+  await overrideInput.press("Enter");
+
+  const runtimeValue = () => page.locator("jb-form-builder").evaluate(element => (
+    element.shadowRoot?.querySelector<HTMLElement>("jb-input")?.style.getPropertyValue("--jb-input-border-color") ?? ""
+  ));
+  await expect.poll(runtimeValue).toBe("#123456");
+  const effectiveValue = page.getByLabel("Effective token value");
+  await expect(effectiveValue).toContainText("Component override");
+  await expect(effectiveValue).toContainText("#123456");
+
+  const colorPicker = page.getByRole("textbox", { name: "Color picker" });
+  await colorPicker.fill("#345678");
+  await overrideInput.focus();
+  await expect.poll(runtimeValue).toBe("#345678");
+  await overrideInput.fill("#123456");
+  await overrideInput.press("Enter");
+
+  await overrideInput.fill("red; display: none");
+  await overrideInput.press("Enter");
+  await expect(page.getByText("Enter a valid CSS value without semicolons or braces.")).toBeVisible();
+  await expect.poll(runtimeValue).toBe("#123456");
+  await overrideInput.fill("#123456");
+  await overrideInput.press("Enter");
+
+  await overrideInput.fill("#234567");
+  await page.getByLabel("Search style properties").focus();
+  await expect.poll(runtimeValue).toBe("#234567");
+  await overrideInput.fill("#123456");
+  await overrideInput.press("Enter");
+
+  const overridesOnly = page.locator('jb-checkbox[label="Show overridden properties only"]');
+  await overridesOnly.click();
+  await expect(tokenList.getByRole("option")).toHaveCount(1);
+  await overridesOnly.click();
+
+  await page.getByRole("button", { name: "Export theme" }).click();
+  const exported = JSON.parse(await page.getByRole("dialog").locator("pre").textContent() ?? "{}");
+  expect(exported.components?.["jb-input"]?.tokens?.["--jb-input-border-color"]).toBe("#123456");
+  await page.getByRole("button", { name: "Close" }).click();
+
+  await page.getByRole("button", { name: "Use inherited value" }).click();
+  await expect.poll(runtimeValue).toBe("");
+  await expect(effectiveValue).toContainText(/Global theme|JB default/);
+  await expect(effectiveValue).not.toContainText("#123456");
+
+  await overrideInput.fill("#654321");
+  await overrideInput.press("Enter");
+  await expect.poll(runtimeValue).toBe("#654321");
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", { name: "Reset component" }).click();
+  await expect.poll(runtimeValue).toBe("");
+  await expect(page.getByText("0 component overrides")).toBeVisible();
+});
+
+test("edits a recognized component length with a value and unit", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+
+  await page.getByLabel("Search style properties").fill("border radius");
+  const tokenList = page.getByRole("listbox", { name: "Component style properties" });
+  await tokenList.getByRole("option").filter({ hasText: "--jb-input-border-radius" }).first().click();
+
+  const runtimeValue = () => page.locator("jb-form-builder").evaluate(element => (
+    element.shadowRoot?.querySelector<HTMLElement>("jb-input")?.style.getPropertyValue("--jb-input-border-radius") ?? ""
+  ));
+  const sizeValue = page.getByRole("textbox", { name: "Size value" });
+  await sizeValue.fill("12");
+  await page.getByLabel("Border radius override").focus();
+  await expect.poll(runtimeValue).toBe("12px");
+
+  const unitSelect = page.locator('jb-select[label="Unit"]');
+  await unitSelect.getByRole("button", { name: "Toggle options" }).click();
+  await unitSelect.locator("jb-option").filter({ hasText: "rem", visible: true }).click();
+  await expect.poll(runtimeValue).toBe("12rem");
+  await expect(page.getByLabel("Border radius override")).toHaveValue("12rem");
+
+  await page.getByLabel("Border radius override").fill("calc(1rem + 2px)");
+  await page.getByLabel("Border radius override").press("Enter");
+  await expect.poll(runtimeValue).toBe("calc(1rem + 2px)");
+  await expect(sizeValue).toHaveValue("");
+});
+
+test("uses suggested values for enumerated component properties", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+  await page.getByLabel("Search style properties").fill("text align");
+  await page.getByRole("listbox", { name: "Component style properties" })
+    .getByRole("option").filter({ hasText: "--jb-input-input-text-align" }).click();
+
+  const suggestedValue = page.locator('jb-select[label="Suggested value"]');
+  await suggestedValue.getByRole("button", { name: "Toggle options" }).click();
+  await suggestedValue.locator("jb-option").filter({ hasText: "center", visible: true }).click();
+
+  const runtimeValue = () => page.locator("jb-form-builder").evaluate(element => (
+    element.shadowRoot?.querySelector<HTMLElement>("jb-input")?.style.getPropertyValue("--jb-input-input-text-align") ?? ""
+  ));
+  await expect.poll(runtimeValue).toBe("center");
+  await expect(page.getByLabel("Input text align override")).toHaveValue("center");
+});
+
+test("edits a component opacity with a bounded typed control", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Switch", visible: true }).click();
+  await page.getByLabel("Search style properties").fill("opacity disabled");
+  await page.getByRole("listbox", { name: "Component style properties" })
+    .getByRole("option").filter({ hasText: "--jb-switch-opacity-disabled" }).click();
+
+  const opacityValue = page.getByRole("textbox", { name: "Opacity value" });
+  await opacityValue.fill("0.4");
+  await page.getByLabel("Opacity disabled override").focus();
+
+  const runtimeValue = () => page.locator("jb-form-builder").evaluate(element => (
+    element.shadowRoot?.querySelector<HTMLElement>("jb-switch")?.style.getPropertyValue("--jb-switch-opacity-disabled") ?? ""
+  ));
+  await expect.poll(runtimeValue).toBe("0.4");
+  await expect(page.getByLabel("Opacity disabled override")).toHaveValue("0.4");
+});
+
 test("flushes a pending autosave before returning to the theme library", async ({ page }) => {
   await openDesigner(page);
   await page.locator("[class*=presetRow]").getByRole("button", { name: "Academic", exact: true }).click();

@@ -88,7 +88,7 @@ export const DESIGNER_SAMPLE_FORM: JBFormDocumentV1 = {
       "permission",
       "I give permission for my child to participate in the science club",
       undefined,
-      { size: "lg" },
+      { size: "lg", variant: "filled-outline", color: "positive" },
       true,
     ),
     {
