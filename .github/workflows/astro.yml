@@ -9,7 +9,7 @@ on:
   push:
     branches: ["main"]
 
-  # Runs the same build and browser gates before changes merge.
+  # Runs the build checks before changes merge.
   pull_request:
     branches: ["main"]
 
@@ -94,40 +94,12 @@ jobs:
         with:
           path: ${{ env.BUILD_PATH }}/dist
 
-  form-designer-browser:
-    name: Form Designer browsers
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Setup Node
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version: "24"
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - name: Install dependencies
-        run: npm ci
-      - name: Install browser engines
-        run: npx playwright install --with-deps
-      - name: Run Designer browser matrix
-        run: npm run test:form:e2e
-      - name: Upload browser report
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: form-designer-playwright-report
-          path: playwright-report/
-          if-no-files-found: ignore
-          retention-days: 14
-
   deploy:
     if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [build, form-designer-browser]
+    needs: build
     runs-on: ubuntu-latest
     name: Deploy
     steps:

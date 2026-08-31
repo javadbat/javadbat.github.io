@@ -18,6 +18,10 @@ import { JBRangeInput } from "jb-range-input/react";
 import { JBTextarea } from "jb-textarea/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
+import type { JBTabChangeEvent } from "jb-tab";
+import { JBTab } from "jb-tab/react";
+import { JBTabList } from "jb-tab/list/react";
+import { JBTabTrigger } from "jb-tab/trigger/react";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
 import { createDefaultElement, getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
@@ -79,7 +83,7 @@ import {
 
 type SaveStatus = "saving" | "saved" | "invalid" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
-type PreviewViewport = "desktop" | "mobile";
+type PreviewViewport = "desktop" | "tablet" | "mobile";
 type MobilePanel = "design" | "preview";
 type ComponentPreview = "all" | "inputs" | "choices" | "actions";
 type ComponentLengthUnit = "px" | "rem" | "em" | "%" | "vh" | "vw";
@@ -1657,19 +1661,19 @@ export function DesignerApp() {
 
   const renderBackgroundSettings = () => (
     <div className={styles.sectionContent}>
-      <div className={styles.segmented} aria-label={messages.designerBackgroundType}>
-        {(["color", "pattern", "image"] as ThemeBackgroundMode[]).map(mode => (
-          <JBButton
-            key={mode}
-            size="sm"
-            variant={theme.background.mode === mode ? "solid" : "ghost"}
-            color="primary"
-            onClick={() => updateTheme(draft => { draft.background.mode = mode; })}
-          >
-            {mode === "color" ? messages.designerColor : mode === "pattern" ? messages.designerPattern : messages.designerImage}
-          </JBButton>
-        ))}
-      </div>
+      <JBTab
+        className={styles.backgroundTabs}
+        value={theme.background.mode}
+        onChange={(event: JBTabChangeEvent) => updateTheme(draft => { draft.background.mode = event.detail.value as ThemeBackgroundMode; })}
+      >
+        <JBTabList size="sm" aria-label={messages.designerBackgroundType}>
+          {(["color", "pattern", "image"] as ThemeBackgroundMode[]).map(mode => (
+            <JBTabTrigger key={mode} value={mode} color="primary">
+              {mode === "color" ? messages.designerColor : mode === "pattern" ? messages.designerPattern : messages.designerImage}
+            </JBTabTrigger>
+          ))}
+        </JBTabList>
+      </JBTab>
 
       {theme.background.mode === "pattern" ? (
         <>
@@ -1989,14 +1993,20 @@ export function DesignerApp() {
     }
     return (
       <div className={styles.sectionContent}>
-        <div className={styles.componentPreviewControl} role="group" aria-label={messages.designerPreviewComponent}>
+        <div className={styles.componentPreviewControl}>
           <span>{messages.designerPreviewComponent}</span>
-          <div>
-            <JBButton size="sm" variant={componentPreview === "all" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("all")}>{messages.designerAllControls}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "inputs" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("inputs")}>{messages.designerInputs}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "choices" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("choices")}>{messages.designerChoices}</JBButton>
-            <JBButton size="sm" variant={componentPreview === "actions" && !selectedComponentTag ? "solid" : "outline"} onClick={() => chooseComponentPreview("actions")}>{messages.designerButtons}</JBButton>
-          </div>
+          <JBTab
+            className={styles.componentPreviewTabs}
+            value={componentPreview}
+            onChange={(event: JBTabChangeEvent) => chooseComponentPreview(event.detail.value as ComponentPreview)}
+          >
+            <JBTabList size="sm" aria-label={messages.designerPreviewComponent}>
+              <JBTabTrigger value="all" color="primary">{messages.designerAllControls}</JBTabTrigger>
+              <JBTabTrigger value="inputs" color="primary">{messages.designerInputs}</JBTabTrigger>
+              <JBTabTrigger value="choices" color="primary">{messages.designerChoices}</JBTabTrigger>
+              <JBTabTrigger value="actions" color="primary">{messages.designerButtons}</JBTabTrigger>
+            </JBTabList>
+          </JBTab>
         </div>
         <div className={styles.componentEditor}>
           <JBSelect<string>
@@ -2659,10 +2669,14 @@ export function DesignerApp() {
         </div>
       </FormRouteHeader>
 
-      <div className={styles.mobileTabs}>
-        <JBButton size="sm" variant={mobilePanel === "design" ? "solid" : "ghost"} onClick={() => setMobilePanel("design")}>{messages.designerDesign}</JBButton>
-        <JBButton size="sm" variant={mobilePanel === "preview" ? "solid" : "ghost"} onClick={() => setMobilePanel("preview")}>{messages.designerPreview}</JBButton>
-      </div>
+      <nav className={styles.mobileTabs} aria-label={messages.designerMobilePanels}>
+        <JBTab value={mobilePanel} onChange={(event: JBTabChangeEvent) => setMobilePanel(event.detail.value as MobilePanel)}>
+          <JBTabList size="sm" aria-label={messages.designerMobilePanels}>
+            <JBTabTrigger value="design" color="primary">{messages.designerDesign}</JBTabTrigger>
+            <JBTabTrigger value="preview" color="primary">{messages.designerPreview}</JBTabTrigger>
+          </JBTabList>
+        </JBTab>
+      </nav>
 
       <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={mobilePanel}>
         <aside className={`${layoutStyles.panel} ${styles.settingsPanel}`}>
@@ -2723,10 +2737,17 @@ export function DesignerApp() {
               </JBSelect>
             </div>
             <div className={styles.previewTools}>
-              <div className={styles.segmented} aria-label={messages.designerPreviewWidth}>
-                <JBButton size="sm" variant={viewport === "desktop" ? "solid" : "ghost"} onClick={() => setViewport("desktop")}>{messages.designerDesktop}</JBButton>
-                <JBButton size="sm" variant={viewport === "mobile" ? "solid" : "ghost"} onClick={() => setViewport("mobile")}>{messages.designerMobile}</JBButton>
-              </div>
+              <JBTab
+                className={styles.previewViewportTabs}
+                value={viewport}
+                onChange={(event: JBTabChangeEvent) => setViewport(event.detail.value as PreviewViewport)}
+              >
+                <JBTabList size="sm" aria-label={messages.designerPreviewWidth}>
+                  <JBTabTrigger value="desktop" color="primary">{messages.designerDesktop}</JBTabTrigger>
+                  <JBTabTrigger value="tablet" color="primary">{messages.designerTablet}</JBTabTrigger>
+                  <JBTabTrigger value="mobile" color="primary">{messages.designerMobile}</JBTabTrigger>
+                </JBTabList>
+              </JBTab>
               <JBButton size="sm" variant="ghost" onClick={() => rendererRef.current?.reset()}>
                 <jb-icon-refresh /> {messages.designerReset}
               </JBButton>
@@ -2735,7 +2756,7 @@ export function DesignerApp() {
 
           <div className={styles.previewStage} style={previewThemeStyle}>
             <div className={styles.previewBackdrop} style={backdropStyle} />
-            <div className={viewport === "mobile" ? styles.previewMobile : styles.previewDesktop}>
+            <div className={viewport === "mobile" ? styles.previewMobile : viewport === "tablet" ? styles.previewTablet : styles.previewDesktop}>
               <div className={styles.formPreview} dir={previewDirection}>
                 <img className={styles.emblem} src="/form/theme-patterns/science-club-emblem.png" alt="" />
                 <h1>{previewName}</h1>

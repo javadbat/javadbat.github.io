@@ -17,7 +17,7 @@ Keep persisted ThemeConfig, editor draft/intermediate input, preview runtime, an
 
 ## Live preview and components
 
-Committed valid changes reach preview under 100ms. Invalid intermediate input stays local; preview retains last valid value. Preview uses the runtime renderer, is interactive, and keeps responses session-only. Desktop offers Desktop/Mobile viewports; mobile uses real width. Reset preview clears runtime state only.
+Committed valid changes reach preview under 100ms. Invalid intermediate input stays local; preview retains last valid value. Preview uses the runtime renderer, is interactive, and keeps responses session-only. Desktop offers Desktop/Tablet/Mobile viewports, with Tablet fixed at 768px; mobile-sized Designer screens use their real width and hide the device-size selector. Reset preview clears runtime state only.
 
 Preview uses the saved form's default locale/direction independently of the Designer chrome, which supports English/LTR and Persian/RTL.
 

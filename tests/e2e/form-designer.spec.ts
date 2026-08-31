@@ -21,7 +21,7 @@ test("has no page overflow and switches to compact navigation at every target wi
     });
 
     expect(state.overflowX, `${width}px should not overflow horizontally`).toBe(false);
-    expect(state.tabsDisplay).toBe(width <= 1024 ? "grid" : "none");
+    expect(state.tabsDisplay).toBe(width <= 1024 ? "block" : "none");
   }
 });
 
@@ -31,8 +31,8 @@ test("supports keyboard compact navigation and 44px primary targets", async ({ p
   const workspace = page.locator("main[data-mobile-panel]");
   const mobileTabs = page.locator("[class*=mobileTabs]");
   const mobileHeader = page.locator("[class*=mobileHeaderActions]");
-  const design = mobileTabs.getByRole("button", { name: "Design", exact: true });
-  const preview = mobileTabs.getByRole("button", { name: "Preview", exact: true });
+  const design = mobileTabs.locator('jb-tab-trigger[value="design"]');
+  const preview = mobileTabs.locator('jb-tab-trigger[value="preview"]');
   const previewRoute = mobileHeader.getByRole("link", { name: "Preview", exact: true });
   const more = mobileHeader.getByRole("button", { name: "More", exact: true });
 

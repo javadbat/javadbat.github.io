@@ -480,21 +480,25 @@
   justify-self: start;
 }
 
-.segmented {
-  min-height: 2.6rem;
-  padding: 0.2rem;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  align-items: stretch;
-  border: 0.0625rem solid var(--designer-line);
-  border-radius: 0.75rem;
-  corner-shape: squircle;
-  background: #fbfcff;
+.backgroundTabs,
+.previewViewportTabs {
+  display: block;
+  --jb-tab-list-background: #fbfcff;
 }
 
-.segmented jb-button {
+.backgroundTabs :global(jb-tab-list),
+.previewViewportTabs :global(jb-tab-list) {
+  display: block;
   width: 100%;
+}
+
+.backgroundTabs :global(jb-tab-list)::part(list),
+.previewViewportTabs :global(jb-tab-list)::part(list) {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 0.0625rem solid var(--designer-line);
+  corner-shape: squircle;
 }
 
 .settingLabel {
@@ -625,14 +629,23 @@
   font-size: 0.75rem;
 }
 
-.componentPreviewControl > div {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+.componentPreviewTabs {
+  display: block;
+  --jb-tab-list-background: #fbfcff;
 }
 
-.componentPreviewControl jb-button {
+.componentPreviewTabs :global(jb-tab-list) {
+  display: block;
   width: 100%;
+}
+
+.componentPreviewTabs :global(jb-tab-list)::part(list) {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: 0.25rem;
+  border: 0.0625rem solid var(--designer-line);
+  corner-shape: squircle;
 }
 
 .componentEditor {
@@ -1069,8 +1082,8 @@
   width: 17.5rem;
 }
 
-.previewTools .segmented {
-  width: 15.5rem;
+.previewTools .previewViewportTabs {
+  width: 20rem;
 }
 
 .previewStage {
@@ -1091,6 +1104,7 @@
 }
 
 .previewDesktop,
+.previewTablet,
 .previewMobile {
   width: 100%;
   min-height: 100%;
@@ -1100,6 +1114,15 @@
   align-items: flex-start;
   justify-content: center;
   transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.previewTablet {
+  width: 768px;
+  min-height: calc(100% - 2rem);
+  margin-top: 1rem;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0.8rem 2.4rem rgba(26, 39, 88, 0.15);
 }
 
 .previewMobile {
@@ -1723,8 +1746,8 @@
     width: 14rem;
   }
 
-  .previewTools .segmented {
-    width: 11.5rem;
+  .previewTools .previewViewportTabs {
+    width: 16.5rem;
   }
 }
 
@@ -1778,15 +1801,23 @@
     top: 5.95rem;
     min-height: 3.5rem;
     padding: 0.5rem 1rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    display: block;
     border-bottom: 0.0625rem solid var(--designer-line);
     background: #fff;
+    --jb-tab-list-background: #fbfcff;
+    --jb-tab-trigger-height-sm: 2.75rem;
   }
 
-  .mobileTabs jb-button {
-    --jb-button-height-sm: 2.75rem;
+  .mobileTabs :global(jb-tab-list) {
+    display: block;
+    width: 100%;
+  }
+
+  .mobileTabs :global(jb-tab-list)::part(list) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    corner-shape: squircle;
   }
 
   .workspace {
@@ -1901,12 +1932,16 @@
 
   .previewPicker,
   .previewPicker jb-select,
-  .previewTools,
-  .previewTools .segmented {
+  .previewTools {
     width: 100%;
   }
 
+  .previewTools .previewViewportTabs {
+    display: none;
+  }
+
   .previewDesktop,
+  .previewTablet,
   .previewMobile {
     width: 100%;
     min-height: 100%;
@@ -1928,6 +1963,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .previewDesktop,
+  .previewTablet,
   .previewMobile {
     transition: none;
   }
