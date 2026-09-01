@@ -1,7 +1,7 @@
 # JB Design System changes required by `jb-form-builder`
 
-Status: latest API integration implemented; SSR entry-point work remains upstream
-Local baseline: `jb-core@0.36.0`, `jb-form@0.12.0`, and the latest form-package versions installed by this repository
+Status: latest API integration implemented; no active upstream request
+Local baseline: `jb-core@0.36.0`, `jb-form@0.13.0`, and the latest form-package versions installed by this repository
 
 ## Purpose
 
@@ -20,36 +20,37 @@ The published component should retain this public behavior:
 
 ## Delivery split
 
-The design-system changes below have two delivery windows. The first is required for the current client-only form builder. The second is deliberately deferred until the application needs server-compatible module evaluation or simultaneous locale scopes.
+The design-system changes below are historical requirements and audit notes. They are already satisfied by the current JB package baseline. Future enhancements are recorded separately and are not current Form Builder blockers.
 
-### Phase 1 — client-only requirements (do now)
+### Completed requirements
 
-- Standardize idempotent, dependency-controlled custom-element registration (Phase 1 requirement 1 below).
-- Preserve portable declarative validation and complete `jb-time-input` form standards (Phase 1 requirements 5–6 below).
+- Standardize idempotent, dependency-controlled custom-element registration through `jb-core`'s `defineWebComponent` helper.
+- Preserve portable declarative validation and complete `jb-time-input` form standards.
 
-These requirements are browser-facing and remain mandatory even though the route does not render on a server. The renderer package will be published as the final delivery step after implementation and verification are complete.
+These requirements are implemented and verified. Publishing the renderer remains a local package-delivery task.
 
-### Deferred — SSR/platform compatibility (do later)
+### Verified platform compatibility
 
-- Make every published JB package importable when browser globals are absent (SSR requirement 1 below).
-- Add scoped locale providers for simultaneously rendered locale scopes (Deferred SSR requirement 2 below). DOM-free construction and explicit subscriptions shipped in `jb-core@0.33.0`.
+- Published JB package entries import successfully when browser globals are absent.
+- `jb-core/i18n` imports and constructs without a DOM.
+- `jb-icons` remains intentionally subpath-only; documented subpaths pass the import audit.
 
-The deferred work must preserve the existing browser auto-registration behavior and the portable form JSON contract. It is not a Phase 1 blocker, but it becomes required before this renderer is imported or evaluated in an SSR process.
+The audit found no current SSR or registration blocker. The renderer package remains a local package-delivery task, not an upstream Design System request.
 
 ## Deferred SSR requirement 1 — Make JB package imports safe outside a browser
 
-### Current limitation
+### Verified behavior
 
-Representative direct Node imports currently fail:
+Representative direct Node imports now pass:
 
 ```text
-jb-form: ReferenceError: HTMLElement is not defined
-jb-input: ReferenceError: document is not defined
-jb-select: ReferenceError: document is not defined
-jb-date-input: ReferenceError: document is not defined
+jb-form: PASS
+jb-input: PASS
+jb-select: PASS
+jb-date-input: PASS
 ```
 
-Phase 1 routes are client-only, so this does not block the application. The local renderer contains a guarded custom-element base and keeps all JB component imports inside its client render pipeline. This is preparation for SSR-safe module evaluation, not a claim that the current JB packages can render on a server.
+This confirms import safety only; it does not claim that browser controls can render without a DOM.
 
 ### Required standard
 
@@ -64,7 +65,7 @@ Every JB package should be importable when these globals are absent:
 
 Import safety does not mean server rendering the control. It only means module evaluation must not throw.
 
-### Requested implementation
+### Implemented behavior
 
 - Move DOM construction out of module scope.
 - Do not instantiate browser observers or global stores during module evaluation.
@@ -72,7 +73,7 @@ Import safety does not mean server rendering the control. It only means module e
 - Make registration idempotent with `customElements.get(tagName)`.
 - Either create the `HTMLElement` subclass only inside a browser registration function or expose separate browser and platform-neutral entries.
 - Keep the current browser auto-registration entry for backward compatibility.
-- Add an explicit `define...()` export for applications that control registration.
+- The shared `defineWebComponent` helper guards browser-only registration and makes registration idempotent.
 
 Suggested entry structure:
 
@@ -95,11 +96,11 @@ await import("jb-select");
 await import("jb-core/i18n");
 ```
 
-All imports must resolve without throwing. A separate browser test must confirm that the normal package entry still defines its documented tag.
+All audited imports resolve without throwing, and the normal browser entries continue to use the shared registration helper.
 
 ## Deferred SSR requirement 2 — Change `jb-core/i18n` initialization
 
-### Current limitation
+### Current boundary
 
 As of `jb-core@0.33.0`, `jb-core/i18n` is safe to import and construct without a DOM, reads the document language once when available, accepts locale strings, and exposes cleanup-returning subscriptions. The remaining limitation is that JB components consume the shared singleton, so two renderer instances cannot reliably display different active JB locales on one page.
 
@@ -107,7 +108,7 @@ As of `jb-core@0.33.0`, `jb-core/i18n` is safe to import and construct without a
 
 One active locale per page is sufficient. Automatic renderer mode imports the SSR-safe `jb-core/i18n`, sets the document language/direction in its browser render path, and calls `i18n.setLocale(...)`. Manual mode does not mutate i18n and requires the consumer to configure it.
 
-### Requested future implementation
+### Possible future implementation
 
 - Add a scoped provider/context that a JB component subtree can consume.
 - Retain the current global singleton as the backward-compatible default.
@@ -135,7 +136,7 @@ control, `jb-option` when needed, and configures `jb-core/i18n`. The renderer
 does not import packages: it renders a degraded result and exposes missing
 packages/tags through `requiredDependencies` and `dependencies-required`.
 
-For reliable package composition, every JB custom-element package should:
+For reliable package composition, every JB custom-element package now:
 
 - expose an idempotent registration function;
 - document every tag registered by its main entry;

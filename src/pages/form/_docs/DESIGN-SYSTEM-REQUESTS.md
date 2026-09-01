@@ -1,6 +1,6 @@
 # JB Form — Design System Requests
 
-Status: Two active SSR entry-point requests
+Status: No active Form Builder design-system requests
 Reviewed: 2026-09-02
 
 This file tracks only work that still requires a change in the JB Design System. Completed requests are intentionally removed from the active list; their verification is reflected in `COMPONENT-INVENTORY.md`, `COMPONENT-SUPPORT.md`, and `PLAN.md`.
@@ -9,21 +9,22 @@ This file tracks only work that still requires a change in the JB Design System.
 
 Previously tracked component requests are complete and intentionally not repeated here. Their verification is recorded in the inventory, support matrix, and operational plan. The current 25-entry catalog is migrated to the latest published API ranges. The application-local renderer now defers configuration for components whose latest runtime initializes internal DOM only in `connectedCallback`.
 
-## Active platform requests
+## Audit result
 
-SSR is now an explicit Form Builder requirement. The following published entry points still fail direct Node evaluation:
+The current published JB packages are importable without browser globals during module evaluation. The audit passed for every JB dependency used by the repository. The only exception is the intentionally non-root-exported `jb-icons` package; its documented subpath entry, such as `jb-icons/arrow`, passes.
 
-- `jb-form` reads `HTMLElement` from its default entry during module evaluation.
-- `jb-color-input` performs unguarded custom-element registration from its default entry.
+All audited web-component packages use `jb-core`'s `defineWebComponent` helper. The helper guards browser-only registration and skips tags that are already defined, so registration is safe and idempotent.
 
-Required upstream API:
+No upstream API change is required for the supported Form Builder flow. Verified representative imports include:
 
-- Preserve the existing browser auto-registration entry.
-- Add guarded, idempotent `define...()` functions and an SSR-safe default import path for both packages.
-- Keep React and browser-only DOM construction out of the SSR-safe path.
-- Add Node import tests and browser registration tests to each package.
+- `jb-form`
+- `jb-color-input`
+- `jb-input`
+- `jb-select`
+- `jb-date-input`
+- `jb-core/i18n`
 
-`jb-core/i18n` is already SSR-safe in the current baseline. `jb-icons` is a subpath package; documented entries such as `jb-icons/arrow` pass the Node import audit, while the package root is intentionally not an exported API.
+`jb-core/i18n` is SSR-safe in the current baseline. No upstream change is required for the supported Form Builder flow.
 
 ## Intake rule for new requests
 

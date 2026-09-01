@@ -93,13 +93,13 @@ Status: NOT STARTED
 
 ## Step 7 — platform hardening when required
 
-Status: IN PROGRESS — local package and renderer work complete; upstream entry-point fixes pending
+Status: COMPLETE — local package, renderer, and platform audit complete
 
 - Treat the latest JB package APIs as the renderer baseline: `jb-core@0.36.0`, `jb-input@3.19.0`, `jb-file-input@3.4.0`, `jb-loading@2.0.0`, `jb-notification@1.0.0`, and the latest catalog versions in `package.json`.
 - Keep browser-only component configuration after connection when a package observes attributes before its internal DOM is initialized. This is required by the latest `jb-file-input` API and keeps detached form assembly safe.
 - Require every local JB package entry (`jb-collapse`, `jb-condition`, `jb-form-wizard`, and `jb-form-builder`) to import without browser globals.
-- Run a direct Node import audit for every published package entry. `jb-form` and `jb-color-input` still require upstream SSR-safe entry-point changes; track those as design-system requests instead of adding application shims.
-- Re-run the browser support matrix after the upstream SSR entries land, then close this step with the published package handoff.
+- Run a direct Node import audit for every published package entry. All JB dependencies pass; `jb-icons` is intentionally subpath-only and its documented entries pass.
+- Keep the shared `jb-core/defineWebComponent` registration helper as the package-wide registration contract.
 
 ## Design work
 
