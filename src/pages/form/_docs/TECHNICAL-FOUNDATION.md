@@ -200,9 +200,9 @@ interface PreviewState {
 - Saving a linked named document updates that named record and the current-draft snapshot in one transaction.
 - Builder Save As generates a new form ID and slug, preserves copied element IDs, creates a named record, and updates the current-draft snapshot.
 - Export/download preserves all document IDs and does not write IndexedDB.
-- Designer and Preview navigation is blocked while the current document is dirty. The user must Save successfully or cancel navigation.
+- Designer and Preview navigation remains available while the document is dirty or saving has failed; destination routes load the latest stored snapshot.
 - New/load destructive actions keep the approved Save, Continue without saving, or Cancel decision. Continue without saving discards in-memory changes and performs no write.
-- Browser unload uses a standard unsaved-changes prompt when `isDirty`; it does not attempt a background save.
+- Browser unload does not block navigation or attempt a background save when `isDirty`.
 
 ## IndexedDB design
 

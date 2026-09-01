@@ -7,6 +7,7 @@ import landingStyles from "../../features/form/landing/FormLanding.module.css";
 import { formLandingAppTranslations } from "../../features/form/landing/translations";
 import shellStyles from "../../features/form/shell/RouteShell.module.css";
 import layoutStyles from "../../features/form/layout/FormRouteLayout.module.css";
+import { FormRouteMenuIsland } from "../../features/form/layout/FormRouteMenuIsland";
 
 const messages = { ...commonTranslations.en, ...formLandingAppTranslations.en, ...deleteFormTranslations.en };
 const builderHref = formPageHref("builder");
@@ -40,7 +41,7 @@ const sectionDecor = {
     <header class={`${layoutStyles.header} ${landingStyles.topbar}`}>
       <a class={`${shellStyles.brand} ${landingStyles.brand}`} href="/form"><span class={`${layoutStyles.brandMark} ${shellStyles.brandMark}`}>JB</span><span><strong data-i18n="productName">{messages.productName}</strong><small data-i18n="openSourceLabel">{messages.openSourceLabel}</small></span></a>
       <nav class={landingStyles.nav} aria-label="Primary navigation"><a href="#features" data-i18n="navFeatures">{messages.navFeatures}</a><a href="#components" data-i18n="navComponents">{messages.navComponents}</a><a href="#embed" data-i18n="navEmbed">{messages.navEmbed}</a><a href="#workspace" data-i18n="navWorkspace">{messages.navWorkspace}</a></nav>
-      <div class={landingStyles.topActions}><a class={landingStyles.sourceLink} href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer" data-i18n="viewSource">{messages.viewSource}</a><button class={`${landingStyles.button} ${landingStyles.buttonQuiet} ${landingStyles.buttonSmall}`} type="button" data-locale-toggle>FA</button><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonSmall}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
+      <div class={landingStyles.topActions}><a class={landingStyles.sourceLink} href="https://github.com/javadbat/javadbat.github.io" target="_blank" rel="noreferrer" data-i18n="viewSource">{messages.viewSource}</a><FormRouteMenuIsland client:load /><a class={`${landingStyles.button} ${landingStyles.buttonPrimary} ${landingStyles.buttonSmall}`} href={builderHref} data-draft-action>{messages.createForm}</a></div>
     </header>
 
     <main>
@@ -164,6 +165,7 @@ form.formDocument = exportedJson;</code></pre>
   import "jb-icons/eye";
   import "jb-icons/plus";
   import { formPageHref } from "../../features/form/application/form-page-url";
+  import { FORM_ROUTE_LOCALE_CHANGE_EVENT } from "../../features/form/layout/FormRouteMenuIsland";
   import { getLocalizedText } from "../../features/form/domain/form-document";
   import { commonTranslations } from "../../features/form/i18n/common.translations";
   import { deleteFormTranslations } from "../../features/form/landing/delete.translations";
@@ -221,7 +223,6 @@ form.formDocument = exportedJson;</code></pre>
     landing.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("[data-value-en][data-value-fa]").forEach(element => {
       element.value = locale === "fa" ? element.dataset.valueFa! : element.dataset.valueEn!;
     });
-    landing.querySelector<HTMLElement>("[data-locale-toggle]")!.textContent = locale === "en" ? "FA" : "EN";
     landing.querySelectorAll<HTMLElement>("[data-draft-action]").forEach(element => {
       element.textContent = draft ? messages.continueDraft : messages.createForm;
     });
@@ -283,9 +284,10 @@ form.formDocument = exportedJson;</code></pre>
   searchInput?.addEventListener("input", () => { query = searchInput.value; renderForms(); });
   landing?.querySelectorAll<HTMLButtonElement>("[data-code-tab]").forEach(button => button.addEventListener("click", () => { const selected = button.dataset.codeTab; landing.querySelectorAll<HTMLButtonElement>("[data-code-tab]").forEach(tab => tab.setAttribute("aria-selected", String(tab === button))); landing.querySelectorAll<HTMLElement>("[data-code-panel]").forEach(panel => { panel.hidden = panel.dataset.codePanel !== selected; }); }));
   landing?.querySelector<HTMLButtonElement>("[data-copy-code]")?.addEventListener("click", async event => { const button = event.currentTarget; const code = landing.querySelector<HTMLElement>("[data-code-panel]:not([hidden]) code")?.textContent ?? ""; try { await navigator.clipboard.writeText(code); button.textContent = dictionaries[locale].copied; window.setTimeout(() => { button.textContent = dictionaries[locale].copy; }, 1600); } catch { button.textContent = dictionaries[locale].copyFailed; } });
-  landing?.querySelector<HTMLButtonElement>("[data-locale-toggle]")?.addEventListener("click", () => {
-    locale = locale === "en" ? "fa" : "en";
-    try { localStorage.setItem(localeStorageKey, locale); } catch { /* Switching remains available without persistence. */ }
+  window.addEventListener(FORM_ROUTE_LOCALE_CHANGE_EVENT, event => {
+    const nextLocale = (event as CustomEvent<{ locale?: string }>).detail.locale;
+    if (nextLocale !== "en" && nextLocale !== "fa") return;
+    locale = nextLocale;
     applyLocale(); renderDraft(); renderForms();
   });
   applyLocale();

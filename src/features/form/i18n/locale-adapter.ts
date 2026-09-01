@@ -12,6 +12,11 @@ import { configurationPanelTranslations } from "../builder/ConfigurationPanel/tr
 import { propertyGuidanceTranslations } from "../builder/ConfigurationPanel/property-guidance.translations";
 import { designerPlaceholderAppTranslations } from "../designer/translations";
 import { designerAppTranslations } from "../designer/DesignerApp.translations";
+import { designerHeaderTranslations } from "../designer/DesignerHeader/translations";
+import { designerMobileTabsTranslations } from "../designer/DesignerMobileTabs/translations";
+import { designerPreviewPanelTranslations } from "../designer/DesignerPreviewPanel/translations";
+import { exportThemeDialogTranslations } from "../designer/ExportThemeDialog/translations";
+import { themePresetPanelTranslations } from "../designer/ThemePresetPanel/translations";
 import { exportJsonModalTranslations } from "../builder/ExportJsonModal/translations";
 import { formCanvasTranslations } from "../builder/FormCanvas/translations";
 import { formLandingAppTranslations } from "../landing/translations";
@@ -24,6 +29,7 @@ import { previewFormPanelTranslations } from "../preview/PreviewFormPanel.transl
 import { validationRulesEditorTranslations } from "../builder/ValidationRulesEditor/translations";
 import { commonTranslations } from "./common.translations";
 import { removeElementModalTranslations } from "../builder/FormCanvas/RemoveElementModal/translations";
+import { formRouteMenuTranslations } from "../layout/FormRouteMenu.translations";
 
 /** Supported interface locales for every `/form` route. */
 export type FormAppLocale = "en" | "fa";
@@ -43,6 +49,11 @@ const formTranslationModules = [
   propertyGuidanceTranslations,
   designerPlaceholderAppTranslations,
   designerAppTranslations,
+  designerHeaderTranslations,
+  designerMobileTabsTranslations,
+  designerPreviewPanelTranslations,
+  exportThemeDialogTranslations,
+  themePresetPanelTranslations,
   exportJsonModalTranslations,
   formCanvasTranslations,
   formLandingAppTranslations,
@@ -54,6 +65,7 @@ const formTranslationModules = [
   previewFormPanelTranslations,
   removeElementModalTranslations,
   validationRulesEditorTranslations,
+  formRouteMenuTranslations,
   commonTranslations,
 ] as const;
 

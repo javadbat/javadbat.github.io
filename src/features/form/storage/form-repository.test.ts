@@ -229,6 +229,32 @@ describe("IndexedDbFormRepository", () => {
     expect(await repository.getCurrentDraft()).toEqual({ ok: true, value: null });
   });
 
+  it("deletes a corrupt named form by slug without trusting its projected id", async () => {
+    const repository = createRepository();
+    const connection = await repository.database.open();
+    expect(connection.ok).toBe(true);
+    if (!connection.ok) return;
+
+    const transaction = connection.value.transaction(FORM_STORES.forms, "readwrite");
+    transaction.objectStore(FORM_STORES.forms).put({
+      id: 42,
+      slug: "corrupt-form",
+      updatedAt: new Date().toISOString(),
+      document: { broken: true },
+    });
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+
+    const corrupt = await repository.getBySlug("corrupt-form");
+    expect(corrupt.ok).toBe(false);
+    if (!corrupt.ok) expect(corrupt.error.code).toBe("corrupt-record");
+
+    expect(await repository.deleteNamedFormBySlug("corrupt-form")).toEqual({ ok: true, value: undefined });
+    expect(await repository.getBySlug("corrupt-form")).toEqual({ ok: true, value: null });
+  });
+
   it("returns typed validation and corrupt-record failures", async () => {
     const repository = createRepository();
     const invalid = namedDocument("Invalid");

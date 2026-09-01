@@ -16,172 +16,6 @@
   font-family: "text-font", "fa-font", system-ui, sans-serif;
 }
 
-.header {
-  position: relative;
-  z-index: 10;
-}
-
-.themeIdentity {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  min-width: 0;
-}
-
-.backButton,
-.themeName {
-  border: 0;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: var(--designer-ink);
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.backButton {
-  flex: 0 0 auto;
-  padding: 0.45rem 0.6rem;
-  border-radius: 0.625rem;
-  color: var(--designer-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.backButton:hover,
-.backButton:focus-visible {
-  color: var(--designer-blue);
-  background: #edf2ff;
-  outline: none;
-}
-
-.backButton jb-icon-arrow {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
-.headerDivider {
-  width: 0.0625rem;
-  height: 2rem;
-  background: var(--designer-line);
-}
-
-.themeName {
-  min-width: 0;
-  max-width: 16rem;
-  overflow: hidden;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.themeName jb-icon-edit {
-  width: 1rem;
-  height: 1rem;
-  color: var(--designer-blue);
-}
-
-.nameInput {
-  width: 12rem;
-}
-
-.saveState {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999rem;
-  color: #0a8f59;
-  background: #edf9f3;
-  font-size: 0.7rem;
-  font-weight: 700;
-  white-space: nowrap;
-  corner-shape: squircle;
-}
-
-.saveState > span {
-  width: 0.375rem;
-  height: 0.375rem;
-  border: 0;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.saveState_saved {
-  color: #0aa765;
-}
-
-.saveState_saving {
-  color: #7b84a2;
-  background: #f4f6fb;
-}
-
-.saveState_error {
-  color: #c83f4e;
-  background: #fff1f2;
-}
-
-.saveState_invalid {
-  color: #8a5a0a;
-  background: #fff6df;
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.mobileHeaderActions {
-  display: none;
-}
-
-.mobileActionsBackdrop {
-  position: fixed;
-  z-index: 29;
-  inset: 0;
-  border: 0;
-  padding: 0;
-  background: rgba(10, 18, 52, 0.12);
-}
-
-.mobileActionsMenu {
-  position: fixed;
-  z-index: 30;
-  inset-block-start: 5.55rem;
-  inset-inline-end: 1rem;
-  width: min(20rem, calc(100vw - 2rem));
-  padding: 0.75rem;
-  border: 0.0625rem solid var(--designer-line);
-  border-radius: 0.9rem;
-  display: grid;
-  gap: 0.5rem;
-  background: #fff;
-  box-shadow: 0 1rem 2.5rem rgba(8, 17, 53, 0.2);
-}
-
-.mobileActionsMenu > a,
-.mobileActionsMenu > jb-button,
-.mobileActionsMenu > jb-select,
-.mobileActionsMenu > a jb-button {
-  width: 100%;
-}
-
-.mobileActionsMenu > jb-button,
-.mobileActionsMenu > a jb-button {
-  --jb-button-height: 2.75rem;
-  --jb-button-height-sm: 2.75rem;
-}
-
-.languageSelect {
-  width: 5.25rem;
-  flex: 0 0 5.25rem;
-}
-
 .workspace {
   height: calc(100dvh - 5.95rem);
   margin: 0;
@@ -197,71 +31,6 @@
   overscroll-behavior: contain;
   background: #fff;
   scrollbar-width: thin;
-}
-
-.presets {
-  padding: 1.45rem 1.8rem 1.1rem;
-  border-bottom: 0.0625rem solid var(--designer-line);
-}
-
-.presets h2 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.presetRow {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.presetButton,
-.presetSelected {
-  min-width: 0;
-  border: 0;
-  padding: 0;
-  color: #515b7a;
-  background: transparent;
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-}
-
-.presetButton > span,
-.presetSelected > span {
-  position: relative;
-  height: 4.15rem;
-  display: block;
-  overflow: hidden;
-  border: 0.0625rem solid var(--designer-line);
-  border-radius: 0.75rem;
-  corner-shape: squircle;
-  background: #f8f9fd;
-}
-
-.presetSelected > span {
-  border: 0.125rem solid var(--designer-blue);
-  box-shadow: 0 0 0 0.18rem #edf2ff;
-}
-
-.presetButton img,
-.presetSelected img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.presetButton small,
-.presetSelected small {
-  display: block;
-  margin-top: 0.45rem;
-  overflow: hidden;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .sections {
@@ -480,20 +249,17 @@
   justify-self: start;
 }
 
-.backgroundTabs,
-.previewViewportTabs {
+.backgroundTabs {
   display: block;
   --jb-tab-list-background: #fbfcff;
 }
 
-.backgroundTabs :global(jb-tab-list),
-.previewViewportTabs :global(jb-tab-list) {
+.backgroundTabs :global(jb-tab-list) {
   display: block;
   width: 100%;
 }
 
-.backgroundTabs :global(jb-tab-list)::part(list),
-.previewViewportTabs :global(jb-tab-list)::part(list) {
+.backgroundTabs :global(jb-tab-list)::part(list) {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -648,6 +414,88 @@
   corner-shape: squircle;
 }
 
+.formAccessibilityAudit {
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.55rem;
+  border: 0.0625rem solid #d6def4;
+  border-radius: 0.75rem;
+  background: #f8faff;
+}
+
+.formAuditSummary {
+  margin: 0;
+  color: #475577;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.formAuditResults {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.formAuditResults section {
+  overflow: hidden;
+  border: 0.0625rem solid #ead0d4;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.formAuditComponentHeader {
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #66242d;
+  background: #fff4f5;
+  font-size: 0.68rem;
+}
+
+.formAuditComponentHeader > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.formAuditComponentHeader code {
+  overflow-wrap: anywhere;
+  color: #78545a;
+  font-size: 0.62rem;
+}
+
+.formAuditResults ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  list-style: none;
+}
+
+.formAuditResults li {
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #6f2932;
+  font-size: 0.66rem;
+}
+
+.formAuditResults li + li {
+  border-block-start: 0.0625rem solid #f0e0e2;
+}
+
+.formAuditResults li > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.formAuditResults li code {
+  overflow-wrap: anywhere;
+}
+
 .componentEditor {
   display: grid;
   gap: 0.8rem;
@@ -770,7 +618,7 @@
   gap: 0.65rem;
 }
 
-.componentAuditHeader > div {
+.componentAuditIntro {
   min-width: 0;
   display: grid;
   gap: 0.18rem;
@@ -781,6 +629,14 @@
 .componentAuditHeader span {
   color: var(--designer-muted);
   line-height: 1.4;
+}
+
+.componentAuditHeaderActions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
 }
 
 .componentAudit ul {
@@ -1044,154 +900,6 @@
 
 .autosaveNote span {
   color: var(--designer-blue);
-}
-
-.previewPanel {
-  min-width: 0;
-  display: grid;
-  grid-template-rows: 5.35rem minmax(0, 1fr);
-  overflow: hidden;
-  background: #fff;
-}
-
-.previewToolbar {
-  min-width: 0;
-  padding: 0.85rem 2.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  border-bottom: 0.0625rem solid var(--designer-line);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.previewPicker,
-.previewTools {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.previewPicker > span {
-  color: #586383;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.previewPicker jb-select {
-  width: 17.5rem;
-}
-
-.previewTools .previewViewportTabs {
-  width: 20rem;
-}
-
-.previewStage {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  isolation: isolate;
-  color: var(--jb-text-primary, #101b48);
-  background: #fff9f9;
-}
-
-.previewBackdrop {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-}
-
-.previewDesktop,
-.previewTablet,
-.previewMobile {
-  width: 100%;
-  min-height: 100%;
-  margin: 0 auto;
-  padding: 6.25rem clamp(1.5rem, 5vw, 5rem) 4rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease;
-}
-
-.previewTablet {
-  width: 768px;
-  min-height: calc(100% - 2rem);
-  margin-top: 1rem;
-  padding: 4rem 2rem;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 0.8rem 2.4rem rgba(26, 39, 88, 0.15);
-}
-
-.previewMobile {
-  width: min(25rem, calc(100% - 2rem));
-  min-height: calc(100% - 2rem);
-  margin-top: 1rem;
-  border-radius: 1.4rem 1.4rem 0 0;
-  padding: 3rem 1.2rem;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 0.8rem 2.4rem rgba(26, 39, 88, 0.15);
-}
-
-.formPreview {
-  width: min(100%, 31.5rem);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  color: inherit;
-  font-size: calc(1rem * var(--designer-text-scale, 1));
-}
-
-.emblem {
-  width: 5.2rem;
-  height: 5.2rem;
-  margin: 0 auto 1.25rem;
-  display: block;
-  object-fit: contain;
-}
-
-.formPreview h1 {
-  margin: 0;
-  color: inherit;
-  font-size: clamp(1.7rem, 3vw, 2.15rem);
-  font-weight: 760;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
-  text-align: center;
-}
-
-.formPreview > p {
-  max-width: 29rem;
-  margin: 0.8rem auto 2.45rem;
-  color: color-mix(in srgb, currentColor 68%, white);
-  font-size: 0.96rem;
-  line-height: 1.65;
-  text-align: center;
-}
-
-.rendererWrap {
-  width: 100%;
-}
-
-.rendererWrap jb-form-builder {
-  --jb-form-builder-ink: var(--jb-text-primary, #101b48);
-  --jb-form-builder-surface: transparent;
-  --jb-form-builder-line: #ced5e5;
-}
-
-.privacyNote {
-  margin-top: calc(1.45rem * var(--designer-spacing-scale, 1));
-  color: color-mix(in srgb, currentColor 54%, white);
-  font-size: 0.72rem;
-  font-weight: 550;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.mobileTabs {
-  display: none;
 }
 
 .modalBackdrop {
@@ -1733,91 +1441,11 @@
   .workspace {
     grid-template-columns: minmax(22rem, 25rem) minmax(0, 1fr);
   }
-
-  .previewToolbar {
-    padding-inline: 1rem;
-  }
-
-  .previewPicker > span {
-    display: none;
-  }
-
-  .previewPicker jb-select {
-    width: 14rem;
-  }
-
-  .previewTools .previewViewportTabs {
-    width: 16.5rem;
-  }
 }
 
 @media (max-width: 64rem) {
   .designer {
     overflow: auto;
-  }
-
-  .header {
-    position: sticky;
-    z-index: 10;
-    top: 0;
-    padding-inline: 1rem;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .headerBrand,
-  .desktopHeaderActions {
-    display: none;
-  }
-
-  .mobileHeaderActions {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .mobileHeaderActions > a jb-button,
-  .mobileHeaderActions > jb-button {
-    --jb-button-height-sm: 2.75rem;
-  }
-
-  .backButton {
-    margin-inline-end: 0;
-  }
-
-  .backButton span,
-  .headerDivider,
-  .headerActions > jb-button:nth-of-type(-n + 2) {
-    display: none;
-  }
-
-  .headerActions > jb-button:last-child {
-    --jb-button-height: 2.75rem;
-    min-width: 7rem;
-  }
-
-  .mobileTabs {
-    position: sticky;
-    z-index: 9;
-    top: 5.95rem;
-    min-height: 3.5rem;
-    padding: 0.5rem 1rem;
-    display: block;
-    border-bottom: 0.0625rem solid var(--designer-line);
-    background: #fff;
-    --jb-tab-list-background: #fbfcff;
-    --jb-tab-trigger-height-sm: 2.75rem;
-  }
-
-  .mobileTabs :global(jb-tab-list) {
-    display: block;
-    width: 100%;
-  }
-
-  .mobileTabs :global(jb-tab-list)::part(list) {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    corner-shape: squircle;
   }
 
   .workspace {
@@ -1829,14 +1457,13 @@
     border-radius: 0;
   }
 
-  .settingsPanel,
-  .previewPanel {
+  .settingsPanel {
     width: 100%;
     height: 100%;
     border: 0;
   }
 
-  .workspace[data-mobile-panel="design"] .previewPanel,
+  .workspace[data-mobile-panel="design"] > [data-designer-panel="preview"],
   .workspace[data-mobile-panel="preview"] .settingsPanel {
     display: none;
   }
@@ -1845,13 +1472,6 @@
     overflow-y: auto;
   }
 
-  .previewPanel {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .previewToolbar {
-    min-height: 4.6rem;
-  }
 }
 
 @media (max-width: 40rem) {
@@ -1873,43 +1493,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .header {
-    gap: 0.55rem;
-  }
-
-  .themeName {
-    min-width: 0;
-    max-width: 5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .saveState {
-    padding: 0.45rem;
-    font-size: 0;
-  }
-
-  .headerActions {
-    min-width: 0;
-  }
-
-  .headerActions > jb-button:last-child {
-    min-width: 0;
-  }
-
-  .presets,
   .sectionContent {
     padding-inline: 1rem;
-  }
-
-  .presetRow {
-    gap: 0.5rem;
-  }
-
-  .presetButton > span,
-  .presetSelected > span {
-    height: 3.35rem;
   }
 
   .patternButton,
@@ -1921,50 +1506,4 @@
     grid-template-columns: minmax(0, 1fr) 5rem;
   }
 
-  .previewToolbar,
-  .previewTools {
-    flex-wrap: wrap;
-  }
-
-  .previewToolbar {
-    gap: 0.65rem;
-  }
-
-  .previewPicker,
-  .previewPicker jb-select,
-  .previewTools {
-    width: 100%;
-  }
-
-  .previewTools .previewViewportTabs {
-    display: none;
-  }
-
-  .previewDesktop,
-  .previewTablet,
-  .previewMobile {
-    width: 100%;
-    min-height: 100%;
-    margin: 0;
-    border-radius: 0;
-    padding: 2.4rem 1rem;
-    box-shadow: none;
-  }
-
-  .emblem {
-    width: 4.2rem;
-    height: 4.2rem;
-  }
-
-  .formPreview h1 {
-    font-size: 1.65rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .previewDesktop,
-  .previewTablet,
-  .previewMobile {
-    transition: none;
-  }
 }

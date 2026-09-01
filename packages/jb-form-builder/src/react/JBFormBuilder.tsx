@@ -22,6 +22,7 @@ interface JBFormBuilderOwnProps {
   onInputValue?: (event: JBFormBuilderEventMap["input"]) => void;
   onChangeValue?: (event: JBFormBuilderEventMap["change"]) => void;
   onAction?: (event: JBFormBuilderEventMap["action"]) => void;
+  onFileUpload?: (event: JBFormBuilderEventMap["file-upload"]) => void;
   onResetValue?: (event: JBFormBuilderEventMap["reset"]) => void;
   onSubmitValue?: (event: JBFormBuilderEventMap["submit"]) => void;
 }
@@ -42,6 +43,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
     onInputValue,
     onChangeValue,
     onAction,
+    onFileUpload,
     onResetValue,
     onSubmitValue,
     ...hostAttributes
@@ -59,6 +61,7 @@ export const JBFormBuilder = forwardRef<JBFormBuilderElement, JBFormBuilderProps
   useEvent(element, "input", onInputValue);
   useEvent(element, "change", onChangeValue);
   useEvent(element, "action", onAction);
+  useEvent(element, "file-upload", onFileUpload);
   useEvent(element, "reset", onResetValue);
   useEvent(element, "submit", onSubmitValue);
 

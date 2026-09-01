@@ -293,16 +293,19 @@ export class IndexedDbFormRepository implements FormRepository {
       const transaction = connection.value.transaction([FORM_STORES.forms, FORM_STORES.drafts], "readwrite");
       /** Named-form store used for both slug resolution and identity deletion. */
       const forms = transaction.objectStore(FORM_STORES.forms);
-      /** Stored form resolved from the unique public slug. */
-      const record = await requestToPromise(forms.index("slug").get(slug));
-      if (record === undefined || !isObject(record) || typeof record.id !== "string") {
+      /** Primary key resolves independently of whether the stored record body is valid. */
+      const recordKey = await requestToPromise(forms.index("slug").getKey(slug));
+      if (recordKey === undefined) {
         transaction.abort();
         return failure("validation-failed", "The saved form was not found.");
       }
-      forms.delete(record.id);
+      /** The untrusted body is read only to clear drafts linked by a projected id. */
+      const record = await requestToPromise(forms.get(recordKey));
+      forms.delete(recordKey);
       /** Current draft checked for a link to the deleted form. */
       const draft = await requestToPromise(transaction.objectStore(FORM_STORES.drafts).get(CURRENT_DRAFT_KEY));
-      if (isObject(draft) && draft.linkedFormId === record.id) transaction.objectStore(FORM_STORES.drafts).delete(CURRENT_DRAFT_KEY);
+      const projectedId = isObject(record) && typeof record.id === "string" ? record.id : recordKey;
+      if (isObject(draft) && draft.linkedFormId === projectedId) transaction.objectStore(FORM_STORES.drafts).delete(CURRENT_DRAFT_KEY);
       await transactionToPromise(transaction);
       return success(undefined);
     } catch (cause) {

@@ -264,7 +264,7 @@ Cancel returns focus to Remove.
 - Invalid intermediate values remain in their controls with inline errors.
 - Users may navigate to another element while configuration is invalid.
 - The canvas isolates component render failures to the affected card.
-- Designer, Preview, and export navigation validate the document before continuing.
+- Export validates the document before continuing; page navigation remains available when validation or saving fails.
 - An error summary links to the affected card and control.
 - Every committed change marks the document unsaved; persistence occurs only through explicit Save or Save As.
 
@@ -275,7 +275,7 @@ Designer is a separate destination:
 - `/form/designer` resolves the working draft.
 - `/form/designer?form=:slug` resolves the named form.
 - Builder has a visible Designer button with an appropriate icon.
-- Before navigation, Builder requires the changed document to validate and save successfully.
+- Builder keeps Designer navigation available when the changed document is invalid or cannot be saved.
 - Phase 1 Designer shows an intentional empty/not-yet-available page with:
   - resolved form identity;
   - a clear future-work message;
@@ -349,17 +349,7 @@ The Preview page owns IndexedDB and supplies JSON to the renderer.
 
 ## Builder-to-Designer and Builder-to-Preview navigation
 
-Before navigation:
-
-1. Commit valid pending configuration edits.
-2. Validate the portable document.
-3. If the document is dirty, require an explicit Save.
-4. If Save fails or is canceled, remain in Builder and offer Retry or Export; do not open a destination that would load stale JSON.
-5. Navigate only after the destination can resolve the intended stored record.
-
-For a linked named form with changes, Designer and Preview require explicit Save before navigation and then open the slug route. They never preview an older named snapshot while presenting it as the current form.
-
-An unnamed working draft may use a no-slug Designer or Preview route only after an explicit current-draft Save succeeds.
+Designer and Preview navigation is never blocked by dirty, invalid, or failed-save state. Destination routes load the latest successfully stored snapshot; unsaved in-memory changes remain the author's responsibility.
 
 ## Form management
 
@@ -593,7 +583,7 @@ Before implementation, inventory the exact icon for each catalog component. Reus
 - Save As is included, and named-form deletion is available from the landing page with confirmation.
 - Preview begins from configured initial values and keeps response values session-only.
 - Every element name is non-empty and valid; repeated names produce intentional array values.
-- Changed linked forms require explicit Save before Designer or Preview navigation.
+- Changed linked forms may navigate without saving; destinations load the latest stored snapshot.
 - The application `<jb-form-builder>` renderer is used through Phase 2; publication remains the owner-approved final delivery step.
 
 ## Planned Theme Designer flow

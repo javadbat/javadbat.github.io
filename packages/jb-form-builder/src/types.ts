@@ -66,6 +66,13 @@ export interface RendererActionDetail extends RendererValueDetail {
   buttonName: string;
 }
 
+export interface FileUploadDetail {
+  elementDom: HTMLElement;
+  elementName: string;
+  endpoint: string;
+  fieldName: string;
+}
+
 export interface JBFormBuilderElement extends HTMLElement {
   /**
    * Documents are assigned as objects because JSON attributes lose types and
@@ -106,6 +113,7 @@ export interface JBFormBuilderEventMap {
   input: CustomEvent<RendererValueDetail>;
   change: CustomEvent<RendererValueDetail>;
   action: CustomEvent<RendererActionDetail>;
+  "file-upload": CustomEvent<FileUploadDetail>;
   reset: CustomEvent<{ value: FormValues }>;
   submit: CustomEvent<RendererValueDetail>;
 }

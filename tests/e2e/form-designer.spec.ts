@@ -51,7 +51,6 @@ test("supports keyboard compact navigation and 44px primary targets", async ({ p
   await more.focus();
   await more.press("Enter");
   const actions = page.getByRole("dialog", { name: "Theme actions" });
-  await expect(actions.getByRole("link", { name: "Builder" })).toBeVisible();
   const exportTheme = actions.getByRole("button", { name: "Export theme" });
   await expect(exportTheme).toBeVisible();
   expect(Math.round((await exportTheme.boundingBox())?.height ?? 0)).toBeGreaterThanOrEqual(44);
@@ -179,6 +178,16 @@ test("audits every component state and jumps to a failing token", async ({ page 
   const audit = page.getByLabel("Component accessibility audit");
   await expect(audit).toContainText(/Text contrast is 1\.00:1/);
   await expect(audit.locator("code").first()).toContainText("--jb-input-value-color");
+  const reportDownloadPromise = page.waitForEvent("download");
+  await audit.getByRole("button", { name: "Download report" }).click();
+  const reportDownload = await reportDownloadPromise;
+  expect(reportDownload.suggestedFilename()).toMatch(/-jb-input-accessibility\.md$/);
+  const reportStream = await reportDownload.createReadStream();
+  let report = "";
+  for await (const chunk of reportStream) report += chunk.toString();
+  expect(report).toContain("# Component accessibility audit");
+  expect(report).toContain("Measured contrast: 1.00:1");
+  expect(report).toContain("Suggested AA fix:");
   await audit.getByRole("button", { name: "Review" }).first().click();
   await expect(page.getByLabel("Value color override")).toBeVisible();
 
@@ -190,6 +199,46 @@ test("audits every component state and jumps to a failing token", async ({ page 
   await audit.getByRole("button", { name: "Apply fix" }).click();
   await expect(page.getByLabel("Value color override")).not.toHaveValue("#ffffff");
   await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
+});
+
+test("audits every rendered component in the full form and opens an issue", async ({ page }) => {
+  await openDesigner(page);
+  await page.getByRole("button", { name: "Components" }).click();
+  const componentSelect = page.locator('jb-select[label="Component to customize"]');
+  await componentSelect.getByRole("button", { name: "Toggle options" }).click();
+  await page.locator("jb-option").filter({ hasText: "Text input", visible: true }).click();
+
+  const setToken = async (search: string, token: string, label: string) => {
+    await page.getByLabel("Search style properties").fill(search);
+    await page.getByRole("listbox", { name: "Component style properties" })
+      .getByText(token, { exact: true }).locator("..").click();
+    await page.getByLabel(label).fill("#ffffff");
+    await page.getByLabel(label).press("Enter");
+  };
+  await setToken("value color", "--jb-input-value-color", "Value color override");
+  await setToken("bg color", "--jb-input-bg-color", "Bg color override");
+
+  const formAudit = page.getByLabel("Full form accessibility audit");
+  await formAudit.getByRole("button", { name: "Run full form audit" }).click();
+  await expect(formAudit.getByRole("status")).toContainText(/Scanned \d+ component types across \d+ instances; found \d+ issues/);
+  const inputResult = formAudit.locator("section").filter({ hasText: "Text input" });
+  await expect(inputResult).toContainText("Text contrast is 1.00:1");
+  await expect(inputResult).toContainText("--jb-input-value-color");
+  const reportDownloadPromise = page.waitForEvent("download");
+  await formAudit.getByRole("button", { name: "Download full report" }).click();
+  const reportDownload = await reportDownloadPromise;
+  expect(reportDownload.suggestedFilename()).toMatch(/-form-accessibility\.md$/);
+  const reportStream = await reportDownload.createReadStream();
+  let report = "";
+  for await (const chunk of reportStream) report += chunk.toString();
+  expect(report).toContain("# Full form accessibility audit");
+  expect(report).toContain("## Components");
+  expect(report).toContain("### Text input (`jb-input`)");
+  expect(report).toContain("Measured contrast: 1.00:1");
+  expect(report).toContain("Suggested AA fix:");
+  await expect(page.getByLabel("Bg color override")).toBeVisible();
+  await inputResult.getByRole("button", { name: "Review" }).first().click();
+  await expect(page.getByLabel("Value color override")).toBeVisible();
 });
 
 test("edits and removes a validated component token override", async ({ page }) => {

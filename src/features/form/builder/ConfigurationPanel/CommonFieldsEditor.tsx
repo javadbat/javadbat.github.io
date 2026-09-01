@@ -70,6 +70,7 @@ export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ ent
           {entry.commonFields.required ? (
             <JBCheckbox
               size="sm"
+              variant="filled-outline"
               name="elementRequired"
               label={messages.required}
               value={element.required ?? false}
@@ -79,6 +80,7 @@ export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ ent
           {entry.commonFields.disabled ? (
             <JBCheckbox
               size="sm"
+              variant="filled-outline"
               name="elementDisabled"
               label={messages.disabled}
               value={element.disabled ?? false}

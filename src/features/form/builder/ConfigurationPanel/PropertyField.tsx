@@ -150,6 +150,8 @@ export const PropertyField = observer(function PropertyField({ definition, local
     definition.control === "string-list"
       ? Array.isArray(value)
         ? value.filter(item => typeof item === "string").join(", ")
+        : typeof value === "string"
+          ? value
         : ""
       : definition.localized
         ? localizedPropertyValue(value, locale, defaultLocale)

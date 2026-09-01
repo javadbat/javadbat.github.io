@@ -670,12 +670,17 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       ...valueControlCommon,
       disabled: true,
       initialValue: false,
-      label: false,
+      label: true,
       placeholder: false,
     },
     "string",
-    { acceptTypes: [], placeholderTitle: localizedDefault("Choose a file", "انتخاب فایل") },
-    [stringListProperty("acceptTypes", "Accepted file types", "نوع فایل‌های مجاز"), textProperty("placeholderTitle", "Placeholder title", "عنوان جای‌نگهدار", true)],
+    { acceptTypes: "" },
+    [
+      textProperty("message", "Helper message", "پیام راهنما", true),
+      textProperty("acceptTypes", "Accepted file types", "نوع فایل‌های مجاز"),
+      numberProperty("maxSize", "Maximum file size (KB)", "بیشترین اندازه فایل (کیلوبایت)", { min: 0, step: 1 }),
+      { ...urlProperty("uploadEndpoint", "Upload endpoint", "نشانی endpoint بارگذاری"), builderVisible: false },
+    ],
   ),
   "jb-image-input": configuration(
     {
@@ -684,13 +689,13 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       placeholder: false,
     },
     "string",
-    { multiple: false, acceptTypes: ["image/*"] },
+    { multiple: false, acceptTypes: "image/*" },
     [
       textProperty("message", "Helper message", "پیام راهنما", true),
       booleanProperty("multiple", "Multiple images", "چند تصویر"),
-      stringListProperty("acceptTypes", "Accepted image types", "نوع تصویرهای مجاز"),
+      textProperty("acceptTypes", "Accepted image types", "نوع تصویرهای مجاز"),
       numberProperty("maxFileSize", "Maximum file size (MB)", "بیشترین اندازه فایل (مگابایت)", { min: 0, step: 0.1 }),
-      hiddenTextProperty("uploadAdapter", "Upload adapter identifier", "شناسه رابط بارگذاری"),
+      { ...urlProperty("uploadEndpoint", "Upload endpoint", "نشانی endpoint بارگذاری"), builderVisible: false },
     ],
   ),
   "jb-button": configuration(

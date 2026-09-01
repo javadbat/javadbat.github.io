@@ -1,0 +1,30 @@
+.mobileTabs {
+  display: none;
+}
+
+@media (max-width: 64rem) {
+  .mobileTabs {
+    position: sticky;
+    z-index: 9;
+    top: 5.95rem;
+    min-height: 3.5rem;
+    padding: 0.5rem 1rem;
+    display: block;
+    border-bottom: 0.0625rem solid var(--designer-line);
+    background: #fff;
+    --jb-tab-list-background: #fbfcff;
+    --jb-tab-trigger-height-sm: 2.75rem;
+  }
+
+  .mobileTabs :global(jb-tab-list) {
+    display: block;
+    width: 100%;
+  }
+
+  .mobileTabs :global(jb-tab-list)::part(list) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    corner-shape: squircle;
+  }
+}

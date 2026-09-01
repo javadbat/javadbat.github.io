@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBTooltip } from "@jbui/tooltip/react";
-import { JBOption } from "jb-select/option/react";
-import { JBSelect } from "jb-select/react";
 import "jb-icons/eye";
 import "jb-icons/react";
 import { observer } from "mobx-react-lite";
@@ -10,10 +8,9 @@ import { formPageHref } from "../../application/form-page-url";
 import { inferLocaleDirection } from "../../domain/form-document";
 import { getStorageIssueMessage, type FormAppLocale, type FormMessages } from "../../i18n/locale-adapter";
 import { useBuilderStore } from "../store/BuilderStoreContext";
-import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../../layout/FormRouteHeader";
+import { FormRouteMenu } from "../../layout/FormRouteMenu";
 import styles from "./BuilderHeader.module.css";
-import DesignIcon from './design.svg?react'
 import SaveIcon from './save.svg?react'
 /** Primary document and workflow actions owned by the builder header. */
 interface BuilderHeaderProps {
@@ -157,6 +154,15 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
       </div>
 
       <nav className={styles.headerActions} aria-label="Form actions">
+        <FormRouteMenu
+          currentPage="builder"
+          messages={messages}
+          formSlug={selectedFormSlug}
+          language={store.editingLocale}
+          languageLabel={messages.contentLocale}
+          languageOptions={selectableLocales.map(contentLocale => ({ value: contentLocale, label: contentLocale.toUpperCase() }))}
+          onLanguageChange={selectLocale}
+        />
         <div className={styles.overflowMenu} ref={menuRef}>
           <button
             type="button"
@@ -199,27 +205,6 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
               <jb-icon-eye open size="sm" />
               {messages.preview}
             </FormRouteLinkButton>
-            <FormRouteLinkButton href={formPageHref("designer", selectedFormSlug)} variant="outline">
-              <DesignIcon />
-              {messages.designer}
-            </FormRouteLinkButton>
-            <div className={styles.localeControls}>
-              <CatalogIcon iconId="language" />
-              <JBSelect<string>
-                name="contentLocale"
-                aria-label={messages.contentLocale}
-                size="sm"
-                value={store.editingLocale}
-                hideClear
-                onChange={event => selectLocale(event.target.value)}
-              >
-                {selectableLocales.map(contentLocale => (
-                  <JBOption key={contentLocale} value={contentLocale}>
-                    {contentLocale.toUpperCase()}
-                  </JBOption>
-                ))}
-              </JBSelect>
-            </div>
           </div>
         </div>
         <JBButton

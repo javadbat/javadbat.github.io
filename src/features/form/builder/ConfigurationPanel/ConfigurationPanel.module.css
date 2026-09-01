@@ -69,8 +69,11 @@
 }
 
 .configurationFields :global(jb-collapse) > :not([slot="title"]) + :not([slot="title"]) {
-  display: block;
   margin-block-start: 0.75rem;
+}
+
+.configurationFields :global(jb-collapse) > :global(jb-checkbox) {
+  display: block;
 }
 
 .configurationFields :global(jb-input),
@@ -81,6 +84,11 @@
 .configurationFields :global(jb-time-input) {
   inline-size: 100%;
 }
+
+.integrationField { position: relative; }
+.integrationInfoButton { position: absolute; inset-inline-end: 0; inset-block-end: 0.2rem; }
+.uploadHelpContent { max-inline-size: 34rem; padding: 1rem 1.25rem 1.5rem; color: var(--form-muted); line-height: 1.65; }
+.uploadHelpContent code { display: block; margin-block-start: 1rem; padding: 0.7rem; border-radius: var(--form-radius-sm); background: var(--form-surface); overflow-wrap: anywhere; }
 
 .initialValueRange {
   display: grid;

@@ -1,0 +1,42 @@
+.modalBackdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  padding: 1.5rem;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 18, 52, 0.52);
+}
+
+.exportModal {
+  width: min(42rem, 100%);
+  max-height: min(45rem, calc(100dvh - 3rem));
+  overflow: auto;
+  border-radius: 1rem;
+  corner-shape: squircle;
+  padding: 1.4rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgba(8, 17, 53, 0.28);
+}
+
+.exportModal h2 { margin: 0; font-size: 1.35rem; }
+.exportModal p { color: var(--designer-muted); line-height: 1.5; }
+
+.exportModal pre {
+  max-height: 25rem;
+  overflow: auto;
+  border: 0.0625rem solid var(--designer-line);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  direction: ltr;
+  background: #f7f9fd;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.exportModal > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}

@@ -118,7 +118,7 @@ const definitions = [
   adapterDefinition("jb-checkbox", "boolean", ["change", "before-change"], allowedValuesValidation),
   adapterDefinition("jb-switch", "boolean", ["load", "init", "change", "before-change"], allowedValuesValidation),
   adapterDefinition("jb-file-input", "file", ["load", "init", "change", "delete", "download"], []),
-  adapterDefinition("jb-image-input", "image", ["load", "init", "change", "imageSelected", "maxSizeExceed"], []),
+  adapterDefinition("jb-image-input", "image", ["load", "init", "change", "imageSelected", "maxSizeExceed", "download-start", "invalid"], []),
   adapterDefinition("jb-button", "none", ["click"], []),
   containerAdapterDefinition("jb-tab", "jb-tab"),
   containerAdapterDefinition("jb-condition", "jb-condition"),
@@ -354,6 +354,11 @@ function toAttributeName(value: string): string {
 }
 
 function setRuntimeValue(target: RuntimeFormElement, key: string, value: unknown): void {
+  // The portable contract edits accepted types as a list, while the v4
+  // component API receives a comma-separated string.
+  if (key === "acceptTypes" && Array.isArray(value)) {
+    value = value.filter(item => typeof item === "string").join(",");
+  }
   const attributeName = toAttributeName(key);
   if (value === undefined || value === null) {
     target[key] = undefined;

@@ -77,7 +77,7 @@ The remaining catalog entries are JB controls, an action, and structural contain
 | Choice | Checkbox | `jb-checkbox@2.0.0` | `boolean` | Verified | Yes |
 | Choice | Switch | `jb-switch@1.7.3` | `boolean` | Verified; DSR-003 resolved | Yes |
 | File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
-| File | Image Input | `jb-image-input@3.10.0` | Generic uploaded value or `null` | Verified | Yes |
+| File | Image Input | `jb-image-input@4.0.0` | File or stored string value, or `null` | Verified | Yes |
 | Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
 | Container | Tabs | `jb-tab@0.1.0` | None | Owns tab panels containing leaf elements | Yes |
 | Container | Conditional container | `jb-condition@0.1.0` | None | Shows an ordered child list when portable field-name rules match | Web component |
@@ -132,8 +132,8 @@ Common input-family styling:
 | `jb-listbox` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `useCheckbox`, `disabled`, `required`, declarative option list and validation rules | `load`, `init`, `change`, `input`, `invalid`; options respond to `filter-change` | Required and forced custom error |
 | `jb-checkbox` | `name`, `label`, `message`, `value`, `initialValue`, `size`, `variant`, `color`, `disabled`, `required`, declarative validation rules | `change`, `before-change` | Required and forced custom error |
 | `jb-switch` | `name`, `value`, `initialValue`, `trueTitle`, `falseTitle`, `isLoading`, `disabled`, `required`, declarative validation rules | `load`, `init`, `change`, `before-change` | Required with native `valueMissing` mapping |
-| `jb-file-input` | `name`, `acceptTypes`, `placeholderTitle`, upload presentation state, `required`, declarative validation rules; runtime `File` values are not builder configuration | `load`, `init`, `change`; web component also emits `delete` and `download` | Required; source contains a pending file-size validation TODO |
-| `jb-image-input` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `acceptTypes`, `maxFileSize`, serializable upload configuration, `required`, declarative validation rules | `load`, `init`, `change`, `imageSelected`, `maxSizeExceed` | Required and maximum file size |
+| `jb-file-input` | `name`, `label`, `message`, `acceptTypes`, `maxSize` (KB), optional upload endpoint, `required`; runtime `File` values are not builder configuration | `load`, `init`, `change`; web component also emits `delete` and `download`; builder emits cancelable `file-upload` | Required and maximum file size |
+| `jb-image-input` | `name`, `label`, `message`, `value`, `initialValue`, `multiple`, `acceptTypes`, `maxFileSize`, upload endpoint, `uploading`, `uploadPercent`, `required`, declarative validation rules | `load`, `init`, `change`, `imageSelected`, `maxSizeExceed`, `download-start`, `invalid`; builder emits cancelable `file-upload` | Required and maximum file size |
 
 ### Action control
 

@@ -26,14 +26,4 @@ export function useBuilderLifecycle(slug?: string): void {
     return () => window.removeEventListener("keydown", handleSaveShortcut);
   }, [store]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (store.isDirty) {
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [store]);
 }

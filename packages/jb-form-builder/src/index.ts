@@ -7,6 +7,7 @@ export type {
   DependencyFailure,
   DependencyLoader,
   DependencyLoadResult,
+  FileUploadDetail,
   FormValues,
   JBFormBuilderElement,
   JBFormBuilderEventMap,

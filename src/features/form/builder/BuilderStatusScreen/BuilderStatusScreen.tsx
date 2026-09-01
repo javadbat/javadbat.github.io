@@ -48,7 +48,11 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
             onClick={() => {
               if (!window.confirm(messages.deleteCorruptFormConfirm)) return;
               setBusy(true);
-              void store.deleteCorruptRecord(slug).finally(() => setBusy(false));
+              void store.deleteCorruptRecord(slug)
+                .then(deleted => {
+                  if (deleted) window.location.assign("/form");
+                })
+                .finally(() => setBusy(false));
             }}
           >
             {messages.deleteCorruptForm}

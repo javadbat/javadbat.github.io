@@ -1,14 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBColorInput } from "jb-color-input/react";
@@ -22,24 +12,14 @@ import type { JBTabChangeEvent } from "jb-tab";
 import { JBTab } from "jb-tab/react";
 import { JBTabList } from "jb-tab/list/react";
 import { JBTabTrigger } from "jb-tab/trigger/react";
-import { JBFormBuilder } from "jb-form-builder/react";
-import { loadDependencies } from "jb-form-builder/dependency-loader";
 import { createDefaultElement, getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
 import type { JBFormBuilderElement } from "jb-form-builder/types";
-import {
-  getSupportedThemeComponentTokens,
-  THEME_COMPONENT_TAGS,
-  type ThemeComponentTag,
-  type ThemeConfigV1,
-} from "jb-form-builder/contract/theme";
-import "jb-icons/arrow";
-import "jb-icons/edit";
-import "jb-icons/refresh";
+import { getSupportedThemeComponentTokens, THEME_COMPONENT_TAGS, type ThemeComponentTag, type ThemeConfigV1 } from "jb-form-builder/contract/theme";
+import { observer } from "mobx-react-lite";
 import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { useStoredTheme } from "../application/use-stored-theme";
 import { getLocalizedText, walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
-import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../layout/FormRouteHeader";
 import { JBCollapse } from "jb-collapse/react";
 import layoutStyles from "../layout/FormRouteLayout.module.css";
 import { DESIGNER_SAMPLE_FORM } from "./sample-form";
@@ -76,15 +56,16 @@ import {
   withCalculatedThemeColors,
   type BaseThemeColorToken,
 } from "./theme-color-calculator";
-import {
-  updateBaseThemeSize,
-  type BaseThemeSizeToken,
-} from "./theme-size-calculator";
+import { updateBaseThemeSize, type BaseThemeSizeToken } from "./theme-size-calculator";
+import { DesignerHeader } from "./DesignerHeader/DesignerHeader";
+import { DesignerMobileTabs } from "./DesignerMobileTabs/DesignerMobileTabs";
+import { DesignerPreviewPanel } from "./DesignerPreviewPanel/DesignerPreviewPanel";
+import { ExportThemeDialog } from "./ExportThemeDialog/ExportThemeDialog";
+import { DesignerUiStore, DesignerUiStoreProvider } from "./state/DesignerUiStore";
+import { ThemePresetPanel } from "./ThemePresetPanel/ThemePresetPanel";
 
 type SaveStatus = "saving" | "saved" | "invalid" | "error";
 type DesignerSection = "background" | "colors" | "typography" | "sizing" | "shape" | "components";
-type PreviewViewport = "desktop" | "tablet" | "mobile";
-type MobilePanel = "design" | "preview";
 type ComponentPreview = "all" | "inputs" | "choices" | "actions";
 type ComponentLengthUnit = "px" | "rem" | "em" | "%" | "vh" | "vw";
 type ComponentTokenState = "all" | "default" | "hover" | "focus" | "active" | "disabled";
@@ -100,25 +81,20 @@ type ComponentAccessibility = {
 };
 type ComponentAuditIssue = { state: ComponentPreviewState; kind: "contrast" | "focus"; ratio?: number; token?: string; suggestion?: string; suggestedRatio?: number };
 type ComponentFixPreview = { issueKey: string; state: ComponentPreviewState; token: string; value: string; ratio: number };
+type FormAccessibilityAuditResult = { tag: ThemeComponentTag; name: string; instanceCount: number; issues: ComponentAuditIssue[] };
 type CSSVariables = CSSProperties & Record<`--${string}`, string | number | undefined>;
 type ThemeSizeCode = "xs" | "sm" | "md" | "lg" | "xl";
 
 const AdvancedSizesModal = lazy(() => import("./AdvancedSizesModal"));
 
-const defaultColorGroupLinks = Object.fromEntries(
-  BASE_THEME_COLOR_TOKENS.map(token => [token, true]),
-) as Record<BaseThemeColorToken, boolean>;
+const defaultColorGroupLinks = Object.fromEntries(BASE_THEME_COLOR_TOKENS.map(token => [token, true])) as Record<BaseThemeColorToken, boolean>;
 
 const defaultSizeGroupLinks: Record<BaseThemeSizeToken, boolean> = {
   "--jb-control-height-md": true,
   "--jb-radius": true,
 };
 
-const allGlobalThemeTokens: readonly GlobalThemeToken[] = [
-  ...GLOBAL_COLOR_TOKENS,
-  ...GLOBAL_RADIUS_TOKENS,
-  ...GLOBAL_CONTROL_HEIGHT_TOKENS,
-];
+const allGlobalThemeTokens: readonly GlobalThemeToken[] = [...GLOBAL_COLOR_TOKENS, ...GLOBAL_RADIUS_TOKENS, ...GLOBAL_CONTROL_HEIGHT_TOKENS];
 
 const legacyColorFallbacks: Partial<Record<GlobalThemeToken, `--${string}`>> = {
   "--jb-neutral-0": "--jb-neutral",
@@ -141,9 +117,7 @@ function isolateComponentPreview(document: JBFormDocumentV1, preview: ComponentP
     const matchingElements = walkFormElements(document.elements).filter(element => element.type === selectedTag);
     const fallbackElements = walkFormElements(DESIGNER_SAMPLE_FORM.elements).filter(element => element.type === selectedTag);
     const entry = registryByType.get(selectedTag);
-    const generated = entry
-      ? [createDefaultElement(entry, "componentPreview", document.localization.defaultLocale)]
-      : [];
+    const generated = entry ? [createDefaultElement(entry, "componentPreview", document.localization.defaultLocale)] : [];
     return { ...document, elements: matchingElements.length > 0 ? matchingElements : fallbackElements.length > 0 ? fallbackElements : generated };
   }
   if (preview === "all") return document;
@@ -319,7 +293,11 @@ function forcedComponentStateCss(element: HTMLElement, state: Exclude<ComponentP
     }
   };
   for (const sheet of shadowRoot.adoptedStyleSheets) {
-    try { visitRules(sheet.cssRules); } catch { /* Cross-origin sheets are ignored. */ }
+    try {
+      visitRules(sheet.cssRules);
+    } catch {
+      /* Cross-origin sheets are ignored. */
+    }
   }
   for (const style of shadowRoot.querySelectorAll<HTMLStyleElement>("style:not([data-designer-preview-state-style])")) {
     if (style.sheet) visitRules(style.sheet.cssRules);
@@ -385,10 +363,7 @@ function effectiveBackground(element: HTMLElement): RgbaColor {
     if (color && color.alpha > 0) layers.push(color);
     current = composedParent(current);
   }
-  return layers.reverse().reduce(
-    (background, layer) => compositeColor(layer, background),
-    { red: 255, green: 255, blue: 255, alpha: 1 },
-  );
+  return layers.reverse().reduce((background, layer) => compositeColor(layer, background), { red: 255, green: 255, blue: 255, alpha: 1 });
 }
 
 function relativeLuminance(color: RgbaColor): number {
@@ -407,7 +382,10 @@ function contrastRatio(foreground: RgbaColor, background: RgbaColor): number {
 }
 
 function colorToHex(color: RgbaColor): string {
-  const channel = (value: number) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
+  const channel = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${channel(color.red)}${channel(color.green)}${channel(color.blue)}`;
 }
 
@@ -440,11 +418,13 @@ function suggestAccessibleColor(color: RgbaColor, counterpart: RgbaColor, requir
     };
     const rounded = rasterizeCssColor(colorToHex(candidate));
     if (!rounded) return [];
-    return [{
-      color: rounded,
-      distance: (rounded.red - color.red) ** 2 + (rounded.green - color.green) ** 2 + (rounded.blue - color.blue) ** 2,
-      ratio: contrastRatio(rounded, counterpart),
-    }];
+    return [
+      {
+        color: rounded,
+        distance: (rounded.red - color.red) ** 2 + (rounded.green - color.green) ** 2 + (rounded.blue - color.blue) ** 2,
+        ratio: contrastRatio(rounded, counterpart),
+      },
+    ];
   });
   const best = candidates.sort((left, right) => left.distance - right.distance)[0];
   return best ? { value: colorToHex(best.color), ratio: best.ratio } : null;
@@ -453,10 +433,12 @@ function suggestAccessibleColor(color: RgbaColor, counterpart: RgbaColor, requir
 function componentVisualSignature(element: HTMLElement): string {
   const shadowRoot = element.shadowRoot;
   const nodes = [element, ...Array.from(shadowRoot?.querySelectorAll<HTMLElement>("*") ?? [])];
-  return nodes.map(node => {
-    const style = getComputedStyle(node);
-    return [style.outlineStyle, style.outlineWidth, style.outlineColor, style.boxShadow, style.borderColor, style.backgroundColor].join("|");
-  }).join("\n");
+  return nodes
+    .map(node => {
+      const style = getComputedStyle(node);
+      return [style.outlineStyle, style.outlineWidth, style.outlineColor, style.boxShadow, style.borderColor, style.backgroundColor].join("|");
+    })
+    .join("\n");
 }
 
 function analyzeComponentAccessibility(element: HTMLElement, state: ComponentPreviewState): ComponentAccessibility {
@@ -488,7 +470,7 @@ function readCssVariableDefaults(): Partial<Record<GlobalThemeToken, string>> {
   const rootStyle = getComputedStyle(document.documentElement);
   const values: Partial<Record<GlobalThemeToken, string>> = {};
   for (const token of allGlobalThemeTokens) {
-    if (GLOBAL_COLOR_TOKENS.includes(token as typeof GLOBAL_COLOR_TOKENS[number])) {
+    if (GLOBAL_COLOR_TOKENS.includes(token as (typeof GLOBAL_COLOR_TOKENS)[number])) {
       const probe = document.createElement("span");
       const fallback = legacyColorFallbacks[token];
       probe.style.color = `var(${token}${fallback ? `, var(${fallback}, transparent)` : ", transparent"})`;
@@ -544,13 +526,15 @@ function numberFromEvent(event: unknown, fallback: number): number {
 }
 
 function themeSlug(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "untitled-theme";
+  return (
+    name
+      .trim()
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "untitled-theme"
+  );
 }
 
 function downloadThemeJson(json: string, slug: string): void {
@@ -561,6 +545,94 @@ function downloadThemeJson(json: string, slug: string): void {
   anchor.download = `${slug}.jb-theme.json`;
   anchor.click();
   URL.revokeObjectURL(href);
+}
+
+function downloadTextFile(text: string, fileName: string, type: string): void {
+  const blob = new Blob([text], { type });
+  const href = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(href);
+}
+
+function markdownInline(value: string): string {
+  return value.replace(/[\\`*_{}[\]()#+.!|>-]/g, character => `\\${character}`).replace(/\s+/g, " ").trim();
+}
+
+function componentAccessibilityReport(
+  themeName: string,
+  componentTag: ThemeComponentTag,
+  componentName: string,
+  issues: ComponentAuditIssue[],
+): string {
+  const states: ComponentPreviewState[] = ["default", "hover", "focus", "active", "disabled"];
+  const lines = [
+    `# Component accessibility audit`,
+    "",
+    `- Theme: ${markdownInline(themeName)}`,
+    `- Component: ${markdownInline(componentName)} (\`${componentTag}\`)`,
+    `- Audited states: ${states.join(", ")}`,
+    `- Generated: ${new Date().toISOString()}`,
+    "",
+    "## Result",
+    "",
+    issues.length === 0 ? "Passed: no contrast or focus-indicator issues were found." : `Needs attention: ${issues.length} issue${issues.length === 1 ? "" : "s"} found.`,
+  ];
+  if (issues.length > 0) {
+    lines.push("", "## Issues", "");
+    for (const [index, issue] of issues.entries()) {
+      lines.push(`${index + 1}. **${issue.state} — ${issue.kind === "contrast" ? "Text contrast" : "Focus indicator"}**`);
+      if (issue.ratio != null) lines.push(`   - Measured contrast: ${issue.ratio.toFixed(2)}:1`);
+      if (issue.token) lines.push(`   - Suggested token: \`${issue.token}\``);
+      if (issue.suggestion) lines.push(`   - Suggested AA fix: \`${issue.suggestion}\`${issue.suggestedRatio != null ? ` (${issue.suggestedRatio.toFixed(2)}:1)` : ""}`);
+      if (issue.kind === "focus") lines.push("   - No visible focus change was detected.");
+    }
+  }
+  lines.push("", "---", "Generated by Form Designer.", "");
+  return lines.join("\n");
+}
+
+function formAccessibilityReport(
+  themeName: string,
+  formName: string,
+  results: FormAccessibilityAuditResult[],
+): string {
+  const instanceCount = results.reduce((total, result) => total + result.instanceCount, 0);
+  const issueCount = results.reduce((total, result) => total + result.issues.length, 0);
+  const lines = [
+    "# Full form accessibility audit",
+    "",
+    `- Form: ${markdownInline(formName)}`,
+    `- Theme: ${markdownInline(themeName)}`,
+    `- Component types: ${results.length}`,
+    `- Rendered instances: ${instanceCount}`,
+    `- Issues: ${issueCount}`,
+    "- Audited states: default, hover, focus, active, disabled",
+    `- Generated: ${new Date().toISOString()}`,
+    "",
+    "## Components",
+    "",
+  ];
+  for (const result of results) {
+    lines.push(`### ${markdownInline(result.name)} (\`${result.tag}\`)`, "", `Rendered instances: ${result.instanceCount}`);
+    if (result.issues.length === 0) {
+      lines.push("", "Passed: no contrast or focus-indicator issues were found.", "");
+      continue;
+    }
+    lines.push("", `Issues: ${result.issues.length}`, "");
+    for (const [index, issue] of result.issues.entries()) {
+      lines.push(`${index + 1}. **${issue.state} — ${issue.kind === "contrast" ? "Text contrast" : "Focus indicator"}**`);
+      if (issue.ratio != null) lines.push(`   - Measured contrast: ${issue.ratio.toFixed(2)}:1`);
+      if (issue.token) lines.push(`   - Suggested token: \`${issue.token}\``);
+      if (issue.suggestion) lines.push(`   - Suggested AA fix: \`${issue.suggestion}\`${issue.suggestedRatio != null ? ` (${issue.suggestedRatio.toFixed(2)}:1)` : ""}`);
+      if (issue.kind === "focus") lines.push("   - No visible focus change was detected.");
+    }
+    lines.push("");
+  }
+  lines.push("---", "Generated by Form Designer.", "");
+  return lines.join("\n");
 }
 
 const BLANK_DESIGNER_THEME: DesignerThemeConfig = {
@@ -588,9 +660,19 @@ const BLANK_DESIGNER_THEME: DesignerThemeConfig = {
 };
 
 const persianTokenLabels: Partial<Record<GlobalThemeToken, string>> = {
-  "--jb-primary": "اصلی", "--jb-secondary": "ثانویه", "--jb-green": "سبز", "--jb-red": "قرمز", "--jb-yellow": "زرد",
-  "--jb-neutral": "خنثی", "--jb-text-primary": "متن اصلی", "--jb-text-secondary": "متن ثانویه", "--jb-text-contrast": "متن متضاد",
-  "--jb-black": "مشکی", "--jb-white": "سفید", "--jb-highlight": "برجسته", "--jb-radius": "گردی گوشه",
+  "--jb-primary": "اصلی",
+  "--jb-secondary": "ثانویه",
+  "--jb-green": "سبز",
+  "--jb-red": "قرمز",
+  "--jb-yellow": "زرد",
+  "--jb-neutral": "خنثی",
+  "--jb-text-primary": "متن اصلی",
+  "--jb-text-secondary": "متن ثانویه",
+  "--jb-text-contrast": "متن متضاد",
+  "--jb-black": "مشکی",
+  "--jb-white": "سفید",
+  "--jb-highlight": "برجسته",
+  "--jb-radius": "گردی گوشه",
 };
 
 function tokenLabel(token: GlobalThemeToken, locale: FormAppLocale): string {
@@ -662,38 +744,34 @@ function SettingRange({
         value={value}
         onInput={event => onChange(numberFromEvent(event, value))}
       />
-      <JBNumberInput
-        aria-label={`${label} value`}
-        size="sm"
-        minValue={min}
-        maxValue={max}
-        step={step}
-        value={value}
-        onInput={event => onChange(numberFromEvent(event, value))}
-      >
-        <span className={styles.inputSuffix} slot="end-section" aria-hidden="true">{suffix}</span>
+      <JBNumberInput aria-label={`${label} value`} size="sm" minValue={min} maxValue={max} step={step} value={value} onInput={event => onChange(numberFromEvent(event, value))}>
+        <span className={styles.inputSuffix} slot="end-section" aria-hidden="true">
+          {suffix}
+        </span>
       </JBNumberInput>
     </div>
   );
 }
 
-export function DesignerApp() {
+export const DesignerApp = observer(function DesignerApp() {
   const { locale, direction, setLocale, messages } = useFormLocale("en");
-  const message = (key: FormMessageKey, values: Record<string, string | number> = {}) => Object.entries(values)
-    .reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
+  const message = (key: FormMessageKey, values: Record<string, string | number> = {}) =>
+    Object.entries(values).reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
   const cssVariableDefaults = useCssVariableDefaults();
-  const sizeLabel = (size: ThemeSizeCode): string => ({
-    xs: messages.designerExtraSmall,
-    sm: messages.designerSmall,
-    md: messages.designerMedium,
-    lg: messages.designerLarge,
-    xl: messages.designerExtraLarge,
-  })[size];
+  const sizeLabel = (size: ThemeSizeCode): string =>
+    ({
+      xs: messages.designerExtraSmall,
+      sm: messages.designerSmall,
+      md: messages.designerMedium,
+      lg: messages.designerLarge,
+      xl: messages.designerExtraLarge,
+    })[size];
   const formSlug = getCurrentFormSlug();
   const selectedThemeSlug = getCurrentThemeSlug();
   const storedForm = useStoredForm(formSlug);
   const storedTheme = useStoredTheme(selectedThemeSlug, formSlug);
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
+  const [ui] = useState(() => new DesignerUiStore());
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const importFileRef = useRef<HTMLInputElement | null>(null);
   const initializingThemeRef = useRef(false);
@@ -745,10 +823,6 @@ export function DesignerApp() {
   const [future, setFuture] = useState<DesignerThemeConfig[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [activePreset, setActivePreset] = useState("rose-pop");
-  const [viewport, setViewport] = useState<PreviewViewport>("desktop");
-  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("design");
-  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
-  const [previewSource, setPreviewSource] = useState("sample");
   const [componentPreview, setComponentPreview] = useState<ComponentPreview>("all");
   const [selectedComponentTag, setSelectedComponentTag] = useState<ThemeComponentTag | null>(null);
   const [componentTokenSearch, setComponentTokenSearch] = useState("");
@@ -765,10 +839,11 @@ export function DesignerApp() {
   const [componentAuditIssues, setComponentAuditIssues] = useState<ComponentAuditIssue[]>();
   const [componentAuditRunning, setComponentAuditRunning] = useState(false);
   const [componentFixPreview, setComponentFixPreview] = useState<ComponentFixPreview>();
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [componentAuditCopied, setComponentAuditCopied] = useState(false);
+  const [formAuditResults, setFormAuditResults] = useState<FormAccessibilityAuditResult[]>();
+  const [formAuditRunning, setFormAuditRunning] = useState(false);
+  const [formAuditCopied, setFormAuditCopied] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [exportCopied, setExportCopied] = useState(false);
   const [advancedColorsOpen, setAdvancedColorsOpen] = useState(false);
   const [advancedColorDraft, setAdvancedColorDraft] = useState<DesignerThemeConfig["global"]>({});
   const [advancedSizesOpen, setAdvancedSizesOpen] = useState(false);
@@ -787,9 +862,9 @@ export function DesignerApp() {
     if (!normalizedThemeSearch) return THEME_PRESETS;
     return THEME_PRESETS.filter(presetItem => `${presetItem.label} ${presetItem.config.description ?? ""}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch));
   }, [locale, normalizedThemeSearch]);
-  const showBuiltInTheme = !normalizedThemeSearch || `${messages.designerDefaultTheme} ${messages.designerBuiltInDefault} ${messages.designerBuiltInThemeDescription}`
-    .toLocaleLowerCase(locale)
-    .includes(normalizedThemeSearch);
+  const showBuiltInTheme =
+    !normalizedThemeSearch ||
+    `${messages.designerDefaultTheme} ${messages.designerBuiltInDefault} ${messages.designerBuiltInThemeDescription}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch);
   const hasThemeSearchResults = showBuiltInTheme || filteredLibraryThemes.length > 0 || filteredThemePresets.length > 0;
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
@@ -803,11 +878,14 @@ export function DesignerApp() {
     setSaveStatus("saving");
   }, []);
 
-  const updateTheme = useCallback((change: (draft: DesignerThemeConfig) => void) => {
-    const next = cloneTheme(theme);
-    change(next);
-    commitTheme(next);
-  }, [commitTheme, theme]);
+  const updateTheme = useCallback(
+    (change: (draft: DesignerThemeConfig) => void) => {
+      const next = cloneTheme(theme);
+      change(next);
+      commitTheme(next);
+    },
+    [commitTheme, theme],
+  );
 
   useEffect(() => {
     if (storedTheme.status === "ready") {
@@ -886,7 +964,10 @@ export function DesignerApp() {
       return true;
     });
     saveInFlightRef.current = operation;
-    saveQueueRef.current = operation.then(() => undefined, () => undefined);
+    saveQueueRef.current = operation.then(
+      () => undefined,
+      () => undefined,
+    );
     void operation.finally(() => {
       if (saveInFlightRef.current === operation) saveInFlightRef.current = null;
     });
@@ -901,9 +982,12 @@ export function DesignerApp() {
     return () => window.clearTimeout(timer);
   }, [saveCurrentTheme, saveStatus, themeRecord]);
 
-  useEffect(() => () => {
-    if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
-  }, [temporaryImage]);
+  useEffect(
+    () => () => {
+      if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
+    },
+    [temporaryImage],
+  );
 
   useEffect(() => {
     if (theme.background.mode !== "image" || temporaryImage) {
@@ -953,7 +1037,9 @@ export function DesignerApp() {
         setThemeBindings(settings.value.bindings);
       }
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [libraryOpen]);
 
   useEffect(() => {
@@ -963,9 +1049,11 @@ export function DesignerApp() {
       if (!active || !result.ok) return;
       setDefaultThemeId(result.value.defaultThemeId);
       setThemeBindings(result.value.bindings);
-      setBoundThemeId(formSlug ? result.value.bindings[formSlug] ?? null : null);
+      setBoundThemeId(formSlug ? (result.value.bindings[formSlug] ?? null) : null);
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [formSlug, themeRecord]);
 
   const openThemeRecord = (record: StoredThemeRecordV1) => {
@@ -1153,18 +1241,16 @@ export function DesignerApp() {
     setThemeLoadNotice(message("designerDeleteSuccess", { name: pendingDelete.config.name }));
   };
 
-  const requestDesignerLeave = useCallback(async (leave: () => void) => {
-    if (saveStatus === "invalid" || saveStatus === "error") {
-      window.alert(messages.designerNavigationBlocked);
-      return;
-    }
-    if (saveStatus === "saving" && !await saveCurrentTheme()) return;
-    if (temporaryImage && !window.confirm(messages.designerTemporaryLeaveConfirm)) return;
-    leave();
-  }, [messages.designerNavigationBlocked, messages.designerTemporaryLeaveConfirm, saveCurrentTheme, saveStatus, temporaryImage]);
+  const requestDesignerLeave = useCallback(
+    (leave: () => void) => {
+      if (temporaryImage && !window.confirm(messages.designerTemporaryLeaveConfirm)) return;
+      leave();
+    },
+    [messages.designerTemporaryLeaveConfirm, temporaryImage],
+  );
 
   const handleDesignerNavigationCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (saveStatus === "saved" && !temporaryImage) return;
+    if (!temporaryImage) return;
     const anchor = (event.target as Element).closest("a[href]") as HTMLAnchorElement | null;
     if (!anchor || event.button !== 0) return;
     event.preventDefault();
@@ -1173,39 +1259,35 @@ export function DesignerApp() {
   };
 
   useEffect(() => {
-    if (saveStatus === "saved" && !temporaryImage) return;
+    if (!temporaryImage) return;
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [saveStatus, temporaryImage]);
+  }, [temporaryImage]);
 
   const canUseStoredForm = storedForm.status === "ready";
-  const selectedDocument = previewSource === "stored" && canUseStoredForm
-    ? storedForm.document
-    : DESIGNER_SAMPLE_FORM;
+  const selectedDocument = ui.previewSource === "stored" && canUseStoredForm ? storedForm.document : DESIGNER_SAMPLE_FORM;
   const availableComponentTags = useMemo(
     () => THEME_COMPONENT_TAGS.filter(tag => componentMatchesPreview(registryByType.get(tag)?.category, componentPreview)),
     [componentPreview],
   );
-  const supportedComponentTokens = useMemo(
-    () => selectedComponentTag ? getSupportedThemeComponentTokens(selectedComponentTag) : [],
-    [selectedComponentTag],
-  );
-  const componentTokenOverrides = selectedComponentTag ? theme.components[selectedComponentTag]?.tokens ?? {} : {};
+  const supportedComponentTokens = useMemo(() => (selectedComponentTag ? getSupportedThemeComponentTokens(selectedComponentTag) : []), [selectedComponentTag]);
+  const componentTokenOverrides = selectedComponentTag ? (theme.components[selectedComponentTag]?.tokens ?? {}) : {};
   const selectedComponentTokenOverride = selectedComponentToken ? componentTokenOverrides[selectedComponentToken] : undefined;
   const selectedComponentTokenProperty = selectedComponentToken ? componentTokenCssProperty(selectedComponentToken) : null;
   const selectedComponentTokenUsesLengthControl = selectedComponentTokenProperty != null && simpleLengthProperties.has(selectedComponentTokenProperty);
-  const selectedComponentTokenOptions = selectedComponentTokenProperty ? componentPropertyOptions[selectedComponentTokenProperty] ?? [] : [];
-  const componentOpacityValue = selectedComponentTokenProperty === "opacity"
-    && componentTokenDraft.trim()
-    && Number.isFinite(Number(componentTokenDraft))
-    && Number(componentTokenDraft) >= 0
-    && Number(componentTokenDraft) <= 1
-    ? Number(componentTokenDraft)
-    : 1;
+  const selectedComponentTokenOptions = selectedComponentTokenProperty ? (componentPropertyOptions[selectedComponentTokenProperty] ?? []) : [];
+  const componentOpacityValue =
+    selectedComponentTokenProperty === "opacity" &&
+    componentTokenDraft.trim() &&
+    Number.isFinite(Number(componentTokenDraft)) &&
+    Number(componentTokenDraft) >= 0 &&
+    Number(componentTokenDraft) <= 1
+      ? Number(componentTokenDraft)
+      : 1;
 
   useEffect(() => {
     if (!selectedComponentTag || !selectedComponentToken) {
@@ -1259,19 +1341,28 @@ export function DesignerApp() {
       });
     };
     resolveValue();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [messages.designerComponentResolvedInternally, selectedComponentTag, selectedComponentToken, selectedComponentTokenOverride, selectedComponentTokenProperty, theme.global]);
   const visibleComponentTokens = useMemo(() => {
     const query = componentTokenSearch.trim().toLocaleLowerCase(locale);
     return supportedComponentTokens
-      .filter(token => (!showComponentOverridesOnly || token in componentTokenOverrides)
-        && (componentTokenStateFilter === "all" || componentTokenState(token) === componentTokenStateFilter)
-        && (!query || `${token} ${selectedComponentTag ? componentTokenLabel(token, selectedComponentTag) : ""}`.toLocaleLowerCase(locale).includes(query)))
+      .filter(
+        token =>
+          (!showComponentOverridesOnly || token in componentTokenOverrides) &&
+          (componentTokenStateFilter === "all" || componentTokenState(token) === componentTokenStateFilter) &&
+          (!query || `${token} ${selectedComponentTag ? componentTokenLabel(token, selectedComponentTag) : ""}`.toLocaleLowerCase(locale).includes(query)),
+      )
       .sort((left, right) => Number(right in componentTokenOverrides) - Number(left in componentTokenOverrides) || left.localeCompare(right));
   }, [componentTokenOverrides, componentTokenSearch, componentTokenStateFilter, locale, selectedComponentTag, showComponentOverridesOnly, supportedComponentTokens]);
-  const groupedVisibleComponentTokens = useMemo(() => componentTokenGroupOrder
-    .map(group => ({ group, tokens: visibleComponentTokens.filter(token => componentTokenGroup(token) === group) }))
-    .filter(entry => entry.tokens.length > 0), [visibleComponentTokens]);
+  const groupedVisibleComponentTokens = useMemo(
+    () =>
+      componentTokenGroupOrder
+        .map(group => ({ group, tokens: visibleComponentTokens.filter(token => componentTokenGroup(token) === group) }))
+        .filter(entry => entry.tokens.length > 0),
+    [visibleComponentTokens],
+  );
   const componentTokenGroupLabels: Record<ComponentTokenGroup, string> = {
     colors: messages.designerComponentGroupColors,
     typography: messages.designerComponentGroupTypography,
@@ -1289,14 +1380,13 @@ export function DesignerApp() {
     active: messages.designerComponentStateActive,
     disabled: messages.designerComponentStateDisabled,
   };
+  const formAuditIssueCount = formAuditResults?.reduce((total, result) => total + result.issues.length, 0) ?? 0;
+  const formAuditInstanceCount = formAuditResults?.reduce((total, result) => total + result.instanceCount, 0) ?? 0;
   const componentPreviewDocument = useMemo(
     () => isolateComponentPreview(selectedDocument, componentPreview, selectedComponentTag),
     [componentPreview, selectedComponentTag, selectedDocument],
   );
-  const previewDocument = useMemo(
-    () => withControlSizeDefault(componentPreviewDocument, theme.defaults.controlSize),
-    [componentPreviewDocument, theme.defaults.controlSize],
-  );
+  const previewDocument = useMemo(() => withControlSizeDefault(componentPreviewDocument, theme.defaults.controlSize), [componentPreviewDocument, theme.defaults.controlSize]);
   useEffect(() => {
     let cancelled = false;
     setComponentAccessibility(undefined);
@@ -1345,65 +1435,60 @@ export function DesignerApp() {
   useEffect(() => {
     setComponentAuditIssues(undefined);
     setComponentFixPreview(undefined);
+    setComponentAuditCopied(false);
   }, [theme]);
+  useEffect(() => {
+    setFormAuditResults(undefined);
+    setFormAuditCopied(false);
+  }, [selectedDocument, theme]);
   const previewLocale = previewDocument.localization.defaultLocale;
   const previewDirection = previewDocument.localization.locales[previewLocale]?.direction ?? "ltr";
-  const previewName = getLocalizedText(
-    previewDocument.metadata.name,
-    previewLocale,
-    previewLocale,
-  );
-  const previewDescription = getLocalizedText(
-    previewDocument.metadata.description,
-    previewLocale,
-    previewLocale,
-  );
+  const previewName = getLocalizedText(previewDocument.metadata.name, previewLocale, previewLocale);
+  const previewDescription = getLocalizedText(previewDocument.metadata.description, previewLocale, previewLocale);
 
-  const previewThemeStyle = useMemo<CSSVariables>(() => ({
-    "--jb-primary": theme.global["--jb-primary"] ?? undefined,
-    "--jb-secondary": theme.global["--jb-secondary"] ?? undefined,
-    "--jb-text-primary": theme.global["--jb-text-primary"] ?? undefined,
-    "--jb-radius": theme.global["--jb-radius"] ?? undefined,
-    "--designer-text-scale": String(theme.typography.textScale),
-    "--designer-spacing-scale": String(theme.sizing.spacingScale),
-    "--designer-pattern-color": theme.background.patternColor,
-    color: theme.global["--jb-text-primary"] ?? undefined,
-    backgroundColor: theme.background.color,
-    fontFamily: theme.typography.fontFamily,
-  }), [theme]);
+  const previewThemeStyle = useMemo<CSSVariables>(
+    () => ({
+      "--jb-primary": theme.global["--jb-primary"] ?? undefined,
+      "--jb-secondary": theme.global["--jb-secondary"] ?? undefined,
+      "--jb-text-primary": theme.global["--jb-text-primary"] ?? undefined,
+      "--jb-radius": theme.global["--jb-radius"] ?? undefined,
+      "--designer-text-scale": String(theme.typography.textScale),
+      "--designer-spacing-scale": String(theme.sizing.spacingScale),
+      "--designer-pattern-color": theme.background.patternColor,
+      color: theme.global["--jb-text-primary"] ?? undefined,
+      backgroundColor: theme.background.color,
+      fontFamily: theme.typography.fontFamily,
+    }),
+    [theme],
+  );
 
   const backdropStyle = useMemo<CSSProperties>(() => {
     if (theme.background.mode === "color") return { display: "none" };
-    const source = theme.background.mode === "image"
-      ? temporaryImage || (imageLoadState === "ready" ? theme.background.imageUrl : undefined)
-      : PATTERN_ASSETS[theme.background.patternId];
+    const source =
+      theme.background.mode === "image" ? temporaryImage || (imageLoadState === "ready" ? theme.background.imageUrl : undefined) : PATTERN_ASSETS[theme.background.patternId];
     if (!source) return { display: "none" };
     const imageSource = `url(${JSON.stringify(source)})`;
     return {
-      backgroundImage: theme.background.mode === "image" && theme.background.imageOverlayColor
-        ? `linear-gradient(${theme.background.imageOverlayColor}, ${theme.background.imageOverlayColor}), ${imageSource}`
-        : imageSource,
-      backgroundPosition: theme.background.mode === "image" ? theme.background.imagePosition ?? "center" : "center",
+      backgroundImage:
+        theme.background.mode === "image" && theme.background.imageOverlayColor
+          ? `linear-gradient(${theme.background.imageOverlayColor}, ${theme.background.imageOverlayColor}), ${imageSource}`
+          : imageSource,
+      backgroundPosition: theme.background.mode === "image" ? (theme.background.imagePosition ?? "center") : "center",
       backgroundRepeat: theme.background.mode === "pattern" ? "repeat" : "no-repeat",
-      backgroundSize: theme.background.mode === "pattern"
-        ? `${Math.max(180, 700 * (theme.background.scale / 100))}px`
-        : theme.background.imageFit ?? "cover",
+      backgroundSize: theme.background.mode === "pattern" ? `${Math.max(180, 700 * (theme.background.scale / 100))}px` : (theme.background.imageFit ?? "cover"),
       opacity: theme.background.opacity / 100,
     };
   }, [imageLoadState, temporaryImage, theme.background]);
 
-  const exportedJson = useMemo(
-    () => JSON.stringify(portableTheme, null, 2),
-    [portableTheme],
-  );
+  const exportedJson = useMemo(() => JSON.stringify(portableTheme, null, 2), [portableTheme]);
 
   const importValidation = useMemo(
-    () => importJson.trim() ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: importSupportedOnly }) : null,
+    () => (importJson.trim() ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: importSupportedOnly }) : null),
     [importJson, importSupportedOnly, libraryThemes],
   );
 
   const supportedImportValidation = useMemo(
-    () => importJson.trim() && !importSupportedOnly ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: true }) : null,
+    () => (importJson.trim() && !importSupportedOnly ? prepareThemeImport(importJson, libraryThemes, { supportedValuesOnly: true }) : null),
     [importJson, importSupportedOnly, libraryThemes],
   );
 
@@ -1474,6 +1559,7 @@ export function DesignerApp() {
     setComponentPreviewState("default");
     setComponentAuditIssues(undefined);
     setComponentFixPreview(undefined);
+    setComponentAuditCopied(false);
   };
 
   const chooseComponentTag = (value: string) => {
@@ -1490,6 +1576,7 @@ export function DesignerApp() {
     setComponentPreviewState("default");
     setComponentAuditIssues(undefined);
     setComponentFixPreview(undefined);
+    setComponentAuditCopied(false);
   };
 
   const chooseComponentToken = (token: string) => {
@@ -1539,32 +1626,33 @@ export function DesignerApp() {
 
   const resetSelectedComponentOverrides = () => {
     if (!selectedComponentTag || !theme.components[selectedComponentTag]) return;
-    if (!window.confirm(message("designerResetComponentConfirm", {
-      component: getFormElementDisplayName(registryByType.get(selectedComponentTag)!, locale),
-    }))) return;
-    updateTheme(draft => { delete draft.components[selectedComponentTag]; });
+    if (
+      !window.confirm(
+        message("designerResetComponentConfirm", {
+          component: getFormElementDisplayName(registryByType.get(selectedComponentTag)!, locale),
+        }),
+      )
+    )
+      return;
+    updateTheme(draft => {
+      delete draft.components[selectedComponentTag];
+    });
     setComponentTokenDraft("");
     setComponentTokenError(undefined);
     setComponentLengthValue("");
     setComponentLengthUnit("px");
   };
 
-  const componentAuditToken = (state: ComponentPreviewState, kind: ComponentAuditIssue["kind"]): string | undefined => {
-    const stateTokens = supportedComponentTokens.filter(token => componentTokenState(token) === state);
-    const patterns = kind === "focus"
-      ? [/border-color/, /box-shadow/, /outline/, /color/]
-      : [/-value-color/, /-text(?:area)?-color/, /-input-color/, /-color$/, /(?:caption|label).*color/, /(?<!bg-)color/, /bg-color/, /background/];
+  const componentAuditToken = (tag: ThemeComponentTag, state: ComponentPreviewState, kind: ComponentAuditIssue["kind"]): string | undefined => {
+    const stateTokens = getSupportedThemeComponentTokens(tag).filter(token => componentTokenState(token) === state);
+    const patterns =
+      kind === "focus"
+        ? [/border-color/, /box-shadow/, /outline/, /color/]
+        : [/-value-color/, /-text(?:area)?-color/, /-input-color/, /-color$/, /(?:caption|label).*color/, /(?<!bg-)color/, /bg-color/, /background/];
     return patterns.flatMap(pattern => stateTokens.filter(token => pattern.test(token)))[0];
   };
 
-  const runComponentAccessibilityAudit = async () => {
-    const renderer = rendererRef.current;
-    if (!renderer || !selectedComponentTag) return;
-    setComponentAuditRunning(true);
-    setComponentAuditIssues(undefined);
-    await new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
-    await renderer.updateComplete;
-    const elements = Array.from(renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []);
+  const auditComponentElements = (tag: ThemeComponentTag, elements: HTMLElement[]): ComponentAuditIssue[] => {
     const issues: ComponentAuditIssue[] = [];
     const states: ComponentPreviewState[] = ["default", "hover", "focus", "active", "disabled"];
     for (const state of states) {
@@ -1573,13 +1661,11 @@ export function DesignerApp() {
       const failedResults = results.filter(result => result.level === "fail" && result.ratio != null);
       if (failedResults.length > 0) {
         const worst = failedResults.sort((left, right) => left.ratio! - right.ratio!)[0];
-        const token = componentAuditToken(state, "contrast");
+        const token = componentAuditToken(tag, state, "contrast");
         const changesBackground = Boolean(token && /(?:bg-color|background)/.test(token));
         const adjustableColor = changesBackground ? worst.background : worst.foreground;
         const counterpart = changesBackground ? worst.foreground : worst.background;
-        const suggestion = adjustableColor && counterpart
-          ? suggestAccessibleColor(adjustableColor, counterpart, worst.requiredRatio)
-          : null;
+        const suggestion = adjustableColor && counterpart ? suggestAccessibleColor(adjustableColor, counterpart, worst.requiredRatio) : null;
         issues.push({
           state,
           kind: "contrast",
@@ -1590,9 +1676,22 @@ export function DesignerApp() {
         });
       }
       if (state === "focus" && results.some(result => result.focusIndicator === false)) {
-        issues.push({ state, kind: "focus", token: componentAuditToken(state, "focus") });
+        issues.push({ state, kind: "focus", token: componentAuditToken(tag, state, "focus") });
       }
     }
+    return issues;
+  };
+
+  const runComponentAccessibilityAudit = async () => {
+    const renderer = rendererRef.current;
+    if (!renderer || !selectedComponentTag) return;
+    setComponentAuditRunning(true);
+    setComponentAuditIssues(undefined);
+    setComponentAuditCopied(false);
+    await new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
+    await renderer.updateComplete;
+    const elements = Array.from(renderer.shadowRoot?.querySelectorAll<HTMLElement>(selectedComponentTag) ?? []);
+    const issues = auditComponentElements(selectedComponentTag, elements);
     for (const element of elements) applyForcedComponentState(element, componentPreviewState);
     setComponentAccessibility(elements[0] ? analyzeComponentAccessibility(elements[0], componentPreviewState) : undefined);
     setComponentAuditIssues(issues);
@@ -1628,13 +1727,112 @@ export function DesignerApp() {
     setComponentFixPreview(undefined);
   };
 
+  const currentComponentAuditReport = (): string | null => {
+    if (!selectedComponentTag || !componentAuditIssues) return null;
+    const entry = registryByType.get(selectedComponentTag);
+    const componentName = entry ? getFormElementDisplayName(entry, locale) : selectedComponentTag;
+    return componentAccessibilityReport(theme.name, selectedComponentTag, componentName, componentAuditIssues);
+  };
+
+  const copyComponentAuditReport = async () => {
+    const report = currentComponentAuditReport();
+    if (!report) return;
+    try {
+      await navigator.clipboard.writeText(report);
+      setComponentAuditCopied(true);
+    } catch {
+      setComponentAuditCopied(false);
+    }
+  };
+
+  const downloadComponentAuditReport = () => {
+    const report = currentComponentAuditReport();
+    if (!report || !selectedComponentTag) return;
+    downloadTextFile(report, `${themeSlug(theme.name)}-${selectedComponentTag}-accessibility.md`, "text/markdown;charset=utf-8");
+  };
+
+  const runFormAccessibilityAudit = async () => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    const previousPreview = componentPreview;
+    const previousTag = selectedComponentTag;
+    const previousState = componentPreviewState;
+    setFormAuditRunning(true);
+    setFormAuditResults(undefined);
+    setFormAuditCopied(false);
+    setComponentPreview("all");
+    setSelectedComponentTag(null);
+    setComponentPreviewState("default");
+    try {
+      await new Promise<void>(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve())));
+      await renderer.updateComplete;
+      const root = renderer.shadowRoot;
+      const results: FormAccessibilityAuditResult[] = [];
+      for (const tag of THEME_COMPONENT_TAGS) {
+        const elements = Array.from(root?.querySelectorAll<HTMLElement>(tag) ?? []);
+        if (elements.length === 0) continue;
+        const entry = registryByType.get(tag);
+        results.push({
+          tag,
+          name: entry ? getFormElementDisplayName(entry, locale) : tag,
+          instanceCount: elements.length,
+          issues: auditComponentElements(tag, elements),
+        });
+        for (const element of elements) clearForcedComponentState(element);
+      }
+      setFormAuditResults(results);
+    } finally {
+      setComponentPreview(previousPreview);
+      setSelectedComponentTag(previousTag);
+      setComponentPreviewState(previousState);
+      setFormAuditRunning(false);
+    }
+  };
+
+  const reviewFormAuditIssue = (result: FormAccessibilityAuditResult, issue: ComponentAuditIssue) => {
+    setComponentPreview("all");
+    setSelectedComponentTag(result.tag);
+    setSelectedComponentToken(issue.token);
+    setComponentTokenDraft(issue.token ? (theme.components[result.tag]?.tokens[issue.token] ?? "") : "");
+    setComponentTokenError(undefined);
+    setComponentLengthValue("");
+    setComponentPreviewState(issue.state);
+    setComponentTokenStateFilter(issue.state);
+    setComponentTokenSearch("");
+    setShowComponentOverridesOnly(false);
+  };
+
+  const currentFormAuditReport = (): string | null => {
+    if (!formAuditResults) return null;
+    return formAccessibilityReport(theme.name, previewName, formAuditResults);
+  };
+
+  const copyFormAuditReport = async () => {
+    const report = currentFormAuditReport();
+    if (!report) return;
+    try {
+      await navigator.clipboard.writeText(report);
+      setFormAuditCopied(true);
+    } catch {
+      setFormAuditCopied(false);
+    }
+  };
+
+  const downloadFormAuditReport = () => {
+    const report = currentFormAuditReport();
+    if (!report) return;
+    downloadTextFile(report, `${themeSlug(theme.name)}-${themeSlug(previewName)}-form-accessibility.md`, "text/markdown;charset=utf-8");
+  };
+
   const openAdvancedColors = () => {
     setAdvancedColorDraft(withCalculatedThemeColors(theme.global) as DesignerThemeConfig["global"]);
     setAdvancedColorsOpen(true);
   };
 
   const saveAdvancedColors = () => {
-    updateTheme(draft => { draft.global = { ...advancedColorDraft }; });
+    updateTheme(draft => {
+      draft.global = { ...advancedColorDraft };
+    });
     setAdvancedColorsOpen(false);
   };
 
@@ -1645,12 +1843,48 @@ export function DesignerApp() {
     baseToken?: BaseThemeColorToken;
     tokens: GlobalColorToken[];
   }> = [
-    { id: "primary", title: messages.designerPrimaryPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-primary", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-primary" || token.startsWith("--jb-primary-")) },
-    { id: "secondary", title: messages.designerSecondaryPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-secondary", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-secondary" || token.startsWith("--jb-secondary-")) },
-    { id: "green", title: messages.designerSuccessPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-green", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-green" || token.startsWith("--jb-green-")) },
-    { id: "red", title: messages.designerErrorPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-red", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-red" || token.startsWith("--jb-red-")) },
-    { id: "yellow", title: messages.designerWarningPalette, description: messages.designerSemanticPaletteHelp, baseToken: "--jb-yellow", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-yellow" || token.startsWith("--jb-yellow-")) },
-    { id: "neutral", title: messages.designerNeutralPalette, description: messages.designerNeutralPaletteHelp, baseToken: "--jb-neutral", tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-neutral" || token.startsWith("--jb-neutral-")) },
+    {
+      id: "primary",
+      title: messages.designerPrimaryPalette,
+      description: messages.designerSemanticPaletteHelp,
+      baseToken: "--jb-primary",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-primary" || token.startsWith("--jb-primary-")),
+    },
+    {
+      id: "secondary",
+      title: messages.designerSecondaryPalette,
+      description: messages.designerSemanticPaletteHelp,
+      baseToken: "--jb-secondary",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-secondary" || token.startsWith("--jb-secondary-")),
+    },
+    {
+      id: "green",
+      title: messages.designerSuccessPalette,
+      description: messages.designerSemanticPaletteHelp,
+      baseToken: "--jb-green",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-green" || token.startsWith("--jb-green-")),
+    },
+    {
+      id: "red",
+      title: messages.designerErrorPalette,
+      description: messages.designerSemanticPaletteHelp,
+      baseToken: "--jb-red",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-red" || token.startsWith("--jb-red-")),
+    },
+    {
+      id: "yellow",
+      title: messages.designerWarningPalette,
+      description: messages.designerSemanticPaletteHelp,
+      baseToken: "--jb-yellow",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-yellow" || token.startsWith("--jb-yellow-")),
+    },
+    {
+      id: "neutral",
+      title: messages.designerNeutralPalette,
+      description: messages.designerNeutralPaletteHelp,
+      baseToken: "--jb-neutral",
+      tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-neutral" || token.startsWith("--jb-neutral-")),
+    },
     {
       id: "foundations",
       title: messages.designerFoundationColors,
@@ -1664,7 +1898,11 @@ export function DesignerApp() {
       <JBTab
         className={styles.backgroundTabs}
         value={theme.background.mode}
-        onChange={(event: JBTabChangeEvent) => updateTheme(draft => { draft.background.mode = event.detail.value as ThemeBackgroundMode; })}
+        onChange={(event: JBTabChangeEvent) =>
+          updateTheme(draft => {
+            draft.background.mode = event.detail.value as ThemeBackgroundMode;
+          })
+        }
       >
         <JBTabList size="sm" aria-label={messages.designerBackgroundType}>
           {(["color", "pattern", "image"] as ThemeBackgroundMode[]).map(mode => (
@@ -1680,21 +1918,30 @@ export function DesignerApp() {
           <p className={styles.settingLabel}>{messages.designerChoosePattern}</p>
           <div className={styles.patternGrid}>
             {patternChoices.map(patternId => {
-              const patternLabel = patternId === "science-doodles" ? messages.designerScienceDoodles
-                : patternId === "academic-waves" ? messages.designerAcademicWaves
-                  : patternId === "calm-dots" ? messages.designerCalmDots : messages.designerWarmChevrons;
+              const patternLabel =
+                patternId === "science-doodles"
+                  ? messages.designerScienceDoodles
+                  : patternId === "academic-waves"
+                    ? messages.designerAcademicWaves
+                    : patternId === "calm-dots"
+                      ? messages.designerCalmDots
+                      : messages.designerWarmChevrons;
               return (
-              <button
-                key={patternId}
-                type="button"
-                className={theme.background.patternId === patternId ? styles.patternSelected : styles.patternButton}
-                aria-label={patternLabel}
-                aria-pressed={theme.background.patternId === patternId}
-                onClick={() => updateTheme(draft => { draft.background.patternId = patternId; })}
-              >
-                <img src={PATTERN_ASSETS[patternId]} alt="" />
-                {theme.background.patternId === patternId ? <span>{messages.designerSelected}</span> : null}
-              </button>
+                <button
+                  key={patternId}
+                  type="button"
+                  className={theme.background.patternId === patternId ? styles.patternSelected : styles.patternButton}
+                  aria-label={patternLabel}
+                  aria-pressed={theme.background.patternId === patternId}
+                  onClick={() =>
+                    updateTheme(draft => {
+                      draft.background.patternId = patternId;
+                    })
+                  }
+                >
+                  <img src={PATTERN_ASSETS[patternId]} alt="" />
+                  {theme.background.patternId === patternId ? <span>{messages.designerSelected}</span> : null}
+                </button>
               );
             })}
           </div>
@@ -1712,10 +1959,10 @@ export function DesignerApp() {
             onInput={event => {
               setTemporaryImage(undefined);
               const value = valueFromEvent(event);
-              setImageNotice(value.startsWith("blob:") || value.startsWith("file:")
-                ? messages.designerTemporaryUrlNotice
-                : undefined);
-              updateTheme(draft => { draft.background.imageUrl = value || undefined; });
+              setImageNotice(value.startsWith("blob:") || value.startsWith("file:") ? messages.designerTemporaryUrlNotice : undefined);
+              updateTheme(draft => {
+                draft.background.imageUrl = value || undefined;
+              });
             }}
           />
           <JBSelect<"cover" | "contain" | "fill">
@@ -1723,7 +1970,11 @@ export function DesignerApp() {
             label={messages.designerImageFit}
             value={theme.background.imageFit ?? "cover"}
             hideClear
-            onChange={event => updateTheme(draft => { draft.background.imageFit = valueFromEvent(event) as "cover" | "contain" | "fill"; })}
+            onChange={event =>
+              updateTheme(draft => {
+                draft.background.imageFit = valueFromEvent(event) as "cover" | "contain" | "fill";
+              })
+            }
           >
             <JBOption value="cover">{messages.designerCover}</JBOption>
             <JBOption value="contain">{messages.designerContain}</JBOption>
@@ -1734,29 +1985,39 @@ export function DesignerApp() {
             label={messages.designerImagePosition}
             placeholder="center"
             value={theme.background.imagePosition ?? ""}
-            onInput={event => updateTheme(draft => { draft.background.imagePosition = valueFromEvent(event) || undefined; })}
+            onInput={event =>
+              updateTheme(draft => {
+                draft.background.imagePosition = valueFromEvent(event) || undefined;
+              })
+            }
           />
           <JBInput
             size="sm"
             label={messages.designerOverlayColor}
             placeholder="rgb(0 0 0 / 20%)"
             value={theme.background.imageOverlayColor ?? ""}
-            onInput={event => updateTheme(draft => { draft.background.imageOverlayColor = valueFromEvent(event) || undefined; })}
+            onInput={event =>
+              updateTheme(draft => {
+                draft.background.imageOverlayColor = valueFromEvent(event) || undefined;
+              })
+            }
           />
-          <input
-            ref={uploadRef}
-            className={styles.fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={event => chooseFile(event.currentTarget.files?.[0])}
-          />
+          <input ref={uploadRef} className={styles.fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={event => chooseFile(event.currentTarget.files?.[0])} />
           <JBButton size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
             {messages.designerChooseLocalImage}
           </JBButton>
           {imageLoadState === "error" ? (
-            <JBButton size="sm" variant="ghost" onClick={() => setImageRetryVersion(version => version + 1)}>{messages.designerRetryImage}</JBButton>
+            <JBButton size="sm" variant="ghost" onClick={() => setImageRetryVersion(version => version + 1)}>
+              {messages.designerRetryImage}
+            </JBButton>
           ) : null}
-          {imageLoadState === "loading" ? <p className={styles.notice} role="status">{messages.designerCheckingImage}</p> : imageNotice ? <p className={styles.notice}>{imageNotice}</p> : null}
+          {imageLoadState === "loading" ? (
+            <p className={styles.notice} role="status">
+              {messages.designerCheckingImage}
+            </p>
+          ) : imageNotice ? (
+            <p className={styles.notice}>{imageNotice}</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -1765,14 +2026,22 @@ export function DesignerApp() {
           size="sm"
           label={messages.designerBackgroundColor}
           value={theme.background.color}
-          onInput={event => updateTheme(draft => { draft.background.color = valueFromEvent(event); })}
+          onInput={event =>
+            updateTheme(draft => {
+              draft.background.color = valueFromEvent(event);
+            })
+          }
         />
         {theme.background.mode === "pattern" ? (
           <JBColorInput
             size="sm"
             label={messages.designerPatternColor}
             value={theme.background.patternColor}
-            onInput={event => updateTheme(draft => { draft.background.patternColor = valueFromEvent(event); })}
+            onInput={event =>
+              updateTheme(draft => {
+                draft.background.patternColor = valueFromEvent(event);
+              })
+            }
           />
         ) : null}
       </div>
@@ -1785,7 +2054,11 @@ export function DesignerApp() {
           step={1}
           tickStep={20}
           suffix="%"
-          onChange={value => updateTheme(draft => { draft.background.opacity = value; })}
+          onChange={value =>
+            updateTheme(draft => {
+              draft.background.opacity = value;
+            })
+          }
         />
       ) : null}
       {theme.background.mode === "pattern" ? (
@@ -1797,7 +2070,11 @@ export function DesignerApp() {
           step={5}
           tickStep={20}
           suffix="%"
-          onChange={value => updateTheme(draft => { draft.background.scale = value; })}
+          onChange={value =>
+            updateTheme(draft => {
+              draft.background.scale = value;
+            })
+          }
         />
       ) : null}
     </div>
@@ -1841,9 +2118,11 @@ export function DesignerApp() {
                         onInput={event => setBaseThemeColor(token, valueFromEvent(event))}
                       />
                       <div className={styles.calculatedSwatches} aria-label={messages.designerCalculatedPalette}>
-                        {Object.entries(calculated).slice(0, token === "--jb-neutral" ? 12 : 7).map(([shadeToken, color]) => (
-                          <span key={shadeToken} style={{ backgroundColor: color ?? "transparent" }} title={shadeToken} />
-                        ))}
+                        {Object.entries(calculated)
+                          .slice(0, token === "--jb-neutral" ? 12 : 7)
+                          .map(([shadeToken, color]) => (
+                            <span key={shadeToken} style={{ backgroundColor: color ?? "transparent" }} title={shadeToken} />
+                          ))}
                       </div>
                     </div>
                   );
@@ -1856,7 +2135,9 @@ export function DesignerApp() {
               <strong>{messages.designerAdvancedColors}</strong>
               <span>{messages.designerAdvancedColorsHelp}</span>
             </div>
-            <JBButton size="sm" variant="outline" onClick={openAdvancedColors}>{messages.designerCustomizeEveryColor}</JBButton>
+            <JBButton size="sm" variant="outline" onClick={openAdvancedColors}>
+              {messages.designerCustomizeEveryColor}
+            </JBButton>
           </div>
         </div>
       );
@@ -1870,11 +2151,32 @@ export function DesignerApp() {
             label={messages.designerFontFamily}
             value={theme.typography.fontFamily}
             hideClear
-            onChange={event => updateTheme(draft => { draft.typography.fontFamily = valueFromEvent(event); })}
+            onChange={event =>
+              updateTheme(draft => {
+                draft.typography.fontFamily = valueFromEvent(event);
+              })
+            }
           >
-            {fontChoices.map(font => <JBOption key={font.value} value={font.value}>{messages[font.labelKey]}</JBOption>)}
+            {fontChoices.map(font => (
+              <JBOption key={font.value} value={font.value}>
+                {messages[font.labelKey]}
+              </JBOption>
+            ))}
           </JBSelect>
-          <SettingRange label={messages.designerTextScale} value={theme.typography.textScale} min={0.8} max={1.5} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.typography.textScale = value; })} />
+          <SettingRange
+            label={messages.designerTextScale}
+            value={theme.typography.textScale}
+            min={0.8}
+            max={1.5}
+            step={0.05}
+            tickStep={0.2}
+            suffix="×"
+            onChange={value =>
+              updateTheme(draft => {
+                draft.typography.textScale = value;
+              })
+            }
+          />
         </div>
       );
     }
@@ -1887,7 +2189,11 @@ export function DesignerApp() {
             label={messages.designerAudienceSize}
             value={theme.sizing.audienceSize}
             hideClear
-            onChange={event => updateTheme(draft => { draft.sizing.audienceSize = valueFromEvent(event) as ThemeAudienceSize; })}
+            onChange={event =>
+              updateTheme(draft => {
+                draft.sizing.audienceSize = valueFromEvent(event) as ThemeAudienceSize;
+              })
+            }
           >
             <JBOption value="compact">{messages.designerCompact}</JBOption>
             <JBOption value="standard">{messages.designerStandard}</JBOption>
@@ -1901,13 +2207,31 @@ export function DesignerApp() {
             label={messages.designerDefaultControlSize}
             value={theme.defaults.controlSize}
             hideClear
-            onChange={event => updateTheme(draft => { draft.defaults.controlSize = valueFromEvent(event) as ThemeControlSize; })}
+            onChange={event =>
+              updateTheme(draft => {
+                draft.defaults.controlSize = valueFromEvent(event) as ThemeControlSize;
+              })
+            }
           >
             <JBOption value="sm">{messages.designerSmall}</JBOption>
             <JBOption value="md">{messages.designerMedium}</JBOption>
             <JBOption value="lg">{messages.designerLarge}</JBOption>
           </JBSelect>
-          <SettingRange label={messages.designerSpacingScale} value={theme.sizing.spacingScale} min={0.75} max={1.6} step={0.05} tickStep={0.2} suffix="×" onChange={value => updateTheme(draft => { draft.sizing.spacingScale = value; draft.sizing.audienceSize = "custom"; })} />
+          <SettingRange
+            label={messages.designerSpacingScale}
+            value={theme.sizing.spacingScale}
+            min={0.75}
+            max={1.6}
+            step={0.05}
+            tickStep={0.2}
+            suffix="×"
+            onChange={value =>
+              updateTheme(draft => {
+                draft.sizing.spacingScale = value;
+                draft.sizing.audienceSize = "custom";
+              })
+            }
+          />
           <div className={styles.sizeFamilyCard}>
             <div className={styles.sizeGroupHeading}>
               <h3>{messages.designerControlHeightScale}</h3>
@@ -2001,12 +2325,81 @@ export function DesignerApp() {
             onChange={(event: JBTabChangeEvent) => chooseComponentPreview(event.detail.value as ComponentPreview)}
           >
             <JBTabList size="sm" aria-label={messages.designerPreviewComponent}>
-              <JBTabTrigger value="all" color="primary">{messages.designerAllControls}</JBTabTrigger>
-              <JBTabTrigger value="inputs" color="primary">{messages.designerInputs}</JBTabTrigger>
-              <JBTabTrigger value="choices" color="primary">{messages.designerChoices}</JBTabTrigger>
-              <JBTabTrigger value="actions" color="primary">{messages.designerButtons}</JBTabTrigger>
+              <JBTabTrigger value="all" color="primary">
+                {messages.designerAllControls}
+              </JBTabTrigger>
+              <JBTabTrigger value="inputs" color="primary">
+                {messages.designerInputs}
+              </JBTabTrigger>
+              <JBTabTrigger value="choices" color="primary">
+                {messages.designerChoices}
+              </JBTabTrigger>
+              <JBTabTrigger value="actions" color="primary">
+                {messages.designerButtons}
+              </JBTabTrigger>
             </JBTabList>
           </JBTab>
+        </div>
+        <div className={styles.formAccessibilityAudit} aria-label={messages.designerFormAuditPanel}>
+          <div className={styles.componentAuditHeader}>
+            <div className={styles.componentAuditIntro}>
+              <strong>{messages.designerFormAuditTitle}</strong>
+              <span>{messages.designerFormAuditHelp}</span>
+            </div>
+            <div className={styles.componentAuditHeaderActions}>
+              {formAuditResults ? (
+                <>
+                  <JBButton size="sm" variant="ghost" onClick={() => void copyFormAuditReport()}>
+                    {formAuditCopied ? messages.designerFormAuditCopied : messages.designerCopyFormAudit}
+                  </JBButton>
+                  <JBButton size="sm" variant="ghost" onClick={downloadFormAuditReport}>{messages.designerDownloadFormAudit}</JBButton>
+                </>
+              ) : null}
+              <JBButton size="sm" variant="outline" disabled={formAuditRunning} onClick={() => void runFormAccessibilityAudit()}>
+                {formAuditRunning ? messages.designerFormAuditRunning : messages.designerRunFormAudit}
+              </JBButton>
+            </div>
+          </div>
+          {formAuditResults ? (
+            <>
+              <p className={styles.formAuditSummary} role="status">
+                {message("designerFormAuditSummary", {
+                  components: formAuditResults.length,
+                  instances: formAuditInstanceCount,
+                  issues: formAuditIssueCount,
+                })}
+              </p>
+              {formAuditIssueCount === 0 ? <p className={styles.componentAuditPass}>{messages.designerFormAuditPassed}</p> : (
+                <div className={styles.formAuditResults}>
+                  {formAuditResults.filter(result => result.issues.length > 0).map(result => (
+                    <section key={result.tag}>
+                      <div className={styles.formAuditComponentHeader}>
+                        <div>
+                          <strong>{result.name}</strong>
+                          <code>{result.tag}</code>
+                        </div>
+                        <span>{message("designerFormAuditComponentIssues", { count: result.issues.length })}</span>
+                      </div>
+                      <ul>
+                        {result.issues.map((issue, index) => (
+                          <li key={`${result.tag}-${issue.state}-${issue.kind}-${index}`}>
+                            <div>
+                              <strong>{componentTokenStateLabels[issue.state]}</strong>
+                              <span>{issue.kind === "contrast"
+                                ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
+                                : messages.designerComponentAuditFocusIssue}</span>
+                              {issue.token ? <code>{issue.token}</code> : null}
+                            </div>
+                            <JBButton size="sm" variant="ghost" onClick={() => reviewFormAuditIssue(result, issue)}>{messages.designerComponentReviewIssue}</JBButton>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : null}
         </div>
         <div className={styles.componentEditor}>
           <JBSelect<string>
@@ -2019,7 +2412,11 @@ export function DesignerApp() {
             <JBOption value="">{messages.designerSelectComponent}</JBOption>
             {availableComponentTags.map(tag => {
               const entry = registryByType.get(tag);
-              return <JBOption key={tag} value={tag}>{entry ? getFormElementDisplayName(entry, locale) : tag}</JBOption>;
+              return (
+                <JBOption key={tag} value={tag}>
+                  {entry ? getFormElementDisplayName(entry, locale) : tag}
+                </JBOption>
+              );
             })}
           </JBSelect>
           {selectedComponentTag ? (
@@ -2059,12 +2456,14 @@ export function DesignerApp() {
                 <div>
                   <span>{messages.designerComponentContrastResult}</span>
                   <strong className={componentAccessibility?.level === "fail" ? styles.accessibilityFail : styles.accessibilityPass}>
-                    {componentAccessibility ? ({
-                      aaa: messages.designerComponentContrastAaa,
-                      aa: messages.designerComponentContrastAa,
-                      fail: messages.designerComponentContrastFail,
-                      unavailable: messages.designerComponentContrastUnavailable,
-                    })[componentAccessibility.level] : messages.designerResolvingValue}
+                    {componentAccessibility
+                      ? {
+                          aaa: messages.designerComponentContrastAaa,
+                          aa: messages.designerComponentContrastAa,
+                          fail: messages.designerComponentContrastFail,
+                          unavailable: messages.designerComponentContrastUnavailable,
+                        }[componentAccessibility.level]
+                      : messages.designerResolvingValue}
                   </strong>
                 </div>
                 <div>
@@ -2082,51 +2481,79 @@ export function DesignerApp() {
               </div>
               <div className={styles.componentAudit} aria-label={messages.designerComponentAuditPanel}>
                 <div className={styles.componentAuditHeader}>
-                  <div>
+                  <div className={styles.componentAuditIntro}>
                     <strong>{messages.designerComponentAuditTitle}</strong>
                     <span>{messages.designerComponentAuditHelp}</span>
                   </div>
-                  <JBButton size="sm" variant="outline" disabled={componentAuditRunning} onClick={() => void runComponentAccessibilityAudit()}>
-                    {componentAuditRunning ? messages.designerComponentAuditRunning : messages.designerComponentRunAudit}
-                  </JBButton>
+                  <div className={styles.componentAuditHeaderActions}>
+                    {componentAuditIssues ? (
+                      <>
+                        <JBButton size="sm" variant="ghost" onClick={() => void copyComponentAuditReport()}>
+                          {componentAuditCopied ? messages.designerComponentAuditCopied : messages.designerComponentCopyAudit}
+                        </JBButton>
+                        <JBButton size="sm" variant="ghost" onClick={downloadComponentAuditReport}>{messages.designerComponentDownloadAudit}</JBButton>
+                      </>
+                    ) : null}
+                    <JBButton size="sm" variant="outline" disabled={componentAuditRunning} onClick={() => void runComponentAccessibilityAudit()}>
+                      {componentAuditRunning ? messages.designerComponentAuditRunning : messages.designerComponentRunAudit}
+                    </JBButton>
+                  </div>
                 </div>
-                {componentAuditIssues ? componentAuditIssues.length === 0 ? (
-                  <p className={styles.componentAuditPass}>{messages.designerComponentAuditPassed}</p>
-                ) : (
-                  <ul>
-                    {componentAuditIssues.map((issue, index) => {
-                      const issueKey = `${issue.state}-${issue.kind}-${index}`;
-                      const isPreviewingFix = componentFixPreview?.issueKey === issueKey;
-                      return <li key={issueKey}>
-                        <div>
-                          <strong>{componentTokenStateLabels[issue.state]}</strong>
-                          <span>{issue.kind === "contrast"
-                            ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
-                            : messages.designerComponentAuditFocusIssue}</span>
-                          {issue.token ? <code>{issue.token}</code> : null}
-                          {isPreviewingFix ? (
-                            <span className={styles.componentFixPreviewStatus} role="status">
-                              <i style={{ backgroundColor: componentFixPreview.value }} />
-                              {message("designerComponentFixPreviewStatus", {
-                                value: componentFixPreview.value,
-                                ratio: componentFixPreview.ratio.toFixed(2),
-                              })}
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className={styles.componentAuditActions}>
-                          {issue.token ? <JBButton size="sm" variant="ghost" onClick={() => reviewComponentAuditIssue(issue)}>{messages.designerComponentReviewIssue}</JBButton> : null}
-                          {issue.suggestion && !isPreviewingFix ? <JBButton size="sm" variant="outline" onClick={() => previewComponentAuditFix(issue, issueKey)}>{messages.designerComponentPreviewFix}</JBButton> : null}
-                          {isPreviewingFix ? (
-                            <>
-                              <JBButton size="sm" variant="solid" onClick={applyComponentAuditFix}>{messages.designerComponentApplyFix}</JBButton>
-                              <JBButton size="sm" variant="ghost" onClick={() => setComponentFixPreview(undefined)}>{messages.designerComponentCancelFix}</JBButton>
-                            </>
-                          ) : null}
-                        </div>
-                      </li>
-                    })}
-                  </ul>
+                {componentAuditIssues ? (
+                  componentAuditIssues.length === 0 ? (
+                    <p className={styles.componentAuditPass}>{messages.designerComponentAuditPassed}</p>
+                  ) : (
+                    <ul>
+                      {componentAuditIssues.map((issue, index) => {
+                        const issueKey = `${issue.state}-${issue.kind}-${index}`;
+                        const isPreviewingFix = componentFixPreview?.issueKey === issueKey;
+                        return (
+                          <li key={issueKey}>
+                            <div>
+                              <strong>{componentTokenStateLabels[issue.state]}</strong>
+                              <span>
+                                {issue.kind === "contrast"
+                                  ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
+                                  : messages.designerComponentAuditFocusIssue}
+                              </span>
+                              {issue.token ? <code>{issue.token}</code> : null}
+                              {isPreviewingFix ? (
+                                <span className={styles.componentFixPreviewStatus} role="status">
+                                  <i style={{ backgroundColor: componentFixPreview.value }} />
+                                  {message("designerComponentFixPreviewStatus", {
+                                    value: componentFixPreview.value,
+                                    ratio: componentFixPreview.ratio.toFixed(2),
+                                  })}
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className={styles.componentAuditActions}>
+                              {issue.token ? (
+                                <JBButton size="sm" variant="ghost" onClick={() => reviewComponentAuditIssue(issue)}>
+                                  {messages.designerComponentReviewIssue}
+                                </JBButton>
+                              ) : null}
+                              {issue.suggestion && !isPreviewingFix ? (
+                                <JBButton size="sm" variant="outline" onClick={() => previewComponentAuditFix(issue, issueKey)}>
+                                  {messages.designerComponentPreviewFix}
+                                </JBButton>
+                              ) : null}
+                              {isPreviewingFix ? (
+                                <>
+                                  <JBButton size="sm" variant="solid" onClick={applyComponentAuditFix}>
+                                    {messages.designerComponentApplyFix}
+                                  </JBButton>
+                                  <JBButton size="sm" variant="ghost" onClick={() => setComponentFixPreview(undefined)}>
+                                    {messages.designerComponentCancelFix}
+                                  </JBButton>
+                                </>
+                              ) : null}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )
                 ) : null}
               </div>
               <div className={styles.componentTokenFilters}>
@@ -2190,11 +2617,15 @@ export function DesignerApp() {
                   <div className={styles.componentTokenEffectiveValue} aria-label={messages.designerComponentEffectiveValuePanel} role="status">
                     <div>
                       <span>{messages.designerComponentValueSource}</span>
-                      <strong>{effectiveComponentToken ? ({
-                        component: messages.designerComponentOverrideSource,
-                        global: messages.designerGlobalThemeSource,
-                        default: messages.designerJbDefaultSource,
-                      })[effectiveComponentToken.source] : messages.designerResolvingValue}</strong>
+                      <strong>
+                        {effectiveComponentToken
+                          ? {
+                              component: messages.designerComponentOverrideSource,
+                              global: messages.designerGlobalThemeSource,
+                              default: messages.designerJbDefaultSource,
+                            }[effectiveComponentToken.source]
+                          : messages.designerResolvingValue}
+                      </strong>
                     </div>
                     <div>
                       <span>{messages.designerComponentEffectiveValue}</span>
@@ -2256,7 +2687,11 @@ export function DesignerApp() {
                             if (value) commitComponentTokenValue(value);
                           }}
                         >
-                          {componentLengthUnits.map(unit => <JBOption value={unit} key={unit}>{unit}</JBOption>)}
+                          {componentLengthUnits.map(unit => (
+                            <JBOption value={unit} key={unit}>
+                              {unit}
+                            </JBOption>
+                          ))}
                         </JBSelect>
                       </div>
                     </div>
@@ -2319,7 +2754,11 @@ export function DesignerApp() {
                         }}
                       >
                         <JBOption value="">{messages.designerComponentCustomValue}</JBOption>
-                        {selectedComponentTokenOptions.map(value => <JBOption value={value} key={value}>{value}</JBOption>)}
+                        {selectedComponentTokenOptions.map(value => (
+                          <JBOption value={value} key={value}>
+                            {value}
+                          </JBOption>
+                        ))}
                       </JBSelect>
                     </div>
                   ) : null}
@@ -2343,18 +2782,17 @@ export function DesignerApp() {
                       commitComponentTokenDraft();
                     }}
                   />
-                  <JBButton
-                    size="sm"
-                    variant="outline"
-                    disabled={!componentTokenOverrides[selectedComponentToken]}
-                    onClick={useInheritedComponentTokenValue}
-                  >
+                  <JBButton size="sm" variant="outline" disabled={!componentTokenOverrides[selectedComponentToken]} onClick={useInheritedComponentTokenValue}>
                     {messages.designerUseInheritedValue}
                   </JBButton>
                 </div>
-              ) : <p className={styles.notice}>{messages.designerSelectTokenHelp}</p>}
+              ) : (
+                <p className={styles.notice}>{messages.designerSelectTokenHelp}</p>
+              )}
             </>
-          ) : <p className={styles.notice}>{messages.designerComponentsNotice}</p>}
+          ) : (
+            <p className={styles.notice}>{messages.designerComponentsNotice}</p>
+          )}
         </div>
       </div>
     );
@@ -2364,15 +2802,31 @@ export function DesignerApp() {
     return (
       <main className={styles.libraryPage} dir={direction}>
         <header className={styles.libraryHeader}>
-          <div><span className={styles.brandMark}>JB</span><h1>{messages.designerYourThemes}</h1></div>
+          <div>
+            <span className={styles.brandMark}>JB</span>
+            <h1>{messages.designerYourThemes}</h1>
+          </div>
           <div className={styles.libraryActions}>
-            <JBSelect<FormAppLocale> className={styles.languageSelect} size="sm" aria-label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
+            <JBSelect<FormAppLocale>
+              className={styles.languageSelect}
+              size="sm"
+              aria-label={messages.designerLanguage}
+              value={locale}
+              hideClear
+              onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}
+            >
               <JBOption value="en">EN</JBOption>
               <JBOption value="fa">FA</JBOption>
             </JBSelect>
-            <JBButton variant="outline" onClick={openCreate}>{messages.designerCreateTheme}</JBButton>
-            <JBButton variant="outline" onClick={openImport}>{messages.designerImportTheme}</JBButton>
-            <JBButton color="primary" onClick={() => setLibraryOpen(false)}>{messages.designerOpenDesigner}</JBButton>
+            <JBButton variant="outline" onClick={openCreate}>
+              {messages.designerCreateTheme}
+            </JBButton>
+            <JBButton variant="outline" onClick={openImport}>
+              {messages.designerImportTheme}
+            </JBButton>
+            <JBButton color="primary" onClick={() => setLibraryOpen(false)}>
+              {messages.designerOpenDesigner}
+            </JBButton>
           </div>
         </header>
         <p>{messages.designerLibraryDescription}</p>
@@ -2386,7 +2840,9 @@ export function DesignerApp() {
             <section className={styles.libraryGrid} aria-label={messages.designerDefaultTheme}>
               <article className={styles.libraryCard}>
                 <div className={`${styles.libraryCardOpen} ${styles.libraryCardStatic}`}>
-                  <div className={styles.builtInThemePreview} aria-hidden="true"><span>JB</span></div>
+                  <div className={styles.builtInThemePreview} aria-hidden="true">
+                    <span>JB</span>
+                  </div>
                   <strong>{messages.designerBuiltInDefault}</strong>
                   <span>{messages.designerBuiltInThemeDescription}</span>
                 </div>
@@ -2406,20 +2862,33 @@ export function DesignerApp() {
               {filteredLibraryThemes.map(record => (
                 <article key={record.id} className={styles.libraryCard}>
                   <button className={styles.libraryCardOpen} type="button" onClick={() => openThemeRecord(record)}>
-                    <img src={record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
-                      ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
-                      : PATTERN_ASSETS["academic-waves"]} alt="" />
+                    <img
+                      src={
+                        record.config.background?.type === "pattern" && record.config.background.patternId in PATTERN_ASSETS
+                          ? PATTERN_ASSETS[record.config.background.patternId as ThemePatternId]
+                          : PATTERN_ASSETS["academic-waves"]
+                      }
+                      alt=""
+                    />
                     <strong>{record.config.name}</strong>
-                    <span>{record.id === defaultThemeId ? messages.designerDefaultTheme : record.config.description ?? messages.designerReusableTheme}</span>
+                    <span>{record.id === defaultThemeId ? messages.designerDefaultTheme : (record.config.description ?? messages.designerReusableTheme)}</span>
                   </button>
                   <div className={styles.libraryCardActions}>
-                    <button type="button" onClick={() => openThemeRecord(record)}>{messages.designerEdit}</button>
-                    <button type="button" onClick={() => void duplicateTheme(record)}>{messages.designerDuplicate}</button>
-                    <button type="button" onClick={() => exportThemeRecord(record)}>{messages.designerExportTheme}</button>
+                    <button type="button" onClick={() => openThemeRecord(record)}>
+                      {messages.designerEdit}
+                    </button>
+                    <button type="button" onClick={() => void duplicateTheme(record)}>
+                      {messages.designerDuplicate}
+                    </button>
+                    <button type="button" onClick={() => exportThemeRecord(record)}>
+                      {messages.designerExportTheme}
+                    </button>
                     <button type="button" disabled={record.id === defaultThemeId} onClick={() => void setLibraryThemeAsDefault(record)}>
                       {record.id === defaultThemeId ? messages.designerDefault : messages.designerSetDefault}
                     </button>
-                    <button className={styles.deleteThemeAction} type="button" onClick={() => requestThemeDelete(record)}>{messages.designerDelete}</button>
+                    <button className={styles.deleteThemeAction} type="button" onClick={() => requestThemeDelete(record)}>
+                      {messages.designerDelete}
+                    </button>
                   </div>
                 </article>
               ))}
@@ -2442,27 +2911,78 @@ export function DesignerApp() {
         ) : null}
         {!hasThemeSearchResults ? <p className={styles.libraryEmpty}>{messages.designerNoThemeResults}</p> : null}
         {createOpen ? (
-          <div className={styles.modalBackdrop} onMouseDown={event => { if (!createBusy && event.target === event.currentTarget) setCreateOpen(false); }}>
-            <section className={`${styles.exportModal} ${styles.createModal}`} role="dialog" aria-modal="true" aria-labelledby="create-theme-title" onKeyDown={event => { if (!createBusy && event.key === "Escape") setCreateOpen(false); }}>
+          <div
+            className={styles.modalBackdrop}
+            onMouseDown={event => {
+              if (!createBusy && event.target === event.currentTarget) setCreateOpen(false);
+            }}
+          >
+            <section
+              className={`${styles.exportModal} ${styles.createModal}`}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="create-theme-title"
+              onKeyDown={event => {
+                if (!createBusy && event.key === "Escape") setCreateOpen(false);
+              }}
+            >
               <h2 id="create-theme-title">{messages.designerCreateTheme}</h2>
               <p>{messages.designerCreateDescription}</p>
               <JBSelect<string> label={messages.designerStartFrom} value={createSource} hideClear onChange={event => setCreateSource(valueFromEvent(event))}>
                 <JBOption value="blank">{messages.designerBlankTheme}</JBOption>
-                {THEME_PRESETS.map(presetItem => <JBOption key={presetItem.id} value={presetItem.id}>{presetItem.label}</JBOption>)}
+                {THEME_PRESETS.map(presetItem => (
+                  <JBOption key={presetItem.id} value={presetItem.id}>
+                    {presetItem.label}
+                  </JBOption>
+                ))}
               </JBSelect>
-              <JBInput label={messages.designerThemeName} value={createName} autoFocus onInput={event => { setCreateName(valueFromEvent(event)); setCreateError(""); }} />
-              <JBTextarea name="themeDescription" label={messages.designerThemeDescription} value={createDescription} onInput={event => setCreateDescription(valueFromEvent(event))} />
-              {createError ? <p className={styles.importError} role="alert">{createError}</p> : null}
+              <JBInput
+                label={messages.designerThemeName}
+                value={createName}
+                autoFocus
+                onInput={event => {
+                  setCreateName(valueFromEvent(event));
+                  setCreateError("");
+                }}
+              />
+              <JBTextarea
+                name="themeDescription"
+                label={messages.designerThemeDescription}
+                value={createDescription}
+                onInput={event => setCreateDescription(valueFromEvent(event))}
+              />
+              {createError ? (
+                <p className={styles.importError} role="alert">
+                  {createError}
+                </p>
+              ) : null}
               <div>
-                <JBButton variant="ghost" disabled={createBusy} onClick={() => setCreateOpen(false)}>{messages.designerCancel}</JBButton>
-                <JBButton color="primary" disabled={createBusy} onClick={() => void createTheme()}>{createBusy ? messages.designerCreating : messages.designerCreateTheme}</JBButton>
+                <JBButton variant="ghost" disabled={createBusy} onClick={() => setCreateOpen(false)}>
+                  {messages.designerCancel}
+                </JBButton>
+                <JBButton color="primary" disabled={createBusy} onClick={() => void createTheme()}>
+                  {createBusy ? messages.designerCreating : messages.designerCreateTheme}
+                </JBButton>
               </div>
             </section>
           </div>
         ) : null}
         {importOpen ? (
-          <div className={styles.modalBackdrop} onMouseDown={event => { if (event.target === event.currentTarget) setImportOpen(false); }}>
-            <section className={`${styles.exportModal} ${styles.importModal}`} role="dialog" aria-modal="true" aria-labelledby="import-theme-title" onKeyDown={event => { if (event.key === "Escape") setImportOpen(false); }}>
+          <div
+            className={styles.modalBackdrop}
+            onMouseDown={event => {
+              if (event.target === event.currentTarget) setImportOpen(false);
+            }}
+          >
+            <section
+              className={`${styles.exportModal} ${styles.importModal}`}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="import-theme-title"
+              onKeyDown={event => {
+                if (event.key === "Escape") setImportOpen(false);
+              }}
+            >
               <h2 id="import-theme-title">{messages.designerImportTheme}</h2>
               <p>{messages.designerImportDescription}</p>
               <JBTextarea
@@ -2482,7 +3002,9 @@ export function DesignerApp() {
                 }}
               />
               <div className={styles.importFileRow}>
-                <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>{messages.designerChooseThemeFile}</JBButton>
+                <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>
+                  {messages.designerChooseThemeFile}
+                </JBButton>
                 {importFileName ? <span>{importFileName}</span> : null}
                 <input
                   ref={importFileRef}
@@ -2496,53 +3018,107 @@ export function DesignerApp() {
                   }}
                 />
               </div>
-              {importFileError ? <p className={styles.importError} role="alert">{importFileError}</p> : null}
+              {importFileError ? (
+                <p className={styles.importError} role="alert">
+                  {importFileError}
+                </p>
+              ) : null}
               {importValidation?.valid ? (
                 <>
                   {importSupportedOnly && importValidation.omittedIssues.length > 0 ? (
                     <div className={styles.importConflict} role="status">
                       <strong>{messages.designerSupportedOnly}</strong>
                       <p>{messages.designerOmittedPaths}</p>
-                      <ul>{importValidation.omittedIssues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code></li>)}</ul>
+                      <ul>
+                        {importValidation.omittedIssues.slice(0, 8).map(issue => (
+                          <li key={`${issue.path}:${issue.message}`}>
+                            <code>{issue.path}</code>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   ) : null}
                   {importValidation.conflicts.name || importValidation.conflicts.slug ? (
                     <p className={styles.importConflict} role="status">
                       {messages.designerImportConflict}
                     </p>
-                  ) : <p className={styles.importValid} role="status">{messages.designerImportReady}</p>}
+                  ) : (
+                    <p className={styles.importValid} role="status">
+                      {messages.designerImportReady}
+                    </p>
+                  )}
                 </>
               ) : importValidation ? (
                 <div className={styles.importError} role="alert">
                   <strong>{messages.designerImportInvalid}</strong>
-                  <ul>{importValidation.issues.slice(0, 8).map(issue => <li key={`${issue.path}:${issue.message}`}><code>{issue.path}</code> {issue.message}</li>)}</ul>
+                  <ul>
+                    {importValidation.issues.slice(0, 8).map(issue => (
+                      <li key={`${issue.path}:${issue.message}`}>
+                        <code>{issue.path}</code> {issue.message}
+                      </li>
+                    ))}
+                  </ul>
                   {supportedImportValidation?.valid && supportedImportValidation.omittedIssues.length > 0 ? (
-                    <JBButton variant="outline" onClick={() => {
-                      setImportSupportedOnly(true);
-                      setImportWarningsConfirmed(false);
-                    }}>{messages.designerReviewSupported}</JBButton>
+                    <JBButton
+                      variant="outline"
+                      onClick={() => {
+                        setImportSupportedOnly(true);
+                        setImportWarningsConfirmed(false);
+                      }}
+                    >
+                      {messages.designerReviewSupported}
+                    </JBButton>
                   ) : null}
                 </div>
               ) : null}
               {importValidation?.valid && importValidation.warnings.length > 0 ? (
                 <label className={styles.importWarningConsent}>
                   <input type="checkbox" checked={importWarningsConfirmed} onChange={event => setImportWarningsConfirmed(event.currentTarget.checked)} />
-                  <span>{importValidation.warnings.join(" ")} {messages.designerImportAnyway}</span>
+                  <span>
+                    {importValidation.warnings.join(" ")} {messages.designerImportAnyway}
+                  </span>
                 </label>
               ) : null}
               <div className={styles.importActions}>
-                <JBButton variant="ghost" onClick={() => setImportOpen(false)}>{messages.designerCancel}</JBButton>
-                {importSupportedOnly ? <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>{messages.designerUseStrictImport}</JBButton> : null}
-                <JBButton color="primary" disabled={!importValidation?.valid || (importValidation.warnings.length > 0 && !importWarningsConfirmed)} onClick={() => void importTheme()}>
-                  {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug) ? messages.designerCreateCopy : importSupportedOnly ? messages.designerImportSupported : messages.designerImportTheme}
+                <JBButton variant="ghost" onClick={() => setImportOpen(false)}>
+                  {messages.designerCancel}
+                </JBButton>
+                {importSupportedOnly ? (
+                  <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>
+                    {messages.designerUseStrictImport}
+                  </JBButton>
+                ) : null}
+                <JBButton
+                  color="primary"
+                  disabled={!importValidation?.valid || (importValidation.warnings.length > 0 && !importWarningsConfirmed)}
+                  onClick={() => void importTheme()}
+                >
+                  {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug)
+                    ? messages.designerCreateCopy
+                    : importSupportedOnly
+                      ? messages.designerImportSupported
+                      : messages.designerImportTheme}
                 </JBButton>
               </div>
             </section>
           </div>
         ) : null}
         {pendingDelete ? (
-          <div className={styles.modalBackdrop} onMouseDown={event => { if (!deleteBusy && event.target === event.currentTarget) setPendingDelete(undefined); }}>
-            <section className={`${styles.exportModal} ${styles.deleteModal}`} role="dialog" aria-modal="true" aria-labelledby="delete-theme-title" onKeyDown={event => { if (!deleteBusy && event.key === "Escape") setPendingDelete(undefined); }}>
+          <div
+            className={styles.modalBackdrop}
+            onMouseDown={event => {
+              if (!deleteBusy && event.target === event.currentTarget) setPendingDelete(undefined);
+            }}
+          >
+            <section
+              className={`${styles.exportModal} ${styles.deleteModal}`}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-theme-title"
+              onKeyDown={event => {
+                if (!deleteBusy && event.key === "Escape") setPendingDelete(undefined);
+              }}
+            >
               <h2 id="delete-theme-title">{message("designerDeleteTitle", { name: pendingDelete.config.name })}</h2>
               <p>
                 {message("designerDeleteDescription", {
@@ -2550,20 +3126,23 @@ export function DesignerApp() {
                   count: Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length,
                 })}
               </p>
-              <JBSelect<string>
-                label={messages.designerReplacementTheme}
-                value={deleteReplacementId}
-                hideClear
-                onChange={event => setDeleteReplacementId(valueFromEvent(event))}
-              >
+              <JBSelect<string> label={messages.designerReplacementTheme} value={deleteReplacementId} hideClear onChange={event => setDeleteReplacementId(valueFromEvent(event))}>
                 <JBOption value="default">{messages.designerBuiltInDefault}</JBOption>
-                {libraryThemes.filter(record => record.id !== pendingDelete.id).map(record => (
-                  <JBOption key={record.id} value={record.id}>{record.config.name}</JBOption>
-                ))}
+                {libraryThemes
+                  .filter(record => record.id !== pendingDelete.id)
+                  .map(record => (
+                    <JBOption key={record.id} value={record.id}>
+                      {record.config.name}
+                    </JBOption>
+                  ))}
               </JBSelect>
               <div>
-                <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>{messages.designerCancel}</JBButton>
-                <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>{deleteBusy ? messages.designerDeleting : messages.designerReplaceDelete}</JBButton>
+                <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>
+                  {messages.designerCancel}
+                </JBButton>
+                <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>
+                  {deleteBusy ? messages.designerDeleting : messages.designerReplaceDelete}
+                </JBButton>
               </div>
             </section>
           </div>
@@ -2582,231 +3161,86 @@ export function DesignerApp() {
   ];
 
   return (
-    <div className={styles.designer} dir={direction} onClickCapture={handleDesignerNavigationCapture}>
-      <FormRouteHeader layout="editor" className={styles.header}>
-        <FormRouteBrand className={styles.headerBrand} href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
-        <div className={styles.themeIdentity}>
-          <button type="button" className={styles.backButton} onClick={() => void requestDesignerLeave(() => setLibraryOpen(true))}>
-            <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
-            <span>{messages.designerBackThemes}</span>
-          </button>
-          <span className={styles.headerDivider} />
-        {isEditingName ? (
-          <JBInput
-            className={styles.nameInput}
-            size="sm"
-            aria-label={messages.designerThemeName}
-            value={theme.name}
-            onInput={event => updateTheme(draft => { draft.name = valueFromEvent(event); })}
-            onBlur={() => setIsEditingName(false)}
-          />
-        ) : (
-          <button type="button" className={styles.themeName} onClick={() => setIsEditingName(true)}>
-            {theme.name}
-            <jb-icon-edit />
-          </button>
-        )}
-        <p className={`${styles.saveState} ${styles[`saveState_${saveStatus}`]}`} aria-live="polite">
-          <span aria-hidden="true" />
-          {saveStatus === "saving" ? messages.designerSaving : saveStatus === "invalid" ? messages.designerFinishEditing : saveStatus === "error" ? messages.designerSaveFailed : messages.designerSaved}
-        </p>
-        </div>
-        <div className={`${styles.headerActions} ${styles.desktopHeaderActions}`}>
-          <FormRouteLinkButton href={formPageHref("builder", formSlug)}>{messages.builder}</FormRouteLinkButton>
-          <FormRouteLinkButton href={formPageHref("preview", formSlug, themeRecord?.slug)} variant="outline">{messages.preview}</FormRouteLinkButton>
-          <JBSelect<FormAppLocale> className={styles.languageSelect} size="sm" aria-label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
-            <JBOption value="en">EN</JBOption>
-            <JBOption value="fa">FA</JBOption>
-          </JBSelect>
-          <JBButton size="sm" variant="ghost" disabled={!history.length} aria-label={messages.designerUndo} onClick={undo}>{messages.designerUndo}</JBButton>
-          <JBButton size="sm" variant="ghost" disabled={!future.length} aria-label={messages.designerRedo} onClick={redo}>{messages.designerRedo}</JBButton>
-          {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => void saveCurrentTheme()}>{messages.designerRetrySave}</JBButton> : null}
-          <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => void setCurrentAsDefault()}>
-            {themeRecord && defaultThemeId === themeRecord.id ? messages.designerDefault : messages.designerSetDefault}
-          </JBButton>
-          {formSlug ? (
-            <JBButton size="sm" variant="ghost" disabled={!themeRecord || boundThemeId === themeRecord.id} onClick={() => void bindCurrentForm()}>
-              {themeRecord && boundThemeId === themeRecord.id ? messages.designerUsedForForm : messages.designerUseForForm}
-            </JBButton>
-          ) : null}
-          <JBButton color="primary" onClick={() => { setExportCopied(false); setExportOpen(true); }}>{messages.designerExportTheme}</JBButton>
-        </div>
-        <div className={styles.mobileHeaderActions}>
-          <FormRouteLinkButton href={formPageHref("preview", formSlug, themeRecord?.slug)} variant="outline">{messages.preview}</FormRouteLinkButton>
-          <JBButton
-            size="sm"
-            variant="ghost"
-            aria-expanded={mobileActionsOpen}
-            aria-haspopup="dialog"
-            onClick={() => setMobileActionsOpen(open => !open)}
-          >
-            {messages.designerMore}
-          </JBButton>
-          {mobileActionsOpen ? (
-            <>
-              <button className={styles.mobileActionsBackdrop} type="button" aria-label={messages.designerCloseActions} onClick={() => setMobileActionsOpen(false)} />
-              <div className={styles.mobileActionsMenu} role="dialog" aria-label={messages.designerActions} onKeyDown={event => { if (event.key === "Escape") setMobileActionsOpen(false); }}>
-                <FormRouteLinkButton href={formPageHref("builder", formSlug)}>{messages.builder}</FormRouteLinkButton>
-                <JBSelect<FormAppLocale> size="sm" label={messages.designerLanguage} value={locale} hideClear onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}>
-                  <JBOption value="en">EN</JBOption>
-                  <JBOption value="fa">FA</JBOption>
-                </JBSelect>
-                <JBButton size="sm" variant="ghost" disabled={!history.length} onClick={() => { undo(); setMobileActionsOpen(false); }}>{messages.designerUndo}</JBButton>
-                <JBButton size="sm" variant="ghost" disabled={!future.length} onClick={() => { redo(); setMobileActionsOpen(false); }}>{messages.designerRedo}</JBButton>
-                {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => { setMobileActionsOpen(false); void saveCurrentTheme(); }}>{messages.designerRetrySave}</JBButton> : null}
-                <JBButton size="sm" variant="ghost" disabled={!themeRecord || defaultThemeId === themeRecord.id} onClick={() => { setMobileActionsOpen(false); void setCurrentAsDefault(); }}>
-                  {themeRecord && defaultThemeId === themeRecord.id ? messages.designerDefault : messages.designerSetDefault}
-                </JBButton>
-                {formSlug ? (
-                  <JBButton size="sm" variant="ghost" disabled={!themeRecord || boundThemeId === themeRecord.id} onClick={() => { setMobileActionsOpen(false); void bindCurrentForm(); }}>
-                    {themeRecord && boundThemeId === themeRecord.id ? messages.designerUsedForForm : messages.designerUseForForm}
-                  </JBButton>
-                ) : null}
-                <JBButton color="primary" onClick={() => { setMobileActionsOpen(false); setExportCopied(false); setExportOpen(true); }}>{messages.designerExportTheme}</JBButton>
-              </div>
-            </>
-          ) : null}
-        </div>
-      </FormRouteHeader>
+    <DesignerUiStoreProvider store={ui}>
+      <div className={styles.designer} dir={direction} onClickCapture={handleDesignerNavigationCapture}>
+      <DesignerHeader
+        direction={direction}
+        messages={messages}
+        locale={locale}
+        formSlug={formSlug}
+        themeSlug={themeRecord?.slug}
+        themeName={theme.name}
+        saveStatus={saveStatus}
+        canUndo={history.length > 0}
+        canRedo={future.length > 0}
+        canSetDefault={Boolean(themeRecord && defaultThemeId !== themeRecord.id)}
+        isDefault={Boolean(themeRecord && defaultThemeId === themeRecord.id)}
+        canBindForm={Boolean(themeRecord && boundThemeId !== themeRecord.id)}
+        isBoundToForm={Boolean(themeRecord && boundThemeId === themeRecord.id)}
+        onLocaleChange={setLocale}
+        onThemeNameChange={name => updateTheme(draft => { draft.name = name; })}
+        onOpenLibrary={() => void requestDesignerLeave(() => setLibraryOpen(true))}
+        onUndo={undo}
+        onRedo={redo}
+        onRetrySave={() => void saveCurrentTheme()}
+        onSetDefault={() => void setCurrentAsDefault()}
+        onBindForm={() => void bindCurrentForm()}
+      />
 
-      <nav className={styles.mobileTabs} aria-label={messages.designerMobilePanels}>
-        <JBTab value={mobilePanel} onChange={(event: JBTabChangeEvent) => setMobilePanel(event.detail.value as MobilePanel)}>
-          <JBTabList size="sm" aria-label={messages.designerMobilePanels}>
-            <JBTabTrigger value="design" color="primary">{messages.designerDesign}</JBTabTrigger>
-            <JBTabTrigger value="preview" color="primary">{messages.designerPreview}</JBTabTrigger>
-          </JBTabList>
-        </JBTab>
-      </nav>
+      <DesignerMobileTabs messages={messages} />
 
-      <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={mobilePanel}>
+      <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={ui.mobilePanel}>
         <aside className={`${layoutStyles.panel} ${styles.settingsPanel}`}>
-          <section className={styles.presets}>
-            <h2>{messages.designerPresets}</h2>
-            <div className={styles.presetRow}>
-              {THEME_PRESETS.slice(0, 4).map(presetItem => (
-                <button
-                  key={presetItem.id}
-                  type="button"
-                  className={activePreset === presetItem.id ? styles.presetSelected : styles.presetButton}
-                  onClick={() => commitTheme(presetItem.config, presetItem.id)}
-                >
-                  <span><img src={presetItem.thumbnail} alt="" /></span>
-                  <small>{presetItem.label}</small>
-                </button>
-              ))}
-            </div>
-          </section>
+          <ThemePresetPanel activePreset={activePreset} messages={messages} onSelect={commitTheme} />
 
           <div className={styles.sections}>
             {sections.map(section => (
-              <JBCollapse
-                key={section.id}
-                title={section.label}
-                defaultOpen={section.id === "background"}
-              >
+              <JBCollapse key={section.id} title={section.label} defaultOpen={section.id === "background"}>
                 {renderSectionContent(section.id)}
               </JBCollapse>
             ))}
           </div>
-          <div className={styles.autosaveNote}>
-            {messages.designerAutosave}
-          </div>
+          <div className={styles.autosaveNote}>{messages.designerAutosave}</div>
         </aside>
 
-        <section className={`${layoutStyles.panel} ${styles.previewPanel}`}>
-          <header className={styles.previewToolbar}>
-            <div className={styles.previewPicker}>
-              <span>{messages.designerPreviewing}</span>
-              <JBSelect<string>
-                size="sm"
-                popoverPosition="fixed"
-                value={previewSource}
-                hideClear
-                onChange={event => setPreviewSource(valueFromEvent(event))}
-              >
-                <JBOption value="sample">{messages.designerSampleForm}</JBOption>
-                {canUseStoredForm ? (
-                  <JBOption value="stored">
-                    {getLocalizedText(
-                      storedForm.document.metadata.name,
-                      storedForm.document.localization.defaultLocale,
-                      storedForm.document.localization.defaultLocale,
-                    )}
-                  </JBOption>
-                ) : null}
-              </JBSelect>
-            </div>
-            <div className={styles.previewTools}>
-              <JBTab
-                className={styles.previewViewportTabs}
-                value={viewport}
-                onChange={(event: JBTabChangeEvent) => setViewport(event.detail.value as PreviewViewport)}
-              >
-                <JBTabList size="sm" aria-label={messages.designerPreviewWidth}>
-                  <JBTabTrigger value="desktop" color="primary">{messages.designerDesktop}</JBTabTrigger>
-                  <JBTabTrigger value="tablet" color="primary">{messages.designerTablet}</JBTabTrigger>
-                  <JBTabTrigger value="mobile" color="primary">{messages.designerMobile}</JBTabTrigger>
-                </JBTabList>
-              </JBTab>
-              <JBButton size="sm" variant="ghost" onClick={() => rendererRef.current?.reset()}>
-                <jb-icon-refresh /> {messages.designerReset}
-              </JBButton>
-            </div>
-          </header>
-
-          <div className={styles.previewStage} style={previewThemeStyle}>
-            <div className={styles.previewBackdrop} style={backdropStyle} />
-            <div className={viewport === "mobile" ? styles.previewMobile : viewport === "tablet" ? styles.previewTablet : styles.previewDesktop}>
-              <div className={styles.formPreview} dir={previewDirection}>
-                <img className={styles.emblem} src="/form/theme-patterns/science-club-emblem.png" alt="" />
-                <h1>{previewName}</h1>
-                {previewDescription ? <p>{previewDescription}</p> : null}
-                <div className={styles.rendererWrap}>
-                  <JBFormBuilder
-                    ref={rendererRef}
-                    formDocument={previewDocument}
-                    themeConfig={rendererTheme}
-                    locale={previewLocale}
-                    aria-label={`${previewName} ${messages.designerPreview}`}
-                    loadDependencies={loadDependencies}
-                  />
-                </div>
-                <small className={styles.privacyNote}>{messages.designerPrivacy}</small>
-              </div>
-            </div>
-          </div>
-        </section>
+        <DesignerPreviewPanel
+          rendererRef={rendererRef}
+          storedFormName={canUseStoredForm ? getLocalizedText(storedForm.document.metadata.name, storedForm.document.localization.defaultLocale, storedForm.document.localization.defaultLocale) : undefined}
+          previewThemeStyle={previewThemeStyle}
+          backdropStyle={backdropStyle}
+          previewDirection={previewDirection}
+          previewName={previewName}
+          previewDescription={previewDescription || undefined}
+          previewDocument={previewDocument}
+          rendererTheme={rendererTheme}
+          previewLocale={previewLocale}
+          messages={messages}
+        />
       </main>
 
-      {exportOpen ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => {
-          if (event.target === event.currentTarget) setExportOpen(false);
-        }}>
-          <section className={styles.exportModal} role="dialog" aria-modal="true" aria-labelledby="export-title">
-            <h2 id="export-title">{messages.designerExportTheme}: {theme.name}</h2>
-            <p>{messages.designerExportDescription}</p>
-            <pre tabIndex={0}>{exportedJson}</pre>
-            <div>
-              <JBButton variant="ghost" onClick={() => setExportOpen(false)}>{messages.designerClose}</JBButton>
-              <JBButton color="primary" onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(exportedJson);
-                  setExportCopied(true);
-                } catch {
-                  downloadThemeJson(exportedJson, themeSlug(theme.name));
-                }
-              }}>{exportCopied ? messages.designerCopied : messages.designerCopyJson}</JBButton>
-            </div>
-          </section>
-        </div>
-      ) : null}
+      <ExportThemeDialog
+        themeName={theme.name}
+        json={exportedJson}
+        messages={messages}
+        onClipboardUnavailable={() => downloadThemeJson(exportedJson, themeSlug(theme.name))}
+      />
       {advancedColorsOpen ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => {
-          if (event.target === event.currentTarget) setAdvancedColorsOpen(false);
-        }}>
-          <section className={`${styles.exportModal} ${styles.advancedColorsModal}`} role="dialog" aria-modal="true" aria-labelledby="advanced-colors-title" onKeyDown={event => {
-            if (event.key === "Escape") setAdvancedColorsOpen(false);
-          }}>
+        <div
+          className={styles.modalBackdrop}
+          role="presentation"
+          onMouseDown={event => {
+            if (event.target === event.currentTarget) setAdvancedColorsOpen(false);
+          }}
+        >
+          <section
+            className={`${styles.exportModal} ${styles.advancedColorsModal}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="advanced-colors-title"
+            onKeyDown={event => {
+              if (event.key === "Escape") setAdvancedColorsOpen(false);
+            }}
+          >
             <header>
               <div>
                 <h2 id="advanced-colors-title">{messages.designerAdvancedColors}</h2>
@@ -2818,9 +3252,7 @@ export function DesignerApp() {
             </header>
             <div className={styles.advancedColorGroups}>
               {advancedColorGroups.map(group => {
-                const baseValue = group.baseToken
-                  ? advancedColorDraft[group.baseToken] ?? cssVariableDefaults[group.baseToken] ?? ""
-                  : undefined;
+                const baseValue = group.baseToken ? (advancedColorDraft[group.baseToken] ?? cssVariableDefaults[group.baseToken] ?? "") : undefined;
                 const variantsLinked = group.baseToken ? linkedColorGroups[group.baseToken] : false;
                 const derivedTokens = group.baseToken ? group.tokens.filter(token => token !== group.baseToken) : group.tokens;
                 return (
@@ -2881,23 +3313,29 @@ export function DesignerApp() {
             <footer>
               <span>{messages.designerAdvancedChangesApplyOnSave}</span>
               <div>
-                <JBButton variant="ghost" onClick={() => setAdvancedColorsOpen(false)}>{messages.designerCancel}</JBButton>
-                <JBButton color="primary" onClick={saveAdvancedColors}>{messages.designerApplyColors}</JBButton>
+                <JBButton variant="ghost" onClick={() => setAdvancedColorsOpen(false)}>
+                  {messages.designerCancel}
+                </JBButton>
+                <JBButton color="primary" onClick={saveAdvancedColors}>
+                  {messages.designerApplyColors}
+                </JBButton>
               </div>
             </footer>
           </section>
         </div>
       ) : null}
       {advancedSizesOpen ? (
-        <Suspense fallback={(
-          <div className={styles.modalBackdrop} role="presentation">
-            <section className={`${styles.exportModal} ${styles.modalLoading}`} role="dialog" aria-modal="true" aria-label={messages.designerLoadingAdvancedSizes}>
-              <progress className={styles.modalLoadingProgress} aria-label={messages.designerLoadingAdvancedSizes} />
-              <strong>{messages.designerLoadingAdvancedSizes}</strong>
-              <p>{messages.designerLoadingAdvancedSizesHelp}</p>
-            </section>
-          </div>
-        )}>
+        <Suspense
+          fallback={
+            <div className={styles.modalBackdrop} role="presentation">
+              <section className={`${styles.exportModal} ${styles.modalLoading}`} role="dialog" aria-modal="true" aria-label={messages.designerLoadingAdvancedSizes}>
+                <progress className={styles.modalLoadingProgress} aria-label={messages.designerLoadingAdvancedSizes} />
+                <strong>{messages.designerLoadingAdvancedSizes}</strong>
+                <p>{messages.designerLoadingAdvancedSizesHelp}</p>
+              </section>
+            </div>
+          }
+        >
           <AdvancedSizesModal
             values={theme.global}
             defaults={cssVariableDefaults}
@@ -2905,12 +3343,15 @@ export function DesignerApp() {
             onLinkChange={(token, linked) => setLinkedSizeGroups(current => ({ ...current, [token]: linked }))}
             onClose={() => setAdvancedSizesOpen(false)}
             onApply={values => {
-              updateTheme(draft => { draft.global = { ...values }; });
+              updateTheme(draft => {
+                draft.global = { ...values };
+              });
               setAdvancedSizesOpen(false);
             }}
           />
         </Suspense>
       ) : null}
-    </div>
+      </div>
+    </DesignerUiStoreProvider>
   );
-}
+});

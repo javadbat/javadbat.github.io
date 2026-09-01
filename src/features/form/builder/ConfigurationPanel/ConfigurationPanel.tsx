@@ -31,6 +31,7 @@ const advancedPropertyKeys = new Set([
   "hideClear",
   "autoHeight",
   "optionalUnits",
+  "maxSize",
   "maxFileSize",
   "separator",
 ]);

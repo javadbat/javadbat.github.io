@@ -149,9 +149,7 @@ If the JB icon set lacks an appropriate icon, design a repository-owned catalog 
 - IndexedDB writes occur only when the user explicitly presses Save or Save As.
 - Named forms change only through explicit Save or Save As.
 - Every record includes ID, name, slug where applicable, document schema version, builder version, timestamps, and form JSON.
-- Builder requires a successful explicit Save before navigating changed work to Designer or Preview.
-- Changed linked named forms require explicit Save before Designer or Preview navigation and then use the slug route.
-- A destination route must not render stale JSON after a failed Save.
+- Builder navigation remains available when explicit Save fails; Designer and Preview load the latest successfully stored snapshot.
 - Slug resolution, indexes, migration, retention, and recovery are defined before implementation.
 
 ### Export
@@ -254,7 +252,7 @@ Phase 2 completes respondent and operational Form Builder workflows. Phase 3 sel
 - Catalog and element lists use proper icons.
 - Local component state uses React; shared Builder state uses MobX.
 - A local `<jb-form-builder>` is used during implementation; the final delivery publishes and integrates the JB Design System package.
-- Changed linked forms must be explicitly saved before Designer or Preview navigation.
+- Changed linked forms may navigate without saving; destinations load the latest stored snapshot.
 - The interaction defaults in `PRODUCT-FLOW.md` are approved.
 - Current drafts and named forms persist only through explicit Save or Save As.
 - Phase 2 prioritizes respondent workflow, uploads, publishing/response foundations, and form-lifecycle refinements. Theme Designer implementation follows as Phase 3.

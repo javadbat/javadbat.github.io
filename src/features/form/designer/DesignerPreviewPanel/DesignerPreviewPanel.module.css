@@ -1,0 +1,207 @@
+.previewPanel {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 5.35rem minmax(0, 1fr);
+  overflow: hidden;
+  background: #fff;
+}
+
+.previewToolbar {
+  min-width: 0;
+  padding: 0.85rem 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border-bottom: 0.0625rem solid var(--designer-line);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.previewPicker,
+.previewTools {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.previewPicker > span {
+  color: #586383;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.previewPicker jb-select {
+  width: 17.5rem;
+}
+
+.previewViewportTabs {
+  width: 20rem;
+  display: block;
+  --jb-tab-list-background: #fbfcff;
+}
+
+.previewViewportTabs :global(jb-tab-list) {
+  display: block;
+  width: 100%;
+}
+
+.previewViewportTabs :global(jb-tab-list)::part(list) {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 0.0625rem solid var(--designer-line);
+  corner-shape: squircle;
+}
+
+.previewStage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  isolation: isolate;
+  color: var(--jb-text-primary, #101b48);
+  background: #fff9f9;
+}
+
+.previewBackdrop {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.previewDesktop,
+.previewTablet,
+.previewMobile {
+  width: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 6.25rem clamp(1.5rem, 5vw, 5rem) 4rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.previewTablet {
+  width: 768px;
+  min-height: calc(100% - 2rem);
+  margin-top: 1rem;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0.8rem 2.4rem rgba(26, 39, 88, 0.15);
+}
+
+.previewMobile {
+  width: min(25rem, calc(100% - 2rem));
+  min-height: calc(100% - 2rem);
+  margin-top: 1rem;
+  border-radius: 1.4rem 1.4rem 0 0;
+  padding: 3rem 1.2rem;
+  background: rgba(255, 255,255, 0.72);
+  box-shadow: 0 0.8rem 2.4rem rgba(26, 39, 88, 0.15);
+}
+
+.formPreview {
+  width: min(100%, 31.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  color: inherit;
+  font-size: calc(1rem * var(--designer-text-scale, 1));
+}
+
+.emblem {
+  width: 5.2rem;
+  height: 5.2rem;
+  margin: 0 auto 1.25rem;
+  display: block;
+  object-fit: contain;
+}
+
+.formPreview h1 {
+  margin: 0;
+  color: inherit;
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.formPreview > p {
+  max-width: 29rem;
+  margin: 0.8rem auto 2.45rem;
+  color: color-mix(in srgb, currentColor 68%, white);
+  font-size: 0.96rem;
+  line-height: 1.65;
+  text-align: center;
+}
+
+.rendererWrap { width: 100%; }
+
+.rendererWrap jb-form-builder {
+  --jb-form-builder-ink: var(--jb-text-primary, #101b48);
+  --jb-form-builder-surface: transparent;
+  --jb-form-builder-line: #ced5e5;
+}
+
+.privacyNote {
+  margin-top: calc(1.45rem * var(--designer-spacing-scale, 1));
+  color: color-mix(in srgb, currentColor 54%, white);
+  font-size: 0.72rem;
+  font-weight: 550;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 75rem) {
+  .previewToolbar { padding-inline: 1rem; }
+  .previewPicker > span { display: none; }
+  .previewPicker jb-select { width: 14rem; }
+  .previewViewportTabs { width: 16.5rem; }
+}
+
+@media (max-width: 64rem) {
+  .previewPanel {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .previewToolbar { min-height: 4.6rem; }
+}
+
+@media (max-width: 40rem) {
+  .previewToolbar,
+  .previewTools { flex-wrap: wrap; }
+
+  .previewToolbar { gap: 0.65rem; }
+
+  .previewPicker,
+  .previewPicker jb-select,
+  .previewTools { width: 100%; }
+
+  .previewViewportTabs { display: none; }
+
+  .previewDesktop,
+  .previewTablet,
+  .previewMobile {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    border-radius: 0;
+    padding: 2.4rem 1rem;
+    box-shadow: none;
+  }
+
+  .emblem { width: 4.2rem; height: 4.2rem; }
+  .formPreview h1 { font-size: 1.65rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewDesktop,
+  .previewTablet,
+  .previewMobile { transition: none; }
+}

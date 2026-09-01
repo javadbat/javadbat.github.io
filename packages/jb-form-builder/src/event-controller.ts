@@ -1,4 +1,5 @@
 import type { FormValues, JBFormBuilderElement, JBFormBuilderEventMap, RendererValueDetail, RuntimeJBForm } from "./types";
+import type { RuntimeFormElement } from "./registry/form-element-adapter";
 
 export function dispatchRendererEvent<Name extends keyof JBFormBuilderEventMap>(
   host: JBFormBuilderElement,
@@ -69,6 +70,14 @@ export class FormEventController {
       }
       return;
     }
+    if (name === "change") {
+      const fileInput = sourceEvent.target instanceof HTMLElement
+        ? sourceEvent.target.closest<RuntimeFormElement>("jb-file-input, jb-image-input")
+        : null;
+      if (fileInput) {
+        this.#handleFileUpload(fileInput);
+      }
+    }
     // Stop the internal event at the Shadow boundary, then publish one stable,
     // composed host event whose target is always jb-form-builder.
     sourceEvent.stopPropagation();
@@ -81,6 +90,54 @@ export class FormEventController {
       sourceEvent.preventDefault();
     }
   }
+
+  #handleFileUpload(elementDom: RuntimeFormElement): void {
+    const file = (elementDom as RuntimeFormElement & { value?: unknown }).value;
+    if (typeof File === "undefined" || !(file instanceof File)) return;
+    const endpoint = elementDom.getAttribute("upload-endpoint")?.trim() ?? "";
+    const accepted = dispatchRendererEvent(this.#host, "file-upload", {
+      elementDom,
+      elementName: elementDom.getAttribute("name") ?? "",
+      endpoint,
+      fieldName: "file",
+    }, true);
+    if (accepted && isUploadEndpoint(endpoint)) {
+      void uploadFile(elementDom, file, endpoint, "file");
+    }
+  }
+}
+
+function isUploadEndpoint(value: string): boolean {
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function uploadFile(elementDom: RuntimeFormElement, file: File, endpoint: string, fieldName: string): Promise<void> {
+  return new Promise(resolve => {
+    const uploader = elementDom as RuntimeFormElement & { uploadPercent?: number | null };
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append(fieldName, file);
+    elementDom.setAttribute("uploading", "");
+    xhr.upload.addEventListener("progress", event => {
+      if (event.lengthComputable) uploader.uploadPercent = (event.loaded / event.total) * 100;
+    });
+    const finish = () => {
+      elementDom.removeAttribute("uploading");
+      uploader.uploadPercent = null;
+      resolve();
+    };
+    xhr.addEventListener("loadend", finish, { once: true });
+    try {
+      xhr.open("POST", endpoint);
+      xhr.send(formData);
+    } catch {
+      finish();
+    }
+  });
 }
 
 function moveWithinTab(button: HTMLElement, offset: 1 | -1): void {
