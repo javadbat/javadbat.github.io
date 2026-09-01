@@ -1,7 +1,7 @@
 # JB Design System changes required by `jb-form-builder`
 
-Status: local integration renderer implemented; design-system publication work remains  
-Local baseline: `jb-core@0.33.0`, `jb-form@0.12.0`, and the form-package versions installed by this repository
+Status: latest API integration implemented; SSR entry-point work remains upstream
+Local baseline: `jb-core@0.36.0`, `jb-form@0.12.0`, and the latest form-package versions installed by this repository
 
 ## Purpose
 
@@ -31,7 +31,7 @@ These requirements are browser-facing and remain mandatory even though the route
 
 ### Deferred — SSR/platform compatibility (do later)
 
-- Make every JB package importable when browser globals are absent (Deferred SSR requirement 1 below).
+- Make every published JB package importable when browser globals are absent (SSR requirement 1 below).
 - Add scoped locale providers for simultaneously rendered locale scopes (Deferred SSR requirement 2 below). DOM-free construction and explicit subscriptions shipped in `jb-core@0.33.0`.
 
 The deferred work must preserve the existing browser auto-registration behavior and the portable form JSON contract. It is not a Phase 1 blocker, but it becomes required before this renderer is imported or evaluated in an SSR process.

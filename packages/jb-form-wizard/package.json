@@ -6,7 +6,10 @@
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "jb-button": "^4.2.0",
     "jb-icons": "^2.3.0"
@@ -27,5 +30,10 @@
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
-  "keywords": ["web-component", "form", "wizard", "multi-step"]
+  "keywords": [
+    "web-component",
+    "form",
+    "wizard",
+    "multi-step"
+  ]
 }

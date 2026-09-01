@@ -50,8 +50,13 @@ function renderRuntimeElement(wrapper: HTMLElement, element: JBFormElementV1, ad
   const runtimeElement = document.createElement(runtimeTagName) as RuntimeFormElement;
   runtimeElement.id = element.id;
   runtimeElement.dataset.formElementId = element.id;
-  adapter.applyToRuntime(runtimeElement, element, locale, defaultLocale);
   wrapper.append(runtimeElement);
+  const applyConfiguration = () => adapter.applyToRuntime(runtimeElement, element, locale, defaultLocale);
+  // jb-file-input observes attributes before its connected callback has built
+  // its internal DOM. Configure it after the detached form is committed so
+  // its public API is used at the same lifecycle point as in a browser app.
+  if (element.type === "jb-file-input") queueMicrotask(applyConfiguration);
+  else applyConfiguration();
 }
 
 function setTabPanelEnabled(panel: HTMLElement, enabled: boolean): void {

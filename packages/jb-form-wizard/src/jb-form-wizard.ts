@@ -9,12 +9,14 @@ import "jb-icons/arrow";
 
 export const JB_FORM_WIZARD_TAG_NAME = "jb-form-wizard" as const;
 
+const HTMLElementBase = globalThis.HTMLElement ?? class {};
+
 type ValidatableElement = HTMLElement & {
   disabled?: boolean;
   reportValidity?: () => boolean;
 };
 
-export class JBFormWizardWebComponent extends HTMLElement {
+export class JBFormWizardWebComponent extends HTMLElementBase {
   #activeStep = 0;
   #observer: MutationObserver;
   #heading: HTMLElement;

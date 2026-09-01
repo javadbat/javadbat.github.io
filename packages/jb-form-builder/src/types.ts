@@ -105,6 +105,12 @@ export interface JBFormBuilderElement extends HTMLElement {
   retryRender(): Promise<void>;
 }
 
+declare global {
+  interface HTMLElementTagNameMap {
+    "jb-form-builder": JBFormBuilderElement;
+  }
+}
+
 export interface JBFormBuilderEventMap {
   ready: CustomEvent<RendererReadyDetail>;
   "document-invalid": CustomEvent<RendererIssuesDetail>;
@@ -116,10 +122,4 @@ export interface JBFormBuilderEventMap {
   "file-upload": CustomEvent<FileUploadDetail>;
   reset: CustomEvent<{ value: FormValues }>;
   submit: CustomEvent<RendererValueDetail>;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "jb-form-builder": JBFormBuilderElement;
-  }
 }

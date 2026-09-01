@@ -1,7 +1,7 @@
 # JB Form — Operational Plan
 
-Status: Theme Designer implementation active; backend-dependent Form Builder steps remain deferred
-Reviewed: 2026-08-30
+Status: Theme Designer implementation active; SSR/API migration is now part of the active Form Builder handoff
+Reviewed: 2026-09-02
 Owner: Form Builder product owner
 
 This is the execution checklist. Work is handled in order, one active step at a time. Completed implementation detail belongs in the supporting documents; it is not repeated here as open work.
@@ -93,9 +93,13 @@ Status: NOT STARTED
 
 ## Step 7 — platform hardening when required
 
-Status: DEFERRED UNTIL REQUIRED
+Status: IN PROGRESS — local package and renderer work complete; upstream entry-point fixes pending
 
-- Add SSR-safe package imports and scoped i18n only when server rendering or simultaneous locale trees become product requirements.
+- Treat the latest JB package APIs as the renderer baseline: `jb-core@0.36.0`, `jb-input@3.19.0`, `jb-file-input@3.4.0`, `jb-loading@2.0.0`, `jb-notification@1.0.0`, and the latest catalog versions in `package.json`.
+- Keep browser-only component configuration after connection when a package observes attributes before its internal DOM is initialized. This is required by the latest `jb-file-input` API and keeps detached form assembly safe.
+- Require every local JB package entry (`jb-collapse`, `jb-condition`, `jb-form-wizard`, and `jb-form-builder`) to import without browser globals.
+- Run a direct Node import audit for every published package entry. `jb-form` and `jb-color-input` still require upstream SSR-safe entry-point changes; track those as design-system requests instead of adding application shims.
+- Re-run the browser support matrix after the upstream SSR entries land, then close this step with the published package handoff.
 
 ## Design work
 

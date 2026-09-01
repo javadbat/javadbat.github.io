@@ -674,7 +674,10 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       placeholder: false,
     },
     "string",
-    { acceptTypes: "" },
+    // jb-file-input applies this MIME allow-list when acceptTypes is empty;
+    // keep the effective latest-package default in the portable document so
+    // Preview and exported plans describe the actual runtime API.
+    { acceptTypes: "application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*" },
     [
       textProperty("message", "Helper message", "پیام راهنما", true),
       textProperty("acceptTypes", "Accepted file types", "نوع فایل‌های مجاز"),

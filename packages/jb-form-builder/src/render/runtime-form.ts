@@ -4,7 +4,12 @@ import type { RuntimeJBForm } from "../types";
 import type { RendererShell, RuntimeFormRender } from "./types";
 
 export function buildRuntimeForm(documentValue: JBFormDocumentV1, locale: string, unavailableTypes: ReadonlySet<string>, options: { completionDisplay?: string } = {}): RuntimeFormRender {
-  const form = document.createElement("jb-form") as RuntimeJBForm;
+  // npm can retain a nested jb-form copy when this package is built via its
+  // own prefix. jb-form's async result contains private class members, so
+  // TypeScript considers the two otherwise identical declarations nominally
+  // different. The DOM tag is the runtime contract; bridge that boundary
+  // explicitly instead of allowing the duplicate private types to leak.
+  const form = document.createElement("jb-form") as unknown as RuntimeJBForm;
   form.setAttribute("part", "form");
   // ElementInternals supplies the role in supporting browsers. Keep an
   // attribute fallback so the generated form retains semantics everywhere.

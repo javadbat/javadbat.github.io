@@ -14,4 +14,10 @@ describe("jb-form-builder server import boundary", () => {
     await expect(import("./index")).resolves.toBeDefined();
     await expect(import("./react")).resolves.toBeDefined();
   });
+
+  it("keeps the local structural JB packages importable without a DOM", async () => {
+    await expect(import("jb-collapse")).resolves.toBeDefined();
+    await expect(import("jb-condition")).resolves.toBeDefined();
+    await expect(import("jb-form-wizard")).resolves.toBeDefined();
+  });
 });

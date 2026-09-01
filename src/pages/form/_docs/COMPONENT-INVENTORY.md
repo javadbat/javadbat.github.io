@@ -11,7 +11,7 @@ Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`]
 - [Form Elements overview](https://github.com/javadbat/design-system/blob/835fddf109e39c33ee7aecd0af6e4a0b4832ebda/docs/form-element.mdx)
 - Each component's pinned source submodule, package manifest, React wrapper, README, stories, and current npm release.
 
-The baseline package versions matched npm on 2026-07-28. The newer `jb-time-input@2.4.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.3` releases were audited through 2026-08-04. The `jb-switch` source reference has since been updated and is no longer a reproducibility blocker.
+The package versions were refreshed against npm on 2026-09-02. This inventory now follows the latest ranges in the repository manifests and records the current SSR/import audit separately from browser rendering coverage.
 
 ## Scope rule
 
@@ -61,25 +61,25 @@ The remaining catalog entries are JB controls, an action, and structural contain
 
 | Category | Component | Package/version | Value | Form contract | React |
 | --- | --- | --- | --- | --- | --- |
-| Text | Input | `jb-input@3.17.0` | `string` | Verified | Yes |
-| Number | Number Input | `jb-number-input@1.6.0` | Numeric string | Inherited from `jb-input` | Yes |
-| Choice | Range Input | `jb-range-input@0.4.0` | Number or two-number tuple | Verified | Yes |
-| Text | Mobile Input | `jb-mobile-input@2.4.0` | Normalized mobile string | Inherited from `jb-input` | Yes |
-| Text | Password Input | `jb-password-input@2.2.0` | `string` | Inherited from `jb-input` | Yes |
-| Financial | Payment Input | `jb-payment-input@3.5.0` | Card/SHABA string | Inherited from `jb-input` | Yes |
-| Identity | National ID Input | `jb-national-input@2.4.0` | National-code string | Inherited from `jb-input` | Yes |
-| Date/time | Date Input | `jb-date-input@6.3.0` | `string`, `Date`, or timestamp-facing configuration | Verified | Yes |
-| Date/time | Time Input | `jb-time-input@2.4.0` | Time string | Verified | Yes |
-| Text | PIN Input | `jb-pin-input@1.14.0` | `string` | Verified | Yes |
-| Text | Textarea | `jb-textarea@3.13.1` | `string` | Verified | Yes |
-| Choice | Select | `jb-select@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
-| Choice | Listbox | `jb-select/listbox@8.0.0` | Generic value or array in multiple mode | Verified | Yes |
+| Text | Input | `jb-input@3.19.0` | `string` | Verified against latest API | Yes |
+| Number | Number Input | `jb-number-input@1.8.0` | Numeric string | Inherited from `jb-input` | Yes |
+| Choice | Range Input | `jb-range-input@0.6.0` | Number or two-number tuple | Verified | Yes |
+| Text | Mobile Input | `jb-mobile-input@2.5.0` | Normalized mobile string | Inherited from `jb-input` | Yes |
+| Text | Password Input | `jb-password-input@2.4.0` | `string` | Inherited from `jb-input` | Yes |
+| Financial | Payment Input | `jb-payment-input@3.6.0` | Card/SHABA string | Inherited from `jb-input` | Yes |
+| Identity | National ID Input | `jb-national-input@2.5.0` | National-code string | Inherited from `jb-input` | Yes |
+| Date/time | Date Input | `jb-date-input@6.5.0` | `string`, `Date`, or timestamp-facing configuration | Verified | Yes |
+| Date/time | Time Input | `jb-time-input@2.5.0` | Time string | Verified | Yes |
+| Text | PIN Input | `jb-pin-input@1.16.0` | `string` | Verified | Yes |
+| Text | Textarea | `jb-textarea@3.14.0` | `string` | Verified | Yes |
+| Choice | Select | `jb-select@8.1.1` | Generic value or array in multiple mode | Verified | Yes |
+| Choice | Listbox | `jb-select/listbox@8.1.1` | Generic value or array in multiple mode | Verified | Yes |
 | Choice | Checkbox | `jb-checkbox@2.0.0` | `boolean` | Verified | Yes |
-| Choice | Switch | `jb-switch@1.7.3` | `boolean` | Verified; DSR-003 resolved | Yes |
-| File | File Input | `jb-file-input@3.3.0` | `File \| null` | Verified; DSR-002 resolved | Yes |
+| Choice | Switch | `jb-switch@1.8.0` | `boolean` | Verified; latest API | Yes |
+| File | File Input | `jb-file-input@3.4.0` | `File \| null` | Verified; latest API | Yes |
 | File | Image Input | `jb-image-input@4.0.0` | File or stored string value, or `null` | Verified | Yes |
-| Action | Button | `jb-button@4.0.0` | None | Not a value control | Yes |
-| Container | Tabs | `jb-tab@0.1.0` | None | Owns tab panels containing leaf elements | Yes |
+| Action | Button | `jb-button@4.2.0` | None | Not a value control | Yes |
+| Container | Tabs | `jb-tab@0.1.2` | None | Owns tab panels containing leaf elements | Yes |
 | Container | Conditional container | `jb-condition@0.1.0` | None | Shows an ordered child list when portable field-name rules match | Web component |
 | Workflow container | Wizard | `jb-form-wizard@0.1.0` | None | Owns ordered steps, validates the active step before forward navigation, and emits navigation/completion events | Web component |
 
@@ -189,8 +189,8 @@ CSS-variable counts include component variables, compatibility aliases, and refe
 | `jb-calendar@5.2.0` | Embedded picker | Used through `jb-date-input`; not a standalone form value control |
 | `jb-time-picker@2.4.0` | Embedded picker | Used through `jb-time-input`; not a standalone form value control |
 | `jb-popover@1.13.0` | Overlay dependency | Used by select/date/time controls and editor surfaces; not addable |
-| `jb-core@0.33.0` | Foundation | Theme, events, SSR-safe i18n, and React helpers |
-| `jb-searchbar@3.1.0` | Data filtering control | Excluded from generated forms: it does not implement `JBFormInputStandards` and is cataloged as Data Display |
+| `jb-core@0.36.0` | Foundation | Theme, events, SSR-safe i18n, and React helpers |
+| `jb-searchbar@3.4.0` | Data filtering control | Excluded from generated forms: it does not implement `JBFormInputStandards` and is cataloged as Data Display |
 
 ## Serialization constraints discovered
 

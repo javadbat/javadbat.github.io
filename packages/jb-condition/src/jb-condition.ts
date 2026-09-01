@@ -3,7 +3,9 @@ import type { JBConditionChangeEvent, JBConditionGroup, JBConditionValue } from 
 
 const emptyConditions = (): JBConditionGroup => ({ match: "all", rules: [] });
 
-export class JBConditionWebComponent extends HTMLElement {
+const HTMLElementBase = globalThis.HTMLElement ?? class {};
+
+export class JBConditionWebComponent extends HTMLElementBase {
   #conditions = emptyConditions();
   #value: JBConditionValue = {};
   #matched = true;
@@ -118,4 +120,6 @@ export class JBConditionWebComponent extends HTMLElement {
   }
 }
 
-if (!customElements.get("jb-condition")) customElements.define("jb-condition", JBConditionWebComponent);
+if (typeof globalThis.customElements !== "undefined" && !globalThis.customElements.get("jb-condition")) {
+  globalThis.customElements.define("jb-condition", JBConditionWebComponent as CustomElementConstructor);
+}

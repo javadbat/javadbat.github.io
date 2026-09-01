@@ -4,7 +4,7 @@ Status: Support matrix complete; all design-system dependency requests resolved
 Reviewed: 2026-08-27
 Reviewed source: JB Design System revision `8afc94a5cae5910c2dccab35c033d4d01150d27e`
 
-The matrix reflects direct audits of `jb-time-input@2.4.0`, `jb-file-input@3.3.0`, and `jb-switch@1.7.3` performed through 2026-08-04. The `jb-switch` source reference has since been updated, so no design-system dependency request blocks the form-builder flow.
+The matrix reflects the latest package ranges audited on 2026-09-02, including `jb-time-input@2.5.0`, `jb-file-input@3.4.0`, and `jb-switch@1.8.0`. Browser rendering is covered by the real-package integration suite; SSR import status is tracked separately in `DESIGN-SYSTEM-REQUESTS.md`.
 
 ## Legend
 

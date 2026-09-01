@@ -438,7 +438,7 @@ register them before calling `retryRender()`.
 
 The React wrapper is a separate entry. It assigns the document as an object property, forwards the underlying element ref, installs one stable listener set with current callback refs, and adds no renderer state mirror.
 
-Current Phase 1 usage is client-only. Browser-specific work remains behind registration, render, dependency, and locale modules; the default definition is guarded and a Node-environment import test passes. This preparation does not make the current JB packages SSR-compatible: direct Node imports of representative installed packages still throw on `HTMLElement` or `document`. Exact required design-system changes and acceptance tests are documented beside the component in `JB-DESIGN-SYSTEM-CHANGES.md`.
+The renderer is now evaluated against the latest JB package APIs. Browser-specific work remains behind registration, render, dependency, and locale modules; local package definitions are guarded and Node import coverage includes the structural packages. The latest published `jb-form` and `jb-color-input` default entries still throw during direct Node evaluation, so SSR completion remains an upstream package task documented in `DESIGN-SYSTEM-REQUESTS.md` and `JB-DESIGN-SYSTEM-CHANGES.md`.
 
 ## Locale and direction
 
