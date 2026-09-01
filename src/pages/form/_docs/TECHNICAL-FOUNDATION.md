@@ -438,7 +438,7 @@ register them before calling `retryRender()`.
 
 The React wrapper is a separate entry. It assigns the document as an object property, forwards the underlying element ref, installs one stable listener set with current callback refs, and adds no renderer state mirror.
 
-The renderer is now evaluated against the latest JB package APIs. Browser-specific work remains behind registration, render, dependency, and locale modules; local package definitions are guarded and Node import coverage includes the structural packages. The latest published `jb-form` and `jb-color-input` default entries still throw during direct Node evaluation, so SSR completion remains an upstream package task documented in `DESIGN-SYSTEM-REQUESTS.md` and `JB-DESIGN-SYSTEM-CHANGES.md`.
+The renderer is now evaluated against the latest JB package APIs. Browser-specific work remains behind registration, render, dependency, and locale modules; local package definitions are guarded and the direct Node import audit passes for all JB dependencies used by the repository. `jb-icons` is intentionally subpath-only, and its documented entries pass. No upstream SSR or registration task remains for the supported Form Builder flow.
 
 ## Locale and direction
 
