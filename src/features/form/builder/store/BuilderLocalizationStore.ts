@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { canonicalizeLocaleCode, getLocalizedText, inferLocaleDirection, isContainerElement, type FormLocalization, type JSONValue } from "../../domain/form-document";
-import { addMissingElementDefaultTranslations } from "jb-form-builder/registry/form-element-registry";
+import { addMissingElementDefaultTranslations } from "../../component-data";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 import type { BuilderElementStore } from "./BuilderElementStore";
 import { builderLocalePreferences, type BuilderLocalePreferences } from "./BuilderLocalePreferences";

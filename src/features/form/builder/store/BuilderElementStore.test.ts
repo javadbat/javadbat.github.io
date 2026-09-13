@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
-import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
+import { formElementRegistry } from "../../component-data";
 import { BuilderDraftStore } from "./BuilderDraftStore";
 import { BuilderElementStore } from "./BuilderElementStore";
 

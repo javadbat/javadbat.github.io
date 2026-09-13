@@ -1,7 +1,8 @@
 import { observer } from "mobx-react-lite";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
-import { getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
+import { getFormElementDisplayName } from "../../component-data";
+import { componentDataByType } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { JBCollapse } from "jb-collapse/react";
@@ -49,7 +50,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
   const element = store.selectedElement;
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
-  const entry = element ? registryByType.get(element.type) : undefined;
+  const entry = element ? componentDataByType.get(element.type) : undefined;
   const visibleProperties = entry?.propertyDefinitions.filter(definition => !removedPropertyKeys.has(definition.key) && definition.builderVisible !== false) ?? [];
   const advancedProperties = visibleProperties.filter(definition => advancedPropertyKeys.has(definition.key));
   const contentProperties = visibleProperties.filter(definition => definition.localized && !advancedPropertyKeys.has(definition.key));

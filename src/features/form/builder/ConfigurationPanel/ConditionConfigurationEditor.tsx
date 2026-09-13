@@ -10,7 +10,7 @@ import {
   type JBConditionOperator,
   type JSONValue,
 } from "../../domain/form-document";
-import { registryByType } from "jb-form-builder/registry/form-element-registry";
+import { registryByType } from "../../component-data";
 import { JBCollapse } from "jb-collapse/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { inputValue } from "./configuration-values";

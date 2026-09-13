@@ -1,4 +1,4 @@
-import { registryByType } from "jb-form-builder/registry/form-element-registry";
+import { componentDataByType } from "../component-data";
 import { walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
 import type { ThemeControlSize } from "./theme-config";
 
@@ -6,7 +6,7 @@ import type { ThemeControlSize } from "./theme-config";
 export function withControlSizeDefault(documentValue: JBFormDocumentV1, size: ThemeControlSize): JBFormDocumentV1 {
   const documentCopy = structuredClone(documentValue);
   for (const element of walkFormElements(documentCopy.elements)) {
-    const supportsSize = registryByType
+    const supportsSize = componentDataByType
       .get(element.type)
       ?.propertyDefinitions.some(property => property.key === "size");
     if (supportsSize && (!("size" in element.props) || element.props.size === null || element.props.size === "")) {

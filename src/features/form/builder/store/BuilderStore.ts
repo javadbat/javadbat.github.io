@@ -12,7 +12,7 @@ import {
   type JBValidationRule,
   type JSONValue,
 } from "../../domain/form-document";
-import type { FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import type { FormElementRegistryEntry } from "../../component-data";
 import type { ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import { formRepository } from "../../storage/form-repository";
 import type { FormRepository, LinkedFormReference, StorageIssue } from "../../storage/storage-types";

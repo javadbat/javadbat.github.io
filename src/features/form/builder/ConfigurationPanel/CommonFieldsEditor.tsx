@@ -4,7 +4,7 @@ import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import type { FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import type { FormElementRegistryEntry } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { JBCollapse } from "jb-collapse/react";
 import { inputValue } from "./configuration-values";

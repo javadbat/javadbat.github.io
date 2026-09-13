@@ -17,7 +17,7 @@ import {
   type JBValidationRule,
   type JSONValue,
 } from "../../domain/form-document";
-import { addMissingElementDefaultTranslations, createDefaultElement, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import { addMissingElementDefaultTranslations, createDefaultElement, type FormElementRegistryEntry } from "../../component-data";
 import { createValidationRule, type ValidationRuleName } from "jb-form-builder/registry/validation-rule-registry";
 import type { BuilderDraftStore } from "./BuilderDraftStore";
 

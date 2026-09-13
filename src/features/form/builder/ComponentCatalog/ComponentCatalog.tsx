@@ -4,7 +4,8 @@ import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { formElementRegistry, getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "jb-form-builder/registry/form-element-registry";
+import { getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "../../component-data";
+import { supportedComponentData } from "../../component-data";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
@@ -68,13 +69,13 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
   const filteredGroups = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
     const entries = normalized
-      ? formElementRegistry.filter(entry =>
+      ? supportedComponentData.filter(entry =>
           [entry.displayName, getFormElementDisplayName(entry, store.editingLocale), entry.type, entry.category, entry.description, getFormElementDescription(entry, store.editingLocale), ...entry.keywords]
             .join(" ")
             .toLocaleLowerCase()
             .includes(normalized),
         )
-      : formElementRegistry;
+      : supportedComponentData;
 
     return Map.groupBy(entries, entry => entry.category);
   }, [query, store.editingLocale]);
@@ -86,7 +87,7 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
           <p className={styles.eyebrow}>{messages.builder}</p>
           <h2 id="component-catalog-title">{messages.componentCatalog}</h2>
         </div>
-        <span className={styles.countBadge}>{formElementRegistry.length}</span>
+        <span className={styles.countBadge}>{supportedComponentData.length}</span>
       </div>
       <p className={styles.panelDescription}>{messages.catalogDescription}</p>
       <JBInput

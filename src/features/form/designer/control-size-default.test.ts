@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { registryByType } from "jb-form-builder/registry/form-element-registry";
+import { registryByType } from "../component-data";
 import { validateFormDocument } from "jb-form-builder/contract/validation";
 import { walkFormElements, type JBFormDocumentV1 } from "../domain/form-document";
 import { withControlSizeDefault } from "./control-size-default";

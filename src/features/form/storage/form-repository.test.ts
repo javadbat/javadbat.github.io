@@ -1,8 +1,8 @@
 import { IDBFactory } from "fake-indexeddb";
 import { afterEach, describe, expect, it } from "vitest";
 import { createEmptyFormDocument, localizedText } from "../domain/form-document";
-import { formElementRegistry } from "jb-form-builder/registry/form-element-registry";
-import { createDefaultElement } from "jb-form-builder/registry/form-element-registry";
+import { formElementRegistry } from "../component-data";
+import { createDefaultElement } from "../component-data";
 import { IndexedDbFormRepository } from "./form-repository";
 import { FORM_STORES, type LinkedFormReference } from "./storage-types";
 

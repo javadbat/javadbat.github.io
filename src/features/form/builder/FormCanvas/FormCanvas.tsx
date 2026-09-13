@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
-import { getFormElementDisplayName } from "jb-form-builder/registry/form-element-registry";
+import { getFormElementDisplayName } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";

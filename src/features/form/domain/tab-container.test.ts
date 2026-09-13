@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BuilderStore } from "../builder/store/BuilderStore";
 import { validateFormDocument } from "./form-document-validation";
 import { isTabElement } from "./form-document";
-import { registryByType } from "jb-form-builder/registry/form-element-registry";
+import { registryByType } from "../component-data";
 import { getRequiredDependencies } from "jb-form-builder/dependency-loader";
 
 describe("jb-tab container contract", () => {

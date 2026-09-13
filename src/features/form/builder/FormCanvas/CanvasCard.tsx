@@ -5,7 +5,7 @@ import { JBTooltip } from "@jbui/tooltip/react";
 import type { JBFormElementV1 } from "../../domain/form-document";
 import { getLocalizedText, isContainerElement } from "../../domain/form-document";
 import type { FormMessages } from "../../i18n/locale-adapter";
-import { getFormElementDisplayName, registryByType } from "jb-form-builder/registry/form-element-registry";
+import { getFormElementDisplayName, registryByType } from "../../component-data";
 import { beginBuilderDrag, CANVAS_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import styles from "./FormCanvas.module.css";

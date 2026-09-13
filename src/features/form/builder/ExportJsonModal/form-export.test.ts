@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
-import { createDefaultElement, formElementRegistry } from "jb-form-builder/registry/form-element-registry";
+import { createDefaultElement, formElementRegistry } from "../../component-data";
 import { getFormExportFileName, prepareFormExport, serializeFormDocument } from "./form-export";
 
 describe("form JSON export", () => {

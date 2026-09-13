@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { makeObservable, observable, runInAction } from "mobx";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { formAppMessages } from "../../i18n/locale-adapter";
-import { formElementRegistry, getFormElementDescription, getFormElementDisplayName } from "jb-form-builder/registry/form-element-registry";
+import { formElementRegistry, getFormElementDescription, getFormElementDisplayName } from "../../component-data";
 import { ComponentCatalog } from "./ComponentCatalog";
 
 const addCatalogElement = vi.fn();

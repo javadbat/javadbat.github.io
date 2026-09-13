@@ -1,0 +1,23 @@
+/** CSS custom properties supported by this component in the form designer. */
+export const componentThemeTokens = [
+  "--jb-pin-input-bottom-line-border-radius",
+  "--jb-pin-input-bottom-line-color",
+  "--jb-pin-input-bottom-line-color-active",
+  "--jb-pin-input-bottom-line-display",
+  "--jb-pin-input-bottom-line-height",
+  "--jb-pin-input-inputs-wrapper-width",
+  "--jb-pin-input-message-box-display",
+  "--jb-pin-input-message-color",
+  "--jb-pin-input-message-color-error",
+  "--jb-pin-input-message-font-size",
+  "--jb-pin-input-pin-color",
+  "--jb-pin-input-pin-font-size",
+  "--jb-pin-input-pin-font-weight",
+  "--jb-pin-input-pin-height",
+  "--jb-pin-input-wrapper-border-color",
+  "--jb-pin-input-wrapper-border-color-active",
+  "--jb-pin-input-wrapper-border-radius",
+  "--jb-pin-input-wrapper-border-style",
+  "--jb-pin-input-wrapper-border-width",
+  "--jb-pin-input-wrapper-box-shadow",
+] as const;

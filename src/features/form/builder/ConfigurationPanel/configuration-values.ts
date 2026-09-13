@@ -1,5 +1,5 @@
 import type { JSONValue, LocalizedText } from "../../domain/form-document";
-import type { PropertyLabel } from "jb-form-builder/registry/form-element-configuration";
+import type { PropertyLabel } from "../../component-data";
 
 /** Portable option shape edited by select-like component configuration controls. */
 export interface PortableSelectOption {
