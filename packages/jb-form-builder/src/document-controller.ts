@@ -18,8 +18,8 @@ function cloneIssue(error: unknown): FormIssue {
 
 /**
  * Clone on assignment so a caller cannot mutate a document while an async
- * dependency load is in flight. The renderer never silently repairs or writes
- * into the caller's object.
+ * dependency load is in flight. Compatibility migrations apply only to the
+ * detached document, never the caller's object.
  */
 export function cloneFormDocument(value: JBFormDocumentV1): PreparedDocument {
   try {

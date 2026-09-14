@@ -44,7 +44,7 @@
     }
   }
 
-  .formModal::part(content-box) {
+  .formModal::part(content) {
     opacity: 0;
     transform: translateY(1rem) scale(0.8);
     transition:
@@ -54,7 +54,7 @@
     will-change: opacity, transform;
   }
 
-  .formModal:state(open)::part(content-box) {
+  .formModal:state(open)::part(content) {
     opacity: 1;
     transform: translateY(0) scale(1);
 
@@ -68,7 +68,7 @@
 @media (prefers-reduced-motion: reduce) {
   .formModal,
   .formModal::part(background),
-  .formModal::part(content-box) {
+  .formModal::part(content) {
     transition: none;
   }
 }

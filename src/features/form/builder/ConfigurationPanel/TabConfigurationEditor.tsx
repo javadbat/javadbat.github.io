@@ -31,7 +31,7 @@ export const TabConfigurationEditor = observer(function TabConfigurationEditor({
           name="containerValidationScope"
           label={copy(locale, "Validate fields", "اعتبارسنجی فیلدها")}
           value={element.validationScope}
-          hideClear
+          clearable={false}
           onChange={event => store.updateSelectedContainerValidationScope(event.target.value === "active" ? "active" : "all")}
         >
           <JBOption value="all">{copy(locale, "In every tab (default)", "در همه تب‌ها (پیش‌فرض)")}</JBOption>

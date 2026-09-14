@@ -3,6 +3,8 @@
 Status: Theme Designer v1 input; manifest-backed component token allowlist implemented
 Reviewed: 2026-08-31
 
+Historical snapshot: see [JB-UPGRADE-2026-09.md](./JB-UPGRADE-2026-09.md) for September's renamed styling hooks and saved-theme migration. Current token catalogs live under `src/features/form/component-data/<component>/theme-tokens.ts`.
+
 This inventory records styling surfaces available to Theme Designer. It is based on `jb-core/theme` and installed `custom-elements.json` manifests. Designer consumes public surfaces only.
 
 ## Token layers

@@ -1,4 +1,4 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
   "--jb-file-input-bg-color",
   "--jb-file-input-bg-color-error",
@@ -17,11 +17,19 @@ export const componentThemeTokens = [
   "--jb-file-input-display-upload-uploading",
   "--jb-file-input-download-button-display",
   "--jb-file-input-download-button-display-hidden",
+  "--jb-file-input-error-overlay-bg-color",
+  "--jb-file-input-error-overlay-color",
+  "--jb-file-input-error-overlay-icon-color",
+  "--jb-file-input-error-overlay-outline",
   "--jb-file-input-file-name-color",
+  "--jb-file-input-focus-ring-color",
   "--jb-file-input-icon-base-color",
   "--jb-file-input-icon-primary-color",
   "--jb-file-input-loading-bg",
   "--jb-file-input-loading-color",
+  "--jb-file-input-message-color",
+  "--jb-file-input-message-color-error",
+  "--jb-file-input-message-font-size",
   "--jb-file-input-overlay-bg-color",
   "--jb-file-input-overlay-button-block-padding-sm",
   "--jb-file-input-overlay-button-block-padding-xs",

@@ -121,12 +121,12 @@ function uploadFile(elementDom: RuntimeFormElement, file: File, endpoint: string
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
     formData.append(fieldName, file);
-    elementDom.setAttribute("uploading", "");
+    elementDom.setAttribute("is-uploading", "");
     xhr.upload.addEventListener("progress", event => {
       if (event.lengthComputable) uploader.uploadPercent = (event.loaded / event.total) * 100;
     });
     const finish = () => {
-      elementDom.removeAttribute("uploading");
+      elementDom.removeAttribute("is-uploading");
       uploader.uploadPercent = null;
       resolve();
     };

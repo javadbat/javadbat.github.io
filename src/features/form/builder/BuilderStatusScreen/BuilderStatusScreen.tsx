@@ -15,6 +15,7 @@ interface BuilderStatusScreenProps {
 export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messages, slug }: BuilderStatusScreenProps) {
   const store = useBuilderStore();
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const canDeleteCorruptRecord = store.storageIssue?.code === "corrupt-record" || store.storageIssue?.code === "incompatible-record";
 
   if (store.status === "loading") {
@@ -31,6 +32,7 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
       {busy ? <JBLoading /> : null}
       <h1>{busy ? messages.loading : "Builder unavailable"}</h1>
       <p>{busy ? messages.loading : getStorageIssueMessage(messages, store.storageIssue)}</p>
+      {actionError ? <p role="status">{actionError}</p> : null}
       <div className={styles.actions}>
         <JBButton
           disabled={busy}
@@ -47,12 +49,17 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
             variant="outline"
             onClick={() => {
               if (!window.confirm(messages.deleteCorruptFormConfirm)) return;
+              setActionError(null);
               setBusy(true);
-              void store.deleteCorruptRecord(slug)
-                .then(deleted => {
-                  if (deleted) window.location.assign("/form");
-                })
-                .finally(() => setBusy(false));
+              void store.deleteCorruptRecord(slug).then(deleted => {
+                if (deleted) {
+                  window.location.assign("/form");
+                  return;
+                }
+                setActionError(getStorageIssueMessage(messages, store.storageIssue));
+              }).catch(() => {
+                setActionError(messages.storageUnavailable);
+              }).finally(() => setBusy(false));
             }}
           >
             {messages.deleteCorruptForm}

@@ -192,3 +192,31 @@ test("preserves complete preview values through reset and submits the seeded for
   await page.getByRole("button", { name: "Submit", exact: true }).click();
   await expect(page.getByLabel("Submitted form values in JSON")).toContainText("Initial configured value");
 });
+
+test("migrates saved component properties and honors the new clearable contract", async ({ page }) => {
+  const document = buildCompleteDocument();
+  const input = document.elements.find(element => element.type === "jb-input")!;
+  input.props.clearable = true;
+  const select = document.elements.find(element => element.type === "jb-select")!;
+  delete select.props.clearable;
+  select.props.hideClear = true;
+  const time = document.elements.find(element => element.type === "jb-time-input")!;
+  delete time.props.leadingZero;
+  time.props.frontalZero = false;
+  const file = document.elements.find(element => element.type === "jb-file-input")!;
+  delete file.props.accept;
+  file.props.acceptTypes = ".pdf";
+  await seedForm(page, document);
+  await page.goto(`/form/preview?form=${FORM_SLUG}`);
+  const renderer = page.locator("jb-form-builder");
+  await expect(renderer).toHaveAttribute("data-state", "ready");
+  const textInput = renderer.locator(`jb-input[name="${input.name}"]`);
+  await expect(textInput.locator('[part~="control"]')).toBeVisible();
+  await textInput.locator(".clear-button").click();
+  await expect.poll(() => textInput.evaluate(element => (element as HTMLElement & { value: string }).value)).toBe("");
+  const selectInput = renderer.locator(`jb-select[name="${select.name}"]`);
+  await expect(selectInput).toHaveAttribute("clearable", "false");
+  await expect(selectInput.locator(".clear-button")).toHaveCount(0);
+  await expect.poll(() => renderer.locator("jb-time-input").evaluate(element => (element as HTMLElement & { leadingZero: boolean }).leadingZero)).toBe(false);
+  await expect.poll(() => renderer.locator("jb-file-input").evaluate(element => (element as HTMLElement & { accept: string }).accept)).toBe(".pdf");
+});

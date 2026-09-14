@@ -83,7 +83,7 @@ export const PropertyField = observer(function PropertyField({ definition, local
         name={`prop-${definition.key}`}
         label={label}
         value={typeof value === "string" ? value : ""}
-        hideClear
+        clearable={false}
         onChange={event => store.updateSelectedProp(definition.key, event.target.value)}
       >
         {definition.options?.map(option => (

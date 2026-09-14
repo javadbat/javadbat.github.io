@@ -172,7 +172,7 @@ function dateRenderer({ element, label, message, onValueChange }: InitialValueEd
       format={typeof element.props.format === "string" ? element.props.format : undefined}
       min={typeof element.props.min === "string" ? element.props.min : undefined}
       max={typeof element.props.max === "string" ? element.props.max : undefined}
-      direction={element.props.direction === "rtl" || element.props.direction === "ltr" ? element.props.direction : undefined}
+      dir={element.props.dir === "rtl" || element.props.dir === "ltr" ? element.props.dir : undefined}
       showPersianNumber={element.props.showPersianNumber === true}
       value={typeof element.initialValue === "string" ? element.initialValue : null}
       onInput={event => commitValue(event as unknown as Event)}
@@ -207,7 +207,7 @@ function TimeInitialValueInput({ element, label, message, onValueChange }: Initi
       label={label}
       message={message}
       secondEnabled={secondEnabled}
-      frontalZero={element.props.frontalZero !== false}
+      leadingZero={element.props.leadingZero !== false}
       showPersianNumber={element.props.showPersianNumber === true}
       value={displayedValue}
       onInput={commitCurrentValue}
@@ -245,7 +245,7 @@ function selectRenderer({ element, label, message, locale, defaultLocale, onValu
       message={message}
       multiple={element.props.multiple === true}
       value={selectValue}
-      hideClear
+      clearable={false}
       onChange={event => onValueChange(event.target.value)}
     >
       {options.map(option => (
@@ -268,7 +268,7 @@ function booleanRenderer({ element, label, message, locale, onValueChange }: Ini
       label={label}
       message={message}
       value={value}
-      hideClear
+      clearable={false}
       onChange={event => onValueChange(event.target.value === "unset" ? undefined : event.target.value === "true")}
     >
       <JBOption value="unset">—</JBOption>

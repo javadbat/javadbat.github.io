@@ -184,6 +184,7 @@ export const inputProperties = [
     })),
   ),
   textProperty("autocomplete", "Autocomplete", "\u062a\u06a9\u0645\u06cc\u0644 \u062e\u0648\u062f\u06a9\u0627\u0631"),
+  booleanProperty("clearable", "Allow clearing", "\u0627\u0645\u06a9\u0627\u0646 \u067e\u0627\u06a9\u200c\u06a9\u0631\u062f\u0646"),
 ] as const;
 
 export const inputDefaults: Record<string, JSONValue> = {
@@ -191,6 +192,7 @@ export const inputDefaults: Record<string, JSONValue> = {
   type: "text",
   inputmode: "text",
   autocomplete: "off",
+  clearable: false,
 };
 
 export const inputCommon: CommonFieldSupport = {
@@ -228,4 +230,3 @@ export const configuration = (
   defaultProps,
   propertyDefinitions,
 });
-

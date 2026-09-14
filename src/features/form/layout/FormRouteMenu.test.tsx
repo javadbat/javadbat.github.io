@@ -25,6 +25,14 @@ if (!("part" in Element.prototype)) {
 
 afterEach(cleanup);
 
+// happy-dom lacks Web Animations; actual close timing is covered in browser tests.
+if (typeof Element.prototype.animate !== "function") {
+  Element.prototype.animate = () => ({
+    finished: Promise.resolve(),
+    cancel() {},
+  }) as unknown as Animation;
+}
+
 describe("FormRouteMenu", () => {
   it("preserves route context and identifies the active link in both responsive renderings", () => {
     const view = render(

@@ -1,15 +1,17 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
   "--jb-pin-input-bottom-line-border-radius",
   "--jb-pin-input-bottom-line-color",
   "--jb-pin-input-bottom-line-color-active",
   "--jb-pin-input-bottom-line-display",
   "--jb-pin-input-bottom-line-height",
+  "--jb-pin-input-inputs-gap",
   "--jb-pin-input-inputs-wrapper-width",
   "--jb-pin-input-message-box-display",
   "--jb-pin-input-message-color",
   "--jb-pin-input-message-color-error",
   "--jb-pin-input-message-font-size",
+  "--jb-pin-input-message-margin",
   "--jb-pin-input-pin-color",
   "--jb-pin-input-pin-font-size",
   "--jb-pin-input-pin-font-weight",

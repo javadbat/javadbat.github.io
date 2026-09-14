@@ -7,7 +7,7 @@ export const componentConfiguration = configuration(
       multiple: false,
       size: "md",
       popoverPosition: "fixed",
-      hideClear: false,
+      clearable: true,
       options: [
         {
           id: "option_1",
@@ -26,7 +26,7 @@ export const componentConfiguration = configuration(
         { value: "fixed", label: label("Fixed", "\u062b\u0627\u0628\u062a") },
         { value: "absolute", label: label("Absolute", "\u0645\u0637\u0644\u0642") },
       ]),
-      booleanProperty("hideClear", "Hide clear button", "\u067e\u0646\u0647\u0627\u0646\u200c\u06a9\u0631\u062f\u0646 \u067e\u0627\u06a9\u200c\u06a9\u0631\u062f\u0646"),
+      booleanProperty("clearable", "Allow clearing", "\u0627\u0645\u06a9\u0627\u0646 \u067e\u0627\u06a9\u200c\u06a9\u0631\u062f\u0646"),
       {
         key: "options",
         label: label("Options", "\u06af\u0632\u06cc\u0646\u0647\u200c\u0647\u0627"),
@@ -34,4 +34,3 @@ export const componentConfiguration = configuration(
       },
     ],
   );
-

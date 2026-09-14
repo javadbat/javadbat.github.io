@@ -108,7 +108,7 @@ export function FormRouteMenu({
         aria-label={languageLabel}
         size="sm"
         value={language}
-        hideClear
+        clearable={false}
         onChange={event => selectLanguage(String(event.target.value))}
       >
         {languageOptions.map(option => <JBOption key={option.value} value={option.value}>{option.label}</JBOption>)}

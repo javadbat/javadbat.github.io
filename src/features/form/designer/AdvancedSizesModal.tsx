@@ -85,7 +85,7 @@ function SettingRange({
         value={value}
         onInput={event => onChange(numberFromEvent(event, value))}
       >
-        <span className={styles.inputSuffix} slot="end-section" aria-hidden="true">rem</span>
+        <span className={styles.inputSuffix} slot="inline-end" aria-hidden="true">rem</span>
       </JBNumberInput>
     </div>
   );

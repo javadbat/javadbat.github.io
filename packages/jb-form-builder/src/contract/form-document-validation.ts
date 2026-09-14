@@ -3,6 +3,7 @@ import formDocumentSchema from "./form-document.schema.json";
 import type { FormIssue } from "./form-issue";
 import { isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement, type JBFormDocumentV1, type JBFormElementV1, type LocalizedText } from "./form-document";
 import { registryByType } from "../registry/form-element-registry";
+import { migrateComponentProperties } from "./migrate-component-properties";
 
 export interface FormDocumentValidationResult {
   valid: boolean;
@@ -220,7 +221,7 @@ export function validateFormDocument(value: unknown): FormDocumentValidationResu
       issues: (validateSchema.errors ?? []).map(schemaIssue),
     };
   }
-  const document = value as JBFormDocumentV1;
+  const document = migrateComponentProperties(value as JBFormDocumentV1);
   const issues = validateSemanticDocument(document);
   return {
     valid: issues.length === 0,

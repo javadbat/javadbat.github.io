@@ -7,7 +7,7 @@ const guidanceByKey: Partial<Record<string, keyof FormMessages>> = {
   inputmode: "propertyInputModeHelp",
   type: "propertyInputTypeHelp",
   valueType: "propertyValueTypeHelp",
-  acceptTypes: "propertyAcceptTypesHelp",
+  accept: "propertyAcceptTypesHelp",
   defaultValue: "propertyDefaultValueHelp",
   options: "propertyOptionsHelp",
   action: "propertyActionHelp",
@@ -25,7 +25,7 @@ export function getPropertyGuidance(
 export function getPropertyPlaceholder(definition: FormElementPropertyDefinition, locale: string): string | undefined {
   if (definition.key === "autocomplete") return "email, name, organization";
   if (definition.key === "inputmode") return "text, numeric, email, tel";
-  if (definition.key === "acceptTypes") return "image/*, .pdf, .docx";
+  if (definition.key === "accept") return "image/*, .pdf, .docx";
   if (definition.key === "ariaLabel") return locale === "fa" ? "برچسب قابل خواندن برای صفحه‌خوان" : "Label announced to screen readers";
   if (definition.key === "defaultValue") return locale === "fa" ? "مثلاً گزینه اول" : "For example, the first option";
   if (definition.key === "options") return undefined;

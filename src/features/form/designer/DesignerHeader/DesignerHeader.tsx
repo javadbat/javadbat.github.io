@@ -58,7 +58,7 @@ export const DesignerHeader = observer(function DesignerHeader(props: DesignerHe
     <FormRouteHeader layout="editor" className={styles.header}>
       <FormRouteBrand className={styles.headerBrand} href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
       <div className={styles.themeIdentity}>
-        <button type="button" className={styles.backButton} onClick={onOpenLibrary}>
+        <button type="button" className={styles.backButton} aria-label={messages.designerBackThemes} onClick={onOpenLibrary}>
           <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
           <span>{messages.designerBackThemes}</span>
         </button>

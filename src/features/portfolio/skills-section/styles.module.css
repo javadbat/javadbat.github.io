@@ -232,7 +232,7 @@
 .skillModal {
   --jb-modal-z-index: 20;
   --jb-modal-back-bg-color:oklch(from var(--jb-white) l c h / .5);
-  &::part(content-box) {
+  &::part(content) {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
       rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
     background-color: red;
@@ -290,7 +290,7 @@
         }
     }
 
-    .skillModal::part(content-box) {
+    .skillModal::part(content) {
         opacity: 0;
         transform: translateY(1rem) scale(0.8);
         transition:
@@ -299,7 +299,7 @@
         will-change: opacity, transform;
 
     }
-    .skillModal:state(open)::part(content-box) {
+    .skillModal:state(open)::part(content) {
         opacity: 1;
         transform: translateY(0) scale(1);
         @starting-style {
@@ -318,7 +318,7 @@
     transition: opacity 220ms ease;
   }
 
-  jb-modal::part(content-box) {
+  jb-modal::part(content) {
     opacity: 1;
     transform: translateY(0) scale(1);
     transition:
@@ -332,7 +332,7 @@
     }
   }
 
-  jb-modal:state(open)::part(content-box) {
+  jb-modal:state(open)::part(content) {
     @starting-style {
       opacity: 0;
       transform: translateY(0.75rem) scale(0.98);

@@ -745,7 +745,7 @@ function SettingRange({
         onInput={event => onChange(numberFromEvent(event, value))}
       />
       <JBNumberInput aria-label={`${label} value`} size="sm" minValue={min} maxValue={max} step={step} value={value} onInput={event => onChange(numberFromEvent(event, value))}>
-        <span className={styles.inputSuffix} slot="end-section" aria-hidden="true">
+        <span className={styles.inputSuffix} slot="inline-end" aria-hidden="true">
           {suffix}
         </span>
       </JBNumberInput>
@@ -893,7 +893,6 @@ export const DesignerApp = observer(function DesignerApp() {
         if (ignoreStaleThemeResolutionRef.current) {
           ignoreStaleThemeResolutionRef.current = false;
           setThemeLoadNotice(undefined);
-          setLibraryOpen(false);
         }
         return;
       }
@@ -1242,11 +1241,13 @@ export const DesignerApp = observer(function DesignerApp() {
   };
 
   const requestDesignerLeave = useCallback(
-    (leave: () => void) => {
+    async (leave: () => void) => {
       if (temporaryImage && !window.confirm(messages.designerTemporaryLeaveConfirm)) return;
+      if (saveInFlightRef.current) await saveInFlightRef.current;
+      if (saveStatus !== "saved" && !(await saveCurrentTheme())) return;
       leave();
     },
-    [messages.designerTemporaryLeaveConfirm, temporaryImage],
+    [messages.designerTemporaryLeaveConfirm, temporaryImage, saveCurrentTheme, saveStatus],
   );
 
   const handleDesignerNavigationCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -1969,7 +1970,7 @@ export const DesignerApp = observer(function DesignerApp() {
             size="sm"
             label={messages.designerImageFit}
             value={theme.background.imageFit ?? "cover"}
-            hideClear
+            clearable={false}
             onChange={event =>
               updateTheme(draft => {
                 draft.background.imageFit = valueFromEvent(event) as "cover" | "contain" | "fill";
@@ -2150,7 +2151,7 @@ export const DesignerApp = observer(function DesignerApp() {
             popoverPosition="fixed"
             label={messages.designerFontFamily}
             value={theme.typography.fontFamily}
-            hideClear
+            clearable={false}
             onChange={event =>
               updateTheme(draft => {
                 draft.typography.fontFamily = valueFromEvent(event);
@@ -2188,7 +2189,7 @@ export const DesignerApp = observer(function DesignerApp() {
             popoverPosition="fixed"
             label={messages.designerAudienceSize}
             value={theme.sizing.audienceSize}
-            hideClear
+            clearable={false}
             onChange={event =>
               updateTheme(draft => {
                 draft.sizing.audienceSize = valueFromEvent(event) as ThemeAudienceSize;
@@ -2206,7 +2207,7 @@ export const DesignerApp = observer(function DesignerApp() {
             popoverPosition="fixed"
             label={messages.designerDefaultControlSize}
             value={theme.defaults.controlSize}
-            hideClear
+            clearable={false}
             onChange={event =>
               updateTheme(draft => {
                 draft.defaults.controlSize = valueFromEvent(event) as ThemeControlSize;
@@ -2406,7 +2407,7 @@ export const DesignerApp = observer(function DesignerApp() {
             size="sm"
             label={messages.designerChooseComponent}
             value={selectedComponentTag ?? ""}
-            hideClear
+            clearable={false}
             onChange={event => chooseComponentTag(valueFromEvent(event))}
           >
             <JBOption value="">{messages.designerSelectComponent}</JBOption>
@@ -2435,7 +2436,7 @@ export const DesignerApp = observer(function DesignerApp() {
                 label={messages.designerComponentPreviewState}
                 message={messages.designerComponentPreviewStateHelp}
                 value={componentPreviewState}
-                hideClear
+                clearable={false}
                 onChange={event => {
                   const state = valueFromEvent(event) as ComponentPreviewState;
                   setComponentPreviewState(state);
@@ -2568,7 +2569,7 @@ export const DesignerApp = observer(function DesignerApp() {
                   size="sm"
                   label={messages.designerComponentStateFilter}
                   value={componentTokenStateFilter}
-                  hideClear
+                  clearable={false}
                   onChange={event => setComponentTokenStateFilter(valueFromEvent(event) as ComponentTokenState)}
                 >
                   <JBOption value="all">{messages.designerComponentStateAll}</JBOption>
@@ -2678,7 +2679,7 @@ export const DesignerApp = observer(function DesignerApp() {
                           size="sm"
                           label={messages.designerComponentSizeUnit}
                           value={componentLengthUnit}
-                          hideClear
+                          clearable={false}
                           onChange={event => {
                             const unit = valueFromEvent(event) as ComponentLengthUnit;
                             setComponentLengthUnit(unit);
@@ -2745,7 +2746,7 @@ export const DesignerApp = observer(function DesignerApp() {
                         size="sm"
                         label={messages.designerComponentSuggestedValue}
                         value={selectedComponentTokenOptions.includes(componentTokenDraft) ? componentTokenDraft : ""}
-                        hideClear
+                        clearable={false}
                         onChange={event => {
                           const value = valueFromEvent(event);
                           if (!value) return;
@@ -2812,7 +2813,7 @@ export const DesignerApp = observer(function DesignerApp() {
               size="sm"
               aria-label={messages.designerLanguage}
               value={locale}
-              hideClear
+              clearable={false}
               onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}
             >
               <JBOption value="en">EN</JBOption>
@@ -2928,7 +2929,7 @@ export const DesignerApp = observer(function DesignerApp() {
             >
               <h2 id="create-theme-title">{messages.designerCreateTheme}</h2>
               <p>{messages.designerCreateDescription}</p>
-              <JBSelect<string> label={messages.designerStartFrom} value={createSource} hideClear onChange={event => setCreateSource(valueFromEvent(event))}>
+              <JBSelect<string> label={messages.designerStartFrom} value={createSource} clearable={false} onChange={event => setCreateSource(valueFromEvent(event))}>
                 <JBOption value="blank">{messages.designerBlankTheme}</JBOption>
                 {THEME_PRESETS.map(presetItem => (
                   <JBOption key={presetItem.id} value={presetItem.id}>
@@ -3126,7 +3127,7 @@ export const DesignerApp = observer(function DesignerApp() {
                   count: Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length,
                 })}
               </p>
-              <JBSelect<string> label={messages.designerReplacementTheme} value={deleteReplacementId} hideClear onChange={event => setDeleteReplacementId(valueFromEvent(event))}>
+              <JBSelect<string> label={messages.designerReplacementTheme} value={deleteReplacementId} clearable={false} onChange={event => setDeleteReplacementId(valueFromEvent(event))}>
                 <JBOption value="default">{messages.designerBuiltInDefault}</JBOption>
                 {libraryThemes
                   .filter(record => record.id !== pendingDelete.id)

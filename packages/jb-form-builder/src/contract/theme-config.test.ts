@@ -2,6 +2,22 @@ import { describe, expect, it } from "vitest";
 import { canonicalizeThemeConfig, validateThemeConfig } from "./theme-config";
 
 describe("ThemeConfig v1", () => {
+  it("migrates renamed styling tokens without mutating or broadening their component scope", () => {
+    const source = {
+      schemaVersion: 1, name: "Legacy styles",
+      components: {
+        "jb-input": { tokens: { "--jb-input-box-shadow": "0 0 2px red" } },
+        "jb-date-input": { tokens: { "--jb-input-box-margin": "2px" } },
+        "jb-textarea": { tokens: { "--jb-textarea-input-box-bg-color": "red", "--jb-textarea-control-bg-color": "blue" } },
+      },
+    };
+    const original = structuredClone(source);
+    const result = canonicalizeThemeConfig(source);
+    expect(result.components?.["jb-input"]?.tokens).toEqual({ "--jb-control-shadow": "0 0 2px red" });
+    expect(result.components?.["jb-date-input"]?.tokens).toEqual({ "--jb-control-margin": "2px" });
+    expect(result.components?.["jb-textarea"]?.tokens).toEqual({ "--jb-textarea-control-bg-color": "blue" });
+    expect(source).toEqual(original);
+  });
   it("canonicalizes sparse values and deterministic token ordering", () => {
     const result = canonicalizeThemeConfig({
       schemaVersion: 1,

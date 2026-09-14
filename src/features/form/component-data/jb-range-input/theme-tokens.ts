@@ -1,4 +1,4 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
   "--jb-range-input-active-line-color",
   "--jb-range-input-active-line-color-disabled",
@@ -78,6 +78,7 @@ export const componentThemeTokens = [
   "--jb-range-input-tick-label-font-size-xs",
   "--jb-range-input-tick-label-gap",
   "--jb-range-input-tick-label-line-height",
+  "--jb-range-input-tick-size",
   "--jb-range-input-tick-width",
   "--jb-range-input-width",
 ] as const;

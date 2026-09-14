@@ -184,6 +184,7 @@ const inputProperties = [
     })),
   ),
   textProperty("autocomplete", "Autocomplete", "تکمیل خودکار"),
+  booleanProperty("clearable", "Allow clearing", "\u0627\u0645\u06a9\u0627\u0646 \u067e\u0627\u06a9\u200c\u06a9\u0631\u062f\u0646"),
 ] as const;
 
 const inputDefaults: Record<string, JSONValue> = {
@@ -191,6 +192,7 @@ const inputDefaults: Record<string, JSONValue> = {
   type: "text",
   inputmode: "text",
   autocomplete: "off",
+  clearable: false,
 };
 
 const inputCommon: CommonFieldSupport = {
@@ -528,7 +530,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     hiddenTextProperty("format", "Display format", "قالب نمایش"),
     textProperty("min", "Minimum date", "کمترین تاریخ"),
     textProperty("max", "Maximum date", "بیشترین تاریخ"),
-    selectProperty("direction", "Calendar direction", "جهت تقویم", [
+    selectProperty("dir", "Calendar direction", "جهت تقویم", [
       { value: "ltr", label: label("Left to right", "چپ به راست") },
       { value: "rtl", label: label("Right to left", "راست به چپ") },
     ]),
@@ -540,14 +542,14 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
     "string",
     {
       secondEnabled: false,
-      frontalZero: true,
+      leadingZero: true,
       optionalUnits: [],
       showPersianNumber: false,
     },
     [
       textProperty("message", "Helper message", "پیام راهنما", true),
       booleanProperty("secondEnabled", "Enable seconds", "فعال‌سازی ثانیه"),
-      booleanProperty("frontalZero", "Leading zero", "صفر ابتدایی"),
+      booleanProperty("leadingZero", "Leading zero", "صفر ابتدایی"),
       stringListProperty("optionalUnits", "Optional units", "واحدهای اختیاری"),
       booleanProperty("showPersianNumber", "Show Persian digits", "نمایش ارقام فارسی"),
       textProperty("closeButtonText", "Close button text", "متن دکمه بستن", true),
@@ -590,7 +592,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       multiple: false,
       size: "md",
       popoverPosition: "fixed",
-      hideClear: false,
+      clearable: true,
       options: [
         {
           id: "option_1",
@@ -609,7 +611,7 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
         { value: "fixed", label: label("Fixed", "ثابت") },
         { value: "absolute", label: label("Absolute", "مطلق") },
       ]),
-      booleanProperty("hideClear", "Hide clear button", "پنهان‌کردن پاک‌کردن"),
+      booleanProperty("clearable", "Allow clearing", "\u0627\u0645\u06a9\u0627\u0646 \u067e\u0627\u06a9\u200c\u06a9\u0631\u062f\u0646"),
       {
         key: "options",
         label: label("Options", "گزینه‌ها"),
@@ -674,13 +676,13 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       placeholder: false,
     },
     "string",
-    // jb-file-input applies this MIME allow-list when acceptTypes is empty;
+    // jb-file-input applies this MIME allow-list when accept is empty;
     // keep the effective latest-package default in the portable document so
     // Preview and exported plans describe the actual runtime API.
-    { acceptTypes: "application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*" },
+    { accept: "application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*" },
     [
       textProperty("message", "Helper message", "پیام راهنما", true),
-      textProperty("acceptTypes", "Accepted file types", "نوع فایل‌های مجاز"),
+      textProperty("accept", "Accepted file types", "نوع فایل‌های مجاز"),
       numberProperty("maxSize", "Maximum file size (KB)", "بیشترین اندازه فایل (کیلوبایت)", { min: 0, step: 1 }),
       { ...urlProperty("uploadEndpoint", "Upload endpoint", "نشانی endpoint بارگذاری"), builderVisible: false },
     ],
@@ -692,11 +694,11 @@ export const configurationByType: Record<JBFormElementType, FormElementConfigura
       placeholder: false,
     },
     "string",
-    { multiple: false, acceptTypes: "image/*" },
+    { multiple: false, accept: "image/*" },
     [
       textProperty("message", "Helper message", "پیام راهنما", true),
       booleanProperty("multiple", "Multiple images", "چند تصویر"),
-      textProperty("acceptTypes", "Accepted image types", "نوع تصویرهای مجاز"),
+      textProperty("accept", "Accepted image types", "نوع تصویرهای مجاز"),
       numberProperty("maxFileSize", "Maximum file size (MB)", "بیشترین اندازه فایل (مگابایت)", { min: 0, step: 0.1 }),
       { ...urlProperty("uploadEndpoint", "Upload endpoint", "نشانی endpoint بارگذاری"), builderVisible: false },
     ],

@@ -2,6 +2,8 @@
 
 Status: Inventory complete; all Form Builder design-system requests resolved or deferred outside current scope
 Reviewed: 2026-08-27
+
+Historical snapshot: the September major-release migration and current data locations are documented in [JB-UPGRADE-2026-09.md](./JB-UPGRADE-2026-09.md). Older API names and styling-hook counts below are not the current component contract.
 Latest repository revision audited: [`8afc94a5cae5910c2dccab35c033d4d01150d27e`](https://github.com/javadbat/design-system/tree/8afc94a5cae5910c2dccab35c033d4d01150d27e)
 
 ## Sources

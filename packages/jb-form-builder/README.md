@@ -117,7 +117,7 @@ builder.addEventListener("file-upload", event => {
 });
 ```
 
-Call `event.preventDefault()` to own the upload. Otherwise, for a valid `http:` or `https:` endpoint, the default uploader uses `XMLHttpRequest` to send a `POST` `multipart/form-data` request with the selected file under the field name `file`. Upload progress is reflected through the file input's `uploading` attribute and `uploadPercent` property.
+Call `event.preventDefault()` to own the upload. Otherwise, for a valid `http:` or `https:` endpoint, the default uploader uses `XMLHttpRequest` to send a `POST` `multipart/form-data` request with the selected file under the field name `file`. Upload progress is reflected through the file input's `is-uploading` attribute and `uploadPercent` property.
 
 The default uploader does not interpret the server response. Authentication, retries, response parsing, and uploaded-file URL handling belong to the host application.
 

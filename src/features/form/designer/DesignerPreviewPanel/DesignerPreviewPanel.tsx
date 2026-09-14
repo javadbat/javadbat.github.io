@@ -54,7 +54,7 @@ export const DesignerPreviewPanel = observer(function DesignerPreviewPanel({
             size="sm"
             popoverPosition="fixed"
             value={ui.previewSource}
-            hideClear
+            clearable={false}
             onChange={event => {
               ui.setPreviewSource(String(event.target.value) as DesignerPreviewSource);
               rendererRef.current?.reset();

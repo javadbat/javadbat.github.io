@@ -99,7 +99,7 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
         className={styles.searchInput}
         onInput={event => setQuery(String((event.target as unknown as { value?: unknown }).value ?? ""))}
       >
-        <jb-icon-search slot="end-section" className={styles.searchIcon}/>
+        <jb-icon-search slot="inline-end" className={styles.searchIcon}/>
         </JBInput>
 
       <div className={styles.catalogGroups}>

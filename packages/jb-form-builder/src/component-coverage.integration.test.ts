@@ -175,6 +175,19 @@ beforeEach(() => {
 });
 
 describe("real JB component Preview coverage", () => {
+  it("keeps select clearing disabled after runtime property and attribute application", async () => {
+    const entry = formElementRegistry.find(candidate => candidate.type === "jb-select")!;
+    const element = createDefaultElement(entry, "nonClearable");
+    element.props.clearable = false;
+    element.initialValue = "option_1";
+    const renderer = createRenderer(element);
+    await renderer.updateComplete;
+    const runtime = expectReadyRuntime(renderer, element);
+    expect(runtime.clearable).toBe(false);
+    expect(runtime.getAttribute("clearable")).toBe("false");
+    expect(runtime.shadowRoot?.querySelector(".clear-button")).toBeNull();
+  });
+
   it("loads jb-option with jb-select for an isolated Preview document", () => {
     expect(selectLoaderRegisteredOption).toBe(true);
   });

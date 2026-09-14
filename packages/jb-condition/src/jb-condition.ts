@@ -63,9 +63,9 @@ export class JBConditionWebComponent extends HTMLElementBase {
     if (this.#matched) return;
     const elements = Array.from(this.#preservedContent.querySelectorAll<HTMLElement>("*"));
     for (const element of elements) {
-      const formControl = element as HTMLElement & { formResetCallback?: () => void };
-      if (typeof formControl.formResetCallback === "function") {
-        formControl.formResetCallback();
+      const formControl = element as HTMLElement & { reset?: () => void };
+      if (element.localName.startsWith("jb-") && typeof formControl.reset === "function") {
+        formControl.reset();
       } else if (element instanceof HTMLInputElement) {
         if (element.type === "checkbox" || element.type === "radio") element.checked = element.defaultChecked;
         else if (element.type !== "file") element.value = element.defaultValue;

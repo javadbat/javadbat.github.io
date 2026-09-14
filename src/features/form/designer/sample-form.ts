@@ -64,7 +64,7 @@ export const DESIGNER_SAMPLE_FORM: JBFormDocumentV1 = {
         size: "lg",
         multiple: false,
         popoverPosition: "fixed",
-        hideClear: true,
+        clearable: false,
         options: [
           { id: "age-6-8", value: "6-8", label: localizedText("6–8 years"), disabled: false },
           { id: "age-9-11", value: "9-11", label: localizedText("9–11 years"), disabled: false },

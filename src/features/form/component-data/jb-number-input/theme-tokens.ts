@@ -1,4 +1,4 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
   "--jb-number-input-button-width",
   "--jb-number-input-button-width-lg",
@@ -11,6 +11,7 @@ export const componentThemeTokens = [
   "--jb-number-input-decrease-button-border-radius",
   "--jb-number-input-decrease-button-color",
   "--jb-number-input-decrease-button-color-hover",
+  "--jb-number-input-focus-ring-color",
   "--jb-number-input-icon-size",
   "--jb-number-input-icon-size-lg",
   "--jb-number-input-icon-size-md",

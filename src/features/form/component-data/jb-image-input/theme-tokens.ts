@@ -1,9 +1,10 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
   "--jb-image-input-bg-color",
   "--jb-image-input-border-radius",
   "--jb-image-input-button-border-radius",
   "--jb-image-input-error-overlay-bg-color",
+  "--jb-image-input-focus-ring-color",
   "--jb-image-input-height",
   "--jb-image-input-message-box-display",
   "--jb-image-input-message-color",

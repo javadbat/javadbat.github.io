@@ -72,14 +72,14 @@ test("uses the demo canvas as the only preview background layer", async ({ page 
 test("isolates inputs, choices, and actions through the component preview selector", async ({ page }) => {
   await openDesigner(page);
   await page.getByRole("button", { name: "Components" }).click();
-  const selector = page.getByRole("group", { name: "Preview component" });
+  const selector = page.locator('jb-tab-list[aria-label="Preview component"]');
   const renderedTypes = () => page.locator("jb-form-builder").evaluate(element => Array.from(
     element.shadowRoot?.querySelectorAll<HTMLElement>("[data-element-type]") ?? [],
     item => item.dataset.elementType,
   ));
   const choose = async (label: string) => {
     await selector.scrollIntoViewIfNeeded();
-    await selector.getByRole("button", { name: label, exact: true }).click();
+    await selector.locator("jb-tab-trigger").filter({ hasText: label }).click();
   };
 
   await choose("Choices");
@@ -139,7 +139,7 @@ test("forces an interaction state in the isolated component preview", async ({ p
   };
   const previewBorderColor = () => page.locator("jb-form-builder").evaluate(element => {
     const input = element.shadowRoot?.querySelector<HTMLElement>("jb-input");
-    const inputBox = input?.shadowRoot?.querySelector<HTMLElement>(".input-box");
+    const inputBox = input?.shadowRoot?.querySelector<HTMLElement>('[part~="control"]');
     return {
       state: input?.getAttribute("data-designer-preview-state") ?? "",
       borderColor: inputBox ? getComputedStyle(inputBox).borderColor : "",
@@ -660,7 +660,7 @@ test("keeps English Designer chrome LTR while a saved Persian form previews RTL"
 test("switches Designer chrome to persistent Persian RTL without changing the English preview", async ({ page }) => {
   await openDesigner(page);
 
-  const language = page.locator("[class*=languageSelect]").first();
+  const language = page.locator('jb-select[name="formRouteLanguage"]').first();
   await language.getByRole("button", { name: "Toggle options" }).click();
   await page.locator("jb-option").filter({ hasText: "FA", visible: true }).click();
 

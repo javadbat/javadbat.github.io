@@ -29,7 +29,7 @@ const advancedPropertyKeys = new Set([
   "tickStep",
   "minorTickStep",
   "popoverPosition",
-  "hideClear",
+  "clearable",
   "autoHeight",
   "optionalUnits",
   "maxSize",
@@ -41,7 +41,7 @@ const removedPropertyKeys = new Set([
   "valueType",
   "disableBalloonRotation",
   "autofocus",
-  "frontalZero",
+  "leadingZero",
   "closeButtonText",
 ]);
 

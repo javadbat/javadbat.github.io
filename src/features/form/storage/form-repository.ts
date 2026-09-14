@@ -98,7 +98,7 @@ async function validateNamedRecord(value: unknown): Promise<Result<StoredFormRec
   if (value.id !== validation.document.id || value.slug !== validation.document.slug) {
     return failure("corrupt-record", "Saved form projections do not match the contained document.");
   }
-  return success(value as unknown as StoredFormRecordV1);
+  return success({ ...value, document: validation.document } as unknown as StoredFormRecordV1);
 }
 
 /** Validates the singleton draft envelope and its optional all-or-nothing named-form link. */
@@ -131,7 +131,7 @@ async function validateDraftRecord(value: unknown): Promise<Result<CurrentDraftR
   if (allLinked && (value.linkedFormId !== validation.document.id || value.linkedSlug !== validation.document.slug)) {
     return failure("corrupt-record", "Current draft projections do not match the linked document.");
   }
-  return success(value as unknown as CurrentDraftRecordV1);
+  return success({ ...value, document: validation.document } as unknown as CurrentDraftRecordV1);
 }
 
 /** IndexedDB implementation of the shared form persistence and concurrency contract. */
@@ -369,9 +369,10 @@ export class IndexedDbFormRepository implements FormRepository {
 
     /** Final schema and semantic check after identity and timestamp normalization. */
     const validation = await validateDocument(document);
-    if (!validation.valid) {
+    if (!validation.valid || !validation.document) {
       return failure("validation-failed", "The form must be valid before it can be saved.", { formIssues: validation.issues });
     }
+    document = validation.document;
 
     /** Open database required for the atomic save. */
     const connection = await this.database.open();

@@ -1,4 +1,5 @@
 import { COMPONENT_THEME_TOKENS } from "./component-theme-tokens";
+import { COMPONENT_THEME_TOKEN_MIGRATIONS } from "./component-theme-token-migrations";
 
 export { COMPONENT_THEME_TOKENS } from "./component-theme-tokens";
 
@@ -216,7 +217,28 @@ function rejectUnknownKeys(value: Record<string, unknown>, allowed: readonly str
 }
 
 /** Validates untrusted ThemeConfig without changing it or silently dropping values. */
-export function validateThemeConfig(value: unknown): ThemeConfigValidationResult {
+function migrateLegacyThemeTokens(value: unknown): unknown {
+  if (!isRecord(value) || !isRecord(value.components)) return value;
+  const mappings: Partial<Record<string, Readonly<Record<string, string>>>> = COMPONENT_THEME_TOKEN_MIGRATIONS;
+  const components = Object.fromEntries(Object.entries(value.components).map(([tag, component]) => {
+    if (!isRecord(component) || !isRecord(component.tokens)) return [tag, component];
+    const tokens = { ...component.tokens };
+    const rules = {
+      ...(inheritedInputTokenTags.has(tag as ThemeComponentTag) ? mappings["jb-input"] : {}),
+      ...mappings[tag],
+    };
+    for (const [oldName, newName] of Object.entries(rules)) {
+      if (!Object.hasOwn(tokens, oldName)) continue;
+      if (!Object.hasOwn(tokens, newName)) tokens[newName] = tokens[oldName];
+      delete tokens[oldName];
+    }
+    return [tag, { ...component, tokens }];
+  }));
+  return { ...value, components };
+}
+
+export function validateThemeConfig(input: unknown): ThemeConfigValidationResult {
+  const value = migrateLegacyThemeTokens(input);
   const issues: ThemeConfigIssue[] = [];
   if (!isRecord(value)) return { valid: false, issues: [{ path: "/", message: "ThemeConfig must be an object." }] };
 

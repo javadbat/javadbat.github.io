@@ -1,3 +1,23 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
+  "--jb-listbox-background",
+  "--jb-listbox-background-disabled",
+  "--jb-listbox-border-bottom-width",
+  "--jb-listbox-border-bottom-width-focus",
+  "--jb-listbox-border-color",
+  "--jb-listbox-border-color-focus",
+  "--jb-listbox-border-color-invalid",
+  "--jb-listbox-border-radius",
+  "--jb-listbox-border-width",
+  "--jb-listbox-border-width-focus",
+  "--jb-listbox-box-shadow",
+  "--jb-listbox-box-shadow-focus",
+  "--jb-listbox-gap",
+  "--jb-listbox-label-color",
+  "--jb-listbox-label-font-size",
+  "--jb-listbox-max-height",
+  "--jb-listbox-message-color",
+  "--jb-listbox-message-color-invalid",
+  "--jb-listbox-message-font-size",
+  "--jb-listbox-padding",
 ] as const;

@@ -1,5 +1,9 @@
-/** CSS custom properties supported by this component in the form designer. */
+/** Public CSS custom properties from the installed component manifest and CSS. */
 export const componentThemeTokens = [
+  "--jb-control-margin",
+  "--jb-control-overflow",
+  "--jb-control-shadow",
+  "--jb-control-shadow-focus",
   "--jb-input-bg-color",
   "--jb-input-bg-color-disabled",
   "--jb-input-border-bottom-width",
@@ -13,10 +17,8 @@ export const componentThemeTokens = [
   "--jb-input-border-radius-xs",
   "--jb-input-border-width",
   "--jb-input-border-width-focus",
-  "--jb-input-box-margin",
-  "--jb-input-box-overflow",
-  "--jb-input-box-shadow",
-  "--jb-input-box-shadow-focus",
+  "--jb-input-clear-icon-color",
+  "--jb-input-focus-ring-color",
   "--jb-input-height",
   "--jb-input-height-lg",
   "--jb-input-height-sm",
@@ -53,6 +55,7 @@ export const componentThemeTokens = [
   "--jb-input-message-font-size-sm",
   "--jb-input-message-font-size-xl",
   "--jb-input-message-font-size-xs",
+  "--jb-input-message-padding",
   "--jb-input-placeholder-color",
   "--jb-input-placeholder-font-size",
   "--jb-input-value-color",

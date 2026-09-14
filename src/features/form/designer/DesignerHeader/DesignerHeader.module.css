@@ -20,6 +20,11 @@
 .mobileActionsMenu { position: fixed; z-index: 30; inset-block-start: 5.55rem; inset-inline-end: 1rem; width: min(20rem, calc(100vw - 2rem)); padding: 0.75rem; border: 0.0625rem solid var(--designer-line); border-radius: 0.9rem; display: grid; gap: 0.5rem; background: #fff; box-shadow: 0 1rem 2.5rem rgba(8, 17, 53, 0.2); }
 .mobileActionsMenu > a, .mobileActionsMenu > jb-button, .mobileActionsMenu > jb-select, .mobileActionsMenu > a jb-button { width: 100%; }
 .mobileActionsMenu > jb-button, .mobileActionsMenu > a jb-button { --jb-button-height: 2.75rem; --jb-button-height-sm: 2.75rem; }
+@media (min-width: 64.001rem) and (max-width: 90rem) {
+  .header { grid-template-columns: minmax(0, 1fr) auto; }
+  .headerBrand, .backButton span, .headerDivider { display: none; }
+  .themeName { min-width: 4rem; }
+}
 @media (max-width: 64rem) {
   .header { position: sticky; z-index: 10; top: 0; padding-inline: 1rem; grid-template-columns: minmax(0, 1fr) auto; }
   .headerBrand, .desktopHeaderActions { display: none; }

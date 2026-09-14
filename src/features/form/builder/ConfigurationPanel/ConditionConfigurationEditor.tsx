@@ -89,7 +89,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
           name="conditionMatch"
           label="Show when"
           value={element.conditions.match}
-          hideClear
+          clearable={false}
           onChange={event => store.updateSelectedConditionMatch(event.target.value === "any" ? "any" : "all")}
         >
           <JBOption value="all">All conditions match</JBOption>
@@ -112,7 +112,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                 name={`conditionField_${rule.id}`}
                 label="Field"
                 value={rule.fieldName}
-                hideClear
+                clearable={false}
                 onChange={event => {
                   const fieldName = event.target.value;
                   const nextSource = sourceElements.find(candidate => candidate.name === fieldName);
@@ -133,7 +133,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                 name={`conditionOperator_${rule.id}`}
                 label="Operator"
                 value={rule.operator}
-                hideClear
+                clearable={false}
                 onChange={event => {
                   const operator = event.target.value;
                   store.updateSelectedConditionRule(rule.id, noValueOperators.has(operator) ? { operator, value: undefined } : { operator, value: rule.value ?? "" });
@@ -148,7 +148,7 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                     name={`conditionValue_${rule.id}`}
                     label="Value"
                     value={String(rule.value ?? false)}
-                    hideClear
+                    clearable={false}
                     onChange={event => store.updateSelectedConditionRule(rule.id, { value: event.target.value === "true" })}
                   >
                     <JBOption value="true">True</JBOption>

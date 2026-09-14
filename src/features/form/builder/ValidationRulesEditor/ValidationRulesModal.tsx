@@ -49,7 +49,7 @@ export const ValidationRulesModal = observer(function ValidationRulesModal({ loc
               name="newValidationRule"
               label={messages.ruleType}
               value={selectedRule}
-              hideClear
+              clearable={false}
               onChange={event => setNextRule(event.target.value)}
             >
               {supportedRules.map(rule => (
