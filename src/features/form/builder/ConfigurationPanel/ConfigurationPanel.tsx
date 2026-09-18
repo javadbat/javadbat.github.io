@@ -61,7 +61,7 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           </p>
           <h2 id="properties-title">
             {isMobile &&
-            element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription
+            element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : ""
             }
             {!isMobile && messages.properties}
           </h2>
