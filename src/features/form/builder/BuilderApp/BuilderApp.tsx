@@ -17,6 +17,7 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
+  //TODO: you pass message to sub components. but you should break dictionary to sub components and pass only the required messages to each component. this will help with tree shaking and reduce bundle size.
   const { direction, messages, setLocale } = useFormLocale("en");
   const slug = getCurrentFormSlug();
   const actions = useBuilderAppActions();

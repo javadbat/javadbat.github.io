@@ -109,6 +109,7 @@ export function FormRouteMenu({
         size="sm"
         value={language}
         clearable={false}
+        popoverPosition="fixed"
         onChange={event => selectLanguage(String(event.target.value))}
       >
         {languageOptions.map(option => <JBOption key={option.value} value={option.value}>{option.label}</JBOption>)}

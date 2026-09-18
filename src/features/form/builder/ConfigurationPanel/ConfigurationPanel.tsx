@@ -15,7 +15,7 @@ import { ConditionConfigurationEditor } from "./ConditionConfigurationEditor";
 import { WizardConfigurationEditor } from "./WizardConfigurationEditor";
 import { isConditionElement, isContainerElement, isTabElement, isWizardElement } from "../../domain/form-document";
 import styles from "./ConfigurationPanel.module.css";
-
+import { useMediaQuery } from "usehooks-ts";
 interface ConfigurationPanelProps {
   messages: FormMessages;
 }
@@ -37,13 +37,7 @@ const advancedPropertyKeys = new Set([
   "separator",
 ]);
 
-const removedPropertyKeys = new Set([
-  "valueType",
-  "disableBalloonRotation",
-  "autofocus",
-  "leadingZero",
-  "closeButtonText",
-]);
+const removedPropertyKeys = new Set(["valueType", "disableBalloonRotation", "autofocus", "leadingZero", "closeButtonText"]);
 
 export const ConfigurationPanel = observer(function ConfigurationPanel({ messages }: ConfigurationPanelProps) {
   const store = useBuilderStore();
@@ -57,12 +51,20 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
   const standardProperties = visibleProperties.filter(definition => !definition.localized && !advancedPropertyKeys.has(definition.key));
   const hasCommonContent = Boolean(entry && (entry.commonFields.label || entry.commonFields.placeholder));
   const hasCommonBehavior = Boolean(entry && (entry.commonFields.initialValue || entry.commonFields.required || entry.commonFields.disabled));
+  const isMobile = useMediaQuery("(max-width: 63.999rem)");
   return (
     <aside className={`${layoutStyles.panel} ${styles.configuration}`} data-builder-panel="properties" aria-labelledby="properties-title">
       <div className={styles.panelHeading}>
         <div>
-          <p className={styles.eyebrow}>{messages.settings}</p>
-          <h2 id="properties-title">{messages.properties}</h2>
+          <p className={styles.eyebrow}>
+            {!isMobile && messages.settings}
+          </p>
+          <h2 id="properties-title">
+            {isMobile &&
+            element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription
+            }
+            {!isMobile && messages.properties}
+          </h2>
         </div>
         {entry ? (
           <span className={styles.iconTile}>
@@ -70,7 +72,11 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
           </span>
         ) : null}
       </div>
-      <p className={styles.panelDescription}>{element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription}</p>
+      {!isMobile && (
+        <p className={styles.panelDescription}>
+          {element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription}
+        </p>
+      )}
       {!element || !entry ? (
         <div className={styles.noSelection}>
           <span className={styles.selectionRing} />

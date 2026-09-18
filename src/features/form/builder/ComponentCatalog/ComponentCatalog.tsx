@@ -10,7 +10,8 @@ import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
 import { beginBuilderDrag, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
-import "jb-icons/search"
+import "jb-icons/search";
+import { useMediaQuery } from "usehooks-ts";
 interface ComponentCatalogProps {
   messages: FormMessages;
   onElementAdded?: (elementId: string) => void;
@@ -70,7 +71,15 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
     const normalized = query.trim().toLocaleLowerCase();
     const entries = normalized
       ? supportedComponentData.filter(entry =>
-          [entry.displayName, getFormElementDisplayName(entry, store.editingLocale), entry.type, entry.category, entry.description, getFormElementDescription(entry, store.editingLocale), ...entry.keywords]
+          [
+            entry.displayName,
+            getFormElementDisplayName(entry, store.editingLocale),
+            entry.type,
+            entry.category,
+            entry.description,
+            getFormElementDescription(entry, store.editingLocale),
+            ...entry.keywords,
+          ]
             .join(" ")
             .toLocaleLowerCase()
             .includes(normalized),
@@ -79,17 +88,21 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
 
     return Map.groupBy(entries, entry => entry.category);
   }, [query, store.editingLocale]);
+  const isMobile = useMediaQuery("(max-width: 63.999rem)");
 
   return (
     <aside className={`${layoutStyles.panel} ${styles.catalog}`} data-builder-panel="catalog" aria-labelledby="component-catalog-title">
       <div className={styles.panelHeading}>
         <div>
-          <p className={styles.eyebrow}>{messages.builder}</p>
-          <h2 id="component-catalog-title">{messages.componentCatalog}</h2>
+          {!isMobile && <p className={styles.eyebrow}>{messages.builder}</p>}
+          <h2 id="component-catalog-title">
+            {isMobile && messages.catalogDescription}
+            {!isMobile && messages.componentCatalog}
+          </h2>
         </div>
         <span className={styles.countBadge}>{supportedComponentData.length}</span>
       </div>
-      <p className={styles.panelDescription}>{messages.catalogDescription}</p>
+      {!isMobile && <p className={styles.panelDescription}>{messages.catalogDescription}</p>}
       <JBInput
         name="componentSearch"
         type="search"
@@ -99,8 +112,8 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
         className={styles.searchInput}
         onInput={event => setQuery(String((event.target as unknown as { value?: unknown }).value ?? ""))}
       >
-        <jb-icon-search slot="inline-end" className={styles.searchIcon}/>
-        </JBInput>
+        <jb-icon-search slot="inline-end" className={styles.searchIcon} />
+      </JBInput>
 
       <div className={styles.catalogGroups}>
         {[...filteredGroups.entries()].map(([category, entries]) => (

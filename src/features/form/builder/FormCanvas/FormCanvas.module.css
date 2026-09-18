@@ -436,8 +436,8 @@
 }
 
 .cardActions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 0.15rem;
   justify-content: flex-end;
   padding: 0.2rem;
@@ -564,7 +564,6 @@
 
   .cardActions {
       grid-column: 1 / -1;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
       inline-size: 100%;
     }
 
