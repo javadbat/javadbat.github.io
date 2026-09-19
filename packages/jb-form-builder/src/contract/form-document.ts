@@ -242,22 +242,23 @@ export function getLocalizedText(value: LocalizedText | undefined, locale: strin
   return value.translations[locale] ?? value.translations[defaultLocale] ?? value.translations.en ?? Object.values(value.translations)[0] ?? "";
 }
 
-export function createEmptyFormDocument(): JBFormDocumentV1 {
+export function createEmptyFormDocument(defaultLocale = "en"): JBFormDocumentV1 {
   const timestamp = new Date().toISOString();
+  const isPersian = defaultLocale.toLowerCase().split("-")[0] === "fa";
 
   return {
     $schema: JB_FORM_SCHEMA_V1,
     schemaVersion: 1,
     id: crypto.randomUUID(),
     metadata: {
-      name: localizedText("Untitled form"),
+      name: localizedText(isPersian ? "فرم بدون عنوان" : "Untitled form", defaultLocale),
       createdAt: timestamp,
       updatedAt: timestamp,
     },
     localization: {
-      defaultLocale: "en",
+      defaultLocale,
       locales: {
-        en: { direction: "ltr" },
+        [defaultLocale]: { direction: isPersian ? "rtl" : "ltr" },
       },
     },
     elements: [],

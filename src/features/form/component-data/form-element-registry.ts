@@ -124,6 +124,18 @@ const persianDisplayNames: Record<JBFormElementType, string> = {
   "jb-button": "\u062f\u06a9\u0645\u0647",
 };
 
+const persianCategories: Record<FormElementCategory, string> = {
+  Container: "ساختار",
+  Content: "محتوا",
+  Text: "متن",
+  "Date & time": "تاریخ و زمان",
+  Choice: "انتخاب",
+  Identity: "هویت",
+  Financial: "مالی",
+  File: "فایل",
+  Action: "عملیات",
+};
+
 const persianDescriptions: Record<JBFormElementType, string> = {
   text: "\u0645\u062a\u0646 \u062a\u0648\u0636\u06cc\u062d\u06cc \u0628\u0647 \u0641\u0631\u0645 \u0627\u0636\u0627\u0641\u0647 \u0645\u06cc\u200c\u06a9\u0646\u062f.",
   image: "\u062a\u0635\u0648\u06cc\u0631\u06cc \u0631\u0627 \u0627\u0632 \u06cc\u06a9 \u0646\u0634\u0627\u0646\u06cc \u0627\u06cc\u0646\u062a\u0631\u0646\u062a\u06cc \u0646\u0645\u0627\u06cc\u0634 \u0645\u06cc\u200c\u062f\u0647\u062f.",
@@ -157,6 +169,11 @@ const persianDescriptions: Record<JBFormElementType, string> = {
 
 export function getFormElementDisplayName(entry: FormElementRegistryEntry, locale: string): string {
   return locale.toLowerCase().split("-")[0] === "fa" ? persianDisplayNames[entry.type] : entry.displayName;
+}
+
+/** Resolves catalog grouping labels for the current interface locale. */
+export function getFormElementCategoryName(category: FormElementCategory, locale: string): string {
+  return locale.toLowerCase().split("-")[0] === "fa" ? persianCategories[category] : category;
 }
 
 /** Resolves the catalog description for a locale, falling back to English. */

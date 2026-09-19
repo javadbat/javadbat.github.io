@@ -1,4 +1,4 @@
-.modalContent,
+﻿.modalContent,
 .validStatus,
 .errorStatus,
 .invalidStatus,
@@ -13,7 +13,7 @@
 
 .eyebrow {
   margin: 0;
-  color: var(--form-accent);
+  color: var(--jb-primary);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -31,7 +31,7 @@
 
 .description {
   margin: 0;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.82rem;
   line-height: 1.6;
 }
@@ -53,7 +53,7 @@
 
 .fileChooser span {
   overflow: hidden;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -72,27 +72,27 @@
 .errorStatus,
 .invalidStatus {
   margin: 0;
-  padding: 0.8rem 0.9rem;
-  border-radius: var(--form-radius-md);
+  padding: 0.75rem 1rem;
+  border-radius: var(--jb-radius-sm);
   font-size: 0.78rem;
   line-height: 1.5;
 }
 
 .validStatus {
-  color: var(--form-success-ink);
-  background: var(--form-success-soft);
+  color: var(--jb-green-dark);
+  background: var(--jb-green-subtle);
 }
 
 .errorStatus,
 .invalidStatus {
-  color: oklch(0.48 0.17 28);
-  background: oklch(0.96 0.035 28);
+  color: var(--jb-red-dark);
+  background: var(--jb-red-subtle);
 }
 
 .invalidStatus ul {
   display: grid;
-  gap: 0.45rem;
-  margin: 0.65rem 0 0;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -100,9 +100,9 @@
 .invalidStatus li {
   display: grid;
   grid-template-columns: minmax(7rem, 0.3fr) minmax(0, 1fr);
-  gap: 0.65rem;
-  padding: 0.6rem;
-  background: color-mix(in oklch, var(--form-surface) 75%, transparent);
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: color-mix(in oklch, var(--jb-surface-primary) 75%, transparent);
 }
 
 .invalidStatus code {
@@ -113,11 +113,11 @@
 
 .modalActions {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   justify-content: flex-end;
 }
 
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   .modalContent {
     inline-size: calc(100vw - 3rem);
   }

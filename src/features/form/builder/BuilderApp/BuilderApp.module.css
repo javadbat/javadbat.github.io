@@ -1,72 +1,49 @@
 .app {
-  --form-ink: #101b48;
-  --form-muted: #657090;
-  --form-line: #dde2ef;
-  --form-surface: #ffffff;
-  --form-canvas: #f3f6fc;
-  --form-accent: #2455e8;
-  --form-accent-strong: #173fb7;
-  --form-accent-soft: #edf2ff;
-  --form-neutral-soft: #f4f6fb;
-  --form-success-ink: #0a8f59;
-  --form-success-soft: #edf9f3;
-  --form-warning-ink: #9a6810;
-  --form-warning-soft: #fff8e8;
-  --shadow-drop: 0 0.0625rem 0.125rem rgba(16, 27, 72, 0.04), 0 0.25rem 0.9rem rgba(16, 27, 72, 0.045);
-  --shadow-box: inset 0 0 0 0.0625rem rgba(16, 27, 72, 0.055);
-  --shadow-float: 0 0.75rem 2rem rgba(16, 27, 72, 0.1), 0 0.125rem 0.5rem rgba(16, 27, 72, 0.06);
-  --shadow-selected: 0 0 0 0.125rem rgba(36, 85, 232, 0.22), var(--shadow-drop);
-  --form-radius-sm: 0.6rem;
-  --form-radius-md: 0.75rem;
-  --form-radius-lg: 1rem;
-  --form-inner-line: color-mix(in srgb, var(--form-line) 88%, transparent);
-  --jb-primary: var(--form-accent);
-  --jb-content-primary: var(--form-ink);
-  --jb-content-inverse: #ffffff;
-  --jb-surface-primary: var(--form-surface);
-  --jb-surface-secondary: var(--form-neutral-soft);
-  --jb-radius: 0.65rem;
-  --jb-radius-sm: 0.55rem;
-  --jb-radius-xs: 0.45rem;
+  --shadow-drop: 0 0.0625rem 0.125rem color-mix(in oklch, var(--jb-content-primary) 4%, transparent), 0 0.25rem 0.9rem color-mix(in oklch, var(--jb-content-primary) 5%, transparent);
+  --shadow-box: inset 0 0 0 0.0625rem color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
+  --shadow-float: 0 0.75rem 2rem color-mix(in oklch, var(--jb-content-primary) 10%, transparent), 0 0.125rem 0.5rem color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
+  --shadow-selected: 0 0 0 0.125rem color-mix(in oklch, var(--jb-primary) 22%, transparent), var(--shadow-drop);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   block-size: 100dvh;
   min-block-size: 0;
   overflow: hidden;
-  color: var(--form-ink);
-  background: var(--form-canvas);
+  color: var(--jb-content-primary);
+  background: var(--jb-surface-secondary);
   font-family: text-font, fa-font, system-ui, sans-serif;
 }
 
 .app :global(jb-button[variant="outline"]) {
   --jb-button-border-width: 0.0625rem;
-  --jb-button-border-color: var(--form-line);
-  --jb-button-bg-color-outline: var(--form-surface);
-  --jb-button-bg-color-outline-hover: var(--form-accent-soft);
+  --jb-button-border-color: var(--jb-neutral-9);
+  --jb-button-bg-color-outline: var(--jb-surface-primary);
+  --jb-button-bg-color-outline-hover: var(--jb-primary-subtle);
   --jb-button-box-shadow: none;
 }
+
 .app :global(button) {
   font-family: inherit;
 }
 
 .app :global(jb-button[color="primary"]) {
-  --jb-button-primary: var(--form-accent);
-  --jb-button-base-color-hover: #3565ed;
-  --jb-button-base-color-pressed: var(--form-accent-strong);
-  --jb-button-box-shadow: 0 0.35rem 0.85rem rgba(36, 85, 232, 0.18);
+  --jb-button-primary: var(--jb-primary);
+  --jb-button-base-color-hover: var(--jb-primary-hover);
+  --jb-button-base-color-pressed: var(--jb-primary-dark);
+  --jb-button-box-shadow: 0 0.35rem 0.85rem color-mix(in oklch, var(--jb-primary) 18%, transparent);
 }
 
 .app :global(jb-button[variant=ghost]),
 .app :global(jb-button[variant=text]) {
-  --jb-button-color-ghost: var(--form-accent);
-  --jb-button-color-ghost-hover: var(--form-accent-strong);
-  --jb-button-bg-color-ghost-hover: var(--form-accent-soft);
-  --jb-button-color-text: var(--form-accent);
-  --jb-button-color-text-hover: var(--form-accent-strong);
+  --jb-button-color-ghost: var(--jb-primary);
+  --jb-button-color-ghost-hover: var(--jb-primary-dark);
+  --jb-button-bg-color-ghost-hover: var(--jb-primary-subtle);
+  --jb-button-color-text: var(--jb-primary);
+  --jb-button-color-text-hover: var(--jb-primary-dark);
 }
 
-@media (max-width: 63.999rem) {
+/* Responsive ranges follow jb-core theme breakpoints: sm 40rem, md 48rem, lg 64rem, xl 80rem. */
+@media (width < 64rem) {
   .app {
-      grid-template-rows: auto minmax(0, 1fr);
-    }
-   }
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}

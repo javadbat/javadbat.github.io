@@ -151,7 +151,7 @@ export const BuilderHeader = observer(function BuilderHeader({ onOpenSettings, o
         </output>
       </div>
 
-      <nav className={styles.headerActions} aria-label="Form actions">
+      <nav className={styles.headerActions} aria-label={t("formActions")}>
         <FormRouteMenu
           currentPage="builder"
           formSlug={selectedFormSlug}
@@ -163,7 +163,7 @@ export const BuilderHeader = observer(function BuilderHeader({ onOpenSettings, o
           <button
             type="button"
             className={styles.overflowMenuToggle}
-            aria-label="More form actions"
+            aria-label={t("moreFormActions")}
             aria-expanded={menuOpen}
             aria-controls="builder-mobile-actions"
             onClick={() => setMenuOpen(open => !open)}

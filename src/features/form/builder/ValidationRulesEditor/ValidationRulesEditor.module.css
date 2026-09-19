@@ -1,17 +1,17 @@
-.validationRule {
+﻿.validationRule {
   corner-shape: squircle;
 }
 
 .emptyRules {
   margin: 0;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.7rem;
   line-height: 1.55;
 }
 
 .validationSummaryList {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -19,14 +19,14 @@
 
 .validationSummaryList li {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
   min-inline-size: 0;
-  padding: 0.55rem 0.65rem;
-  border: 0.0625rem solid var(--form-inner-line);
-  border-radius: var(--form-radius-sm);
-  background: oklch(0.985 0.006 255);
+  padding: 0.5rem 0.75rem;
+  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-xs);
+  background: var(--jb-surface-secondary);
   font-size: 0.72rem;
 }
 
@@ -40,7 +40,7 @@
 .validationSummaryList code {
   overflow: hidden;
   max-inline-size: 45%;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.66rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -63,7 +63,7 @@
 
 .eyebrow {
   margin: 0;
-  color: var(--form-accent);
+  color: var(--jb-primary);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -91,9 +91,9 @@
   align-content: start;
   gap: 1rem;
   padding: 1rem;
-  border: 0.0625rem solid var(--form-inner-line);
-  border-radius: var(--form-radius-md);
-  background: oklch(0.975 0.01 255);
+  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-sm);
+  background: var(--jb-surface-secondary);
 }
 
 .modalIntro h3,
@@ -102,8 +102,8 @@
 }
 
 .modalIntro p {
-  margin: 0.4rem 0 0;
-  color: var(--form-muted);
+  margin: 0.5rem 0 0;
+  color: var(--jb-content-secondary);
   font-size: 0.75rem;
   line-height: 1.55;
 }
@@ -111,7 +111,7 @@
 .currentRules {
   display: grid;
   align-content: start;
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
 .currentRulesHeading {
@@ -124,11 +124,11 @@
 .currentRulesHeading span {
   display: inline-grid;
   place-items: center;
-  min-inline-size: 1.8rem;
-  block-size: 1.8rem;
+  min-inline-size: 1.75rem;
+  block-size: 1.75rem;
   border-radius: 999px;
-  color: var(--form-accent-strong);
-  background: var(--form-accent-soft);
+  color: var(--jb-primary-dark);
+  background: var(--jb-primary-subtle);
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -136,7 +136,7 @@
 .addValidationRule {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.55rem;
+  gap: 0.5rem;
   align-items: end;
 }
 
@@ -149,11 +149,11 @@
 .validationRule {
   display: grid;
   align-content: start;
-  gap: 0.65rem;
+  gap: 0.75rem;
   padding: 1rem;
-  border: 0.0625rem solid var(--form-inner-line);
-  border-radius: var(--form-radius-md);
-  background: oklch(0.985 0.006 255);
+  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-sm);
+  background: var(--jb-surface-secondary);
   box-shadow: none;
 }
 
@@ -167,14 +167,14 @@
   place-items: center;
   min-block-size: 12rem;
   padding: 1.5rem;
-  border: 0.0625rem dashed var(--form-inner-line);
-  border-radius: var(--form-radius-md);
+  border: 0.0625rem dashed color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-sm);
   text-align: center;
 }
 
 .modalEmptyState p {
   margin: 0;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.78rem;
 }
 
@@ -197,7 +197,7 @@
 .validationParameterGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.35fr);
-  gap: 0.55rem;
+  gap: 0.5rem;
 }
 
 .validationIssues {
@@ -205,12 +205,12 @@
   gap: 0.25rem;
   margin: 0;
   padding-inline-start: 1rem;
-  color: oklch(0.5 0.18 28);
+  color: var(--jb-red-dark);
   font-size: 0.68rem;
   line-height: 1.45;
 }
 
-@media (max-width: 58rem) {
+@media (width < 64rem) {
   .modalContent {
     grid-template-columns: minmax(0, 1fr);
     inline-size: calc(100vw - 1.5rem);
@@ -221,7 +221,7 @@
   }
 }
 
-@media (max-width: 30rem) {
+@media (width < 40rem) {
   .validationParameterGrid,
   .addValidationRule {
       grid-template-columns: minmax(0, 1fr);

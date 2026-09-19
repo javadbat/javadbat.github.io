@@ -18,7 +18,7 @@ function focusElementCard(elementId: string): void {
 
 export function useCanvasInteractions({ onSelectElement, onConfigureElement }: CanvasInteractionOptions) {
   const { t: tCommon } = useTranslation("common");
-  const { t } = useTranslation("formCanvas");
+  const { t, i18n } = useTranslation("formCanvas");
   const store = useBuilderStore();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
@@ -34,9 +34,9 @@ export function useCanvasInteractions({ onSelectElement, onConfigureElement }: C
 
   const announcePosition = useCallback(
     (entry: FormElementRegistryEntry, action: string, position: number) => {
-      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${action} ${position} ${tCommon("of")} ${store.document.elements.length}`);
+      store.announce(`${getFormElementDisplayName(entry, i18n.resolvedLanguage ?? i18n.language)} ${action} ${position} ${tCommon("of")} ${store.document.elements.length}`);
     },
-    [tCommon, store],
+    [i18n, tCommon, store],
   );
 
   const selectElement = useCallback(
@@ -86,10 +86,10 @@ export function useCanvasInteractions({ onSelectElement, onConfigureElement }: C
     const entry = registryByType.get(pendingRemoval.type);
     const nextSelectionId = store.removeElement(pendingRemoval.id);
     setPendingRemovalId(null);
-    store.announce(`${entry ? getFormElementDisplayName(entry, store.editingLocale) : pendingRemoval.type} ${t("removedAnnouncement")}`);
+    store.announce(`${entry ? getFormElementDisplayName(entry, i18n.resolvedLanguage ?? i18n.language) : pendingRemoval.type} ${t("removedAnnouncement")}`);
     if (nextSelectionId) focusElementCard(nextSelectionId);
     else requestAnimationFrame(() => document.getElementById("form-canvas-title")?.focus());
-  }, [t, pendingRemoval, store]);
+  }, [i18n, t, pendingRemoval, store]);
 
   const cancelRemoval = useCallback(() => {
     const elementId = pendingRemovalId;

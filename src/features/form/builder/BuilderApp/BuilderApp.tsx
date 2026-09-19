@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { getCurrentFormSlug } from "../../application/form-page-url";
 import { FormI18nProvider } from "../../i18n/FormI18nProvider";
@@ -25,6 +25,12 @@ const BuilderAppContent = observer(function BuilderAppContent() {
 
   useBuilderLifecycle(slug);
   useHistoryShortcuts();
+
+  useEffect(() => {
+    const locale = i18n.resolvedLanguage ?? i18n.language;
+    document.title = locale.toLowerCase().split("-")[0] === "fa" ? "فرم‌ساز JB" : "JB Form Builder";
+    store.synchronizeEmptyDocumentLocale(locale);
+  }, [i18n.language, i18n.resolvedLanguage, store]);
 
   if (store.status === "loading" || store.status === "load-error") {
     return <BuilderStatusScreen slug={slug} />;
@@ -63,9 +69,16 @@ const BuilderAppContent = observer(function BuilderAppContent() {
 export function BuilderApp() {
   return (
     <FormI18nProvider>
-      <BuilderStoreProvider>
-        <BuilderAppContent />
-      </BuilderStoreProvider>
+      <BuilderAppStoreRoot />
     </FormI18nProvider>
+  );
+}
+
+function BuilderAppStoreRoot() {
+  const { i18n } = useTranslation();
+  return (
+    <BuilderStoreProvider initialLocale={i18n.resolvedLanguage ?? i18n.language}>
+      <BuilderAppContent />
+    </BuilderStoreProvider>
   );
 }

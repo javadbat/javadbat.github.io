@@ -5,7 +5,7 @@ import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
-import { getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "../../component-data";
+import { getFormElementCategoryName, getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "../../component-data";
 import { supportedComponentData } from "../../component-data";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
@@ -53,20 +53,21 @@ const CatalogRow = memo(function CatalogRow({ entry, displayName, description, o
 
 export const ComponentCatalog = observer(function ComponentCatalog({ onElementAdded }: ComponentCatalogProps) {
   const { t: tCommon } = useTranslation("common");
-  const { t } = useTranslation("componentCatalog");
+  const { t, i18n } = useTranslation("componentCatalog");
   const store = useBuilderStore();
+  const interfaceLocale = i18n.resolvedLanguage ?? i18n.language;
   const [query, setQuery] = useState("");
   const addElement = useCallback(
     (entry: FormElementRegistryEntry) => {
       const elementId = store.addCatalogElement(entry);
       const position = store.getElementPosition(elementId) + 1;
-      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${tCommon("addedAnnouncement")} ${position} ${tCommon("of")} ${store.document.elements.length}`);
+      store.announce(`${getFormElementDisplayName(entry, interfaceLocale)} ${tCommon("addedAnnouncement")} ${position} ${tCommon("of")} ${store.document.elements.length}`);
       onElementAdded?.(elementId);
       requestAnimationFrame(() => {
         document.getElementById(`element-card-${elementId}`)?.scrollIntoView({ block: "nearest" });
       });
     },
-    [tCommon, onElementAdded, store],
+    [interfaceLocale, tCommon, onElementAdded, store],
   );
 
   const filteredGroups = useMemo(() => {
@@ -75,11 +76,12 @@ export const ComponentCatalog = observer(function ComponentCatalog({ onElementAd
       ? supportedComponentData.filter(entry =>
           [
             entry.displayName,
-            getFormElementDisplayName(entry, store.editingLocale),
-            entry.type,
+            getFormElementDisplayName(entry, interfaceLocale),
+            getFormElementCategoryName(entry.category, interfaceLocale),
             entry.category,
+            entry.type,
             entry.description,
-            getFormElementDescription(entry, store.editingLocale),
+            getFormElementDescription(entry, interfaceLocale),
             ...entry.keywords,
           ]
             .join(" ")
@@ -89,7 +91,7 @@ export const ComponentCatalog = observer(function ComponentCatalog({ onElementAd
       : supportedComponentData;
 
     return Map.groupBy(entries, entry => entry.category);
-  }, [query, store.editingLocale]);
+  }, [query, interfaceLocale]);
   const isMobile = useMediaQuery("(max-width: 63.999rem)");
 
   return (
@@ -120,14 +122,14 @@ export const ComponentCatalog = observer(function ComponentCatalog({ onElementAd
       <div className={styles.catalogGroups}>
         {[...filteredGroups.entries()].map(([category, entries]) => (
           <section className={styles.catalogGroup} key={category}>
-            <h3>{category}</h3>
+            <h3>{getFormElementCategoryName(category, interfaceLocale)}</h3>
             <ul>
               {entries.map(entry => (
                 <CatalogRow
                   key={entry.type}
                   entry={entry}
-                  displayName={getFormElementDisplayName(entry, store.editingLocale)}
-                  description={getFormElementDescription(entry, store.editingLocale)}
+                  displayName={getFormElementDisplayName(entry, interfaceLocale)}
+                  description={getFormElementDescription(entry, interfaceLocale)}
                   onAdd={addElement}
                 />
               ))}

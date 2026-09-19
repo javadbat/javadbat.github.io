@@ -11,7 +11,9 @@ export const formCanvasTranslations = {
     "dropHere": "Drop here",
     "movedAnnouncement": "moved to position",
     "duplicatedAnnouncement": "duplicated at position",
-    "removedAnnouncement": "removed"
+    "removedAnnouncement": "removed",
+    "dropRepeatableGroup": "Drop form elements into this repeatable group",
+    "formSections": "Form sections"
   },
   fa: {
     "emptyFormTitle": "فرم شما برای اولین فیلد آماده است",
@@ -25,6 +27,8 @@ export const formCanvasTranslations = {
     "dropHere": "اینجا رها کنید",
     "movedAnnouncement": "به جایگاه منتقل شد",
     "duplicatedAnnouncement": "در جایگاه تکثیر شد",
-    "removedAnnouncement": "حذف شد"
+    "removedAnnouncement": "حذف شد",
+    "dropRepeatableGroup": "اجزای فرم را در این گروه تکرارشونده رها کنید",
+    "formSections": "بخش‌های فرم"
   },
 } as const;

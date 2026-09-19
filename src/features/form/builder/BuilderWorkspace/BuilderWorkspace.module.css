@@ -1,4 +1,4 @@
-.builderShell {
+﻿.builderShell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-block-size: 0;
@@ -18,18 +18,18 @@
   display: none;
 }
 
-@media (max-width: 89.9375rem) {
+@media (width < 80rem) {
   .workspace {
       grid-template-columns: minmax(15rem, 17rem) minmax(28rem, 1fr) minmax(16rem, 18rem);
     }
    }
 
-@media (max-width: 74.9375rem) and (min-width: 64rem) {
+@media (width < 80rem) and (width >= 64rem) {
   .compactTabs {
       display: flex;
       margin: 0.5rem 1rem 0 1rem;
       inline-size: max-content;
-      --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
+      --jb-tab-list-background: color-mix(in oklch, var(--jb-surface-primary) 92%, transparent);
       jb-tab-list::part(list) {
         corner-shape: squircle;
         box-shadow: var(--shadow-drop);
@@ -49,21 +49,21 @@
     }
    }
 
-@media (max-width: 74.9375rem) and (min-width: 64rem) {
+@media (width < 80rem) and (width >= 64rem) {
   .workspace[data-side-panel="properties"] > :global([data-builder-panel="properties"]) {
       grid-column: 1;
       grid-row: 1;
     }
    }
 
-@media (max-width: 74.9375rem) and (min-width: 64rem) {
+@media (width < 80rem) and (width >= 64rem) {
   .workspace[data-side-panel="properties"] > :global([data-builder-panel="canvas"]) {
       grid-column: 2;
       grid-row: 1;
     }
 }
 
-@media (max-width: 63.999rem) {
+@media (width < 64rem) {
   .builderShell {
       display: grid;
       grid-template-rows: minmax(3.25rem, auto) minmax(0, 1fr);
@@ -76,8 +76,8 @@
       display: block;
       grid-row: 1;
       padding: 0.5rem 0.5rem 0;
-      --jb-tab-list-background: color-mix(in oklch, var(--form-surface) 92%, transparent);
-      --jb-tab-trigger-padding: 0.65rem 0.35rem;
+      --jb-tab-list-background: color-mix(in oklch, var(--jb-surface-primary) 92%, transparent);
+      --jb-tab-trigger-padding: 0.75rem 0.25rem;
     }
 
   .mobileTabs :global(jb-tab-list) {

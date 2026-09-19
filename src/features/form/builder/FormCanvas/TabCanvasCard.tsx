@@ -106,7 +106,7 @@ export const TabCanvasCard = observer(function TabCanvasCard(props: TabCanvasCar
   return (
     <div className={styles.tabContainerCard}>
       <CanvasCard {...props} element={element} />
-      <div className={styles.builderTabList} role="tablist" aria-label={typeof element.props.ariaLabel === "object" ? getLocalizedText(element.props.ariaLabel as never, locale, defaultLocale) : "Form sections"}>
+      <div className={styles.builderTabList} role="tablist" aria-label={typeof element.props.ariaLabel === "object" ? getLocalizedText(element.props.ariaLabel as never, locale, defaultLocale) : t("formSections")}>
         {element.tabs.map((tab, tabIndex) => (
           <button
             key={tab.id}

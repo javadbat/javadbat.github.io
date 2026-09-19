@@ -161,8 +161,26 @@ export class BuilderStore {
     if (initialized) {
       this.elements.clearSelection();
       this.localization.restoreForDocument(slug ? `slug:${slug}` : "current");
+      if (!this.hasSavedDraft) this.localization.setEditingLocale(this.document.localization.defaultLocale);
     }
     return initialized;
+  }
+
+  /** Keeps an untouched new document's default content language aligned with the interface. */
+  synchronizeEmptyDocumentLocale(locale: string): void {
+    const language = locale.toLowerCase().split("-")[0];
+    if (language !== "en" && language !== "fa") return;
+    if (this.persistence.hasSavedDraft || this.draft.isDirty || this.document.elements.length > 0) return;
+    const currentName = this.document.metadata.name.translations[this.document.localization.defaultLocale] ?? "";
+    if (currentName !== "Untitled form" && currentName !== "فرم بدون عنوان") return;
+    if (this.document.localization.defaultLocale === language) return;
+
+    const nextDocument = createEmptyFormDocument(language);
+    nextDocument.id = this.document.id;
+    nextDocument.metadata.createdAt = this.document.metadata.createdAt;
+    nextDocument.metadata.updatedAt = this.document.metadata.updatedAt;
+    this.draft.hydrate(nextDocument);
+    this.localization.setEditingLocale(language);
   }
 
   /** Deletes a corrupt source record through the persistence recovery workflow. */

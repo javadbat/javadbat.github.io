@@ -10,9 +10,22 @@ import { BuilderApp } from "../../../features/form/builder/BuilderApp/BuilderApp
   <link rel="stylesheet" href="/styles/fonts.css" />
   <BuilderApp client:only="react">
     <div slot="fallback" class="builder-page-loading" role="status" aria-live="polite" aria-busy="true">
-      <p>Loading builder…</p>
+      <p data-en="Loading builder…" data-fa="در حال بارگذاری فرم‌ساز…">Loading builder…</p>
     </div>
   </BuilderApp>
+  <script is:inline>
+    try {
+      const locale = localStorage.getItem("jb-form:locale");
+      const loadingLabel = document.querySelector(".builder-page-loading p");
+      if (loadingLabel && locale === "fa") {
+        loadingLabel.textContent = loadingLabel.dataset.fa ?? loadingLabel.textContent;
+        loadingLabel.lang = "fa";
+        loadingLabel.dir = "rtl";
+      }
+    } catch {
+      // Keep the default loading label when browser storage is unavailable.
+    }
+  </script>
 </Layout>
 
 <style>

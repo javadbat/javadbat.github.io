@@ -24,11 +24,12 @@ export function getPropertyGuidance(
 }
 
 export function getPropertyPlaceholder(definition: FormElementPropertyDefinition, locale: string): string | undefined {
+  const isPersian = locale.toLowerCase().split("-")[0] === "fa";
   if (definition.key === "autocomplete") return "email, name, organization";
   if (definition.key === "inputmode") return "text, numeric, email, tel";
   if (definition.key === "accept") return "image/*, .pdf, .docx";
-  if (definition.key === "ariaLabel") return locale === "fa" ? "برچسب قابل خواندن برای صفحه‌خوان" : "Label announced to screen readers";
-  if (definition.key === "defaultValue") return locale === "fa" ? "مثلاً گزینه اول" : "For example, the first option";
+  if (definition.key === "ariaLabel") return isPersian ? "برچسب قابل خواندن برای صفحه‌خوان" : "Label announced to screen readers";
+  if (definition.key === "defaultValue") return isPersian ? "مثلاً گزینه اول" : "For example, the first option";
   if (definition.key === "options") return undefined;
   return undefined;
 }

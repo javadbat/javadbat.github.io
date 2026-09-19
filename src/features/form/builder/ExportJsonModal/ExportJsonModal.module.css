@@ -1,4 +1,4 @@
-.exportModalContent,
+﻿.exportModalContent,
 .exportFileName,
 .exportError,
 .exportIssueList li {
@@ -6,14 +6,14 @@
 }
 
 .modalHeading h2 {
-  margin: 0.1rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 1rem;
   line-height: 1.25;
 }
 
 .eyebrow {
   margin: 0;
-  color: var(--form-accent);
+  color: var(--jb-primary);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -44,10 +44,10 @@
 .exportFileName {
   overflow: hidden;
   max-inline-size: 24rem;
-  padding: 0.4rem 0.65rem;
-  border-radius: 0.55rem;
-  color: var(--form-accent-strong);
-  background: var(--form-accent-soft);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--jb-primary-dark);
+  background: var(--jb-primary-subtle);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 0.68rem;
   text-overflow: ellipsis;
@@ -61,17 +61,17 @@
 
 .exportError {
   margin: 0;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  color: oklch(0.48 0.17 28);
-  background: oklch(0.96 0.035 28);
+  color: var(--jb-red-dark);
+  background: var(--jb-red-subtle);
   font-size: 0.8rem;
   line-height: 1.55;
 }
 
 .exportIssueList {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.5rem;
   min-block-size: 0;
   margin: 0;
   padding: 0;
@@ -84,9 +84,9 @@
   grid-template-columns: minmax(8rem, 0.3fr) minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 0.0625rem solid var(--form-inner-line);
-  border-radius: var(--form-radius-md);
-  background: var(--form-surface);
+  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-sm);
+  background: var(--jb-surface-primary);
   box-shadow: none;
   font-size: 0.75rem;
   line-height: 1.5;
@@ -94,7 +94,7 @@
 
 .exportIssueList code {
   overflow: hidden;
-  color: var(--form-accent-strong);
+  color: var(--jb-primary-dark);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 0.68rem;
   text-overflow: ellipsis;
@@ -107,52 +107,52 @@
 
 .modalActions {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   justify-content: flex-end;
 }
 
 .modalDescription {
   max-inline-size: 30rem;
   margin: 0;
-  color: var(--form-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.82rem;
   line-height: 1.6;
 }
 
-@media (max-width: 63.999rem) {
+@media (width < 64rem) {
   .modalActions :global(jb-button) {
       --jb-button-height: 2.75rem;
       --jb-button-height-sm: 2.75rem;
     }
    }
 
-@media (max-width: 63.999rem) {
+@media (width < 64rem) {
   .exportModalContent {
       inline-size: calc(100vw - 1.5rem);
       max-block-size: calc(100dvh - 1.5rem);
     }
    }
 
-@media (max-width: 30rem) {
+@media (width < 40rem) {
   .exportIssueList li {
       grid-template-columns: minmax(0, 1fr);
     }
    }
 
-@media (max-width: 30rem) {
+@media (width < 40rem) {
   .modalActions {
       flex-wrap: wrap;
     }
    }
 
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   .modalActions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
    }
 
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   .modalActions :global(jb-button:last-child) {
       grid-column: 1 / -1;
       grid-row: 1;

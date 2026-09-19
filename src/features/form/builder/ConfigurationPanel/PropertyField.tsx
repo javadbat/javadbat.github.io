@@ -21,8 +21,9 @@ const BYTES_PER_MEGABYTE = 1024 * 1024;
 
 export const PropertyField = observer(function PropertyField({ definition }: PropertyFieldProps) {
   const { t: tCommon } = useTranslation("common");
-  const { t: tPropertyGuidance } = useTranslation("propertyGuidance");
+  const { t: tPropertyGuidance, i18n } = useTranslation("propertyGuidance");
   const store = useBuilderStore();
+  const interfaceLocale = i18n.resolvedLanguage ?? i18n.language;
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
   const element = store.selectedElement;
@@ -31,9 +32,9 @@ export const PropertyField = observer(function PropertyField({ definition }: Pro
   }
 
   const value = element.props[definition.key];
-  const label = propertyLabel(definition.label, locale);
+  const label = propertyLabel(definition.label, interfaceLocale);
   const guidance = getPropertyGuidance(definition, tPropertyGuidance, tCommon);
-  const placeholder = getPropertyPlaceholder(definition, locale);
+  const placeholder = getPropertyPlaceholder(definition, interfaceLocale);
 
   if (definition.control === "textarea") {
     const displayedValue = definition.localized
@@ -89,7 +90,7 @@ export const PropertyField = observer(function PropertyField({ definition }: Pro
       >
         {definition.options?.map(option => (
           <JBOption key={option.value} value={option.value}>
-            {propertyLabel(option.label, locale)}
+            {propertyLabel(option.label, interfaceLocale)}
           </JBOption>
         ))}
       </JBSelect>

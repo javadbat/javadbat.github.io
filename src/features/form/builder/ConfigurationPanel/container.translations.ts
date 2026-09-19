@@ -7,10 +7,10 @@ export const containerConfigurationTranslations = {
     "elementCount_other": "{{count}} elements"
   },
   "fa": {
-    "label": "?????",
-    "stableValue": "????? ????",
-    "disabled": "???????",
-    "elementCount_one": "{{count}} ?????",
-    "elementCount_other": "{{count}} ?????"
+    "label": "عنوان",
+    "stableValue": "مقدار ثابت",
+    "disabled": "غیرفعال",
+    "elementCount_one": "{{count}} جزء",
+    "elementCount_other": "{{count}} جزء"
   }
 } as const;

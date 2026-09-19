@@ -20,7 +20,7 @@ export function inputValue(event: Event): string {
 
 /** Resolves registry-authored property labels for the builder interface locale. */
 export function propertyLabel(value: PropertyLabel, locale: string): string {
-  return locale === "fa" ? value.fa : value.en;
+  return locale.toLowerCase().split("-")[0] === "fa" ? value.fa : value.en;
 }
 
 /** Identifies portable property values that carry a locale-to-text dictionary. */

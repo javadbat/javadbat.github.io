@@ -28,7 +28,7 @@ interface FormCanvasProps {
 
 export const FormCanvas = observer(function FormCanvas({ onOpenFormNameSettings, onSelectElement, onConfigureElement }: FormCanvasProps) {
   const { t: tCommon } = useTranslation("common");
-  const { t } = useTranslation("formCanvas");
+  const { t, i18n } = useTranslation("formCanvas");
   const store = useBuilderStore();
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
@@ -153,7 +153,7 @@ export const FormCanvas = observer(function FormCanvas({ onOpenFormNameSettings,
             isOpen
             elementLabel={
               (isContainerElement(pendingRemoval) ? pendingRemoval.name : getLocalizedText(pendingRemoval.label, locale, defaultLocale)) ||
-              (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
+              (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, i18n.resolvedLanguage ?? i18n.language) : pendingRemoval.type)
             }
             onCancel={interactions.cancelRemoval}
             onConfirm={interactions.confirmRemoval}

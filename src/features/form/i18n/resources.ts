@@ -30,6 +30,7 @@ import { advancedSizesModalTranslations } from "../designer/AdvancedSizesModal.t
 import { tabConfigurationEditorTranslations } from "../builder/ConfigurationPanel/TabConfigurationEditor.translations";
 import { wizardConfigurationEditorTranslations } from "../builder/ConfigurationPanel/WizardConfigurationEditor.translations";
 import { containerConfigurationTranslations } from "../builder/ConfigurationPanel/container.translations";
+import { conditionConfigurationTranslations } from "../builder/ConfigurationPanel/condition.translations";
 import { wizardCanvasCardTranslations } from "../builder/FormCanvas/WizardCanvasCard.translations";
 
 export const formResources = {
@@ -65,6 +66,7 @@ export const formResources = {
     tabConfigurationEditor: tabConfigurationEditorTranslations.en,
     wizardConfigurationEditor: wizardConfigurationEditorTranslations.en,
     containerConfiguration: containerConfigurationTranslations.en,
+    conditionConfiguration: conditionConfigurationTranslations.en,
     wizardCanvasCard: wizardCanvasCardTranslations.en,
   },
   fa: {
@@ -99,6 +101,7 @@ export const formResources = {
     tabConfigurationEditor: tabConfigurationEditorTranslations.fa,
     wizardConfigurationEditor: wizardConfigurationEditorTranslations.fa,
     containerConfiguration: containerConfigurationTranslations.fa,
+    conditionConfiguration: conditionConfigurationTranslations.fa,
     wizardCanvasCard: wizardCanvasCardTranslations.fa,
   },
 } as const;

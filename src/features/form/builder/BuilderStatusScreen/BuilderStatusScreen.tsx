@@ -32,7 +32,7 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ slug 
   return (
     <div className={styles.stateScreen} role="alert">
       {busy ? <JBLoading /> : null}
-      <h1>{busy ? t("loading") : "Builder unavailable"}</h1>
+      <h1>{busy ? t("loading") : t("unavailable")}</h1>
       <p>{busy ? t("loading") : getStorageIssueMessage(tCommon, store.storageIssue)}</p>
       {actionError ? <p role="status">{actionError}</p> : null}
       <div className={styles.actions}>

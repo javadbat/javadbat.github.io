@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
@@ -15,20 +16,23 @@ import { JBCollapse } from "jb-collapse/react";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { inputValue } from "./configuration-values";
 import styles from "./ConfigurationPanel.module.css";
+import { conditionConfigurationTranslations } from "./condition.translations";
 
-const operatorOptions: Array<{ value: JBConditionOperator; label: string }> = [
-  { value: "equals", label: "Equals" },
-  { value: "notEquals", label: "Does not equal" },
-  { value: "isEmpty", label: "Is empty" },
-  { value: "isNotEmpty", label: "Is not empty" },
-  { value: "contains", label: "Contains" },
-  { value: "notContains", label: "Does not contain" },
-  { value: "containsAny", label: "Contains any" },
-  { value: "containsAll", label: "Contains all" },
-  { value: "greaterThan", label: "Greater than" },
-  { value: "greaterThanOrEqual", label: "Greater than or equal" },
-  { value: "lessThan", label: "Less than" },
-  { value: "lessThanOrEqual", label: "Less than or equal" },
+type ConditionTranslationKey = keyof typeof conditionConfigurationTranslations.en;
+
+const operatorOptions: Array<{ value: JBConditionOperator; labelKey: ConditionTranslationKey }> = [
+  { value: "equals", labelKey: "equals" },
+  { value: "notEquals", labelKey: "notEquals" },
+  { value: "isEmpty", labelKey: "isEmpty" },
+  { value: "isNotEmpty", labelKey: "isNotEmpty" },
+  { value: "contains", labelKey: "contains" },
+  { value: "notContains", labelKey: "notContains" },
+  { value: "containsAny", labelKey: "containsAny" },
+  { value: "containsAll", labelKey: "containsAll" },
+  { value: "greaterThan", labelKey: "greaterThan" },
+  { value: "greaterThanOrEqual", labelKey: "greaterThanOrEqual" },
+  { value: "lessThan", labelKey: "lessThan" },
+  { value: "lessThanOrEqual", labelKey: "lessThanOrEqual" },
 ];
 
 const noValueOperators = new Set<JBConditionOperator>(["isEmpty", "isNotEmpty"]);
@@ -59,6 +63,7 @@ function parseRuleValue(value: string, valueType: string | undefined, operator: 
 }
 
 export const ConditionConfigurationEditor = observer(function ConditionConfigurationEditor() {
+  const { t } = useTranslation("conditionConfiguration");
   const store = useBuilderStore();
   const element = store.selectedElement;
   if (!element || !isConditionElement(element)) return null;
@@ -82,18 +87,18 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
   };
 
   return (
-    <JBCollapse title="Visibility conditions" defaultOpen>
+    <JBCollapse title={t("visibilityConditions")} defaultOpen>
       <div className={styles.conditionEditor}>
         <JBSelect<"all" | "any">
           popoverPosition="fixed"
           name="conditionMatch"
-          label="Show when"
+          label={t("showWhen")}
           value={element.conditions.match}
           clearable={false}
           onChange={event => store.updateSelectedConditionMatch(event.target.value === "any" ? "any" : "all")}
         >
-          <JBOption value="all">All conditions match</JBOption>
-          <JBOption value="any">Any condition matches</JBOption>
+          <JBOption value="all">{t("allConditionsMatch")}</JBOption>
+          <JBOption value="any">{t("anyConditionMatches")}</JBOption>
         </JBSelect>
 
         {element.conditions.rules.map((rule, index) => {
@@ -104,13 +109,13 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
           return (
             <div className={styles.conditionRule} key={rule.id}>
               <div className={styles.conditionRuleHeading}>
-                <strong>Condition {index + 1}</strong>
-                <JBButton square size="sm" variant="ghost" aria-label="Remove condition" onClick={() => store.removeSelectedConditionRule(rule.id)}>×</JBButton>
+                <strong>{t("condition", { number: index + 1 })}</strong>
+                <JBButton square size="sm" variant="ghost" aria-label={t("removeCondition")} onClick={() => store.removeSelectedConditionRule(rule.id)}>×</JBButton>
               </div>
               <JBSelect<string>
                 popoverPosition="fixed"
                 name={`conditionField_${rule.id}`}
-                label="Field"
+                label={t("field")}
                 value={rule.fieldName}
                 clearable={false}
                 onChange={event => {
@@ -125,13 +130,13 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                   }
                 }}
               >
-                {!sourceNames.includes(rule.fieldName) ? <JBOption value={rule.fieldName}>{rule.fieldName} (missing)</JBOption> : null}
+                {!sourceNames.includes(rule.fieldName) ? <JBOption value={rule.fieldName}>{rule.fieldName} ({t("missing")})</JBOption> : null}
                 {sourceNames.map(name => <JBOption key={name} value={name}>{name}</JBOption>)}
               </JBSelect>
               <JBSelect<JBConditionOperator>
                 popoverPosition="fixed"
                 name={`conditionOperator_${rule.id}`}
-                label="Operator"
+                label={t("operator")}
                 value={rule.operator}
                 clearable={false}
                 onChange={event => {
@@ -139,25 +144,25 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
                   store.updateSelectedConditionRule(rule.id, noValueOperators.has(operator) ? { operator, value: undefined } : { operator, value: rule.value ?? "" });
                 }}
               >
-                {availableOperators.map(option => <JBOption key={option.value} value={option.value}>{option.label}</JBOption>)}
+                {availableOperators.map(option => <JBOption key={option.value} value={option.value}>{t(option.labelKey)}</JBOption>)}
               </JBSelect>
               {expectsValue ? (
                 valueType === "boolean" ? (
                   <JBSelect<string>
                     popoverPosition="fixed"
                     name={`conditionValue_${rule.id}`}
-                    label="Value"
+                    label={t("value")}
                     value={String(rule.value ?? false)}
                     clearable={false}
                     onChange={event => store.updateSelectedConditionRule(rule.id, { value: event.target.value === "true" })}
                   >
-                    <JBOption value="true">True</JBOption>
-                    <JBOption value="false">False</JBOption>
+                    <JBOption value="true">{t("true")}</JBOption>
+                    <JBOption value="false">{t("false")}</JBOption>
                   </JBSelect>
                 ) : (
                   <JBInput
                     name={`conditionValue_${rule.id}`}
-                    label={rule.operator === "containsAny" || rule.operator === "containsAll" ? "Values (comma separated)" : "Value"}
+                    label={rule.operator === "containsAny" || rule.operator === "containsAll" ? t("valuesCommaSeparated") : t("value")}
                     value={Array.isArray(rule.value) ? rule.value.join(", ") : String(rule.value ?? "")}
                     onInput={event => store.updateSelectedConditionRule(rule.id, { value: parseRuleValue(inputValue(event as unknown as Event), valueType, rule.operator) })}
                   />
@@ -167,9 +172,9 @@ export const ConditionConfigurationEditor = observer(function ConditionConfigura
           );
         })}
 
-        {sourceNames.length === 0 ? <p className={styles.conditionHint}>Add a field outside this container before creating a condition.</p> : null}
-        <JBButton variant="outline" size="sm" disabled={sourceNames.length === 0} onClick={addRule}>Add condition</JBButton>
-        {element.conditions.rules.length === 0 ? <p className={styles.conditionHint}>No conditions means this container is always visible.</p> : null}
+        {sourceNames.length === 0 ? <p className={styles.conditionHint}>{t("addFieldBeforeCondition")}</p> : null}
+        <JBButton variant="outline" size="sm" disabled={sourceNames.length === 0} onClick={addRule}>{t("addCondition")}</JBButton>
+        {element.conditions.rules.length === 0 ? <p className={styles.conditionHint}>{t("noConditionsAlwaysVisible")}</p> : null}
       </div>
     </JBCollapse>
   );

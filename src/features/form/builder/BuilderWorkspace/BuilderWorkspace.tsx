@@ -31,12 +31,12 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ onOpenFormNameS
 
   return (
     <div className={styles.builderShell}>
-      <nav className={styles.compactTabs} aria-label="Side panels">
+      <nav className={styles.compactTabs} aria-label={t("sidePanels")}>
         <JBTab
           value={compactPanel}
           onChange={(event: JBTabChangeEvent) => setCompactPanel(event.detail.value as CompactPanel)}
         >
-          <JBTabList aria-label="Side panels">
+          <JBTabList aria-label={t("sidePanels")}>
             <JBTabTrigger value="catalog" color="primary">
               {tCommon("componentCatalog")}
             </JBTabTrigger>
@@ -46,12 +46,12 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ onOpenFormNameS
           </JBTabList>
         </JBTab>
       </nav>
-      <nav className={styles.mobileTabs} aria-label="Mobile workspace panels">
+      <nav className={styles.mobileTabs} aria-label={t("mobileWorkspacePanels")}>
         <JBTab
           value={mobilePanel}
           onChange={(event: JBTabChangeEvent) => setMobilePanel(event.detail.value as MobilePanel)}
         >
-          <JBTabList aria-label="Mobile workspace panels" size="sm">
+          <JBTabList aria-label={t("mobileWorkspacePanels")} size="sm">
             <JBTabTrigger value="catalog" color="dark">
               {tCommon("componentCatalog")}
             </JBTabTrigger>

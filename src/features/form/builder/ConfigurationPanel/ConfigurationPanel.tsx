@@ -41,11 +41,11 @@ const removedPropertyKeys = new Set(["valueType", "disableBalloonRotation", "aut
 
 export const ConfigurationPanel = observer(function ConfigurationPanel({ }: ConfigurationPanelProps) {
   const { t: tCommon } = useTranslation("common");
-  const { t } = useTranslation("configurationPanel");
+  const { t, i18n } = useTranslation("configurationPanel");
   const { t: tPropertyGuidance } = useTranslation("propertyGuidance");
   const store = useBuilderStore();
   const element = store.selectedElement;
-  const locale = store.editingLocale;
+  const locale = i18n.resolvedLanguage ?? i18n.language;
   const defaultLocale = store.document.localization.defaultLocale;
   const entry = element ? componentDataByType.get(element.type) : undefined;
   const visibleProperties = entry?.propertyDefinitions.filter(definition => !removedPropertyKeys.has(definition.key) && definition.builderVisible !== false) ?? [];

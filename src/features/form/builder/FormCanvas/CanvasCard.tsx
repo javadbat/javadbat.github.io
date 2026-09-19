@@ -115,7 +115,7 @@ function CanvasCardActions({ element, index, count, onConfigure, onMove, onDupli
 /** Renders one selectable, draggable, keyboard-reorderable form element summary. */
 export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
   const { t: tCommon } = useTranslation("common");
-  const { t } = useTranslation("formCanvas");
+  const { t, i18n } = useTranslation("formCanvas");
   const store = useBuilderStore();
   /** Business data and callbacks supplied by the owning canvas collection. */
   const { element, index, count, isSelected, alwaysShowActions, onSelect, onConfigure, onMove, onDuplicate, onRemove, onFocusOffset } = props;
@@ -125,7 +125,7 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
   const entry = registryByType.get(element.type);
   if (!entry) return null;
   /** Component name localized for the active builder interface. */
-  const componentName = getFormElementDisplayName(entry, locale);
+  const componentName = getFormElementDisplayName(entry, i18n.resolvedLanguage ?? i18n.language);
   /** Element-authored label or container name before registry fallback. */
   const fallbackLabel = isContainerElement(element) ? element.name : getLocalizedText(element.label, locale, defaultLocale);
   /** Final card label that distinguishes untranslated defaults from localized component names. */

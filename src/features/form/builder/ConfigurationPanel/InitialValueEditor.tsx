@@ -6,6 +6,7 @@ import { JBInput } from "jb-input/react";
 import { JBTextarea } from "jb-textarea/react";
 import { JBTimeInput } from "jb-time-input/react";
 import type { JBTimeInputWebComponent } from "jb-time-input";
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, type ReactNode } from "react";
 import { getLocalizedText } from "../../domain/form-document";
 import type { JBFormElementType, JBFormElementV1 } from "../../domain/form-document";
@@ -20,6 +21,7 @@ interface InitialValueEditorProps {
   label: string;
   message: string;
   locale: string;
+  interfaceLocale: string;
   defaultLocale: string;
   onValueChange: (value: unknown) => void;
 }
@@ -258,8 +260,8 @@ function selectRenderer({ element, label, message, locale, defaultLocale, onValu
   );
 }
 
-function booleanRenderer({ element, label, message, locale, onValueChange }: InitialValueEditorProps) {
-  const isFarsi = locale.toLowerCase().split("-")[0] === "fa";
+function booleanRenderer({ element, label, message, interfaceLocale, onValueChange }: InitialValueEditorProps) {
+  const isFarsi = interfaceLocale.toLowerCase().split("-")[0] === "fa";
   const value = typeof element.initialValue === "boolean" ? String(element.initialValue) : "unset";
   return (
     <JBSelect<string>
@@ -298,8 +300,14 @@ export const initialValueInputMap: Partial<Record<JBFormElementType, InitialValu
   "jb-switch": booleanRenderer,
 };
 
-export function InitialValueEditor(props: Omit<InitialValueEditorProps, "locale" | "defaultLocale">) {
+export function InitialValueEditor(props: Omit<InitialValueEditorProps, "locale" | "interfaceLocale" | "defaultLocale">) {
+  const { i18n } = useTranslation();
   const store = useBuilderStore();
   const Renderer = initialValueInputMap[props.entry.type] ?? textRenderer;
-  return Renderer({ ...props, locale: store.editingLocale, defaultLocale: store.document.localization.defaultLocale });
+  return Renderer({
+    ...props,
+    locale: store.editingLocale,
+    interfaceLocale: i18n.resolvedLanguage ?? i18n.language,
+    defaultLocale: store.document.localization.defaultLocale,
+  });
 }

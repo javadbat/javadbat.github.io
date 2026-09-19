@@ -34,7 +34,9 @@ export class BuilderLocalizationStore {
 
   /** Localized form name used by builder chrome, with a usable untitled fallback. */
   get formName(): string {
-    return getLocalizedText(this.draft.document.metadata.name, this.draft.document.localization.defaultLocale) || "Untitled form";
+    const locale = this.draft.document.localization.defaultLocale;
+    const fallback = locale.toLowerCase().split("-")[0] === "fa" ? "فرم بدون عنوان" : "Untitled form";
+    return getLocalizedText(this.draft.document.metadata.name, locale) || fallback;
   }
 
   /** Restores the scoped editing locale and adds it to older documents when necessary. */
@@ -86,8 +88,9 @@ export class BuilderLocalizationStore {
 
   /** Updates the form's localized display name and records one undoable document change. */
   updateFormName(name: string, locale = "en"): void {
-    this.draft.document.metadata.name = patchLocalizedText(this.draft.document.metadata.name, name || "Untitled form", locale) ?? {
-      translations: { [locale]: name || "Untitled form" },
+    const fallback = locale.toLowerCase().split("-")[0] === "fa" ? "فرم بدون عنوان" : "Untitled form";
+    this.draft.document.metadata.name = patchLocalizedText(this.draft.document.metadata.name, name || fallback, locale) ?? {
+      translations: { [locale]: name || fallback },
     };
     this.draft.markChanged();
   }

@@ -1,4 +1,4 @@
-.menu,
+﻿.menu,
 .desktopMenu,
 .links,
 .languageControl {
@@ -12,22 +12,22 @@
 }
 
 .desktopMenu {
-  gap: 0.35rem;
+  gap: 0.25rem;
 }
 
 .links {
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .link {
   display: inline-flex;
-  gap: 0.45rem;
+  gap: 0.5rem;
   align-items: center;
-  min-block-size: 2.4rem;
-  padding-inline: 0.65rem;
+  min-block-size: 2.5rem;
+  padding-inline: 0.75rem;
   border: 0.0625rem solid transparent;
-  border-radius: 0.625rem;
-  color: #53607f;
+  border-radius: 0.75rem;
+  color: var(--jb-content-secondary);
   background: transparent;
   font-size: 0.75rem;
   font-weight: 700;
@@ -39,25 +39,25 @@
 }
 
 .link:hover {
-  color: #2455e8;
-  background: #f1f4ff;
+  color: var(--jb-primary);
+  background: var(--jb-primary-subtle);
 }
 
 .link:focus-visible,
 .mobileTrigger:focus-visible {
-  outline: 0.125rem solid rgba(36, 85, 232, 0.3);
-  outline-offset: 0.125rem;
+  outline: 0.125rem solid color-mix(in oklch, var(--jb-primary) 30%, transparent);
+  outline-offset: 0.25rem;
 }
 
 .link[aria-current="page"] {
-  border-color: #cbd6fb;
-  color: #1f49ca;
-  background: #edf2ff;
+  border-color: color-mix(in oklch, var(--jb-primary) 24%, var(--jb-surface-primary));
+  color: var(--jb-primary-dark);
+  background: var(--jb-primary-subtle);
 }
 
 .icon {
-  inline-size: 1.05rem;
-  block-size: 1.05rem;
+  inline-size: 1rem;
+  block-size: 1rem;
   flex: 0 0 auto;
   fill: none;
   stroke: currentcolor;
@@ -72,11 +72,11 @@
 }
 
 .languageControl {
-  gap: 0.4rem;
-  min-block-size: 2.4rem;
-  padding-inline-start: 0.55rem;
-  border-inline-start: 0.0625rem solid #dde2ef;
-  color: #657090;
+  gap: 0.5rem;
+  min-block-size: 2.5rem;
+  padding-inline-start: 0.5rem;
+  border-inline-start: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  color: var(--jb-content-secondary);
 }
 
 .languageControl > .icon {
@@ -99,19 +99,19 @@
   inline-size: 2.75rem;
   block-size: 2.75rem;
   padding: 0;
-  border: 0.0625rem solid #dde2ef;
-  border-radius: 0.7rem;
-  color: #4f5c7d;
-  background: #f7f9ff;
+  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-radius: 0.75rem;
+  color: var(--jb-content-secondary);
+  background: var(--jb-surface-secondary);
   cursor: pointer;
   corner-shape: squircle;
 }
 
 .mobileTrigger:hover,
 .mobileTrigger[aria-expanded="true"] {
-  border-color: #c5d1f7;
-  color: #2455e8;
-  background: #edf2ff;
+  border-color: color-mix(in oklch, var(--jb-primary) 28%, var(--jb-surface-primary));
+  color: var(--jb-primary);
+  background: var(--jb-primary-subtle);
 }
 
 .mobileTrigger .icon {
@@ -121,14 +121,14 @@
 
 .popover {
   --jb-popover-z-index: 100;
-  --jb-popover-bg-color: #fff;
-  --jb-popover-border-radius: 0.9rem;
-  --jb-popover-padding: 0.55rem;
+  --jb-popover-bg-color: var(--jb-surface-primary);
+  --jb-popover-border-radius: 1rem;
+  --jb-popover-padding: 0.5rem;
 }
 
 .popoverContent {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.25rem;
   inline-size: min(19rem, calc(100vw - 1.5rem));
 }
 
@@ -148,16 +148,16 @@
   inline-size: 100%;
   min-block-size: 3rem;
   justify-content: space-between;
-  padding: 0.35rem 0.4rem 0.35rem 0.75rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
   border: 0;
-  border-block-start: 0.0625rem solid #e4e8f2;
+  border-block-start: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 14%, var(--jb-surface-primary));
 }
 
 .popoverContent .languageControl :global(jb-select) {
   inline-size: 6rem;
 }
 
-@media (max-width: 63.999rem) {
+@media (width < 64rem) {
   .desktopMenu {
     display: none;
   }

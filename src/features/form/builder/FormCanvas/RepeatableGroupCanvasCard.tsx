@@ -42,7 +42,7 @@ export const RepeatableGroupCanvasCard = observer(function RepeatableGroupCanvas
   return <div className={styles.tabContainerCard}>
     <CanvasCard {...props} element={element} />
     <div className={styles.tabPanel}>
-      {element.children.length === 0 ? <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>Drop form elements into this repeatable group</div> :
+      {element.children.length === 0 ? <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>{t("dropRepeatableGroup")}</div> :
         <ol className={styles.tabChildList}>{element.children.map((child, index) => <li key={child.id}>
           <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
           <CanvasCard {...props} element={child} index={index} count={element.children.length} onFocusOffset={(current, offset) => { const target = element.children[Math.max(0, Math.min(current + offset, element.children.length - 1))]; if (target) document.getElementById(`element-select-${target.id}`)?.focus(); }} />
