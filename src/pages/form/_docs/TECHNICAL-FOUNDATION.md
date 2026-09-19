@@ -69,7 +69,9 @@ src/
         migrations/
       i18n/
         form-dictionary.ts
-        locale-adapter.ts
+        i18n.ts
+        resources.ts
+        FormI18nProvider.tsx
       builder/
         BuilderApp.tsx
         BuilderStore.ts

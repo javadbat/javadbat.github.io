@@ -1,8 +1,9 @@
-import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementPropertyDefinition } from "../../component-data";
+import type { TFunction } from "i18next";
+import type { propertyGuidanceTranslations } from "./property-guidance.translations";
 import { propertyLabel } from "./configuration-values";
 
-const guidanceByKey: Partial<Record<string, keyof FormMessages>> = {
+const guidanceByKey: Partial<Record<string, keyof typeof propertyGuidanceTranslations.en>> = {
   autocomplete: "propertyAutocompleteHelp",
   inputmode: "propertyInputModeHelp",
   type: "propertyInputTypeHelp",
@@ -15,11 +16,11 @@ const guidanceByKey: Partial<Record<string, keyof FormMessages>> = {
 
 export function getPropertyGuidance(
   definition: FormElementPropertyDefinition,
-  locale: string,
-  messages: FormMessages,
+  t: TFunction<"propertyGuidance">,
+  tCommon: TFunction<"common">,
 ): string | undefined {
   const messageKey = guidanceByKey[definition.key];
-  return messageKey ? messages[messageKey] : definition.control === "string-list" ? messages.commaSeparated : undefined;
+  return messageKey ? t(messageKey) : definition.control === "string-list" ? tCommon("commaSeparated") : undefined;
 }
 
 export function getPropertyPlaceholder(definition: FormElementPropertyDefinition, locale: string): string | undefined {

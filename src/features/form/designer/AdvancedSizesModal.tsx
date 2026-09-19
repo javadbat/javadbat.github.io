@@ -1,10 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { JBNumberInput } from "jb-number-input/react";
 import { JBRangeInput } from "jb-range-input/react";
-import { useFormLocale, type FormMessageKey } from "../i18n/locale-adapter";
 import {
   GLOBAL_CONTROL_HEIGHT_TOKENS,
   GLOBAL_RADIUS_TOKENS,
@@ -99,18 +99,17 @@ export default function AdvancedSizesModal({
   onApply,
   onClose,
 }: AdvancedSizesModalProps) {
-  const { messages } = useFormLocale("en");
+  const { t } = useTranslation("advancedSizesModal");
+  const { t: tDesignerCommon } = useTranslation("designerCommon");
   const [draft, setDraft] = useState<DesignerThemeConfig["global"]>(() => (
     withCalculatedThemeSizes(values) as DesignerThemeConfig["global"]
   ));
-  const message = (key: FormMessageKey, replacements: Record<string, string | number> = {}) => Object.entries(replacements)
-    .reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
   const sizeLabel = (size: ThemeSizeCode): string => ({
-    xs: messages.designerExtraSmall,
-    sm: messages.designerSmall,
-    md: messages.designerMedium,
-    lg: messages.designerLarge,
-    xl: messages.designerExtraLarge,
+    xs: tDesignerCommon("designerExtraSmall"),
+    sm: tDesignerCommon("designerSmall"),
+    md: tDesignerCommon("designerMedium"),
+    lg: tDesignerCommon("designerLarge"),
+    xl: tDesignerCommon("designerExtraLarge"),
   })[size];
 
   const updateBase = (token: BaseThemeSizeToken, value: string) => {
@@ -138,27 +137,27 @@ export default function AdvancedSizesModal({
       >
         <header>
           <div>
-            <h2 id="advanced-sizes-title">{messages.designerAdvancedSizes}</h2>
-            <p>{messages.designerAdvancedSizesModalHelp}</p>
+            <h2 id="advanced-sizes-title">{tDesignerCommon("designerAdvancedSizes")}</h2>
+            <p>{t("designerAdvancedSizesModalHelp")}</p>
           </div>
           <JBButton size="sm" variant="ghost" onClick={() => setDraft(recalculateAllThemeSizes(draft) as DesignerThemeConfig["global"])}>
-            {messages.designerRestoreCalculatedSizes}
+            {t("designerRestoreCalculatedSizes")}
           </JBButton>
         </header>
         <div className={styles.advancedColorGroups}>
           <section className={styles.advancedColorGroup}>
             <header className={styles.advancedColorGroupHeader}>
               <div>
-                <h3>{messages.designerControlHeightScale}</h3>
-                <p>{messages.designerControlHeightScaleHelp}</p>
+                <h3>{tDesignerCommon("designerControlHeightScale")}</h3>
+                <p>{tDesignerCommon("designerControlHeightScaleHelp")}</p>
               </div>
             </header>
             <div className={styles.advancedBaseToken}>
-              <span className={styles.baseColorBadge}>{messages.designerBaseSize}</span>
+              <span className={styles.baseColorBadge}>{tDesignerCommon("designerBaseSize")}</span>
               <JBInput
                 size="md"
-                label={message("designerControlHeightLabel", { size: sizeLabel("md") })}
-                message={linkedGroups["--jb-control-height-md"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                label={tDesignerCommon("designerControlHeightLabel", { size: sizeLabel("md") })}
+                message={linkedGroups["--jb-control-height-md"] ? tDesignerCommon("designerBaseSizeHelp") : tDesignerCommon("designerBaseSizeIndependentHelp")}
                 value={draft["--jb-control-height-md"] ?? defaults["--jb-control-height-md"] ?? ""}
                 onInput={event => updateBase("--jb-control-height-md", valueFromEvent(event))}
               />
@@ -166,8 +165,8 @@ export default function AdvancedSizesModal({
                 className={styles.baseSizeLink}
                 size="sm"
                 name="advanced-link-control-height-scale"
-                label={messages.designerLinkCalculatedSizes}
-                message={linkedGroups["--jb-control-height-md"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                label={tDesignerCommon("designerLinkCalculatedSizes")}
+                message={linkedGroups["--jb-control-height-md"] ? tDesignerCommon("designerLinkedSizesHelp") : tDesignerCommon("designerUnlinkedSizesHelp")}
                 value={linkedGroups["--jb-control-height-md"]}
                 onChange={event => onLinkChange("--jb-control-height-md", Boolean(event.target.value))}
               />
@@ -178,7 +177,7 @@ export default function AdvancedSizesModal({
                 <div className={`${styles.tokenField} ${styles.advancedDerivedToken}`} key={token}>
                   <JBInput
                     size="sm"
-                    label={message("designerControlHeightLabel", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
+                    label={tDesignerCommon("designerControlHeightLabel", { size: sizeLabel(token.slice("--jb-control-height-".length) as ThemeSizeCode) })}
                     value={draft[token] ?? defaults[token] ?? ""}
                     onInput={event => setDraft(current => ({ ...current, [token]: valueFromEvent(event) || null }))}
                   />
@@ -191,15 +190,15 @@ export default function AdvancedSizesModal({
           <section className={styles.advancedColorGroup}>
             <header className={styles.advancedColorGroupHeader}>
               <div>
-                <h3>{messages.designerRadiusScale}</h3>
-                <p>{messages.designerRadiusScaleHelp}</p>
+                <h3>{tDesignerCommon("designerRadiusScale")}</h3>
+                <p>{tDesignerCommon("designerRadiusScaleHelp")}</p>
               </div>
             </header>
             <div className={styles.advancedBaseToken}>
-              <span className={styles.baseColorBadge}>{messages.designerBaseSize}</span>
+              <span className={styles.baseColorBadge}>{tDesignerCommon("designerBaseSize")}</span>
               <SettingRange
-                label={message("designerCornerRadiusLabel", { size: sizeLabel("md") })}
-                message={linkedGroups["--jb-radius"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                label={tDesignerCommon("designerCornerRadiusLabel", { size: sizeLabel("md") })}
+                message={linkedGroups["--jb-radius"] ? tDesignerCommon("designerBaseSizeHelp") : tDesignerCommon("designerBaseSizeIndependentHelp")}
                 value={cssLengthToRem(draft["--jb-radius"] ?? defaults["--jb-radius"] ?? "")}
                 onChange={value => updateBase("--jb-radius", `${value}rem`)}
               />
@@ -207,8 +206,8 @@ export default function AdvancedSizesModal({
                 className={styles.baseSizeLink}
                 size="sm"
                 name="advanced-link-radius-scale"
-                label={messages.designerLinkCalculatedSizes}
-                message={linkedGroups["--jb-radius"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                label={tDesignerCommon("designerLinkCalculatedSizes")}
+                message={linkedGroups["--jb-radius"] ? tDesignerCommon("designerLinkedSizesHelp") : tDesignerCommon("designerUnlinkedSizesHelp")}
                 value={linkedGroups["--jb-radius"]}
                 onChange={event => onLinkChange("--jb-radius", Boolean(event.target.value))}
               />
@@ -220,7 +219,7 @@ export default function AdvancedSizesModal({
                 return (
                   <div className={`${styles.tokenField} ${styles.advancedDerivedToken}`} key={token}>
                     <SettingRange
-                      label={message("designerCornerRadiusLabel", { size: sizeLabel(radiusSize[token]) })}
+                      label={tDesignerCommon("designerCornerRadiusLabel", { size: sizeLabel(radiusSize[token]) })}
                       value={Number.isFinite(radius) ? radius : 0}
                       onChange={value => setDraft(current => ({ ...current, [token]: `${value}rem` }))}
                     />
@@ -232,10 +231,10 @@ export default function AdvancedSizesModal({
           </section>
         </div>
         <footer>
-          <span>{messages.designerAdvancedSizesApplyOnSave}</span>
+          <span>{t("designerAdvancedSizesApplyOnSave")}</span>
           <div>
-            <JBButton variant="ghost" onClick={onClose}>{messages.designerCancel}</JBButton>
-            <JBButton color="primary" onClick={() => onApply(draft)}>{messages.designerApplySizes}</JBButton>
+            <JBButton variant="ghost" onClick={onClose}>{tDesignerCommon("designerCancel")}</JBButton>
+            <JBButton color="primary" onClick={() => onApply(draft)}>{t("designerApplySizes")}</JBButton>
           </div>
         </footer>
       </section>

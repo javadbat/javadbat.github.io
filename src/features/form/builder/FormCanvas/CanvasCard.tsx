@@ -1,13 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { useState, type KeyboardEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBTooltip } from "@jbui/tooltip/react";
 import type { JBFormElementV1 } from "../../domain/form-document";
 import { getLocalizedText, isContainerElement } from "../../domain/form-document";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType } from "../../component-data";
 import { beginBuilderDrag, CANVAS_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./FormCanvas.module.css";
 
 /** Shared card contract used to represent root and nested form elements on the canvas. */
@@ -22,12 +23,6 @@ export interface CanvasCardProps {
   isSelected: boolean;
   /** Whether a touch/non-hover device needs persistent visible actions. */
   alwaysShowActions: boolean;
-  /** Locale currently edited by the builder. */
-  locale: string;
-  /** Document fallback locale for missing element text. */
-  defaultLocale: string;
-  /** Localized builder-interface copy. */
-  messages: FormMessages;
   /** Selects the card's element. */
   onSelect: (elementId: string) => void;
   /** Selects the element and opens its configuration surface. */
@@ -43,20 +38,21 @@ export interface CanvasCardProps {
 }
 
 /** Canvas-card inputs needed only by the action toolbar. */
-type ActionProps = Pick<CanvasCardProps, "element" | "index" | "count" | "messages" | "onConfigure" | "onMove" | "onDuplicate" | "onRemove">;
+type ActionProps = Pick<CanvasCardProps, "element" | "index" | "count" | "onConfigure" | "onMove" | "onDuplicate" | "onRemove">;
 
 /** Renders selected-element configure, reorder, duplicate, and remove actions. */
-function CanvasCardActions({ element, index, count, messages, onConfigure, onMove, onDuplicate, onRemove }: ActionProps) {
+function CanvasCardActions({ element, index, count, onConfigure, onMove, onDuplicate, onRemove }: ActionProps) {
+  const { t } = useTranslation("formCanvas");
   /** Action whose animated icon is currently hovered or keyboard-focused. */
   const [activeIcon, setActiveIcon] = useState<"configure" | "remove" | null>(null);
   return (
     <div className={styles.cardActions}>
-      <JBTooltip content={messages.configure} positionArea="top" tail>
+      <JBTooltip content={t("configure")} positionArea="top" tail>
         <JBButton
           square
           size="sm"
           variant="ghost"
-          aria-label={messages.configure}
+          aria-label={t("configure")}
           onPointerEnter={() => setActiveIcon("configure")}
           onPointerLeave={() => setActiveIcon(null)}
           onFocus={() => setActiveIcon("configure")}
@@ -65,41 +61,41 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
         >
           <span className={styles.actionContent}>
             <CatalogIcon iconId="configure" active={activeIcon === "configure"} />
-            <span className={styles.actionLabel}>{messages.configure}</span>
+            <span className={styles.actionLabel}>{t("configure")}</span>
           </span>
         </JBButton>
       </JBTooltip>
-      <JBTooltip content={messages.moveUp} positionArea="top" tail>
-        <JBButton square size="sm" variant="ghost" aria-label={messages.moveUp} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
+      <JBTooltip content={t("moveUp")} positionArea="top" tail>
+        <JBButton square size="sm" variant="ghost" aria-label={t("moveUp")} disabled={index === 0} onClick={() => onMove(element.id, -1)}>
           <span className={styles.actionContent}>
             <CatalogIcon iconId="move-up" />
-            <span className={styles.actionLabel}>{messages.moveUp}</span>
+            <span className={styles.actionLabel}>{t("moveUp")}</span>
           </span>
         </JBButton>
       </JBTooltip>
-      <JBTooltip content={messages.moveDown} positionArea="top" tail>
-        <JBButton square size="sm" variant="ghost" aria-label={messages.moveDown} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
+      <JBTooltip content={t("moveDown")} positionArea="top" tail>
+        <JBButton square size="sm" variant="ghost" aria-label={t("moveDown")} disabled={index === count - 1} onClick={() => onMove(element.id, 1)}>
           <span className={styles.actionContent}>
             <CatalogIcon iconId="move-down" />
-            <span className={styles.actionLabel}>{messages.moveDown}</span>
+            <span className={styles.actionLabel}>{t("moveDown")}</span>
           </span>
         </JBButton>
       </JBTooltip>
-      <JBTooltip content={messages.duplicate} positionArea="top" tail>
-        <JBButton square size="sm" variant="ghost" aria-label={messages.duplicate} onClick={() => onDuplicate(element.id)}>
+      <JBTooltip content={t("duplicate")} positionArea="top" tail>
+        <JBButton square size="sm" variant="ghost" aria-label={t("duplicate")} onClick={() => onDuplicate(element.id)}>
           <span className={styles.actionContent}>
             <CatalogIcon iconId="duplicate" />
-            <span className={styles.actionLabel}>{messages.duplicate}</span>
+            <span className={styles.actionLabel}>{t("duplicate")}</span>
           </span>
         </JBButton>
       </JBTooltip>
-      <JBTooltip content={messages.remove} positionArea="top" tail>
+      <JBTooltip content={t("remove")} positionArea="top" tail>
         <JBButton
           id={`element-remove-${element.id}`}
           square
           size="sm"
           variant="ghost"
-          aria-label={messages.remove}
+          aria-label={t("remove")}
           onPointerEnter={() => setActiveIcon("remove")}
           onPointerLeave={() => setActiveIcon(null)}
           onFocus={() => setActiveIcon("remove")}
@@ -108,7 +104,7 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
         >
           <span className={styles.actionContent}>
             <CatalogIcon iconId="remove" active={activeIcon === "remove"} />
-            <span className={styles.actionLabel}>{messages.remove}</span>
+            <span className={styles.actionLabel}>{t("remove")}</span>
           </span>
         </JBButton>
       </JBTooltip>
@@ -118,8 +114,13 @@ function CanvasCardActions({ element, index, count, messages, onConfigure, onMov
 
 /** Renders one selectable, draggable, keyboard-reorderable form element summary. */
 export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formCanvas");
+  const store = useBuilderStore();
   /** Business data and callbacks supplied by the owning canvas collection. */
-  const { element, index, count, isSelected, alwaysShowActions, locale, defaultLocale, messages, onSelect, onConfigure, onMove, onDuplicate, onRemove, onFocusOffset } = props;
+  const { element, index, count, isSelected, alwaysShowActions, onSelect, onConfigure, onMove, onDuplicate, onRemove, onFocusOffset } = props;
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   /** Registry metadata that defines the element's display and icon identity. */
   const entry = registryByType.get(element.type);
   if (!entry) return null;
@@ -146,8 +147,8 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
         variant="ghost"
         draggable
         className={styles.dragHandle}
-        aria-label={messages.dragToReorder}
-        title={messages.dragToReorder}
+        aria-label={t("dragToReorder")}
+        title={t("dragToReorder")}
         onDragStart={event => {
           event.dataTransfer.effectAllowed = "move";
           event.dataTransfer.setData(CANVAS_DRAG_TYPE, element.id);
@@ -164,7 +165,7 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
         type="button"
         className={styles.canvasSelect}
         aria-pressed={isSelected}
-        aria-label={`${componentName}: ${label}, ${index + 1} ${messages.of} ${count}`}
+        aria-label={`${componentName}: ${label}, ${index + 1} ${tCommon("of")} ${count}`}
         onClick={() => onSelect(element.id)}
         onKeyDown={handleKeyDown}
       >
@@ -185,7 +186,6 @@ export const CanvasCard = observer(function CanvasCard(props: CanvasCardProps) {
           element={element}
           index={index}
           count={count}
-          messages={messages}
           onConfigure={onConfigure}
           onMove={onMove}
           onDuplicate={onDuplicate}

@@ -1,8 +1,11 @@
 // @vitest-environment happy-dom
 
-import { act, cleanup, render } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { formAppMessages } from "../i18n/locale-adapter";
+import { renderForm as render } from "../i18n/test-utils";
+
+import { act, cleanup } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { formI18n } from "../i18n/i18n";
+import { formResources } from "../i18n/resources";
 import { FormRouteMenu } from "./FormRouteMenu";
 
 if (typeof HTMLElement.prototype.attachInternals !== "function") {
@@ -24,6 +27,7 @@ if (!("part" in Element.prototype)) {
 }
 
 afterEach(cleanup);
+beforeEach(async () => { await formI18n.changeLanguage("en"); });
 
 // happy-dom lacks Web Animations; actual close timing is covered in browser tests.
 if (typeof Element.prototype.animate !== "function") {
@@ -34,15 +38,32 @@ if (typeof Element.prototype.animate !== "function") {
 }
 
 describe("FormRouteMenu", () => {
+  it("keeps interface language and form content language independent", () => {
+    const onContentLanguageChange = vi.fn();
+    const view = render(<FormRouteMenu
+      currentPage="builder"
+      contentLanguage="en"
+      contentLanguageOptions={[{ value: "en", label: "EN" }, { value: "fa", label: "FA" }]}
+      onContentLanguageChange={onContentLanguageChange}
+    />);
+    const content = view.container.querySelector('jb-select[name="formRouteLanguageContent"]') as HTMLElement & { value: string };
+    const interfaceLanguage = view.container.querySelector('jb-select[name="formRouteLanguage"]') as HTMLElement & { value: string };
+
+    act(() => { content.value = "fa"; content.dispatchEvent(new Event("change")); });
+    expect(onContentLanguageChange).toHaveBeenCalledWith("fa");
+    expect(formI18n.resolvedLanguage).toBe("en");
+
+    onContentLanguageChange.mockClear();
+    act(() => { interfaceLanguage.value = "fa"; interfaceLanguage.dispatchEvent(new Event("change")); });
+    expect(formI18n.resolvedLanguage).toBe("fa");
+    expect(onContentLanguageChange).not.toHaveBeenCalled();
+  });
   it("preserves route context and identifies the active link in both responsive renderings", () => {
     const view = render(
       <FormRouteMenu
         currentPage="designer"
-        messages={formAppMessages.en}
         formSlug="customer-survey"
         themeSlug="ocean"
-        language="en"
-        onLanguageChange={() => undefined}
       />,
     );
 
@@ -55,11 +76,10 @@ describe("FormRouteMenu", () => {
   });
 
   it("opens the mobile popover and closes it after changing language", () => {
-    const onLanguageChange = vi.fn();
     const view = render(
-      <FormRouteMenu currentPage="builder" messages={formAppMessages.en} language="en" onLanguageChange={onLanguageChange} />,
+      <FormRouteMenu currentPage="builder" />,
     );
-    const trigger = view.getByRole("button", { name: formAppMessages.en.openFormNavigation });
+    const trigger = view.getByRole("button", { name: formResources.en.formRouteMenu.openFormNavigation });
 
     act(() => trigger.click());
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
@@ -70,7 +90,7 @@ describe("FormRouteMenu", () => {
       mobileSelect.dispatchEvent(new Event("change"));
     });
 
-    expect(onLanguageChange).toHaveBeenCalledWith("fa");
+    expect(formI18n.resolvedLanguage).toBe("fa");
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 });

@@ -1,17 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { JBButton } from "jb-button/react";
 import { observer } from "mobx-react-lite";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import { useDesignerUiStore } from "../state/DesignerUiStore";
 import styles from "./ExportThemeDialog.module.css";
 
 export interface ExportThemeDialogProps {
   themeName: string;
   json: string;
-  messages: FormMessages;
   onClipboardUnavailable: () => void;
 }
 
-export const ExportThemeDialog = observer(function ExportThemeDialog({ themeName, json, messages, onClipboardUnavailable }: ExportThemeDialogProps) {
+export const ExportThemeDialog = observer(function ExportThemeDialog({ themeName, json, onClipboardUnavailable }: ExportThemeDialogProps) {
+  const { t } = useTranslation("exportThemeDialog");
+  const { t: tDesignerCommon } = useTranslation("designerCommon");
   const ui = useDesignerUiStore();
   if (!ui.exportOpen) return null;
 
@@ -20,11 +21,11 @@ export const ExportThemeDialog = observer(function ExportThemeDialog({ themeName
       if (event.target === event.currentTarget) ui.closeExport();
     }}>
       <section className={styles.exportModal} role="dialog" aria-modal="true" aria-labelledby="export-title">
-        <h2 id="export-title">{messages.designerExportTheme}: {themeName}</h2>
-        <p>{messages.designerExportDescription}</p>
+        <h2 id="export-title">{tDesignerCommon("designerExportTheme")}: {themeName}</h2>
+        <p>{t("designerExportDescription")}</p>
         <pre>{json}</pre>
         <div>
-          <JBButton variant="ghost" onClick={ui.closeExport}>{messages.designerClose}</JBButton>
+          <JBButton variant="ghost" onClick={ui.closeExport}>{t("designerClose")}</JBButton>
           <JBButton color="primary" onClick={async () => {
             try {
               await navigator.clipboard.writeText(json);
@@ -33,7 +34,7 @@ export const ExportThemeDialog = observer(function ExportThemeDialog({ themeName
               onClipboardUnavailable();
             }
           }}>
-            {ui.exportCopied ? messages.designerCopied : messages.designerCopyJson}
+            {ui.exportCopied ? t("designerCopied") : t("designerCopyJson")}
           </JBButton>
         </div>
       </section>

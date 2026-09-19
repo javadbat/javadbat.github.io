@@ -1,20 +1,22 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBTextarea } from "jb-textarea/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { prepareFormImport } from "./form-import";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import modalStyles from "../../shell/FormModal.module.css";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./ImportJsonModal.module.css";
 import {JBModal} from 'jb-modal/react'
 interface ImportJsonModalProps {
   isOpen: boolean;
-  messages: FormMessages;
+
   onClose: () => void;
 }
 
-export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalProps) {
+export function ImportJsonModal({ isOpen, onClose }: ImportJsonModalProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("importJsonModal");
   const store = useBuilderStore();
   const [json, setJson] = useState("");
   const [fileName, setFileName] = useState("");
@@ -40,33 +42,33 @@ export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalPr
       setFileError("");
     } catch (cause) {
       setJson("");
-      setFileError(cause instanceof Error ? cause.message : messages.importFailure);
+      setFileError(cause instanceof Error ? cause.message : t("importFailure"));
     }
   };
 
   const importDocument = () => {
     if (!validation?.valid || !store.importDocument(validation.document)) return;
-    store.announce(messages.importSuccess);
+    store.announce(t("importSuccess"));
     onClose();
   };
 
   return (
-    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.importJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={tCommon("importJson")} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
-          <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
-          <h2>{messages.importJson}</h2>
+          <p className={styles.eyebrow}>{tCommon("portableFormDocument")}</p>
+          <h2>{tCommon("importJson")}</h2>
         </div>
-        <ModalCloseButton label={messages.close} onClick={onClose} />
+        <ModalCloseButton label={tCommon("close")} onClick={onClose} />
       </div>
 
       <div slot="content" className={styles.modalContent}>
-        <p className={styles.description}>{messages.importDescription}</p>
+        <p className={styles.description}>{t("importDescription")}</p>
         <JBTextarea
           className={styles.jsonInput}
           name="importJson"
-          label={messages.pasteJson}
-          placeholder={messages.pasteJsonPlaceholder}
+          label={t("pasteJson")}
+          placeholder={t("pasteJsonPlaceholder")}
           value={json}
           autoFocus
           onInput={event => {
@@ -78,7 +80,7 @@ export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalPr
 
         <div className={styles.fileChooser}>
           <JBButton variant="outline" onClick={() => fileInputRef.current?.click()}>
-            {messages.chooseJsonFile}
+            {t("chooseJsonFile")}
           </JBButton>
           {fileName ? <span>{fileName}</span> : null}
           <input ref={fileInputRef} className={styles.fileInput} type="file" accept="application/json,.json" onChange={event => void chooseFile(event)} />
@@ -86,15 +88,15 @@ export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalPr
 
         {fileError ? (
           <p className={styles.errorStatus} role="alert">
-            {messages.importFailure} {fileError}
+            {t("importFailure")} {fileError}
           </p>
         ) : validation?.valid ? (
           <p className={styles.validStatus} role="status">
-            {messages.jsonSchemaValid}
+            {t("jsonSchemaValid")}
           </p>
         ) : validation ? (
           <div className={styles.invalidStatus} role="alert">
-            <strong>{messages.importFailure}</strong>
+            <strong>{t("importFailure")}</strong>
             <ul>
               {validation.issues.map(issue => (
                 <li key={`${issue.path}:${issue.code}`}>
@@ -109,10 +111,10 @@ export function ImportJsonModal({ isOpen, messages, onClose }: ImportJsonModalPr
 
       <div slot="footer" className={styles.modalActions}>
         <JBButton variant="ghost" onClick={onClose}>
-          {messages.cancel}
+          {tCommon("cancel")}
         </JBButton>
         <JBButton color="primary" disabled={!validation?.valid} onClick={importDocument}>
-          {messages.importDocument}
+          {t("importDocument")}
         </JBButton>
       </div>
     </JBModal>

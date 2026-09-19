@@ -1,7 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import type { JBFormDocumentV1 } from "../domain/form-document";
-import type { FormMessages } from "../i18n/locale-adapter";
 import { JBFormBuilder } from "jb-form-builder/react";
 import { loadDependencies } from "jb-form-builder/dependency-loader";
 import type { FormValues, JBFormBuilderElement, JBFormBuilderEventMap } from "jb-form-builder/types";
@@ -19,7 +19,6 @@ interface PreviewFormPanelProps {
   document: JBFormDocumentV1;
   locale: string;
   accessibleName: string;
-  messages: FormMessages;
   themeConfig?: ThemeConfigV1 | null;
 }
 
@@ -28,7 +27,9 @@ interface PreviewFormPanelProps {
  * keeps <jb-form-builder> framework-independent and lets any host application
  * choose its own validation and reset controls.
  */
-export function PreviewFormPanel({ document, locale, accessibleName, messages, themeConfig = null }: PreviewFormPanelProps) {
+export function PreviewFormPanel({ document, locale, accessibleName, themeConfig = null }: PreviewFormPanelProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("previewFormPanel");
   const rendererRef = useRef<JBFormBuilderElement | null>(null);
   const [validationState, setValidationState] = useState<ValidationState>("preparing");
   const [submittedValues, setSubmittedValues] = useState<FormValues | null>(null);
@@ -100,16 +101,16 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages, t
 
   const statusMessage =
     validationState === "preparing"
-      ? messages.formPreparing
+      ? t("formPreparing")
       : validationState === "validating"
-        ? messages.validatingForm
+        ? t("validatingForm")
         : validationState === "valid"
-          ? messages.formIsValid
+          ? t("formIsValid")
           : validationState === "invalid"
-            ? messages.formHasErrors
+            ? t("formHasErrors")
             : validationState === "error"
-              ? messages.validationFailed
-              : messages.validationReady;
+              ? t("validationFailed")
+              : t("validationReady");
 
   const controlsDisabled = validationState === "preparing" || validationState === "validating";
 
@@ -130,10 +131,10 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages, t
       <footer className={styles.previewActions}>
         <div className={styles.previewActionButtons}>
           <JBButton color="primary" disabled={controlsDisabled} onClick={() => void submit()}>
-            {messages.submitForm}
+            {t("submitForm")}
           </JBButton>
           <JBButton variant="outline" disabled={controlsDisabled} onClick={reset}>
-            {messages.resetForm}
+            {t("resetForm")}
           </JBButton>
         </div>
         <p className={`${styles.validationStatus} ${styles[`validationStatus_${validationState}`]}`} aria-live="polite" aria-atomic="true">
@@ -142,8 +143,8 @@ export function PreviewFormPanel({ document, locale, accessibleName, messages, t
         </p>
       </footer>
       {resultModalOpen && submittedValues ? (
-        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
-          <FormResultModal messages={messages} values={submittedValues} onClose={closeResultModal} />
+        <Suspense fallback={<ModalLoadingFallback label={tCommon("loadingModal")} />}>
+          <FormResultModal values={submittedValues} onClose={closeResultModal} />
         </Suspense>
       ) : null}
     </section>

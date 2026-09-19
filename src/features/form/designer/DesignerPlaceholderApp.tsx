@@ -1,12 +1,16 @@
+import { useTranslation } from "react-i18next";
+import { FormI18nProvider } from "../i18n/FormI18nProvider";
 import { formPageHref, getCurrentFormSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { getLocalizedText } from "../domain/form-document";
-import { useFormLocale } from "../i18n/locale-adapter";
 import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../layout/FormRouteHeader";
 import styles from "../shell/RouteShell.module.css";
 
-export function DesignerPlaceholderApp() {
-  const { locale, direction, messages } = useFormLocale("en");
+function DesignerPlaceholderAppContent() {
+  const { t, i18n } = useTranslation("designerPlaceholderApp");
+  const locale = i18n.language;
+  const direction = i18n.dir();
+  const { t: tCommon } = useTranslation("common");
   const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
   const formName = resolution.status === "ready"
@@ -16,13 +20,13 @@ export function DesignerPlaceholderApp() {
   return (
     <div className={styles.page} dir={direction}>
       <FormRouteHeader className={styles.topbar}>
-        <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.designer} />
+        <FormRouteBrand href={formPageHref("landing")} title={tCommon("productName")} subtitle={tCommon("designer")} />
         <div className={styles.topActions}>
           <FormRouteLinkButton href={formPageHref("builder", slug)}>
-            {messages.builder}
+            {tCommon("builder")}
           </FormRouteLinkButton>
           <FormRouteLinkButton href={formPageHref("preview", slug)} variant="outline">
-            {messages.preview}
+            {tCommon("preview")}
           </FormRouteLinkButton>
         </div>
       </FormRouteHeader>
@@ -30,20 +34,24 @@ export function DesignerPlaceholderApp() {
         <div className={styles.placeholderCard} aria-hidden="true">
           <span />
         </div>
-        <p className={styles.eyebrow}>{messages.phaseOne}</p>
-        <h1>{messages.emptyDesigner}</h1>
+        <p className={styles.eyebrow}>{tCommon("phaseOne")}</p>
+        <h1>{t("emptyDesigner")}</h1>
         <p className={styles.placeholderDescription}>
           {resolution.status === "loading"
-            ? messages.loadingForms
+            ? tCommon("loadingForms")
             : resolution.status === "error"
-              ? messages.storageUnavailable
+              ? tCommon("storageUnavailable")
               : resolution.status === "not-found"
-                ? messages.unknownForm
+                ? tCommon("unknownForm")
                 : resolution.status === "empty"
-                  ? messages.noSavedDraft
-                  : `${messages.emptyDesignerDescription} ${messages.formName}: ${formName}.`}
+                  ? tCommon("noSavedDraft")
+                  : `${t("emptyDesignerDescription")} ${tCommon("formName")}: ${formName}.`}
         </p>
       </main>
     </div>
   );
+}
+
+export function DesignerPlaceholderApp() {
+  return <FormI18nProvider><DesignerPlaceholderAppContent /></FormI18nProvider>;
 }

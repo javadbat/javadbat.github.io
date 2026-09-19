@@ -1,11 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState, type DragEvent } from "react";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import { getFormElementDisplayName, registryByType, type FormElementRegistryEntry } from "../../component-data";
 import { BUILDER_DRAG_END_EVENT, CANVAS_DRAG_TYPE, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
 interface CanvasInteractionOptions {
-  messages: FormMessages;
   onSelectElement?: (elementId: string) => void;
   onConfigureElement?: (elementId: string) => void;
 }
@@ -17,7 +16,9 @@ function focusElementCard(elementId: string): void {
   });
 }
 
-export function useCanvasInteractions({ messages, onSelectElement, onConfigureElement }: CanvasInteractionOptions) {
+export function useCanvasInteractions({ onSelectElement, onConfigureElement }: CanvasInteractionOptions) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formCanvas");
   const store = useBuilderStore();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
@@ -33,9 +34,9 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
 
   const announcePosition = useCallback(
     (entry: FormElementRegistryEntry, action: string, position: number) => {
-      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${action} ${position} ${messages.of} ${store.document.elements.length}`);
+      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${action} ${position} ${tCommon("of")} ${store.document.elements.length}`);
     },
-    [messages.of, store],
+    [tCommon, store],
   );
 
   const selectElement = useCallback(
@@ -62,10 +63,10 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
       const nextIndex = store.moveElementBy(elementId, offset);
       if (nextIndex === -1) return;
       const entry = registryByType.get(element.type);
-      if (entry) announcePosition(entry, messages.movedAnnouncement, nextIndex + 1);
+      if (entry) announcePosition(entry, t("movedAnnouncement"), nextIndex + 1);
       focusElementCard(elementId);
     },
-    [announcePosition, messages.movedAnnouncement, store],
+    [announcePosition, t, store],
   );
 
   const duplicateElement = useCallback(
@@ -74,10 +75,10 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
       if (!duplicateId) return;
       const duplicate = store.findElement(duplicateId);
       const entry = duplicate ? registryByType.get(duplicate.type) : undefined;
-      if (entry) announcePosition(entry, messages.duplicatedAnnouncement, store.getElementPosition(duplicateId) + 1);
+      if (entry) announcePosition(entry, t("duplicatedAnnouncement"), store.getElementPosition(duplicateId) + 1);
       focusElementCard(duplicateId);
     },
-    [announcePosition, messages.duplicatedAnnouncement, store],
+    [announcePosition, t, store],
   );
 
   const confirmRemoval = useCallback(() => {
@@ -85,10 +86,10 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
     const entry = registryByType.get(pendingRemoval.type);
     const nextSelectionId = store.removeElement(pendingRemoval.id);
     setPendingRemovalId(null);
-    store.announce(`${entry ? getFormElementDisplayName(entry, store.editingLocale) : pendingRemoval.type} ${messages.removedAnnouncement}`);
+    store.announce(`${entry ? getFormElementDisplayName(entry, store.editingLocale) : pendingRemoval.type} ${t("removedAnnouncement")}`);
     if (nextSelectionId) focusElementCard(nextSelectionId);
     else requestAnimationFrame(() => document.getElementById("form-canvas-title")?.focus());
-  }, [messages.removedAnnouncement, pendingRemoval, store]);
+  }, [t, pendingRemoval, store]);
 
   const cancelRemoval = useCallback(() => {
     const elementId = pendingRemovalId;
@@ -113,7 +114,7 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
       const registryEntry = registryByType.get(elementType as FormElementRegistryEntry["type"]);
       if (registryEntry) {
         const elementId = store.addElement(registryEntry, insertionIndex);
-        announcePosition(registryEntry, messages.addedAnnouncement, store.getElementPosition(elementId) + 1);
+        announcePosition(registryEntry, tCommon("addedAnnouncement"), store.getElementPosition(elementId) + 1);
         focusElementCard(elementId);
         return;
       }
@@ -123,11 +124,11 @@ export function useCanvasInteractions({ messages, onSelectElement, onConfigureEl
       const nextIndex = store.moveElementToInsertionIndex(elementId, insertionIndex);
       const entry = registryByType.get(element.type);
       if (entry && nextIndex >= 0) {
-        announcePosition(entry, messages.movedAnnouncement, nextIndex + 1);
+        announcePosition(entry, t("movedAnnouncement"), nextIndex + 1);
         focusElementCard(elementId);
       }
     },
-    [announcePosition, messages.addedAnnouncement, messages.movedAnnouncement, store],
+    [announcePosition, tCommon, t, store],
   );
 
   const markDropTarget = useCallback((event: DragEvent, insertionIndex: number) => {

@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useEffect, useState } from "react";
 import { canonicalizeLocaleCode, inferLocaleDirection, type LocaleDefinition } from "../../domain/form-document";
 import { isValidFormSlug, normalizeFormSlug } from "../../application/form-slug";
-import { getStorageIssueMessage, type FormMessages } from "../../i18n/locale-adapter";
+import { getStorageIssueMessage } from "../../i18n/storage-issue-message";
 import type { StorageIssue } from "../../storage/storage-types";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 
@@ -9,8 +11,8 @@ export function copyLocaleDefinitions(locales: Record<string, LocaleDefinition>)
   return Object.fromEntries(Object.entries(locales).map(([locale, definition]) => [locale, { direction: definition.direction }]));
 }
 
-export function getFormSettingsSaveError(messages: FormMessages, issue: StorageIssue | null): string {
-  const summary = getStorageIssueMessage(messages, issue);
+export function getFormSettingsSaveError(tCommon: TFunction<"common">, issue: StorageIssue | null): string {
+  const summary = getStorageIssueMessage(tCommon, issue);
   if (!issue || issue.code !== "validation-failed") return summary;
   if (issue.formIssues?.length) {
     return [summary, ...issue.formIssues.map(formIssue => `${formIssue.path}: ${formIssue.message}`)].join("\n");
@@ -18,7 +20,9 @@ export function getFormSettingsSaveError(messages: FormMessages, issue: StorageI
   return issue.message && issue.message !== summary ? `${summary}\n${issue.message}` : summary;
 }
 
-export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose: () => void) {
+export function useFormSettings(isOpen: boolean, onClose: () => void) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formSettingsModal");
   const store = useBuilderStore();
   const [name, setName] = useState(store.formName);
   const [defaultLocale, setDefaultLocale] = useState(store.document.localization.defaultLocale);
@@ -43,8 +47,8 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
   const slugIsValid = slug.length === 0 || isValidFormSlug(normalizedSlug);
   const addLocale = () => {
     const normalized = canonicalizeLocaleCode(newLocale);
-    if (!normalized) return setLocaleError(messages.localeInvalid);
-    if (locales[normalized]) return setLocaleError(messages.localeAlreadyAdded);
+    if (!normalized) return setLocaleError(t("localeInvalid"));
+    if (locales[normalized]) return setLocaleError(t("localeAlreadyAdded"));
     setLocales(current => ({ ...current, [normalized]: { direction: inferLocaleDirection(normalized) } }));
     setNewLocale("");
     setLocaleError("");
@@ -54,13 +58,13 @@ export function useFormSettings(isOpen: boolean, messages: FormMessages, onClose
     setLocales(current => Object.fromEntries(Object.entries(current).filter(([key]) => key !== locale)));
   };
   const persist = async (saveAs: boolean) => {
-    if (!slugIsValid || (saveAs && normalizedSlug.length === 0)) return setSaveError(messages.slugInvalid);
+    if (!slugIsValid || (saveAs && normalizedSlug.length === 0)) return setSaveError(t("slugInvalid"));
     store.setFormLocalization({ defaultLocale, locales });
     store.updateFormName(name, defaultLocale);
     store.setEditingLocale(defaultLocale);
     const saved = await store.save({ slug: normalizedSlug || undefined, saveAs });
     if (saved) onClose();
-    else setSaveError(getFormSettingsSaveError(messages, store.storageIssue));
+    else setSaveError(getFormSettingsSaveError(tCommon, store.storageIssue));
   };
 
   return {

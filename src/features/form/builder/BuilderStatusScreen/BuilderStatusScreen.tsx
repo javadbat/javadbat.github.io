@@ -1,18 +1,20 @@
+import { useTranslation } from "react-i18next";
 import { JBButton } from "jb-button/react";
 import { JBLoading } from "jb-loading/react";
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
-import type { FormMessages } from "../../i18n/locale-adapter";
-import { getStorageIssueMessage } from "../../i18n/locale-adapter";
+import { getStorageIssueMessage } from "../../i18n/storage-issue-message";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./BuilderStatusScreen.module.css";
 
 interface BuilderStatusScreenProps {
-  messages: FormMessages;
+
   slug?: string;
 }
 
-export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messages, slug }: BuilderStatusScreenProps) {
+export const BuilderStatusScreen = observer(function BuilderStatusScreen({ slug }: BuilderStatusScreenProps) {
+  const { t } = useTranslation("builderStatusScreen");
+  const { t: tCommon } = useTranslation("common");
   const store = useBuilderStore();
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
     return (
       <output className={styles.stateScreen}>
         <JBLoading />
-        <p>{messages.loading}</p>
+        <p>{t("loading")}</p>
       </output>
     );
   }
@@ -30,8 +32,8 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
   return (
     <div className={styles.stateScreen} role="alert">
       {busy ? <JBLoading /> : null}
-      <h1>{busy ? messages.loading : "Builder unavailable"}</h1>
-      <p>{busy ? messages.loading : getStorageIssueMessage(messages, store.storageIssue)}</p>
+      <h1>{busy ? t("loading") : "Builder unavailable"}</h1>
+      <p>{busy ? t("loading") : getStorageIssueMessage(tCommon, store.storageIssue)}</p>
       {actionError ? <p role="status">{actionError}</p> : null}
       <div className={styles.actions}>
         <JBButton
@@ -41,14 +43,14 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
             void store.initialize(slug).finally(() => setBusy(false));
           }}
         >
-          {messages.retry}
+          {t("retry")}
         </JBButton>
         {canDeleteCorruptRecord ? (
           <JBButton
             disabled={busy}
             variant="outline"
             onClick={() => {
-              if (!window.confirm(messages.deleteCorruptFormConfirm)) return;
+              if (!window.confirm(t("deleteCorruptFormConfirm"))) return;
               setActionError(null);
               setBusy(true);
               void store.deleteCorruptRecord(slug).then(deleted => {
@@ -56,17 +58,17 @@ export const BuilderStatusScreen = observer(function BuilderStatusScreen({ messa
                   window.location.assign("/form");
                   return;
                 }
-                setActionError(getStorageIssueMessage(messages, store.storageIssue));
+                setActionError(getStorageIssueMessage(tCommon, store.storageIssue));
               }).catch(() => {
-                setActionError(messages.storageUnavailable);
+                setActionError(tCommon("storageUnavailable"));
               }).finally(() => setBusy(false));
             }}
           >
-            {messages.deleteCorruptForm}
+            {t("deleteCorruptForm")}
           </JBButton>
         ) : null}
         <JBButton disabled={busy} variant="ghost" onClick={() => window.location.assign("/form")}>
-          {messages.backToForms}
+          {tCommon("backToForms")}
         </JBButton>
       </div>
     </div>

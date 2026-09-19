@@ -1,10 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { ThemeConfigV1 } from "jb-form-builder/contract/theme";
 import { formPageHref, getCurrentFormSlug, getCurrentThemeSlug } from "../application/form-page-url";
 import { useStoredForm } from "../application/use-stored-form";
 import { useStoredTheme } from "../application/use-stored-theme";
 import { getLocalizedText } from "../domain/form-document";
-import { useFormLocale } from "../i18n/locale-adapter";
+import { FormI18nProvider } from "../i18n/FormI18nProvider";
 import { FormRouteBrand, FormRouteHeader } from "../layout/FormRouteHeader";
 import { FormRouteMenu } from "../layout/FormRouteMenu";
 import styles from "../shell/RouteShell.module.css";
@@ -19,8 +20,10 @@ function getRequestedLanguage(): string | null {
   return new URLSearchParams(window.location.search).get(PREVIEW_LANGUAGE_QUERY_PARAMETER);
 }
 
-export function PreviewApp() {
-  const { locale, direction, setLocale, messages } = useFormLocale("en");
+function PreviewAppContent() {
+  const { t: tCommon, i18n } = useTranslation("common");
+  const direction = i18n.dir();
+  const { t } = useTranslation("previewApp");
   const slug = getCurrentFormSlug();
   const resolution = useStoredForm(slug);
   const themeResolution = useStoredTheme(getCurrentThemeSlug(), slug);
@@ -70,12 +73,11 @@ export function PreviewApp() {
   const [requestedLanguage, setRequestedLanguage] = useState<string | null>(getRequestedLanguage);
   const supportedLanguages = useMemo(() => resolution.status === "ready" ? Object.keys(resolution.document.localization.locales) : [], [resolution]);
   const selectedLanguage = useMemo(() => {
-    if (resolution.status !== "ready") return requestedLanguage ?? locale;
+    if (resolution.status !== "ready") return requestedLanguage ?? "";
     const requested = requestedLanguage?.toLowerCase();
     return supportedLanguages.find(language => language.toLowerCase() === requested)
-      ?? supportedLanguages.find(language => language.toLowerCase() === locale)
       ?? resolution.document.localization.defaultLocale;
-  }, [locale, requestedLanguage, resolution, supportedLanguages]);
+  }, [requestedLanguage, resolution, supportedLanguages]);
   const formName = resolution.status === "ready"
     ? getLocalizedText(resolution.document.metadata.name, selectedLanguage, resolution.document.localization.defaultLocale)
     : "";
@@ -88,50 +90,43 @@ export function PreviewApp() {
     window.history.replaceState(window.history.state, "", url);
   }, [resolution.status, selectedLanguage]);
 
-  const selectLanguage = (nextLanguage: string) => {
-    setRequestedLanguage(nextLanguage);
-    if (nextLanguage === "en" || nextLanguage === "fa") setLocale(nextLanguage);
-  };
   const unresolvedMessage =
     resolution.status === "loading"
-      ? messages.loadingForms
+      ? tCommon("loadingForms")
       : resolution.status === "error"
-        ? messages.storageUnavailable
+        ? tCommon("storageUnavailable")
         : resolution.status === "not-found"
-          ? messages.unknownForm
+          ? tCommon("unknownForm")
           : resolution.status === "empty"
-            ? messages.noSavedDraft
+            ? tCommon("noSavedDraft")
             : "";
 
   return (
     <div className={styles.page} dir={direction} style={pageThemeStyle} data-theme-background={themeConfig?.background?.type}>
       <div className={styles.themePageBackdrop} style={pageBackdropStyle} aria-hidden="true" />
       <FormRouteHeader className={styles.topbar}>
-        <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.preview} />
+        <FormRouteBrand href={formPageHref("landing")} title={tCommon("productName")} subtitle={tCommon("preview")} />
         <FormRouteMenu
           currentPage="preview"
-          messages={messages}
           formSlug={slug}
           themeSlug={getCurrentThemeSlug()}
-          language={selectedLanguage}
-          languageLabel={messages.contentLocale}
-          languageOptions={(supportedLanguages.length > 0 ? supportedLanguages : ["en", "fa"]).map(language => ({ value: language, label: language.toUpperCase() }))}
-          onLanguageChange={selectLanguage}
+          contentLanguage={selectedLanguage}
+          contentLanguageOptions={(supportedLanguages.length > 0 ? supportedLanguages : ["en", "fa"]).map(language => ({ value: language, label: language.toUpperCase() }))}
+          onContentLanguageChange={setRequestedLanguage}
         />
       </FormRouteHeader>
       {resolution.status === "ready" ? (
         <main className={styles.previewMain}>
           <header className={styles.previewHeading}>
-            <p className={styles.eyebrow}>{messages.preview}</p>
-            <h1>{formName || messages.previewReadyTitle}</h1>
-            <p>{messages.previewReadyDescription}</p>
+            <p className={styles.eyebrow}>{tCommon("preview")}</p>
+            <h1>{formName || t("previewReadyTitle")}</h1>
+            <p>{t("previewReadyDescription")}</p>
           </header>
           <PreviewFormPanel
             key={selectedLanguage}
             document={resolution.document}
             locale={selectedLanguage}
-            accessibleName={formName || messages.previewReadyTitle}
-            messages={messages}
+            accessibleName={formName || t("previewReadyTitle")}
             themeConfig={rendererTheme}
           />
         </main>
@@ -140,11 +135,15 @@ export function PreviewApp() {
           <div className={styles.placeholderCard} aria-hidden="true">
             <span />
           </div>
-          <p className={styles.eyebrow}>{messages.phaseOne}</p>
-          <h1>{messages.preview}</h1>
+          <p className={styles.eyebrow}>{tCommon("phaseOne")}</p>
+          <h1>{tCommon("preview")}</h1>
           <p className={styles.placeholderDescription}>{unresolvedMessage}</p>
         </main>
       )}
     </div>
   );
+}
+
+export function PreviewApp() {
+  return <FormI18nProvider><PreviewAppContent /></FormI18nProvider>;
 }

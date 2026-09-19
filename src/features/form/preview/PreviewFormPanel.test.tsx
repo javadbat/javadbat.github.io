@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
 
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { renderForm as render } from "../i18n/test-utils";
+
+import { cleanup, fireEvent, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { JBFormDocumentV1 } from "../domain/form-document";
-import { formAppMessages } from "../i18n/locale-adapter";
+import { formResources } from "../i18n/resources";
 import { PreviewFormPanel } from "./PreviewFormPanel";
 
 const renderer = vi.hoisted(() => ({
@@ -81,7 +83,6 @@ function renderPanel() {
       document={document}
       locale="en"
       accessibleName="Test form"
-      messages={formAppMessages.en}
     />,
   );
 }
@@ -90,11 +91,11 @@ describe("PreviewFormPanel", () => {
   it("opens a modal with pretty JSON after the preview submit action validates", async () => {
     const view = renderPanel();
 
-    const submitButton = view.getByText(formAppMessages.en.submitForm) as HTMLButtonElement;
+    const submitButton = view.getByText(formResources.en.previewFormPanel.submitForm) as HTMLButtonElement;
     await waitFor(() => expect(submitButton.disabled).toBe(false));
     fireEvent.click(submitButton);
 
-    const dialog = await view.findByRole("dialog", { name: formAppMessages.en.formResult });
+    const dialog = await view.findByRole("dialog", { name: formResources.en.formResultModal.formResult });
     expect(dialog.textContent).toContain('"name": "Ada"');
     expect(dialog.textContent).toContain('"subscribed": true');
   });
@@ -104,17 +105,17 @@ describe("PreviewFormPanel", () => {
 
     fireEvent.click(view.getByText("Rendered submit"));
 
-    expect(await view.findByRole("dialog", { name: formAppMessages.en.formResult })).toBeTruthy();
+    expect(await view.findByRole("dialog", { name: formResources.en.formResultModal.formResult })).toBeTruthy();
   });
 
   it("downloads the submitted values as JSON from the result modal", async () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     const view = renderPanel();
 
-    const submitButton = view.getByText(formAppMessages.en.submitForm) as HTMLButtonElement;
+    const submitButton = view.getByText(formResources.en.previewFormPanel.submitForm) as HTMLButtonElement;
     await waitFor(() => expect(submitButton.disabled).toBe(false));
     fireEvent.click(submitButton);
-    fireEvent.click(await view.findByText(formAppMessages.en.downloadJson));
+    fireEvent.click(await view.findByText(formResources.en.common.downloadJson));
 
     expect(URL.createObjectURL).toHaveBeenCalledOnce();
     expect(click).toHaveBeenCalledOnce();

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { JBButton } from "jb-button/react";
 import { JBTooltip } from "@jbui/tooltip/react";
@@ -6,7 +7,7 @@ import "jb-icons/react";
 import { observer } from "mobx-react-lite";
 import { formPageHref } from "../../application/form-page-url";
 import { inferLocaleDirection } from "../../domain/form-document";
-import { getStorageIssueMessage, type FormAppLocale, type FormMessages } from "../../i18n/locale-adapter";
+import { getStorageIssueMessage } from "../../i18n/storage-issue-message";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../../layout/FormRouteHeader";
 import { FormRouteMenu } from "../../layout/FormRouteMenu";
@@ -14,10 +15,6 @@ import styles from "./BuilderHeader.module.css";
 import SaveIcon from './save.svg?react'
 /** Primary document and workflow actions owned by the builder header. */
 interface BuilderHeaderProps {
-  /** Localized builder-interface copy. */
-  messages: FormMessages;
-  /** Switches the builder interface language and writing direction. */
-  onBuilderLocaleChange: (locale: FormAppLocale) => void;
   /** Opens document identity and localization settings. */
   onOpenSettings: () => void;
   /** Opens portable JSON import. */
@@ -69,7 +66,9 @@ function OverflowMenuIcon() {
  * The component observes the store directly so save-state changes update only
  * the header and the builder sections that actually consume those values.
  */
-export const BuilderHeader = observer(function BuilderHeader({ messages, onBuilderLocaleChange, onOpenSettings, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+export const BuilderHeader = observer(function BuilderHeader({ onOpenSettings, onImport, onUndo, onRedo, onExport }: BuilderHeaderProps) {
+  const { t } = useTranslation("builderHeader");
+  const { t: tCommon } = useTranslation("common");
   /** Shared builder state observed for document identity, locale, and save status. */
   const store = useBuilderStore();
   /** Whether compact layout should prioritize preview after the draft is safely saved. */
@@ -93,7 +92,6 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
       });
     }
     store.setEditingLocale(nextLocale);
-    if (nextLocale === "en" || nextLocale === "fa") onBuilderLocaleChange(nextLocale);
     setMenuOpen(false);
   };
 
@@ -125,43 +123,41 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
 
   return (
     <FormRouteHeader layout="editor" className={styles.header}>
-      <FormRouteBrand href={formPageHref("landing")} title={messages.productName} subtitle={messages.editorReady} />
+      <FormRouteBrand href={formPageHref("landing")} title={tCommon("productName")} subtitle={tCommon("editorReady")} />
 
       <div className={styles.documentIdentity}>
         <span className={styles.documentName}>{store.formName}</span>
-        <JBTooltip content={messages.formSettings} positionArea="bottom" tail>
-          <button type="button" className={styles.settingsButton} aria-label={messages.formSettings} onClick={onOpenSettings}>
+        <JBTooltip content={tCommon("formSettings")} positionArea="bottom" tail>
+          <button type="button" className={styles.settingsButton} aria-label={tCommon("formSettings")} onClick={onOpenSettings}>
             <SettingsIcon />
           </button>
         </JBTooltip>
-        <span className={styles.identityBadge}>{store.linkedRecord ? messages.linkedNamedForm : messages.currentDraft}</span>
+        <span className={styles.identityBadge}>{store.linkedRecord ? tCommon("linkedNamedForm") : tCommon("currentDraft")}</span>
         <output
           className={styles.saveState}
           data-dirty={store.isDirty || store.status === "save-error"}
-          title={store.status === "save-error" ? getStorageIssueMessage(messages, store.storageIssue) : undefined}
+          title={store.status === "save-error" ? getStorageIssueMessage(tCommon, store.storageIssue) : undefined}
         >
           <i />
           {store.status === "saving"
-            ? messages.saving
+            ? tCommon("saving")
             : store.status === "save-error"
-              ? messages.saveFailed
+              ? t("saveFailed")
               : store.isDirty
-                ? messages.unsavedChanges
+                ? t("unsavedChanges")
                 : store.hasSavedDraft
-                  ? messages.saved
-                  : messages.currentDraft}
+                  ? t("saved")
+                  : tCommon("currentDraft")}
         </output>
       </div>
 
       <nav className={styles.headerActions} aria-label="Form actions">
         <FormRouteMenu
           currentPage="builder"
-          messages={messages}
           formSlug={selectedFormSlug}
-          language={store.editingLocale}
-          languageLabel={messages.contentLocale}
-          languageOptions={selectableLocales.map(contentLocale => ({ value: contentLocale, label: contentLocale.toUpperCase() }))}
-          onLanguageChange={selectLocale}
+          contentLanguage={store.editingLocale}
+          contentLanguageOptions={selectableLocales.map(contentLocale => ({ value: contentLocale, label: contentLocale.toUpperCase() }))}
+          onContentLanguageChange={selectLocale}
         />
         <div className={styles.overflowMenu} ref={menuRef}>
           <button
@@ -175,35 +171,35 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
             <OverflowMenuIcon />
           </button>
           <div id="builder-mobile-actions" className={styles.overflowMenuPanel} hidden={!menuOpen}>
-            <JBTooltip content={messages.formSettings} positionArea="bottom" tail>
+            <JBTooltip content={tCommon("formSettings")} positionArea="bottom" tail>
               <button type="button" className={styles.menuSettingsButton} onClick={() => runMenuAction(onOpenSettings)}>
                 <SettingsIcon />
-                {messages.formSettings}
+                {tCommon("formSettings")}
               </button>
             </JBTooltip>
             <div className={styles.documentActions}>
               <JBButton variant="ghost" size="sm" onClick={() => runMenuAction(onImport)}>
-                {messages.importJson}
+                {tCommon("importJson")}
               </JBButton>
               <JBButton variant="ghost" size="sm" onClick={() => runMenuAction(onExport)}>
-                {messages.exportJson}
+                {tCommon("exportJson")}
               </JBButton>
             </div>
             <div className={styles.historyActions}>
-              <JBTooltip content={messages.undo} positionArea="bottom" tail>
-                <JBButton square variant="ghost" size="sm" aria-label={messages.undo} disabled={!store.canUndo} onClick={() => runMenuAction(onUndo)}>
+              <JBTooltip content={t("undo")} positionArea="bottom" tail>
+                <JBButton square variant="ghost" size="sm" aria-label={t("undo")} disabled={!store.canUndo} onClick={() => runMenuAction(onUndo)}>
                   <HistoryActionIcon action="undo" />
                 </JBButton>
               </JBTooltip>
-              <JBTooltip content={messages.redo} positionArea="bottom" tail>
-                <JBButton square variant="ghost" size="sm" aria-label={messages.redo} disabled={!store.canRedo} onClick={() => runMenuAction(onRedo)}>
+              <JBTooltip content={t("redo")} positionArea="bottom" tail>
+                <JBButton square variant="ghost" size="sm" aria-label={t("redo")} disabled={!store.canRedo} onClick={() => runMenuAction(onRedo)}>
                   <HistoryActionIcon action="redo" />
                 </JBButton>
               </JBTooltip>
             </div>
             <FormRouteLinkButton href={formPageHref("preview", selectedFormSlug)} variant="outline">
               <jb-icon-eye open size="sm" />
-              {messages.preview}
+              {tCommon("preview")}
             </FormRouteLinkButton>
           </div>
         </div>
@@ -213,23 +209,23 @@ export const BuilderHeader = observer(function BuilderHeader({ messages, onBuild
           square
           color="primary"
           size="sm"
-          aria-label={messages.save}
+          aria-label={tCommon("save")}
           disabled={store.status === "saving"}
           onClick={() => void store.save()}
         >
           <SaveIcon />
-          <span className={styles.saveLabel}>{store.status === "saving" ? messages.saving : messages.save}</span>
+          <span className={styles.saveLabel}>{store.status === "saving" ? tCommon("saving") : tCommon("save")}</span>
         </JBButton>
         {showMobilePreview ? (
           <FormRouteLinkButton
             className={styles.mobilePreviewButton}
             square
             variant="solid"
-            aria-label={messages.preview}
+            aria-label={tCommon("preview")}
             href={formPageHref("preview", selectedFormSlug)}
           >
             <jb-icon-eye open size="sm" />
-            <span className={styles.saveLabel}>{messages.preview}</span>
+            <span className={styles.saveLabel}>{tCommon("preview")}</span>
           </FormRouteLinkButton>
         ) : null}
       </nav>

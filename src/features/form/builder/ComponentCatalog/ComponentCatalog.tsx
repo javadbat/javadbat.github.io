@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo, useCallback, useMemo, useState, type DragEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
@@ -6,14 +7,13 @@ import { useBuilderStore } from "../store/BuilderStoreContext";
 import { CatalogIcon } from "../CatalogIcon/CatalogIcon";
 import { getFormElementDescription, getFormElementDisplayName, type FormElementRegistryEntry } from "../../component-data";
 import { supportedComponentData } from "../../component-data";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import styles from "./ComponentCatalog.module.css";
 import { beginBuilderDrag, CATALOG_DRAG_TYPE, endBuilderDrag } from "../builder-drag";
 import "jb-icons/search";
 import { useMediaQuery } from "usehooks-ts";
 interface ComponentCatalogProps {
-  messages: FormMessages;
+
   onElementAdded?: (elementId: string) => void;
 }
 
@@ -21,11 +21,11 @@ interface CatalogRowProps {
   entry: FormElementRegistryEntry;
   displayName: string;
   description: string;
-  addLabel: string;
   onAdd: (entry: FormElementRegistryEntry) => void;
 }
 
-const CatalogRow = memo(function CatalogRow({ entry, displayName, description, addLabel, onAdd }: CatalogRowProps) {
+const CatalogRow = memo(function CatalogRow({ entry, displayName, description, onAdd }: CatalogRowProps) {
+  const { t } = useTranslation("componentCatalog");
   return (
     <li
       className={styles.catalogRow}
@@ -44,27 +44,29 @@ const CatalogRow = memo(function CatalogRow({ entry, displayName, description, a
         <strong>{displayName}</strong>
         <small>{description}</small>
       </span>
-      <JBButton variant="ghost" size="sm" onClick={() => onAdd(entry)} aria-label={`${addLabel} ${displayName}`}>
-        {addLabel}
+      <JBButton variant="ghost" size="sm" onClick={() => onAdd(entry)} aria-label={`${t("add")} ${displayName}`}>
+        {t("add")}
       </JBButton>
     </li>
   );
 });
 
-export const ComponentCatalog = observer(function ComponentCatalog({ messages, onElementAdded }: ComponentCatalogProps) {
+export const ComponentCatalog = observer(function ComponentCatalog({ onElementAdded }: ComponentCatalogProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("componentCatalog");
   const store = useBuilderStore();
   const [query, setQuery] = useState("");
   const addElement = useCallback(
     (entry: FormElementRegistryEntry) => {
       const elementId = store.addCatalogElement(entry);
       const position = store.getElementPosition(elementId) + 1;
-      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${messages.addedAnnouncement} ${position} ${messages.of} ${store.document.elements.length}`);
+      store.announce(`${getFormElementDisplayName(entry, store.editingLocale)} ${tCommon("addedAnnouncement")} ${position} ${tCommon("of")} ${store.document.elements.length}`);
       onElementAdded?.(elementId);
       requestAnimationFrame(() => {
         document.getElementById(`element-card-${elementId}`)?.scrollIntoView({ block: "nearest" });
       });
     },
-    [messages, onElementAdded, store],
+    [tCommon, onElementAdded, store],
   );
 
   const filteredGroups = useMemo(() => {
@@ -94,19 +96,19 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
     <aside className={`${layoutStyles.panel} ${styles.catalog}`} data-builder-panel="catalog" aria-labelledby="component-catalog-title">
       <div className={styles.panelHeading}>
         <div>
-          {!isMobile && <p className={styles.eyebrow}>{messages.builder}</p>}
+          {!isMobile && <p className={styles.eyebrow}>{tCommon("builder")}</p>}
           <h2 id="component-catalog-title">
-            {isMobile && messages.catalogDescription}
-            {!isMobile && messages.componentCatalog}
+            {isMobile && t("catalogDescription")}
+            {!isMobile && tCommon("componentCatalog")}
           </h2>
         </div>
         <span className={styles.countBadge}>{supportedComponentData.length}</span>
       </div>
-      {!isMobile && <p className={styles.panelDescription}>{messages.catalogDescription}</p>}
+      {!isMobile && <p className={styles.panelDescription}>{t("catalogDescription")}</p>}
       <JBInput
         name="componentSearch"
         type="search"
-        placeholder={messages.searchComponents}
+        placeholder={t("searchComponents")}
         value={query}
         size="sm"
         className={styles.searchInput}
@@ -126,7 +128,6 @@ export const ComponentCatalog = observer(function ComponentCatalog({ messages, o
                   entry={entry}
                   displayName={getFormElementDisplayName(entry, store.editingLocale)}
                   description={getFormElementDescription(entry, store.editingLocale)}
-                  addLabel={messages.add}
                   onAdd={addElement}
                 />
               ))}

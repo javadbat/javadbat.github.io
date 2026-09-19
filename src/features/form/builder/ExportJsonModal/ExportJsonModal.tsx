@@ -1,9 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { JBButton } from "jb-button/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
 import { CodeViewer } from "../../../../components/react/components/code-viewer/CodeViewer";
 import type { JBFormDocumentV1 } from "../../domain/form-document";
 import { downloadFormExport, prepareFormExport } from "./form-export";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import modalStyles from "../../shell/FormModal.module.css";
 import styles from "./ExportJsonModal.module.css";
 import { JBModal } from "jb-modal/react";
@@ -11,7 +11,7 @@ import { JBModal } from "jb-modal/react";
 interface ExportJsonModalProps {
   document: JBFormDocumentV1;
   isOpen: boolean;
-  messages: FormMessages;
+
   onClose: () => void;
 }
 
@@ -20,34 +20,36 @@ interface ExportJsonModalProps {
  * and Shiki are useful here but should not increase the Builder's initial
  * editing bundle or initialization work.
  */
-export function ExportJsonModal({ document, isOpen, messages, onClose }: ExportJsonModalProps) {
+export function ExportJsonModal({ document, isOpen, onClose }: ExportJsonModalProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("exportJsonModal");
   const exportResult = prepareFormExport(document);
 
   return (
-    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.exportJson} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={tCommon("exportJson")} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
-          <p className={styles.eyebrow}>{messages.portableFormDocument}</p>
-          <h2>{messages.exportJson}</h2>
+          <p className={styles.eyebrow}>{tCommon("portableFormDocument")}</p>
+          <h2>{tCommon("exportJson")}</h2>
         </div>
         <div className={styles.exportModalHeaderActions}>
           {exportResult.valid ? <code className={styles.exportFileName}>{exportResult.fileName}</code> : null}
-          <ModalCloseButton label={messages.close} onClick={onClose} />
+          <ModalCloseButton label={tCommon("close")} onClick={onClose} />
         </div>
       </div>
 
       <div slot="content" className={styles.exportModalContent}>
         {exportResult.valid ? (
           <>
-            <p className={styles.modalDescription}>{messages.exportDescription}</p>
+            <p className={styles.modalDescription}>{t("exportDescription")}</p>
             <div className={styles.exportCodeViewer}>
-              <CodeViewer code={exportResult.json} language="json" ariaLabel={messages.exportCodeLabel} copyLabel={messages.copyCode} copiedLabel={messages.copiedCode} />
+              <CodeViewer code={exportResult.json} language="json" ariaLabel={t("exportCodeLabel")} copyLabel={t("copyCode")} copiedLabel={t("copiedCode")} />
             </div>
           </>
         ) : (
           <>
             <p className={styles.exportError} role="alert">
-              {messages.exportInvalidDescription}
+              {t("exportInvalidDescription")}
             </p>
             <ul className={styles.exportIssueList}>
               {exportResult.issues.map(issue => (
@@ -65,15 +67,15 @@ export function ExportJsonModal({ document, isOpen, messages, onClose }: ExportJ
         {exportResult.valid ? (
           <>
             <JBButton variant="ghost" onClick={onClose}>
-              {messages.close}
+              {tCommon("close")}
             </JBButton>
             <JBButton color="primary" onClick={() => downloadFormExport(exportResult)}>
-              {messages.downloadJson}
+              {tCommon("downloadJson")}
             </JBButton>
           </>
         ) : (
           <JBButton color="primary" onClick={onClose}>
-            {messages.close}
+            {tCommon("close")}
           </JBButton>
         )}
       </div>

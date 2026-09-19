@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, type DragEvent } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
@@ -15,8 +16,12 @@ interface WizardCanvasCardProps extends Omit<CanvasCardProps, "element"> {
 }
 
 export const WizardCanvasCard = observer(function WizardCanvasCard(props: WizardCanvasCardProps) {
-  const { element, locale, defaultLocale, messages } = props;
+  const { t } = useTranslation("formCanvas");
+  const { t: tWizard } = useTranslation("wizardCanvasCard");
+  const { element } = props;
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const [activeStepId, setActiveStepId] = useState(element.steps[0]?.id ?? "");
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const activeStep = element.steps.find(step => step.id === activeStepId) ?? element.steps[0];
@@ -68,7 +73,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
   return (
     <div className={styles.tabContainerCard}>
       <CanvasCard {...props} element={element} />
-      <div className={styles.builderTabList} aria-label={locale.toLowerCase().startsWith("fa") ? "مراحل فرم" : "Wizard steps"}>
+      <div className={styles.builderTabList} aria-label={tWizard("wizardSteps")}>
         {element.steps.map((step, index) => (
           <button
             key={step.id}
@@ -81,7 +86,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
             {index + 1}. {getLocalizedText(step.label, locale, defaultLocale)}
           </button>
         ))}
-        <JBButton size="sm" variant="ghost" aria-label={locale.toLowerCase().startsWith("fa") ? "افزودن مرحله" : "Add wizard step"} onClick={() => {
+        <JBButton size="sm" variant="ghost" aria-label={tWizard("addWizardStep")} onClick={() => {
           const id = store.addWizardStep(element.id);
           if (id) activateStep(id);
         }}>+</JBButton>
@@ -90,13 +95,13 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
         <div className={styles.tabPanel} aria-label={getLocalizedText(activeStep.label, locale, defaultLocale)}>
           {activeStep.children.length === 0 ? (
             <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>
-              {locale.toLowerCase().startsWith("fa") ? "اجزای فرم را در این مرحله رها کنید" : "Drop form elements into this step"}
+              {tWizard("dropIntoStep")}
             </div>
           ) : (
             <ol className={styles.tabChildList}>
               {activeStep.children.map((child, index) => (
                 <li key={child.id}>
-                  <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
+                  <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
                   <CanvasCard
                     {...props}
                     element={child}
@@ -109,7 +114,7 @@ export const WizardCanvasCard = observer(function WizardCanvasCard(props: Wizard
                     }}
                   />
                   {index === activeStep.children.length - 1 ? (
-                    <InsertionTarget active={dragOverIndex === activeStep.children.length} onDragOver={event => markDropTarget(event, activeStep.children.length)} onDrop={event => acceptDrop(event, activeStep.children.length)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
+                    <InsertionTarget active={dragOverIndex === activeStep.children.length} onDragOver={event => markDropTarget(event, activeStep.children.length)} onDrop={event => acceptDrop(event, activeStep.children.length)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
                   ) : null}
                 </li>
               ))}

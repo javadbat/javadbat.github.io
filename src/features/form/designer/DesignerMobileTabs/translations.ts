@@ -1,12 +1,10 @@
 export const designerMobileTabsTranslations = {
-  en: {
-    designerDesign: "Design",
-    designerPreview: "Preview",
-    designerMobilePanels: "Designer panels",
+  "en": {
+    "designerDesign": "Design",
+    "designerMobilePanels": "Designer panels"
   },
-  fa: {
-    designerDesign: "طراحی",
-    designerPreview: "پیش‌نمایش",
-    designerMobilePanels: "پنل‌های طراح",
-  },
+  "fa": {
+    "designerDesign": "طراحی",
+    "designerMobilePanels": "پنل‌های طراح"
+  }
 } as const;

@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { renderForm as render } from "../../i18n/test-utils";
+
+import { cleanup, fireEvent, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { formAppMessages } from "../../i18n/locale-adapter";
+import { formResources } from "../../i18n/resources";
 import { formElementRegistry } from "../../component-data";
 import { BuilderStore } from "../store/BuilderStore";
 import { BuilderStoreProvider } from "../store/BuilderStoreContext";
@@ -56,24 +58,24 @@ describe("ValidationRulesEditor", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <ValidationRulesEditor locale="en" messages={formAppMessages.en} supportedRules={inputEntry.validationRules} />
+        <ValidationRulesEditor supportedRules={inputEntry.validationRules} />
       </BuilderStoreProvider>,
     );
 
     expect(view.queryByRole("dialog")).toBeNull();
     expect(view.container.querySelector('select[name="newValidationRule"]')).toBeNull();
 
-    fireEvent.click(view.getByText(formAppMessages.en.addValidation));
-    expect(await view.findByRole("dialog", { name: formAppMessages.en.validationRules })).toBeTruthy();
+    fireEvent.click(view.getByText(formResources.en.validationRulesEditor.addValidation));
+    expect(await view.findByRole("dialog", { name: formResources.en.validationRulesEditor.validationRules })).toBeTruthy();
     expect(view.container.querySelector('select[name="newValidationRule"]')).toBeTruthy();
 
-    fireEvent.click(view.getByText(formAppMessages.en.addRule));
+    fireEvent.click(view.getByText(formResources.en.validationRulesEditor.addRule));
     expect(store.selectedElement?.validation[0]?.rule).toBe("minLength");
     expect(view.container.querySelector('jb-input[name^="validation-value-"]')).toBeTruthy();
 
-    fireEvent.click(view.getByText(formAppMessages.en.done));
+    fireEvent.click(view.getByText(formResources.en.validationRulesEditor.done));
     expect(view.queryByRole("dialog")).toBeNull();
-    expect(view.getByText(formAppMessages.en.manageValidation)).toBeTruthy();
+    expect(view.getByText(formResources.en.validationRulesEditor.manageValidation)).toBeTruthy();
     expect(view.getByText("Minimum length")).toBeTruthy();
   });
 
@@ -86,13 +88,13 @@ describe("ValidationRulesEditor", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <ValidationRulesEditor locale="en" messages={formAppMessages.en} supportedRules={inputEntry.validationRules} />
+        <ValidationRulesEditor supportedRules={inputEntry.validationRules} />
       </BuilderStoreProvider>,
     );
 
-    const manageButton = Array.from(view.container.querySelectorAll("jb-button")).find(button => button.textContent === formAppMessages.en.manageValidation)!;
+    const manageButton = Array.from(view.container.querySelectorAll("jb-button")).find(button => button.textContent === formResources.en.validationRulesEditor.manageValidation)!;
     fireEvent.click(manageButton);
-    await view.findByRole("dialog", { name: formAppMessages.en.validationRules });
+    await view.findByRole("dialog", { name: formResources.en.validationRulesEditor.validationRules });
     const patternInput = await waitFor(() => {
       const input = view.container.querySelector('jb-input[name^="validation-source-"]');
       expect(input).toBeTruthy();
@@ -100,6 +102,6 @@ describe("ValidationRulesEditor", () => {
     });
 
     expect(patternInput?.getAttribute("message")).toContain("https://regex101.com/?flavor=javascript");
-    expect(patternInput?.getAttribute("message")).toContain(formAppMessages.en.openRegexBuilder);
+    expect(patternInput?.getAttribute("message")).toContain(formResources.en.validationRulesEditor.openRegexBuilder);
   });
 });

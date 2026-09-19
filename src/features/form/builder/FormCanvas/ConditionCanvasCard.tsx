@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, type DragEvent } from "react";
 import { observer } from "mobx-react-lite";
 import type { JBConditionElementV1 } from "../../domain/form-document";
@@ -14,8 +15,11 @@ interface ConditionCanvasCardProps extends Omit<CanvasCardProps, "element"> {
 }
 
 export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: ConditionCanvasCardProps) {
-  const { element, messages } = props;
+  const { t } = useTranslation("formCanvas");
+  const { element } = props;
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: 
           <ol className={styles.tabChildList}>
             {element.children.map((child, index) => (
               <li key={child.id}>
-                <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
+                <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
                 <CanvasCard
                   {...props}
                   element={child}
@@ -78,7 +82,7 @@ export const ConditionCanvasCard = observer(function ConditionCanvasCard(props: 
                   }}
                 />
                 {index === element.children.length - 1 ? (
-                  <InsertionTarget active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
+                  <InsertionTarget active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
                 ) : null}
               </li>
             ))}

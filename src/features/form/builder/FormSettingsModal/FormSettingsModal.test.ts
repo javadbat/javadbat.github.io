@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { BuilderStore } from "../store/BuilderStore";
-import { formAppMessages } from "../../i18n/locale-adapter";
+import { formI18n } from "../../i18n/i18n";
 import { copyLocaleDefinitions } from "./FormSettingsModal";
 import { getFormSettingsSaveError } from "./useFormSettings";
 
@@ -31,7 +31,7 @@ describe("FormSettingsModal locale drafts", () => {
   });
 
   it("shows the exact form issue instead of hiding it behind a generic save error", () => {
-    const error = getFormSettingsSaveError(formAppMessages.en, {
+    const error = getFormSettingsSaveError(formI18n.getFixedT("en", "common"), {
       code: "validation-failed",
       message: "The form must be valid before it can be saved.",
       formIssues: [

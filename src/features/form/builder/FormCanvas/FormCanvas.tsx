@@ -1,7 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getLocalizedText, isConditionElement, isContainerElement, isRepeatableGroupElement, isTabElement, isWizardElement } from "../../domain/form-document";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { getFormElementDisplayName } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
@@ -20,18 +20,20 @@ import { useMediaQuery } from "usehooks-ts";
 const RemoveElementModal = lazy(() => import("./RemoveElementModal/RemoveElementModal").then(module => ({ default: module.RemoveElementModal })));
 
 interface FormCanvasProps {
-  messages: FormMessages;
+
   onOpenFormNameSettings?: () => void;
   onSelectElement?: (elementId: string) => void;
   onConfigureElement?: (elementId: string) => void;
 }
 
-export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNameSettings, onSelectElement, onConfigureElement }: FormCanvasProps) {
+export const FormCanvas = observer(function FormCanvas({ onOpenFormNameSettings, onSelectElement, onConfigureElement }: FormCanvasProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formCanvas");
   const store = useBuilderStore();
   const locale = store.editingLocale;
   const defaultLocale = store.document.localization.defaultLocale;
   const count = store.document.elements.length;
-  const interactions = useCanvasInteractions({ messages, onSelectElement, onConfigureElement });
+  const interactions = useCanvasInteractions({ onSelectElement, onConfigureElement });
   const alwaysShowActions = useMediaQuery("(hover: none) and (pointer: coarse), (max-width: 30rem)");
   const { dragOverIndex, pendingRemoval, pendingRemovalEntry, acceptDrop, markDropTarget } = interactions;
 
@@ -46,7 +48,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
     >
       <div className={styles.canvasHeader}>
         <div>
-          <p className={styles.eyebrow}>{messages.currentDraft}</p>
+          <p className={styles.eyebrow}>{tCommon("currentDraft")}</p>
           <h1 id="form-canvas-title" tabIndex={-1}>
             <button type="button" className={styles.titleButton} onClick={onOpenFormNameSettings}>
               {store.formName}
@@ -54,7 +56,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
           </h1>
         </div>
         <span className={styles.fieldCount}>
-          <strong>{count}</strong> {count === 1 ? messages.field : messages.fields}
+          <strong>{count}</strong> {count === 1 ? tCommon("field") : tCommon("fields")}
         </span>
       </div>
       {count === 0 ? (
@@ -62,15 +64,15 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
           <span className={styles.emptyIllustration}>
             <CatalogIcon iconId="text-input" />
           </span>
-          <h2>{messages.emptyFormTitle}</h2>
-          <p>{messages.emptyFormDescription}</p>
+          <h2>{t("emptyFormTitle")}</h2>
+          <p>{t("emptyFormDescription")}</p>
         </div>
       ) : (
         <ol className={styles.canvasList}>
           {store.document.elements.map((element, index) => (
             <li className={styles.canvasListItem} key={element.id}>
               <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}>
-                <CatalogIcon iconId="drop" />{messages.dropHere}
+                <CatalogIcon iconId="drop" />{t("dropHere")}
               </InsertionTarget>
               {isTabElement(element) ? <TabCanvasCard
                 element={element}
@@ -78,9 +80,6 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 alwaysShowActions={alwaysShowActions}
-                locale={locale}
-                defaultLocale={defaultLocale}
-                messages={messages}
                 onSelect={interactions.selectElement}
                 onConfigure={interactions.configureElement}
                 onMove={interactions.moveElement}
@@ -93,9 +92,6 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 alwaysShowActions={alwaysShowActions}
-                locale={locale}
-                defaultLocale={defaultLocale}
-                messages={messages}
                 onSelect={interactions.selectElement}
                 onConfigure={interactions.configureElement}
                 onMove={interactions.moveElement}
@@ -108,9 +104,6 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 alwaysShowActions={alwaysShowActions}
-                locale={locale}
-                defaultLocale={defaultLocale}
-                messages={messages}
                 onSelect={interactions.selectElement}
                 onConfigure={interactions.configureElement}
                 onMove={interactions.moveElement}
@@ -123,9 +116,6 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 alwaysShowActions={alwaysShowActions}
-                locale={locale}
-                defaultLocale={defaultLocale}
-                messages={messages}
                 onSelect={interactions.selectElement}
                 onConfigure={interactions.configureElement}
                 onMove={interactions.moveElement}
@@ -138,9 +128,6 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
                 count={count}
                 isSelected={element.id === store.selectedElementId}
                 alwaysShowActions={alwaysShowActions}
-                locale={locale}
-                defaultLocale={defaultLocale}
-                messages={messages}
                 onSelect={interactions.selectElement}
                 onConfigure={interactions.configureElement}
                 onMove={interactions.moveElement}
@@ -150,7 +137,7 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
               />}
               {index === count - 1 ? (
                 <InsertionTarget active={dragOverIndex === count} onDragOver={event => markDropTarget(event, count)} onDrop={event => acceptDrop(event, count)}>
-                  <CatalogIcon iconId="drop" />{messages.dropHere}
+                  <CatalogIcon iconId="drop" />{t("dropHere")}
                 </InsertionTarget>
               ) : null}
             </li>
@@ -161,14 +148,13 @@ export const FormCanvas = observer(function FormCanvas({ messages, onOpenFormNam
         {store.announcement}
       </p>
       {pendingRemoval ? (
-        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
+        <Suspense fallback={<ModalLoadingFallback label={tCommon("loadingModal")} />}>
           <RemoveElementModal
             isOpen
             elementLabel={
               (isContainerElement(pendingRemoval) ? pendingRemoval.name : getLocalizedText(pendingRemoval.label, locale, defaultLocale)) ||
               (pendingRemovalEntry ? getFormElementDisplayName(pendingRemovalEntry, locale) : pendingRemoval.type)
             }
-            messages={messages}
             onCancel={interactions.cancelRemoval}
             onConfirm={interactions.confirmRemoval}
           />

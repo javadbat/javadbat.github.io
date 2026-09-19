@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
 
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { renderForm as render } from "../../i18n/test-utils";
+
+import { act, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { IDBFactory } from "fake-indexeddb";
 import { autorun } from "mobx";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
 import { validateFormDocument } from "../../domain/form-document-validation";
-import { formAppMessages } from "../../i18n/locale-adapter";
+import { formI18n } from "../../i18n/i18n";
+import { formResources } from "../../i18n/resources";
 import { formElementRegistry } from "../../component-data";
 import { IndexedDbFormRepository } from "../../storage/form-repository";
 import { BuilderStore } from "./BuilderStore";
@@ -17,6 +20,12 @@ import { PropertyField } from "../ConfigurationPanel/PropertyField";
 import { CommonBehaviorEditor, CommonFieldsEditor } from "../ConfigurationPanel/CommonFieldsEditor";
 import { DataFieldsEditor } from "../ConfigurationPanel/DataFieldsEditor";
 import { ConfigurationPanel } from "../ConfigurationPanel/ConfigurationPanel";
+
+afterEach(cleanup);
+beforeEach(async () => {
+  localStorage.clear();
+  await formI18n.changeLanguage("en");
+});
 
 // Happy DOM lacks the ElementInternals API used by jb-tooltip. Real supported
 // browsers provide it; this shim keeps these component tests on the real UI path.
@@ -101,7 +110,7 @@ describe("Builder shell performance baseline", () => {
     const renderStartedAt = performance.now();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
     const renderDuration = performance.now() - renderStartedAt;
@@ -129,7 +138,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <ConfigurationPanel messages={formAppMessages.en} />
+        <ConfigurationPanel />
       </BuilderStoreProvider>,
     );
     const collapses = Array.from(view.container.querySelectorAll("jb-collapse"));
@@ -137,12 +146,12 @@ describe("Builder core editing", () => {
     const contentFields = Array.from(collapses[0].querySelectorAll("jb-input"), field => field.getAttribute("name"));
 
     expect(titles).toEqual([
-      formAppMessages.en.contentSettings,
-      formAppMessages.en.componentSettings,
-      formAppMessages.en.behaviorSettings,
-      formAppMessages.en.validationRules,
-      formAppMessages.en.advancedSettings,
-      formAppMessages.en.dataSettings,
+      formResources.en.configurationPanel.contentSettings,
+      formResources.en.configurationPanel.componentSettings,
+      formResources.en.configurationPanel.behaviorSettings,
+      formResources.en.validationRulesEditor.validationRules,
+      formResources.en.propertyGuidance.advancedSettings,
+      formResources.en.configurationPanel.dataSettings,
     ]);
     expect(contentFields).toEqual(["elementLabel", "prop-message", "elementPlaceholder"]);
     expect(collapses[0].hasAttribute("open")).toBe(true);
@@ -168,7 +177,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} />
       </BuilderStoreProvider>,
     );
 
@@ -182,10 +191,12 @@ describe("Builder core editing", () => {
     const store = new BuilderStore();
     const entry = formElementRegistry.find(candidate => candidate.type === type)!;
     store.addElement(entry);
+    store.setFormLocalization({ defaultLocale: "en", locales: { en: { direction: "ltr" }, fa: { direction: "rtl" } } });
+    store.setEditingLocale("fa");
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonBehaviorEditor entry={entry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+        <CommonBehaviorEditor entry={entry} />
       </BuilderStoreProvider>,
     );
     const options = Array.from(view.container.querySelectorAll("jb-option"), option => option.textContent);
@@ -202,7 +213,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} />
       </BuilderStoreProvider>,
     );
 
@@ -216,7 +227,7 @@ describe("Builder core editing", () => {
     store.addElement(entry);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonBehaviorEditor entry={entry} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <CommonBehaviorEditor entry={entry} />
       </BuilderStoreProvider>,
     );
     const timeInput = view.container.querySelector("jb-time-input") as HTMLElement & {
@@ -238,7 +249,7 @@ describe("Builder core editing", () => {
     const originalName = store.selectedElement!.name;
     const view = render(
       <BuilderStoreProvider value={store}>
-        <DataFieldsEditor messages={formAppMessages.en} />
+        <DataFieldsEditor />
       </BuilderStoreProvider>,
     );
     const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
@@ -251,12 +262,13 @@ describe("Builder core editing", () => {
   });
 
   it("uses the field's built-in error UI for invalid English-only names", () => {
+    void formI18n.changeLanguage("fa");
     const store = new BuilderStore();
     const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
     store.addElement(inputEntry);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <DataFieldsEditor messages={formAppMessages.fa} />
+        <DataFieldsEditor />
       </BuilderStoreProvider>,
     );
     const nameInput = view.container.querySelector<HTMLElement>('jb-input[name="elementName"]')!;
@@ -272,11 +284,13 @@ describe("Builder core editing", () => {
     const store = new BuilderStore();
     const inputEntry = formElementRegistry.find(entry => entry.type === "jb-input")!;
     store.addElement(inputEntry);
+    store.setFormLocalization({ defaultLocale: "en", locales: { en: { direction: "ltr" }, fa: { direction: "rtl" } } });
+    store.setEditingLocale("fa");
     store.updateSelectedText("label", "English label", "en");
     store.updateSelectedText("label", "برچسب فارسی", "fa");
     const view = render(
       <BuilderStoreProvider value={store}>
-        <CommonFieldsEditor entry={inputEntry} locale="fa" defaultLocale="en" messages={formAppMessages.fa} />
+        <CommonFieldsEditor entry={inputEntry} />
       </BuilderStoreProvider>,
     );
     const labelInput = view.container.querySelector<HTMLElement>('jb-input[name="elementLabel"]')!;
@@ -294,7 +308,7 @@ describe("Builder core editing", () => {
     const contentDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "content")!;
     const view = render(
       <BuilderStoreProvider value={store}>
-        <PropertyField definition={contentDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <PropertyField definition={contentDefinition} />
       </BuilderStoreProvider>,
     );
     const textarea = view.container.querySelector<HTMLElement>('jb-textarea[name="prop-content"]');
@@ -311,7 +325,7 @@ describe("Builder core editing", () => {
     const colorDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "color")!;
     const view = render(
       <BuilderStoreProvider value={store}>
-        <PropertyField definition={colorDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <PropertyField definition={colorDefinition} />
       </BuilderStoreProvider>,
     );
     const colorInput = view.container.querySelector<HTMLElement>('jb-color-input[name="prop-color"]');
@@ -330,7 +344,7 @@ describe("Builder core editing", () => {
     const fontSizeDefinition = textEntry.propertyDefinitions.find(definition => definition.key === "fontSize")!;
     const view = render(
       <BuilderStoreProvider value={store}>
-        <PropertyField definition={fontSizeDefinition} locale="en" defaultLocale="en" messages={formAppMessages.en} />
+        <PropertyField definition={fontSizeDefinition} />
       </BuilderStoreProvider>,
     );
     const numberInput = view.container.querySelector<HTMLElement>('jb-number-input[name="prop-fontSize"]')!;
@@ -536,7 +550,7 @@ describe("Builder core editing", () => {
     const store = new BuilderStore();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
     const emptyDropTarget = view.container.querySelector<HTMLElement>("[data-drop-active='false']");
@@ -581,7 +595,7 @@ describe("Builder core editing", () => {
     const secondId = store.addElement(formElementRegistry[1]);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
     const moveUp = view.container.querySelector<HTMLElement>("jb-button[aria-label='Move up']");
@@ -599,7 +613,7 @@ describe("Builder core editing", () => {
     const onSelectElement = vi.fn();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} onSelectElement={onSelectElement} />
+        <FormCanvas onSelectElement={onSelectElement} />
       </BuilderStoreProvider>,
     );
 
@@ -626,7 +640,7 @@ describe("Builder core editing", () => {
     store.addElement(formElementRegistry[1]);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
     const unselectedCard = view.container.querySelector<HTMLElement>('[data-selected="false"]')!;
@@ -634,11 +648,11 @@ describe("Builder core editing", () => {
 
     expect(actionButtons).toHaveLength(5);
     expect(Array.from(actionButtons, button => button.textContent?.trim())).toEqual([
-      formAppMessages.en.configure,
-      formAppMessages.en.moveUp,
-      formAppMessages.en.moveDown,
-      formAppMessages.en.duplicate,
-      formAppMessages.en.remove,
+      formResources.en.formCanvas.configure,
+      formResources.en.formCanvas.moveUp,
+      formResources.en.formCanvas.moveDown,
+      formResources.en.formCanvas.duplicate,
+      formResources.en.formCanvas.remove,
     ]);
     view.unmount();
     matchMedia.mockRestore();
@@ -655,7 +669,7 @@ describe("Builder core editing", () => {
     if (!childId) throw new Error("Expected a child element to be added to the tab.");
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
 
@@ -672,7 +686,7 @@ describe("Builder core editing", () => {
     const onOpenFormNameSettings = vi.fn();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} onOpenFormNameSettings={onOpenFormNameSettings} />
+        <FormCanvas onOpenFormNameSettings={onOpenFormNameSettings} />
       </BuilderStoreProvider>,
     );
 
@@ -691,7 +705,7 @@ describe("Builder core editing", () => {
 
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
         <section id={`tab-editor-${targetTab.id}`} tabIndex={-1} />
       </BuilderStoreProvider>,
     );
@@ -713,7 +727,7 @@ describe("Builder core editing", () => {
     store.addElement(tabEntry);
     const view = render(
       <BuilderStoreProvider value={store}>
-        <FormCanvas messages={formAppMessages.en} />
+        <FormCanvas />
       </BuilderStoreProvider>,
     );
 

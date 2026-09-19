@@ -11,6 +11,7 @@ import { getLocalizedText } from "../../domain/form-document";
 import type { JBFormElementType, JBFormElementV1 } from "../../domain/form-document";
 import type { FormElementRegistryEntry } from "../../component-data";
 import { asSelectOptions, inputValue } from "./configuration-values";
+import { useBuilderStore } from "../store/BuilderStoreContext";
 import styles from "./ConfigurationPanel.module.css";
 
 interface InitialValueEditorProps {
@@ -297,7 +298,8 @@ export const initialValueInputMap: Partial<Record<JBFormElementType, InitialValu
   "jb-switch": booleanRenderer,
 };
 
-export function InitialValueEditor(props: InitialValueEditorProps) {
+export function InitialValueEditor(props: Omit<InitialValueEditorProps, "locale" | "defaultLocale">) {
+  const store = useBuilderStore();
   const Renderer = initialValueInputMap[props.entry.type] ?? textRenderer;
-  return Renderer(props);
+  return Renderer({ ...props, locale: store.editingLocale, defaultLocale: store.document.localization.defaultLocale });
 }

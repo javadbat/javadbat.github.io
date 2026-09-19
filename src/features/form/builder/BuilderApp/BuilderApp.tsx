@@ -1,7 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { observer } from "mobx-react-lite";
 import { getCurrentFormSlug } from "../../application/form-page-url";
-import { useFormLocale } from "../../i18n/locale-adapter";
+import { FormI18nProvider } from "../../i18n/FormI18nProvider";
 import { BuilderHeader } from "../BuilderHeader/BuilderHeader";
 import { BuilderStatusScreen } from "../BuilderStatusScreen/BuilderStatusScreen";
 import { BuilderStoreProvider, useBuilderStore } from "../store/BuilderStoreContext";
@@ -17,8 +18,8 @@ const ExportJsonModal = lazy(() => import("../ExportJsonModal/ExportJsonModal").
 
 const BuilderAppContent = observer(function BuilderAppContent() {
   const store = useBuilderStore();
-  //TODO: you pass message to sub components. but you should break dictionary to sub components and pass only the required messages to each component. this will help with tree shaking and reduce bundle size.
-  const { direction, messages, setLocale } = useFormLocale("en");
+  const { t: tCommon, i18n } = useTranslation("common");
+  const direction = i18n.dir();
   const slug = getCurrentFormSlug();
   const actions = useBuilderAppActions();
 
@@ -26,35 +27,33 @@ const BuilderAppContent = observer(function BuilderAppContent() {
   useHistoryShortcuts();
 
   if (store.status === "loading" || store.status === "load-error") {
-    return <BuilderStatusScreen messages={messages} slug={slug} />;
+    return <BuilderStatusScreen slug={slug} />;
   }
 
   return (
     <div className={styles.app} dir={direction}>
       <BuilderHeader
-        messages={messages}
-        onBuilderLocaleChange={setLocale}
         onOpenSettings={actions.openSettings}
         onImport={actions.openImport}
         onUndo={store.undo}
         onRedo={store.redo}
         onExport={actions.openExport}
       />
-      <BuilderWorkspace messages={messages} onOpenFormNameSettings={actions.openSettingsForFormName} />
+      <BuilderWorkspace onOpenFormNameSettings={actions.openSettingsForFormName} />
 
       {actions.settingsOpen ? (
-        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
-          <FormSettingsModal isOpen focusFormName={actions.focusFormName} messages={messages} onClose={actions.closeSettings} />
+        <Suspense fallback={<ModalLoadingFallback label={tCommon("loadingModal")} />}>
+          <FormSettingsModal isOpen focusFormName={actions.focusFormName} onClose={actions.closeSettings} />
         </Suspense>
       ) : null}
       {actions.importOpen ? (
-        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
-          <ImportJsonModal isOpen messages={messages} onClose={actions.closeImport} />
+        <Suspense fallback={<ModalLoadingFallback label={tCommon("loadingModal")} />}>
+          <ImportJsonModal isOpen onClose={actions.closeImport} />
         </Suspense>
       ) : null}
       {actions.exportDocument ? (
-        <Suspense fallback={<ModalLoadingFallback label={messages.loadingModal} />}>
-          <ExportJsonModal document={actions.exportDocument} isOpen={actions.exportOpen} messages={messages} onClose={actions.closeExport} />
+        <Suspense fallback={<ModalLoadingFallback label={tCommon("loadingModal")} />}>
+          <ExportJsonModal document={actions.exportDocument} isOpen={actions.exportOpen} onClose={actions.closeExport} />
         </Suspense>
       ) : null}
     </div>
@@ -63,8 +62,10 @@ const BuilderAppContent = observer(function BuilderAppContent() {
 
 export function BuilderApp() {
   return (
-    <BuilderStoreProvider>
-      <BuilderAppContent />
-    </BuilderStoreProvider>
+    <FormI18nProvider>
+      <BuilderStoreProvider>
+        <BuilderAppContent />
+      </BuilderStoreProvider>
+    </FormI18nProvider>
   );
 }

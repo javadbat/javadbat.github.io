@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import type { FormAppLocale } from "../i18n/i18n";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { JBButton } from "jb-button/react";
 import { JBCheckbox } from "jb-checkbox/react";
@@ -47,7 +49,7 @@ import { withControlSizeDefault } from "./control-size-default";
 import { themeRepository } from "../storage/theme-repository";
 import type { StoredThemeRecordV1 } from "../storage/storage-types";
 import { prepareThemeImport } from "./theme-import";
-import { useFormLocale, type FormAppLocale, type FormMessageKey } from "../i18n/locale-adapter";
+import { FormI18nProvider } from "../i18n/FormI18nProvider";
 import {
   BASE_THEME_COLOR_TOKENS,
   calculateColorGroup,
@@ -753,18 +755,20 @@ function SettingRange({
   );
 }
 
-export const DesignerApp = observer(function DesignerApp() {
-  const { locale, direction, setLocale, messages } = useFormLocale("en");
-  const message = (key: FormMessageKey, values: Record<string, string | number> = {}) =>
-    Object.entries(values).reduce((result, [name, value]) => result.replaceAll(`{${name}}`, String(value)), messages[key]);
+const DesignerAppContent = observer(function DesignerAppContent() {
+  const { t, i18n } = useTranslation("designerApp");
+  const locale = i18n.resolvedLanguage as FormAppLocale;
+  const direction = i18n.dir();
+  const setLocale = (nextLocale: FormAppLocale) => { void i18n.changeLanguage(nextLocale); };
+  const { t: tDesignerCommon } = useTranslation("designerCommon");
   const cssVariableDefaults = useCssVariableDefaults();
   const sizeLabel = (size: ThemeSizeCode): string =>
     ({
-      xs: messages.designerExtraSmall,
-      sm: messages.designerSmall,
-      md: messages.designerMedium,
-      lg: messages.designerLarge,
-      xl: messages.designerExtraLarge,
+      xs: tDesignerCommon("designerExtraSmall"),
+      sm: tDesignerCommon("designerSmall"),
+      md: tDesignerCommon("designerMedium"),
+      lg: tDesignerCommon("designerLarge"),
+      xl: tDesignerCommon("designerExtraLarge"),
     })[size];
   const formSlug = getCurrentFormSlug();
   const selectedThemeSlug = getCurrentThemeSlug();
@@ -864,7 +868,7 @@ export const DesignerApp = observer(function DesignerApp() {
   }, [locale, normalizedThemeSearch]);
   const showBuiltInTheme =
     !normalizedThemeSearch ||
-    `${messages.designerDefaultTheme} ${messages.designerBuiltInDefault} ${messages.designerBuiltInThemeDescription}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch);
+    `${t("designerDefaultTheme")} ${t("designerBuiltInDefault")} ${t("designerBuiltInThemeDescription")}`.toLocaleLowerCase(locale).includes(normalizedThemeSearch);
   const hasThemeSearchResults = showBuiltInTheme || filteredLibraryThemes.length > 0 || filteredThemePresets.length > 0;
 
   const commitTheme = useCallback((nextTheme: DesignerThemeConfig, presetId = "") => {
@@ -909,7 +913,7 @@ export const DesignerApp = observer(function DesignerApp() {
     }
     if (storedTheme.status === "not-found") {
       if (ignoreStaleThemeResolutionRef.current) return;
-      setThemeLoadNotice(messages.designerThemeNotFound);
+      setThemeLoadNotice(t("designerThemeNotFound"));
       setLibraryOpen(true);
       return;
     }
@@ -935,7 +939,7 @@ export const DesignerApp = observer(function DesignerApp() {
       setSaveStatus(selectedDefault.ok ? (editVersionRef.current === 0 ? "saved" : "saving") : "error");
       window.history.replaceState(null, "", formPageHref("designer", formSlug, result.value.slug));
     });
-  }, [formSlug, messages.designerThemeNotFound, storedTheme]);
+  }, [formSlug, t, storedTheme]);
 
   const saveCurrentTheme = useCallback((): Promise<boolean> => {
     if (saveInFlightRef.current) return saveInFlightRef.current;
@@ -1003,7 +1007,7 @@ export const DesignerApp = observer(function DesignerApp() {
     const timer = window.setTimeout(() => {
       if (window.location.protocol === "https:" && source.startsWith("http:")) {
         setImageLoadState("error");
-        setImageNotice(messages.designerMixedContentNotice);
+        setImageNotice(t("designerMixedContentNotice"));
         return;
       }
       const candidate = new Image();
@@ -1015,7 +1019,7 @@ export const DesignerApp = observer(function DesignerApp() {
       candidate.onerror = () => {
         if (!active) return;
         setImageLoadState("error");
-        setImageNotice(messages.designerUnavailableNotice);
+        setImageNotice(t("designerUnavailableNotice"));
       };
       candidate.src = source;
     }, 400);
@@ -1023,7 +1027,7 @@ export const DesignerApp = observer(function DesignerApp() {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [imageRetryVersion, messages.designerMixedContentNotice, messages.designerUnavailableNotice, temporaryImage, theme.background.imageUrl, theme.background.mode]);
+  }, [imageRetryVersion, t, temporaryImage, theme.background.imageUrl, theme.background.mode]);
 
   useEffect(() => {
     if (!libraryOpen) return;
@@ -1091,7 +1095,7 @@ export const DesignerApp = observer(function DesignerApp() {
   const createTheme = async () => {
     const name = createName.trim();
     if (!name) {
-      setCreateError(messages.designerThemeNameRequired);
+      setCreateError(t("designerThemeNameRequired"));
       return;
     }
     const preset = THEME_PRESETS.find(item => item.id === createSource);
@@ -1131,7 +1135,7 @@ export const DesignerApp = observer(function DesignerApp() {
       setImportFileError("");
     } catch (cause) {
       setImportJson("");
-      setImportFileError(cause instanceof Error ? cause.message : messages.designerFileReadFailed);
+      setImportFileError(cause instanceof Error ? cause.message : t("designerFileReadFailed"));
     }
   };
 
@@ -1172,7 +1176,7 @@ export const DesignerApp = observer(function DesignerApp() {
       return;
     }
     setLibraryThemes(items => [result.value, ...items]);
-    setThemeLoadNotice(message("designerDuplicateSuccess", { name: result.value.config.name }));
+    setThemeLoadNotice(t("designerDuplicateSuccess", { name: result.value.config.name }));
   };
 
   const exportThemeRecord = (record: StoredThemeRecordV1) => {
@@ -1187,7 +1191,7 @@ export const DesignerApp = observer(function DesignerApp() {
     }
     setDefaultThemeId(record.id);
     setThemeBindings(result.value.bindings);
-    setThemeLoadNotice(message("designerDefaultSuccess", { name: record.config.name }));
+    setThemeLoadNotice(t("designerDefaultSuccess", { name: record.config.name }));
   };
 
   const setBuiltInThemeAsDefault = async () => {
@@ -1198,7 +1202,7 @@ export const DesignerApp = observer(function DesignerApp() {
     }
     setDefaultThemeId(null);
     setThemeBindings(result.value.bindings);
-    setThemeLoadNotice(messages.designerBuiltInDefaultSuccess);
+    setThemeLoadNotice(t("designerBuiltInDefaultSuccess"));
   };
 
   const requestThemeDelete = (record: StoredThemeRecordV1) => {
@@ -1237,17 +1241,17 @@ export const DesignerApp = observer(function DesignerApp() {
       setSaveStatus("saved");
       window.history.replaceState(null, "", formPageHref("designer", formSlug));
     }
-    setThemeLoadNotice(message("designerDeleteSuccess", { name: pendingDelete.config.name }));
+    setThemeLoadNotice(t("designerDeleteSuccess", { name: pendingDelete.config.name }));
   };
 
   const requestDesignerLeave = useCallback(
     async (leave: () => void) => {
-      if (temporaryImage && !window.confirm(messages.designerTemporaryLeaveConfirm)) return;
+      if (temporaryImage && !window.confirm(t("designerTemporaryLeaveConfirm"))) return;
       if (saveInFlightRef.current) await saveInFlightRef.current;
       if (saveStatus !== "saved" && !(await saveCurrentTheme())) return;
       leave();
     },
-    [messages.designerTemporaryLeaveConfirm, temporaryImage, saveCurrentTheme, saveStatus],
+    [t, temporaryImage, saveCurrentTheme, saveStatus],
   );
 
   const handleDesignerNavigationCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -1311,7 +1315,7 @@ export const DesignerApp = observer(function DesignerApp() {
         return;
       }
       if (!element) {
-        setEffectiveComponentToken({ source: "default", value: messages.designerComponentResolvedInternally });
+        setEffectiveComponentToken({ source: "default", value: t("designerComponentResolvedInternally") });
         return;
       }
       if (element.style.getPropertyValue(selectedComponentToken) && attempts < 10) {
@@ -1332,7 +1336,7 @@ export const DesignerApp = observer(function DesignerApp() {
           window.setTimeout(resolveValue, 50);
           return;
         }
-        setEffectiveComponentToken({ source: "default", value: messages.designerComponentResolvedInternally });
+        setEffectiveComponentToken({ source: "default", value: t("designerComponentResolvedInternally") });
         return;
       }
       const source = Object.keys(theme.global).some(token => fallback.includes(token)) ? "global" : "default";
@@ -1345,7 +1349,7 @@ export const DesignerApp = observer(function DesignerApp() {
     return () => {
       cancelled = true;
     };
-  }, [messages.designerComponentResolvedInternally, selectedComponentTag, selectedComponentToken, selectedComponentTokenOverride, selectedComponentTokenProperty, theme.global]);
+  }, [t, selectedComponentTag, selectedComponentToken, selectedComponentTokenOverride, selectedComponentTokenProperty, theme.global]);
   const visibleComponentTokens = useMemo(() => {
     const query = componentTokenSearch.trim().toLocaleLowerCase(locale);
     return supportedComponentTokens
@@ -1365,21 +1369,21 @@ export const DesignerApp = observer(function DesignerApp() {
     [visibleComponentTokens],
   );
   const componentTokenGroupLabels: Record<ComponentTokenGroup, string> = {
-    colors: messages.designerComponentGroupColors,
-    typography: messages.designerComponentGroupTypography,
-    borders: messages.designerComponentGroupBorders,
-    sizing: messages.designerComponentGroupSizing,
-    layout: messages.designerComponentGroupLayout,
-    effects: messages.designerComponentGroupEffects,
-    interaction: messages.designerComponentGroupInteraction,
-    other: messages.designerComponentGroupOther,
+    colors: t("designerComponentGroupColors"),
+    typography: t("designerComponentGroupTypography"),
+    borders: t("designerComponentGroupBorders"),
+    sizing: t("designerComponentGroupSizing"),
+    layout: t("designerComponentGroupLayout"),
+    effects: t("designerComponentGroupEffects"),
+    interaction: t("designerComponentGroupInteraction"),
+    other: t("designerComponentGroupOther"),
   };
   const componentTokenStateLabels: Record<Exclude<ComponentTokenState, "all">, string> = {
-    default: messages.designerComponentStateDefault,
-    hover: messages.designerComponentStateHover,
-    focus: messages.designerComponentStateFocus,
-    active: messages.designerComponentStateActive,
-    disabled: messages.designerComponentStateDisabled,
+    default: t("designerComponentStateDefault"),
+    hover: t("designerComponentStateHover"),
+    focus: t("designerComponentStateFocus"),
+    active: t("designerComponentStateActive"),
+    disabled: t("designerComponentStateDisabled"),
   };
   const formAuditIssueCount = formAuditResults?.reduce((total, result) => total + result.issues.length, 0) ?? 0;
   const formAuditInstanceCount = formAuditResults?.reduce((total, result) => total + result.instanceCount, 0) ?? 0;
@@ -1518,16 +1522,16 @@ export const DesignerApp = observer(function DesignerApp() {
   const chooseFile = (file: File | undefined) => {
     if (!file) return;
     if (file.size > 800 * 1024) {
-      setImageNotice(messages.designerImageTooLarge);
+      setImageNotice(t("designerImageTooLarge"));
       return;
     }
-    if (file.size > 400 * 1024 && !window.confirm(messages.designerImageConfirm)) {
+    if (file.size > 400 * 1024 && !window.confirm(t("designerImageConfirm"))) {
       return;
     }
     if (temporaryImage?.startsWith("blob:")) URL.revokeObjectURL(temporaryImage);
     const source = URL.createObjectURL(file);
     setTemporaryImage(source);
-    setImageNotice(messages.designerLocalImageNotice);
+    setImageNotice(t("designerLocalImageNotice"));
     updateTheme(draft => {
       draft.background.mode = "image";
       draft.background.imageUrl = undefined;
@@ -1605,7 +1609,7 @@ export const DesignerApp = observer(function DesignerApp() {
     if (!selectedComponentToken) return;
     const value = draftValue.trim();
     if (!isValidComponentTokenValue(selectedComponentToken, value)) {
-      setComponentTokenError(messages.designerInvalidComponentTokenValue);
+      setComponentTokenError(t("designerInvalidComponentTokenValue"));
       return;
     }
     setComponentTokenDraft(value);
@@ -1629,7 +1633,7 @@ export const DesignerApp = observer(function DesignerApp() {
     if (!selectedComponentTag || !theme.components[selectedComponentTag]) return;
     if (
       !window.confirm(
-        message("designerResetComponentConfirm", {
+        t("designerResetComponentConfirm", {
           component: getFormElementDisplayName(registryByType.get(selectedComponentTag)!, locale),
         }),
       )
@@ -1846,50 +1850,50 @@ export const DesignerApp = observer(function DesignerApp() {
   }> = [
     {
       id: "primary",
-      title: messages.designerPrimaryPalette,
-      description: messages.designerSemanticPaletteHelp,
+      title: t("designerPrimaryPalette"),
+      description: t("designerSemanticPaletteHelp"),
       baseToken: "--jb-primary",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-primary" || token.startsWith("--jb-primary-")),
     },
     {
       id: "secondary",
-      title: messages.designerSecondaryPalette,
-      description: messages.designerSemanticPaletteHelp,
+      title: t("designerSecondaryPalette"),
+      description: t("designerSemanticPaletteHelp"),
       baseToken: "--jb-secondary",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-secondary" || token.startsWith("--jb-secondary-")),
     },
     {
       id: "green",
-      title: messages.designerSuccessPalette,
-      description: messages.designerSemanticPaletteHelp,
+      title: t("designerSuccessPalette"),
+      description: t("designerSemanticPaletteHelp"),
       baseToken: "--jb-green",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-green" || token.startsWith("--jb-green-")),
     },
     {
       id: "red",
-      title: messages.designerErrorPalette,
-      description: messages.designerSemanticPaletteHelp,
+      title: t("designerErrorPalette"),
+      description: t("designerSemanticPaletteHelp"),
       baseToken: "--jb-red",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-red" || token.startsWith("--jb-red-")),
     },
     {
       id: "yellow",
-      title: messages.designerWarningPalette,
-      description: messages.designerSemanticPaletteHelp,
+      title: t("designerWarningPalette"),
+      description: t("designerSemanticPaletteHelp"),
       baseToken: "--jb-yellow",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-yellow" || token.startsWith("--jb-yellow-")),
     },
     {
       id: "neutral",
-      title: messages.designerNeutralPalette,
-      description: messages.designerNeutralPaletteHelp,
+      title: t("designerNeutralPalette"),
+      description: t("designerNeutralPaletteHelp"),
       baseToken: "--jb-neutral",
       tokens: GLOBAL_COLOR_TOKENS.filter(token => token === "--jb-neutral" || token.startsWith("--jb-neutral-")),
     },
     {
       id: "foundations",
-      title: messages.designerFoundationColors,
-      description: messages.designerFoundationColorsHelp,
+      title: t("designerFoundationColors"),
+      description: t("designerFoundationColorsHelp"),
       tokens: ["--jb-text-primary", "--jb-text-secondary", "--jb-text-contrast", "--jb-black", "--jb-white", "--jb-highlight"],
     },
   ];
@@ -1905,10 +1909,10 @@ export const DesignerApp = observer(function DesignerApp() {
           })
         }
       >
-        <JBTabList size="sm" aria-label={messages.designerBackgroundType}>
+        <JBTabList size="sm" aria-label={t("designerBackgroundType")}>
           {(["color", "pattern", "image"] as ThemeBackgroundMode[]).map(mode => (
             <JBTabTrigger key={mode} value={mode} color="primary">
-              {mode === "color" ? messages.designerColor : mode === "pattern" ? messages.designerPattern : messages.designerImage}
+              {mode === "color" ? t("designerColor") : mode === "pattern" ? t("designerPattern") : t("designerImage")}
             </JBTabTrigger>
           ))}
         </JBTabList>
@@ -1916,17 +1920,17 @@ export const DesignerApp = observer(function DesignerApp() {
 
       {theme.background.mode === "pattern" ? (
         <>
-          <p className={styles.settingLabel}>{messages.designerChoosePattern}</p>
+          <p className={styles.settingLabel}>{t("designerChoosePattern")}</p>
           <div className={styles.patternGrid}>
             {patternChoices.map(patternId => {
               const patternLabel =
                 patternId === "science-doodles"
-                  ? messages.designerScienceDoodles
+                  ? t("designerScienceDoodles")
                   : patternId === "academic-waves"
-                    ? messages.designerAcademicWaves
+                    ? t("designerAcademicWaves")
                     : patternId === "calm-dots"
-                      ? messages.designerCalmDots
-                      : messages.designerWarmChevrons;
+                      ? t("designerCalmDots")
+                      : t("designerWarmChevrons");
               return (
                 <button
                   key={patternId}
@@ -1941,7 +1945,7 @@ export const DesignerApp = observer(function DesignerApp() {
                   }
                 >
                   <img src={PATTERN_ASSETS[patternId]} alt="" />
-                  {theme.background.patternId === patternId ? <span>{messages.designerSelected}</span> : null}
+                  {theme.background.patternId === patternId ? <span>{t("designerSelected")}</span> : null}
                 </button>
               );
             })}
@@ -1954,13 +1958,13 @@ export const DesignerApp = observer(function DesignerApp() {
           <JBInput
             size="sm"
             type="url"
-            label={messages.designerImageUrl}
+            label={t("designerImageUrl")}
             placeholder="https://, data:, blob:, or file:"
             value={theme.background.imageUrl ?? ""}
             onInput={event => {
               setTemporaryImage(undefined);
               const value = valueFromEvent(event);
-              setImageNotice(value.startsWith("blob:") || value.startsWith("file:") ? messages.designerTemporaryUrlNotice : undefined);
+              setImageNotice(value.startsWith("blob:") || value.startsWith("file:") ? t("designerTemporaryUrlNotice") : undefined);
               updateTheme(draft => {
                 draft.background.imageUrl = value || undefined;
               });
@@ -1968,7 +1972,7 @@ export const DesignerApp = observer(function DesignerApp() {
           />
           <JBSelect<"cover" | "contain" | "fill">
             size="sm"
-            label={messages.designerImageFit}
+            label={t("designerImageFit")}
             value={theme.background.imageFit ?? "cover"}
             clearable={false}
             onChange={event =>
@@ -1977,13 +1981,13 @@ export const DesignerApp = observer(function DesignerApp() {
               })
             }
           >
-            <JBOption value="cover">{messages.designerCover}</JBOption>
-            <JBOption value="contain">{messages.designerContain}</JBOption>
-            <JBOption value="fill">{messages.designerFill}</JBOption>
+            <JBOption value="cover">{t("designerCover")}</JBOption>
+            <JBOption value="contain">{t("designerContain")}</JBOption>
+            <JBOption value="fill">{t("designerFill")}</JBOption>
           </JBSelect>
           <JBInput
             size="sm"
-            label={messages.designerImagePosition}
+            label={t("designerImagePosition")}
             placeholder="center"
             value={theme.background.imagePosition ?? ""}
             onInput={event =>
@@ -1994,7 +1998,7 @@ export const DesignerApp = observer(function DesignerApp() {
           />
           <JBInput
             size="sm"
-            label={messages.designerOverlayColor}
+            label={t("designerOverlayColor")}
             placeholder="rgb(0 0 0 / 20%)"
             value={theme.background.imageOverlayColor ?? ""}
             onInput={event =>
@@ -2005,16 +2009,16 @@ export const DesignerApp = observer(function DesignerApp() {
           />
           <input ref={uploadRef} className={styles.fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={event => chooseFile(event.currentTarget.files?.[0])} />
           <JBButton size="sm" variant="outline" onClick={() => uploadRef.current?.click()}>
-            {messages.designerChooseLocalImage}
+            {t("designerChooseLocalImage")}
           </JBButton>
           {imageLoadState === "error" ? (
             <JBButton size="sm" variant="ghost" onClick={() => setImageRetryVersion(version => version + 1)}>
-              {messages.designerRetryImage}
+              {t("designerRetryImage")}
             </JBButton>
           ) : null}
           {imageLoadState === "loading" ? (
             <p className={styles.notice} role="status">
-              {messages.designerCheckingImage}
+              {t("designerCheckingImage")}
             </p>
           ) : imageNotice ? (
             <p className={styles.notice}>{imageNotice}</p>
@@ -2025,7 +2029,7 @@ export const DesignerApp = observer(function DesignerApp() {
       <div className={styles.colorRows}>
         <JBColorInput
           size="sm"
-          label={messages.designerBackgroundColor}
+          label={t("designerBackgroundColor")}
           value={theme.background.color}
           onInput={event =>
             updateTheme(draft => {
@@ -2036,7 +2040,7 @@ export const DesignerApp = observer(function DesignerApp() {
         {theme.background.mode === "pattern" ? (
           <JBColorInput
             size="sm"
-            label={messages.designerPatternColor}
+            label={t("designerPatternColor")}
             value={theme.background.patternColor}
             onInput={event =>
               updateTheme(draft => {
@@ -2048,7 +2052,7 @@ export const DesignerApp = observer(function DesignerApp() {
       </div>
       {theme.background.mode !== "color" ? (
         <SettingRange
-          label={theme.background.mode === "pattern" ? messages.designerPatternOpacity : messages.designerImageOpacity}
+          label={theme.background.mode === "pattern" ? t("designerPatternOpacity") : t("designerImageOpacity")}
           value={theme.background.opacity}
           min={0}
           max={100}
@@ -2064,7 +2068,7 @@ export const DesignerApp = observer(function DesignerApp() {
       ) : null}
       {theme.background.mode === "pattern" ? (
         <SettingRange
-          label={messages.designerPatternScale}
+          label={t("designerPatternScale")}
           value={theme.background.scale}
           min={40}
           max={180}
@@ -2086,19 +2090,19 @@ export const DesignerApp = observer(function DesignerApp() {
     if (section === "colors") {
       const quickColorGroups: Array<{ title: string; description: string; tokens: BaseThemeColorToken[] }> = [
         {
-          title: messages.designerBrandColors,
-          description: messages.designerBrandColorsHelp,
+          title: t("designerBrandColors"),
+          description: t("designerBrandColorsHelp"),
           tokens: ["--jb-primary", "--jb-secondary", "--jb-neutral"],
         },
         {
-          title: messages.designerFeedbackColors,
-          description: messages.designerFeedbackColorsHelp,
+          title: t("designerFeedbackColors"),
+          description: t("designerFeedbackColorsHelp"),
           tokens: ["--jb-green", "--jb-red", "--jb-yellow"],
         },
       ];
       return (
         <div className={styles.sectionContent}>
-          <p className={styles.sectionIntro}>{messages.designerColorsIntro}</p>
+          <p className={styles.sectionIntro}>{t("designerColorsIntro")}</p>
           {quickColorGroups.map(group => (
             <section className={styles.colorGroupCard} key={group.title}>
               <div className={styles.colorGroupHeading}>
@@ -2114,11 +2118,11 @@ export const DesignerApp = observer(function DesignerApp() {
                       <JBColorInput
                         size="sm"
                         label={tokenLabel(token, locale)}
-                        message={theme.global[token] == null ? messages.designerInheritedDefault : messages.designerShadesCalculated}
+                        message={theme.global[token] == null ? t("designerInheritedDefault") : t("designerShadesCalculated")}
                         value={baseValue}
                         onInput={event => setBaseThemeColor(token, valueFromEvent(event))}
                       />
-                      <div className={styles.calculatedSwatches} aria-label={messages.designerCalculatedPalette}>
+                      <div className={styles.calculatedSwatches} aria-label={t("designerCalculatedPalette")}>
                         {Object.entries(calculated)
                           .slice(0, token === "--jb-neutral" ? 12 : 7)
                           .map(([shadeToken, color]) => (
@@ -2133,11 +2137,11 @@ export const DesignerApp = observer(function DesignerApp() {
           ))}
           <div className={styles.advancedColorCallout}>
             <div>
-              <strong>{messages.designerAdvancedColors}</strong>
-              <span>{messages.designerAdvancedColorsHelp}</span>
+              <strong>{t("designerAdvancedColors")}</strong>
+              <span>{t("designerAdvancedColorsHelp")}</span>
             </div>
             <JBButton size="sm" variant="outline" onClick={openAdvancedColors}>
-              {messages.designerCustomizeEveryColor}
+              {t("designerCustomizeEveryColor")}
             </JBButton>
           </div>
         </div>
@@ -2149,7 +2153,7 @@ export const DesignerApp = observer(function DesignerApp() {
           <JBSelect<string>
             size="sm"
             popoverPosition="fixed"
-            label={messages.designerFontFamily}
+            label={t("designerFontFamily")}
             value={theme.typography.fontFamily}
             clearable={false}
             onChange={event =>
@@ -2160,12 +2164,12 @@ export const DesignerApp = observer(function DesignerApp() {
           >
             {fontChoices.map(font => (
               <JBOption key={font.value} value={font.value}>
-                {messages[font.labelKey]}
+                {t(font.labelKey)}
               </JBOption>
             ))}
           </JBSelect>
           <SettingRange
-            label={messages.designerTextScale}
+            label={t("designerTextScale")}
             value={theme.typography.textScale}
             min={0.8}
             max={1.5}
@@ -2187,7 +2191,7 @@ export const DesignerApp = observer(function DesignerApp() {
           <JBSelect<ThemeAudienceSize>
             size="sm"
             popoverPosition="fixed"
-            label={messages.designerAudienceSize}
+            label={t("designerAudienceSize")}
             value={theme.sizing.audienceSize}
             clearable={false}
             onChange={event =>
@@ -2196,16 +2200,16 @@ export const DesignerApp = observer(function DesignerApp() {
               })
             }
           >
-            <JBOption value="compact">{messages.designerCompact}</JBOption>
-            <JBOption value="standard">{messages.designerStandard}</JBOption>
-            <JBOption value="large">{messages.designerLarge}</JBOption>
-            <JBOption value="extra-large">{messages.designerExtraLarge}</JBOption>
-            <JBOption value="custom">{messages.designerCustom}</JBOption>
+            <JBOption value="compact">{t("designerCompact")}</JBOption>
+            <JBOption value="standard">{t("designerStandard")}</JBOption>
+            <JBOption value="large">{tDesignerCommon("designerLarge")}</JBOption>
+            <JBOption value="extra-large">{tDesignerCommon("designerExtraLarge")}</JBOption>
+            <JBOption value="custom">{t("designerCustom")}</JBOption>
           </JBSelect>
           <JBSelect<ThemeControlSize>
             size="sm"
             popoverPosition="fixed"
-            label={messages.designerDefaultControlSize}
+            label={t("designerDefaultControlSize")}
             value={theme.defaults.controlSize}
             clearable={false}
             onChange={event =>
@@ -2214,12 +2218,12 @@ export const DesignerApp = observer(function DesignerApp() {
               })
             }
           >
-            <JBOption value="sm">{messages.designerSmall}</JBOption>
-            <JBOption value="md">{messages.designerMedium}</JBOption>
-            <JBOption value="lg">{messages.designerLarge}</JBOption>
+            <JBOption value="sm">{tDesignerCommon("designerSmall")}</JBOption>
+            <JBOption value="md">{tDesignerCommon("designerMedium")}</JBOption>
+            <JBOption value="lg">{tDesignerCommon("designerLarge")}</JBOption>
           </JBSelect>
           <SettingRange
-            label={messages.designerSpacingScale}
+            label={t("designerSpacingScale")}
             value={theme.sizing.spacingScale}
             min={0.75}
             max={1.6}
@@ -2235,15 +2239,15 @@ export const DesignerApp = observer(function DesignerApp() {
           />
           <div className={styles.sizeFamilyCard}>
             <div className={styles.sizeGroupHeading}>
-              <h3>{messages.designerControlHeightScale}</h3>
-              <p>{messages.designerControlHeightScaleHelp}</p>
+              <h3>{tDesignerCommon("designerControlHeightScale")}</h3>
+              <p>{tDesignerCommon("designerControlHeightScaleHelp")}</p>
             </div>
             <div className={styles.baseSizeToken}>
-              <span className={styles.baseSizeBadge}>{messages.designerBaseSize}</span>
+              <span className={styles.baseSizeBadge}>{tDesignerCommon("designerBaseSize")}</span>
               <JBInput
                 size="md"
-                label={message("designerControlHeightLabel", { size: sizeLabel("md") })}
-                message={linkedSizeGroups["--jb-control-height-md"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                label={tDesignerCommon("designerControlHeightLabel", { size: sizeLabel("md") })}
+                message={linkedSizeGroups["--jb-control-height-md"] ? tDesignerCommon("designerBaseSizeHelp") : tDesignerCommon("designerBaseSizeIndependentHelp")}
                 value={theme.global["--jb-control-height-md"] ?? cssVariableDefaults["--jb-control-height-md"] ?? ""}
                 onInput={event => setBaseThemeSize("--jb-control-height-md", valueFromEvent(event))}
               />
@@ -2251,8 +2255,8 @@ export const DesignerApp = observer(function DesignerApp() {
                 className={styles.baseSizeLink}
                 size="sm"
                 name="link-control-height-scale"
-                label={messages.designerLinkCalculatedSizes}
-                message={linkedSizeGroups["--jb-control-height-md"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                label={tDesignerCommon("designerLinkCalculatedSizes")}
+                message={linkedSizeGroups["--jb-control-height-md"] ? tDesignerCommon("designerLinkedSizesHelp") : tDesignerCommon("designerUnlinkedSizesHelp")}
                 value={linkedSizeGroups["--jb-control-height-md"]}
                 onChange={event => setLinkedSizeGroups(current => ({ ...current, "--jb-control-height-md": Boolean(event.target.value) }))}
               />
@@ -2260,11 +2264,11 @@ export const DesignerApp = observer(function DesignerApp() {
             </div>
             <div className={styles.advancedSizeCallout}>
               <div>
-                <strong>{messages.designerAdvancedSizes}</strong>
-                <span>{messages.designerAdvancedSizesHelp}</span>
+                <strong>{tDesignerCommon("designerAdvancedSizes")}</strong>
+                <span>{t("designerAdvancedSizesHelp")}</span>
               </div>
               <JBButton size="sm" variant="outline" onClick={() => setAdvancedSizesOpen(true)}>
-                {messages.designerCustomizeSizeScale}
+                {t("designerCustomizeSizeScale")}
               </JBButton>
             </div>
           </div>
@@ -2276,14 +2280,14 @@ export const DesignerApp = observer(function DesignerApp() {
         <div className={styles.sectionContent}>
           <div className={styles.sizeFamilyCard}>
             <div className={styles.sizeGroupHeading}>
-              <h3>{messages.designerRadiusScale}</h3>
-              <p>{messages.designerRadiusScaleHelp}</p>
+              <h3>{tDesignerCommon("designerRadiusScale")}</h3>
+              <p>{tDesignerCommon("designerRadiusScaleHelp")}</p>
             </div>
             <div className={styles.baseSizeToken}>
-              <span className={styles.baseSizeBadge}>{messages.designerBaseSize}</span>
+              <span className={styles.baseSizeBadge}>{tDesignerCommon("designerBaseSize")}</span>
               <SettingRange
-                label={message("designerCornerRadiusLabel", { size: sizeLabel("md") })}
-                message={linkedSizeGroups["--jb-radius"] ? messages.designerBaseSizeHelp : messages.designerBaseSizeIndependentHelp}
+                label={tDesignerCommon("designerCornerRadiusLabel", { size: sizeLabel("md") })}
+                message={linkedSizeGroups["--jb-radius"] ? tDesignerCommon("designerBaseSizeHelp") : tDesignerCommon("designerBaseSizeIndependentHelp")}
                 value={cssLengthToRem(theme.global["--jb-radius"] ?? cssVariableDefaults["--jb-radius"] ?? "")}
                 min={0}
                 max={2}
@@ -2296,8 +2300,8 @@ export const DesignerApp = observer(function DesignerApp() {
                 className={styles.baseSizeLink}
                 size="sm"
                 name="link-radius-scale"
-                label={messages.designerLinkCalculatedSizes}
-                message={linkedSizeGroups["--jb-radius"] ? messages.designerLinkedSizesHelp : messages.designerUnlinkedSizesHelp}
+                label={tDesignerCommon("designerLinkCalculatedSizes")}
+                message={linkedSizeGroups["--jb-radius"] ? tDesignerCommon("designerLinkedSizesHelp") : tDesignerCommon("designerUnlinkedSizesHelp")}
                 value={linkedSizeGroups["--jb-radius"]}
                 onChange={event => setLinkedSizeGroups(current => ({ ...current, "--jb-radius": Boolean(event.target.value) }))}
               />
@@ -2305,11 +2309,11 @@ export const DesignerApp = observer(function DesignerApp() {
             </div>
             <div className={styles.advancedSizeCallout}>
               <div>
-                <strong>{messages.designerAdvancedSizes}</strong>
-                <span>{messages.designerAdvancedSizesHelp}</span>
+                <strong>{tDesignerCommon("designerAdvancedSizes")}</strong>
+                <span>{t("designerAdvancedSizesHelp")}</span>
               </div>
               <JBButton size="sm" variant="outline" onClick={() => setAdvancedSizesOpen(true)}>
-                {messages.designerCustomizeSizeScale}
+                {t("designerCustomizeSizeScale")}
               </JBButton>
             </div>
           </div>
@@ -2319,58 +2323,58 @@ export const DesignerApp = observer(function DesignerApp() {
     return (
       <div className={styles.sectionContent}>
         <div className={styles.componentPreviewControl}>
-          <span>{messages.designerPreviewComponent}</span>
+          <span>{t("designerPreviewComponent")}</span>
           <JBTab
             className={styles.componentPreviewTabs}
             value={componentPreview}
             onChange={(event: JBTabChangeEvent) => chooseComponentPreview(event.detail.value as ComponentPreview)}
           >
-            <JBTabList size="sm" aria-label={messages.designerPreviewComponent}>
+            <JBTabList size="sm" aria-label={t("designerPreviewComponent")}>
               <JBTabTrigger value="all" color="primary">
-                {messages.designerAllControls}
+                {t("designerAllControls")}
               </JBTabTrigger>
               <JBTabTrigger value="inputs" color="primary">
-                {messages.designerInputs}
+                {t("designerInputs")}
               </JBTabTrigger>
               <JBTabTrigger value="choices" color="primary">
-                {messages.designerChoices}
+                {t("designerChoices")}
               </JBTabTrigger>
               <JBTabTrigger value="actions" color="primary">
-                {messages.designerButtons}
+                {t("designerButtons")}
               </JBTabTrigger>
             </JBTabList>
           </JBTab>
         </div>
-        <div className={styles.formAccessibilityAudit} aria-label={messages.designerFormAuditPanel}>
+        <div className={styles.formAccessibilityAudit} aria-label={t("designerFormAuditPanel")}>
           <div className={styles.componentAuditHeader}>
             <div className={styles.componentAuditIntro}>
-              <strong>{messages.designerFormAuditTitle}</strong>
-              <span>{messages.designerFormAuditHelp}</span>
+              <strong>{t("designerFormAuditTitle")}</strong>
+              <span>{t("designerFormAuditHelp")}</span>
             </div>
             <div className={styles.componentAuditHeaderActions}>
               {formAuditResults ? (
                 <>
                   <JBButton size="sm" variant="ghost" onClick={() => void copyFormAuditReport()}>
-                    {formAuditCopied ? messages.designerFormAuditCopied : messages.designerCopyFormAudit}
+                    {formAuditCopied ? t("designerFormAuditCopied") : t("designerCopyFormAudit")}
                   </JBButton>
-                  <JBButton size="sm" variant="ghost" onClick={downloadFormAuditReport}>{messages.designerDownloadFormAudit}</JBButton>
+                  <JBButton size="sm" variant="ghost" onClick={downloadFormAuditReport}>{t("designerDownloadFormAudit")}</JBButton>
                 </>
               ) : null}
               <JBButton size="sm" variant="outline" disabled={formAuditRunning} onClick={() => void runFormAccessibilityAudit()}>
-                {formAuditRunning ? messages.designerFormAuditRunning : messages.designerRunFormAudit}
+                {formAuditRunning ? t("designerFormAuditRunning") : t("designerRunFormAudit")}
               </JBButton>
             </div>
           </div>
           {formAuditResults ? (
             <>
               <p className={styles.formAuditSummary} role="status">
-                {message("designerFormAuditSummary", {
+                {t("designerFormAuditSummary", {
                   components: formAuditResults.length,
                   instances: formAuditInstanceCount,
                   issues: formAuditIssueCount,
                 })}
               </p>
-              {formAuditIssueCount === 0 ? <p className={styles.componentAuditPass}>{messages.designerFormAuditPassed}</p> : (
+              {formAuditIssueCount === 0 ? <p className={styles.componentAuditPass}>{t("designerFormAuditPassed")}</p> : (
                 <div className={styles.formAuditResults}>
                   {formAuditResults.filter(result => result.issues.length > 0).map(result => (
                     <section key={result.tag}>
@@ -2379,7 +2383,7 @@ export const DesignerApp = observer(function DesignerApp() {
                           <strong>{result.name}</strong>
                           <code>{result.tag}</code>
                         </div>
-                        <span>{message("designerFormAuditComponentIssues", { count: result.issues.length })}</span>
+                        <span>{t("designerFormAuditComponentIssues", { count: result.issues.length })}</span>
                       </div>
                       <ul>
                         {result.issues.map((issue, index) => (
@@ -2387,11 +2391,11 @@ export const DesignerApp = observer(function DesignerApp() {
                             <div>
                               <strong>{componentTokenStateLabels[issue.state]}</strong>
                               <span>{issue.kind === "contrast"
-                                ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
-                                : messages.designerComponentAuditFocusIssue}</span>
+                                ? t("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
+                                : t("designerComponentAuditFocusIssue")}</span>
                               {issue.token ? <code>{issue.token}</code> : null}
                             </div>
-                            <JBButton size="sm" variant="ghost" onClick={() => reviewFormAuditIssue(result, issue)}>{messages.designerComponentReviewIssue}</JBButton>
+                            <JBButton size="sm" variant="ghost" onClick={() => reviewFormAuditIssue(result, issue)}>{t("designerComponentReviewIssue")}</JBButton>
                           </li>
                         ))}
                       </ul>
@@ -2405,12 +2409,12 @@ export const DesignerApp = observer(function DesignerApp() {
         <div className={styles.componentEditor}>
           <JBSelect<string>
             size="sm"
-            label={messages.designerChooseComponent}
+            label={t("designerChooseComponent")}
             value={selectedComponentTag ?? ""}
             clearable={false}
             onChange={event => chooseComponentTag(valueFromEvent(event))}
           >
-            <JBOption value="">{messages.designerSelectComponent}</JBOption>
+            <JBOption value="">{t("designerSelectComponent")}</JBOption>
             {availableComponentTags.map(tag => {
               const entry = registryByType.get(tag);
               return (
@@ -2424,17 +2428,17 @@ export const DesignerApp = observer(function DesignerApp() {
             <>
               <div className={styles.componentOverrideSummary}>
                 <div>
-                  <strong>{message("designerComponentOverrides", { count: Object.keys(componentTokenOverrides).length })}</strong>
+                  <strong>{t("designerComponentOverrides", { count: Object.keys(componentTokenOverrides).length })}</strong>
                   <code>{selectedComponentTag}</code>
                 </div>
                 <JBButton size="sm" variant="outline" disabled={Object.keys(componentTokenOverrides).length === 0} onClick={resetSelectedComponentOverrides}>
-                  {messages.designerResetComponent}
+                  {t("designerResetComponent")}
                 </JBButton>
               </div>
               <JBSelect<ComponentPreviewState>
                 size="sm"
-                label={messages.designerComponentPreviewState}
-                message={messages.designerComponentPreviewStateHelp}
+                label={t("designerComponentPreviewState")}
+                message={t("designerComponentPreviewStateHelp")}
                 value={componentPreviewState}
                 clearable={false}
                 onChange={event => {
@@ -2443,66 +2447,66 @@ export const DesignerApp = observer(function DesignerApp() {
                   setComponentTokenStateFilter(state);
                 }}
               >
-                <JBOption value="default">{messages.designerComponentStateDefault}</JBOption>
-                <JBOption value="hover">{messages.designerComponentStateHover}</JBOption>
-                <JBOption value="focus">{messages.designerComponentStateFocus}</JBOption>
-                <JBOption value="active">{messages.designerComponentStateActive}</JBOption>
-                <JBOption value="disabled">{messages.designerComponentStateDisabled}</JBOption>
+                <JBOption value="default">{t("designerComponentStateDefault")}</JBOption>
+                <JBOption value="hover">{t("designerComponentStateHover")}</JBOption>
+                <JBOption value="focus">{t("designerComponentStateFocus")}</JBOption>
+                <JBOption value="active">{t("designerComponentStateActive")}</JBOption>
+                <JBOption value="disabled">{t("designerComponentStateDisabled")}</JBOption>
               </JBSelect>
-              <div className={styles.componentAccessibility} aria-label={messages.designerComponentAccessibilityPanel} role="status">
+              <div className={styles.componentAccessibility} aria-label={t("designerComponentAccessibilityPanel")} role="status">
                 <div>
-                  <span>{messages.designerComponentContrastRatio}</span>
-                  <strong>{componentAccessibility?.ratio != null ? `${componentAccessibility.ratio.toFixed(2)}:1` : messages.designerResolvingValue}</strong>
+                  <span>{t("designerComponentContrastRatio")}</span>
+                  <strong>{componentAccessibility?.ratio != null ? `${componentAccessibility.ratio.toFixed(2)}:1` : t("designerResolvingValue")}</strong>
                 </div>
                 <div>
-                  <span>{messages.designerComponentContrastResult}</span>
+                  <span>{t("designerComponentContrastResult")}</span>
                   <strong className={componentAccessibility?.level === "fail" ? styles.accessibilityFail : styles.accessibilityPass}>
                     {componentAccessibility
                       ? {
-                          aaa: messages.designerComponentContrastAaa,
-                          aa: messages.designerComponentContrastAa,
-                          fail: messages.designerComponentContrastFail,
-                          unavailable: messages.designerComponentContrastUnavailable,
+                          aaa: t("designerComponentContrastAaa"),
+                          aa: t("designerComponentContrastAa"),
+                          fail: t("designerComponentContrastFail"),
+                          unavailable: t("designerComponentContrastUnavailable"),
                         }[componentAccessibility.level]
-                      : messages.designerResolvingValue}
+                      : t("designerResolvingValue")}
                   </strong>
                 </div>
                 <div>
-                  <span>{messages.designerComponentFocusIndicator}</span>
+                  <span>{t("designerComponentFocusIndicator")}</span>
                   <strong className={componentAccessibility?.focusIndicator === false ? styles.accessibilityFail : undefined}>
                     {componentPreviewState !== "focus"
-                      ? messages.designerComponentSelectFocusState
+                      ? t("designerComponentSelectFocusState")
                       : componentAccessibility?.focusIndicator == null
-                        ? messages.designerResolvingValue
+                        ? t("designerResolvingValue")
                         : componentAccessibility.focusIndicator
-                          ? messages.designerComponentFocusDetected
-                          : messages.designerComponentFocusMissing}
+                          ? t("designerComponentFocusDetected")
+                          : t("designerComponentFocusMissing")}
                   </strong>
                 </div>
               </div>
-              <div className={styles.componentAudit} aria-label={messages.designerComponentAuditPanel}>
+              <div className={styles.componentAudit} aria-label={t("designerComponentAuditPanel")}>
                 <div className={styles.componentAuditHeader}>
                   <div className={styles.componentAuditIntro}>
-                    <strong>{messages.designerComponentAuditTitle}</strong>
-                    <span>{messages.designerComponentAuditHelp}</span>
+                    <strong>{t("designerComponentAuditTitle")}</strong>
+                    <span>{t("designerComponentAuditHelp")}</span>
                   </div>
                   <div className={styles.componentAuditHeaderActions}>
                     {componentAuditIssues ? (
                       <>
                         <JBButton size="sm" variant="ghost" onClick={() => void copyComponentAuditReport()}>
-                          {componentAuditCopied ? messages.designerComponentAuditCopied : messages.designerComponentCopyAudit}
+                          {componentAuditCopied ? t("designerComponentAuditCopied") : t("designerComponentCopyAudit")}
                         </JBButton>
-                        <JBButton size="sm" variant="ghost" onClick={downloadComponentAuditReport}>{messages.designerComponentDownloadAudit}</JBButton>
+                        <JBButton size="sm" variant="ghost" onClick={downloadComponentAuditReport}>{t("designerComponentDownloadAudit")}</JBButton>
                       </>
                     ) : null}
                     <JBButton size="sm" variant="outline" disabled={componentAuditRunning} onClick={() => void runComponentAccessibilityAudit()}>
-                      {componentAuditRunning ? messages.designerComponentAuditRunning : messages.designerComponentRunAudit}
+                      {componentAuditRunning ? t("designerComponentAuditRunning") : t("designerComponentRunAudit")}
                     </JBButton>
                   </div>
                 </div>
                 {componentAuditIssues ? (
                   componentAuditIssues.length === 0 ? (
-                    <p className={styles.componentAuditPass}>{messages.designerComponentAuditPassed}</p>
+                    <p className={styles.componentAuditPass}>{t("designerComponentAuditPassed")}</p>
                   ) : (
                     <ul>
                       {componentAuditIssues.map((issue, index) => {
@@ -2514,14 +2518,14 @@ export const DesignerApp = observer(function DesignerApp() {
                               <strong>{componentTokenStateLabels[issue.state]}</strong>
                               <span>
                                 {issue.kind === "contrast"
-                                  ? message("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
-                                  : messages.designerComponentAuditFocusIssue}
+                                  ? t("designerComponentAuditContrastIssue", { ratio: issue.ratio?.toFixed(2) ?? "—" })
+                                  : t("designerComponentAuditFocusIssue")}
                               </span>
                               {issue.token ? <code>{issue.token}</code> : null}
                               {isPreviewingFix ? (
                                 <span className={styles.componentFixPreviewStatus} role="status">
                                   <i style={{ backgroundColor: componentFixPreview.value }} />
-                                  {message("designerComponentFixPreviewStatus", {
+                                  {t("designerComponentFixPreviewStatus", {
                                     value: componentFixPreview.value,
                                     ratio: componentFixPreview.ratio.toFixed(2),
                                   })}
@@ -2531,21 +2535,21 @@ export const DesignerApp = observer(function DesignerApp() {
                             <div className={styles.componentAuditActions}>
                               {issue.token ? (
                                 <JBButton size="sm" variant="ghost" onClick={() => reviewComponentAuditIssue(issue)}>
-                                  {messages.designerComponentReviewIssue}
+                                  {t("designerComponentReviewIssue")}
                                 </JBButton>
                               ) : null}
                               {issue.suggestion && !isPreviewingFix ? (
                                 <JBButton size="sm" variant="outline" onClick={() => previewComponentAuditFix(issue, issueKey)}>
-                                  {messages.designerComponentPreviewFix}
+                                  {t("designerComponentPreviewFix")}
                                 </JBButton>
                               ) : null}
                               {isPreviewingFix ? (
                                 <>
                                   <JBButton size="sm" variant="solid" onClick={applyComponentAuditFix}>
-                                    {messages.designerComponentApplyFix}
+                                    {t("designerComponentApplyFix")}
                                   </JBButton>
                                   <JBButton size="sm" variant="ghost" onClick={() => setComponentFixPreview(undefined)}>
-                                    {messages.designerComponentCancelFix}
+                                    {t("designerComponentCancelFix")}
                                   </JBButton>
                                 </>
                               ) : null}
@@ -2561,33 +2565,33 @@ export const DesignerApp = observer(function DesignerApp() {
                 <JBCheckbox
                   size="sm"
                   name="show-component-overrides-only"
-                  label={messages.designerShowOverridesOnly}
+                  label={t("designerShowOverridesOnly")}
                   value={showComponentOverridesOnly}
                   onChange={event => setShowComponentOverridesOnly(Boolean(event.target.value))}
                 />
                 <JBSelect<ComponentTokenState>
                   size="sm"
-                  label={messages.designerComponentStateFilter}
+                  label={t("designerComponentStateFilter")}
                   value={componentTokenStateFilter}
                   clearable={false}
                   onChange={event => setComponentTokenStateFilter(valueFromEvent(event) as ComponentTokenState)}
                 >
-                  <JBOption value="all">{messages.designerComponentStateAll}</JBOption>
-                  <JBOption value="default">{messages.designerComponentStateDefault}</JBOption>
-                  <JBOption value="hover">{messages.designerComponentStateHover}</JBOption>
-                  <JBOption value="focus">{messages.designerComponentStateFocus}</JBOption>
-                  <JBOption value="active">{messages.designerComponentStateActive}</JBOption>
-                  <JBOption value="disabled">{messages.designerComponentStateDisabled}</JBOption>
+                  <JBOption value="all">{t("designerComponentStateAll")}</JBOption>
+                  <JBOption value="default">{t("designerComponentStateDefault")}</JBOption>
+                  <JBOption value="hover">{t("designerComponentStateHover")}</JBOption>
+                  <JBOption value="focus">{t("designerComponentStateFocus")}</JBOption>
+                  <JBOption value="active">{t("designerComponentStateActive")}</JBOption>
+                  <JBOption value="disabled">{t("designerComponentStateDisabled")}</JBOption>
                 </JBSelect>
               </div>
               <JBInput
                 size="sm"
-                label={messages.designerSearchComponentTokens}
-                message={messages.designerSearchComponentTokensHelp}
+                label={t("designerSearchComponentTokens")}
+                message={t("designerSearchComponentTokensHelp")}
                 value={componentTokenSearch}
                 onInput={event => setComponentTokenSearch(valueFromEvent(event))}
               />
-              <div className={styles.componentTokenList} role="listbox" aria-label={messages.designerComponentTokens}>
+              <div className={styles.componentTokenList} role="listbox" aria-label={t("designerComponentTokens")}>
                 {groupedVisibleComponentTokens.map(({ group, tokens }) => (
                   <div className={styles.componentTokenGroup} role="group" aria-label={componentTokenGroupLabels[group]} key={group}>
                     <strong>{componentTokenGroupLabels[group]}</strong>
@@ -2605,43 +2609,43 @@ export const DesignerApp = observer(function DesignerApp() {
                           <span>{componentTokenLabel(token, selectedComponentTag)}</span>
                           <code>{token}</code>
                           {state !== "default" ? <small>{componentTokenStateLabels[state]}</small> : null}
-                          {componentTokenOverrides[token] ? <i>{messages.designerOverridden}</i> : null}
+                          {componentTokenOverrides[token] ? <i>{t("designerOverridden")}</i> : null}
                         </button>
                       );
                     })}
                   </div>
                 ))}
-                {visibleComponentTokens.length === 0 ? <p>{showComponentOverridesOnly ? messages.designerNoComponentOverrides : messages.designerNoComponentTokens}</p> : null}
+                {visibleComponentTokens.length === 0 ? <p>{showComponentOverridesOnly ? t("designerNoComponentOverrides") : t("designerNoComponentTokens")}</p> : null}
               </div>
               {selectedComponentToken ? (
                 <div className={styles.componentTokenEditor}>
-                  <div className={styles.componentTokenEffectiveValue} aria-label={messages.designerComponentEffectiveValuePanel} role="status">
+                  <div className={styles.componentTokenEffectiveValue} aria-label={t("designerComponentEffectiveValuePanel")} role="status">
                     <div>
-                      <span>{messages.designerComponentValueSource}</span>
+                      <span>{t("designerComponentValueSource")}</span>
                       <strong>
                         {effectiveComponentToken
                           ? {
-                              component: messages.designerComponentOverrideSource,
-                              global: messages.designerGlobalThemeSource,
-                              default: messages.designerJbDefaultSource,
+                              component: t("designerComponentOverrideSource"),
+                              global: t("designerGlobalThemeSource"),
+                              default: t("designerJbDefaultSource"),
                             }[effectiveComponentToken.source]
-                          : messages.designerResolvingValue}
+                          : t("designerResolvingValue")}
                       </strong>
                     </div>
                     <div>
-                      <span>{messages.designerComponentEffectiveValue}</span>
-                      <code>{effectiveComponentToken?.value ?? messages.designerResolvingValue}</code>
+                      <span>{t("designerComponentEffectiveValue")}</span>
+                      <code>{effectiveComponentToken?.value ?? t("designerResolvingValue")}</code>
                     </div>
                   </div>
                   {selectedComponentTokenProperty === "color" ? (
                     <div className={styles.componentTokenTypedControl}>
                       <div>
-                        <strong>{messages.designerComponentColorControl}</strong>
-                        <span>{messages.designerComponentColorControlHelp}</span>
+                        <strong>{t("designerComponentColorControl")}</strong>
+                        <span>{t("designerComponentColorControlHelp")}</span>
                       </div>
                       <JBColorInput
                         size="sm"
-                        label={messages.designerComponentColorPicker}
+                        label={t("designerComponentColorPicker")}
                         value={componentTokenDraft}
                         onInput={event => {
                           setComponentTokenDraft(valueFromEvent(event));
@@ -2654,13 +2658,13 @@ export const DesignerApp = observer(function DesignerApp() {
                   {selectedComponentTokenUsesLengthControl ? (
                     <div className={styles.componentTokenTypedControl}>
                       <div>
-                        <strong>{messages.designerComponentSizeControl}</strong>
-                        <span>{messages.designerComponentSizeControlHelp}</span>
+                        <strong>{t("designerComponentSizeControl")}</strong>
+                        <span>{t("designerComponentSizeControlHelp")}</span>
                       </div>
                       <div className={styles.componentTokenLengthFields}>
                         <JBNumberInput
                           size="sm"
-                          label={messages.designerComponentSizeValue}
+                          label={t("designerComponentSizeValue")}
                           value={componentLengthValue}
                           acceptNegative
                           decimalPrecision={3}
@@ -2677,7 +2681,7 @@ export const DesignerApp = observer(function DesignerApp() {
                         />
                         <JBSelect<ComponentLengthUnit>
                           size="sm"
-                          label={messages.designerComponentSizeUnit}
+                          label={t("designerComponentSizeUnit")}
                           value={componentLengthUnit}
                           clearable={false}
                           onChange={event => {
@@ -2700,12 +2704,12 @@ export const DesignerApp = observer(function DesignerApp() {
                   {selectedComponentTokenProperty === "opacity" ? (
                     <div className={styles.componentTokenTypedControl}>
                       <div>
-                        <strong>{messages.designerComponentOpacityControl}</strong>
-                        <span>{messages.designerComponentOpacityControlHelp}</span>
+                        <strong>{t("designerComponentOpacityControl")}</strong>
+                        <span>{t("designerComponentOpacityControlHelp")}</span>
                       </div>
                       <div className={styles.componentTokenOpacityFields}>
                         <JBRangeInput
-                          aria-label={messages.designerComponentOpacitySlider}
+                          aria-label={t("designerComponentOpacitySlider")}
                           size="sm"
                           min={0}
                           max={1}
@@ -2721,7 +2725,7 @@ export const DesignerApp = observer(function DesignerApp() {
                         />
                         <JBNumberInput
                           size="sm"
-                          label={messages.designerComponentOpacityValue}
+                          label={t("designerComponentOpacityValue")}
                           minValue={0}
                           maxValue={1}
                           step={0.05}
@@ -2739,12 +2743,12 @@ export const DesignerApp = observer(function DesignerApp() {
                   {selectedComponentTokenOptions.length > 0 ? (
                     <div className={styles.componentTokenTypedControl}>
                       <div>
-                        <strong>{messages.designerComponentOptionControl}</strong>
-                        <span>{messages.designerComponentOptionControlHelp}</span>
+                        <strong>{t("designerComponentOptionControl")}</strong>
+                        <span>{t("designerComponentOptionControlHelp")}</span>
                       </div>
                       <JBSelect<string>
                         size="sm"
-                        label={messages.designerComponentSuggestedValue}
+                        label={t("designerComponentSuggestedValue")}
                         value={selectedComponentTokenOptions.includes(componentTokenDraft) ? componentTokenDraft : ""}
                         clearable={false}
                         onChange={event => {
@@ -2754,7 +2758,7 @@ export const DesignerApp = observer(function DesignerApp() {
                           commitComponentTokenValue(value);
                         }}
                       >
-                        <JBOption value="">{messages.designerComponentCustomValue}</JBOption>
+                        <JBOption value="">{t("designerComponentCustomValue")}</JBOption>
                         {selectedComponentTokenOptions.map(value => (
                           <JBOption value={value} key={value}>
                             {value}
@@ -2765,8 +2769,8 @@ export const DesignerApp = observer(function DesignerApp() {
                   ) : null}
                   <JBInput
                     size="sm"
-                    label={message("designerTokenOverride", { token: componentTokenLabel(selectedComponentToken, selectedComponentTag) })}
-                    message={componentTokenError ?? message("designerComponentTokenCommitHelp", { token: selectedComponentToken })}
+                    label={t("designerTokenOverride", { token: componentTokenLabel(selectedComponentToken, selectedComponentTag) })}
+                    message={componentTokenError ?? t("designerComponentTokenCommitHelp", { token: selectedComponentToken })}
                     value={componentTokenDraft}
                     onInput={event => {
                       const value = valueFromEvent(event);
@@ -2784,15 +2788,15 @@ export const DesignerApp = observer(function DesignerApp() {
                     }}
                   />
                   <JBButton size="sm" variant="outline" disabled={!componentTokenOverrides[selectedComponentToken]} onClick={useInheritedComponentTokenValue}>
-                    {messages.designerUseInheritedValue}
+                    {t("designerUseInheritedValue")}
                   </JBButton>
                 </div>
               ) : (
-                <p className={styles.notice}>{messages.designerSelectTokenHelp}</p>
+                <p className={styles.notice}>{t("designerSelectTokenHelp")}</p>
               )}
             </>
           ) : (
-            <p className={styles.notice}>{messages.designerComponentsNotice}</p>
+            <p className={styles.notice}>{t("designerComponentsNotice")}</p>
           )}
         </div>
       </div>
@@ -2805,13 +2809,13 @@ export const DesignerApp = observer(function DesignerApp() {
         <header className={styles.libraryHeader}>
           <div>
             <span className={styles.brandMark}>JB</span>
-            <h1>{messages.designerYourThemes}</h1>
+            <h1>{t("designerYourThemes")}</h1>
           </div>
           <div className={styles.libraryActions}>
             <JBSelect<FormAppLocale>
               className={styles.languageSelect}
               size="sm"
-              aria-label={messages.designerLanguage}
+              aria-label={t("designerLanguage")}
               value={locale}
               clearable={false}
               onChange={event => setLocale(valueFromEvent(event) as FormAppLocale)}
@@ -2820,36 +2824,36 @@ export const DesignerApp = observer(function DesignerApp() {
               <JBOption value="fa">FA</JBOption>
             </JBSelect>
             <JBButton variant="outline" onClick={openCreate}>
-              {messages.designerCreateTheme}
+              {t("designerCreateTheme")}
             </JBButton>
             <JBButton variant="outline" onClick={openImport}>
-              {messages.designerImportTheme}
+              {t("designerImportTheme")}
             </JBButton>
             <JBButton color="primary" onClick={() => setLibraryOpen(false)}>
-              {messages.designerOpenDesigner}
+              {t("designerOpenDesigner")}
             </JBButton>
           </div>
         </header>
-        <p>{messages.designerLibraryDescription}</p>
+        <p>{t("designerLibraryDescription")}</p>
         <div className={styles.libraryToolbar}>
-          <JBInput size="sm" label={messages.designerSearchThemes} value={themeSearch} onInput={event => setThemeSearch(valueFromEvent(event))} />
+          <JBInput size="sm" label={t("designerSearchThemes")} value={themeSearch} onInput={event => setThemeSearch(valueFromEvent(event))} />
         </div>
         {themeLoadNotice ? <p role="alert">{themeLoadNotice}</p> : null}
         {showBuiltInTheme ? (
           <>
-            <h2>{messages.designerDefaultTheme}</h2>
-            <section className={styles.libraryGrid} aria-label={messages.designerDefaultTheme}>
+            <h2>{t("designerDefaultTheme")}</h2>
+            <section className={styles.libraryGrid} aria-label={t("designerDefaultTheme")}>
               <article className={styles.libraryCard}>
                 <div className={`${styles.libraryCardOpen} ${styles.libraryCardStatic}`}>
                   <div className={styles.builtInThemePreview} aria-hidden="true">
                     <span>JB</span>
                   </div>
-                  <strong>{messages.designerBuiltInDefault}</strong>
-                  <span>{messages.designerBuiltInThemeDescription}</span>
+                  <strong>{t("designerBuiltInDefault")}</strong>
+                  <span>{t("designerBuiltInThemeDescription")}</span>
                 </div>
                 <div className={styles.libraryCardActions}>
                   <button type="button" disabled={defaultThemeId === null} onClick={() => void setBuiltInThemeAsDefault()}>
-                    {defaultThemeId === null ? messages.designerDefault : messages.designerSetDefault}
+                    {defaultThemeId === null ? tDesignerCommon("designerDefault") : tDesignerCommon("designerSetDefault")}
                   </button>
                 </div>
               </article>
@@ -2858,8 +2862,8 @@ export const DesignerApp = observer(function DesignerApp() {
         ) : null}
         {filteredLibraryThemes.length > 0 ? (
           <>
-            <h2>{messages.designerMyThemes}</h2>
-            <section className={styles.libraryGrid} aria-label={messages.designerMyThemes}>
+            <h2>{t("designerMyThemes")}</h2>
+            <section className={styles.libraryGrid} aria-label={t("designerMyThemes")}>
               {filteredLibraryThemes.map(record => (
                 <article key={record.id} className={styles.libraryCard}>
                   <button className={styles.libraryCardOpen} type="button" onClick={() => openThemeRecord(record)}>
@@ -2872,23 +2876,23 @@ export const DesignerApp = observer(function DesignerApp() {
                       alt=""
                     />
                     <strong>{record.config.name}</strong>
-                    <span>{record.id === defaultThemeId ? messages.designerDefaultTheme : (record.config.description ?? messages.designerReusableTheme)}</span>
+                    <span>{record.id === defaultThemeId ? t("designerDefaultTheme") : (record.config.description ?? t("designerReusableTheme"))}</span>
                   </button>
                   <div className={styles.libraryCardActions}>
                     <button type="button" onClick={() => openThemeRecord(record)}>
-                      {messages.designerEdit}
+                      {t("designerEdit")}
                     </button>
                     <button type="button" onClick={() => void duplicateTheme(record)}>
-                      {messages.designerDuplicate}
+                      {t("designerDuplicate")}
                     </button>
                     <button type="button" onClick={() => exportThemeRecord(record)}>
-                      {messages.designerExportTheme}
+                      {tDesignerCommon("designerExportTheme")}
                     </button>
                     <button type="button" disabled={record.id === defaultThemeId} onClick={() => void setLibraryThemeAsDefault(record)}>
-                      {record.id === defaultThemeId ? messages.designerDefault : messages.designerSetDefault}
+                      {record.id === defaultThemeId ? tDesignerCommon("designerDefault") : tDesignerCommon("designerSetDefault")}
                     </button>
                     <button className={styles.deleteThemeAction} type="button" onClick={() => requestThemeDelete(record)}>
-                      {messages.designerDelete}
+                      {t("designerDelete")}
                     </button>
                   </div>
                 </article>
@@ -2898,8 +2902,8 @@ export const DesignerApp = observer(function DesignerApp() {
         ) : null}
         {filteredThemePresets.length > 0 ? (
           <>
-            <h2>{messages.designerPresetGallery}</h2>
-            <section className={styles.libraryGrid} aria-label={messages.designerThemePresets}>
+            <h2>{t("designerPresetGallery")}</h2>
+            <section className={styles.libraryGrid} aria-label={t("designerThemePresets")}>
               {filteredThemePresets.map(presetItem => (
                 <button key={presetItem.id} type="button" onClick={() => void createFromPreset(presetItem.config, presetItem.id)}>
                   <img src={presetItem.thumbnail} alt="" />
@@ -2910,7 +2914,7 @@ export const DesignerApp = observer(function DesignerApp() {
             </section>
           </>
         ) : null}
-        {!hasThemeSearchResults ? <p className={styles.libraryEmpty}>{messages.designerNoThemeResults}</p> : null}
+        {!hasThemeSearchResults ? <p className={styles.libraryEmpty}>{t("designerNoThemeResults")}</p> : null}
         {createOpen ? (
           <div
             className={styles.modalBackdrop}
@@ -2927,10 +2931,10 @@ export const DesignerApp = observer(function DesignerApp() {
                 if (!createBusy && event.key === "Escape") setCreateOpen(false);
               }}
             >
-              <h2 id="create-theme-title">{messages.designerCreateTheme}</h2>
-              <p>{messages.designerCreateDescription}</p>
-              <JBSelect<string> label={messages.designerStartFrom} value={createSource} clearable={false} onChange={event => setCreateSource(valueFromEvent(event))}>
-                <JBOption value="blank">{messages.designerBlankTheme}</JBOption>
+              <h2 id="create-theme-title">{t("designerCreateTheme")}</h2>
+              <p>{t("designerCreateDescription")}</p>
+              <JBSelect<string> label={t("designerStartFrom")} value={createSource} clearable={false} onChange={event => setCreateSource(valueFromEvent(event))}>
+                <JBOption value="blank">{t("designerBlankTheme")}</JBOption>
                 {THEME_PRESETS.map(presetItem => (
                   <JBOption key={presetItem.id} value={presetItem.id}>
                     {presetItem.label}
@@ -2938,7 +2942,7 @@ export const DesignerApp = observer(function DesignerApp() {
                 ))}
               </JBSelect>
               <JBInput
-                label={messages.designerThemeName}
+                label={tDesignerCommon("designerThemeName")}
                 value={createName}
                 autoFocus
                 onInput={event => {
@@ -2948,7 +2952,7 @@ export const DesignerApp = observer(function DesignerApp() {
               />
               <JBTextarea
                 name="themeDescription"
-                label={messages.designerThemeDescription}
+                label={t("designerThemeDescription")}
                 value={createDescription}
                 onInput={event => setCreateDescription(valueFromEvent(event))}
               />
@@ -2959,10 +2963,10 @@ export const DesignerApp = observer(function DesignerApp() {
               ) : null}
               <div>
                 <JBButton variant="ghost" disabled={createBusy} onClick={() => setCreateOpen(false)}>
-                  {messages.designerCancel}
+                  {tDesignerCommon("designerCancel")}
                 </JBButton>
                 <JBButton color="primary" disabled={createBusy} onClick={() => void createTheme()}>
-                  {createBusy ? messages.designerCreating : messages.designerCreateTheme}
+                  {createBusy ? t("designerCreating") : t("designerCreateTheme")}
                 </JBButton>
               </div>
             </section>
@@ -2984,13 +2988,13 @@ export const DesignerApp = observer(function DesignerApp() {
                 if (event.key === "Escape") setImportOpen(false);
               }}
             >
-              <h2 id="import-theme-title">{messages.designerImportTheme}</h2>
-              <p>{messages.designerImportDescription}</p>
+              <h2 id="import-theme-title">{t("designerImportTheme")}</h2>
+              <p>{t("designerImportDescription")}</p>
               <JBTextarea
                 className={styles.importJsonInput}
                 name="themeImportJson"
-                label={messages.designerThemeJson}
-                placeholder={messages.designerPasteThemeJson}
+                label={t("designerThemeJson")}
+                placeholder={t("designerPasteThemeJson")}
                 value={importJson}
                 autoHeight={false}
                 autoFocus
@@ -3004,7 +3008,7 @@ export const DesignerApp = observer(function DesignerApp() {
               />
               <div className={styles.importFileRow}>
                 <JBButton variant="outline" onClick={() => importFileRef.current?.click()}>
-                  {messages.designerChooseThemeFile}
+                  {t("designerChooseThemeFile")}
                 </JBButton>
                 {importFileName ? <span>{importFileName}</span> : null}
                 <input
@@ -3028,8 +3032,8 @@ export const DesignerApp = observer(function DesignerApp() {
                 <>
                   {importSupportedOnly && importValidation.omittedIssues.length > 0 ? (
                     <div className={styles.importConflict} role="status">
-                      <strong>{messages.designerSupportedOnly}</strong>
-                      <p>{messages.designerOmittedPaths}</p>
+                      <strong>{t("designerSupportedOnly")}</strong>
+                      <p>{t("designerOmittedPaths")}</p>
                       <ul>
                         {importValidation.omittedIssues.slice(0, 8).map(issue => (
                           <li key={`${issue.path}:${issue.message}`}>
@@ -3041,17 +3045,17 @@ export const DesignerApp = observer(function DesignerApp() {
                   ) : null}
                   {importValidation.conflicts.name || importValidation.conflicts.slug ? (
                     <p className={styles.importConflict} role="status">
-                      {messages.designerImportConflict}
+                      {t("designerImportConflict")}
                     </p>
                   ) : (
                     <p className={styles.importValid} role="status">
-                      {messages.designerImportReady}
+                      {t("designerImportReady")}
                     </p>
                   )}
                 </>
               ) : importValidation ? (
                 <div className={styles.importError} role="alert">
-                  <strong>{messages.designerImportInvalid}</strong>
+                  <strong>{t("designerImportInvalid")}</strong>
                   <ul>
                     {importValidation.issues.slice(0, 8).map(issue => (
                       <li key={`${issue.path}:${issue.message}`}>
@@ -3067,7 +3071,7 @@ export const DesignerApp = observer(function DesignerApp() {
                         setImportWarningsConfirmed(false);
                       }}
                     >
-                      {messages.designerReviewSupported}
+                      {t("designerReviewSupported")}
                     </JBButton>
                   ) : null}
                 </div>
@@ -3076,17 +3080,17 @@ export const DesignerApp = observer(function DesignerApp() {
                 <label className={styles.importWarningConsent}>
                   <input type="checkbox" checked={importWarningsConfirmed} onChange={event => setImportWarningsConfirmed(event.currentTarget.checked)} />
                   <span>
-                    {importValidation.warnings.join(" ")} {messages.designerImportAnyway}
+                    {importValidation.warnings.join(" ")} {t("designerImportAnyway")}
                   </span>
                 </label>
               ) : null}
               <div className={styles.importActions}>
                 <JBButton variant="ghost" onClick={() => setImportOpen(false)}>
-                  {messages.designerCancel}
+                  {tDesignerCommon("designerCancel")}
                 </JBButton>
                 {importSupportedOnly ? (
                   <JBButton variant="outline" onClick={() => setImportSupportedOnly(false)}>
-                    {messages.designerUseStrictImport}
+                    {t("designerUseStrictImport")}
                   </JBButton>
                 ) : null}
                 <JBButton
@@ -3095,10 +3099,10 @@ export const DesignerApp = observer(function DesignerApp() {
                   onClick={() => void importTheme()}
                 >
                   {importValidation?.valid && (importValidation.conflicts.name || importValidation.conflicts.slug)
-                    ? messages.designerCreateCopy
+                    ? t("designerCreateCopy")
                     : importSupportedOnly
-                      ? messages.designerImportSupported
-                      : messages.designerImportTheme}
+                      ? t("designerImportSupported")
+                      : t("designerImportTheme")}
                 </JBButton>
               </div>
             </section>
@@ -3120,15 +3124,15 @@ export const DesignerApp = observer(function DesignerApp() {
                 if (!deleteBusy && event.key === "Escape") setPendingDelete(undefined);
               }}
             >
-              <h2 id="delete-theme-title">{message("designerDeleteTitle", { name: pendingDelete.config.name })}</h2>
+              <h2 id="delete-theme-title">{t("designerDeleteTitle", { name: pendingDelete.config.name })}</h2>
               <p>
-                {message("designerDeleteDescription", {
-                  status: pendingDelete.id === defaultThemeId ? messages.designerCurrentDefault : messages.designerNotDefault,
+                {t("designerDeleteDescription", {
+                  status: pendingDelete.id === defaultThemeId ? t("designerCurrentDefault") : t("designerNotDefault"),
                   count: Object.values(themeBindings).filter(themeId => themeId === pendingDelete.id).length,
                 })}
               </p>
-              <JBSelect<string> label={messages.designerReplacementTheme} value={deleteReplacementId} clearable={false} onChange={event => setDeleteReplacementId(valueFromEvent(event))}>
-                <JBOption value="default">{messages.designerBuiltInDefault}</JBOption>
+              <JBSelect<string> label={t("designerReplacementTheme")} value={deleteReplacementId} clearable={false} onChange={event => setDeleteReplacementId(valueFromEvent(event))}>
+                <JBOption value="default">{t("designerBuiltInDefault")}</JBOption>
                 {libraryThemes
                   .filter(record => record.id !== pendingDelete.id)
                   .map(record => (
@@ -3139,10 +3143,10 @@ export const DesignerApp = observer(function DesignerApp() {
               </JBSelect>
               <div>
                 <JBButton variant="ghost" disabled={deleteBusy} onClick={() => setPendingDelete(undefined)}>
-                  {messages.designerCancel}
+                  {tDesignerCommon("designerCancel")}
                 </JBButton>
                 <JBButton color="danger" disabled={deleteBusy} onClick={() => void confirmThemeDelete()}>
-                  {deleteBusy ? messages.designerDeleting : messages.designerReplaceDelete}
+                  {deleteBusy ? t("designerDeleting") : t("designerReplaceDelete")}
                 </JBButton>
               </div>
             </section>
@@ -3153,21 +3157,18 @@ export const DesignerApp = observer(function DesignerApp() {
   }
 
   const sections: Array<{ id: DesignerSection; label: string }> = [
-    { id: "background", label: messages.designerBackground },
-    { id: "colors", label: messages.designerColors },
-    { id: "typography", label: messages.designerTypography },
-    { id: "sizing", label: messages.designerSizeSpacing },
-    { id: "shape", label: messages.designerShape },
-    { id: "components", label: messages.designerComponents },
+    { id: "background", label: t("designerBackground") },
+    { id: "colors", label: t("designerColors") },
+    { id: "typography", label: t("designerTypography") },
+    { id: "sizing", label: t("designerSizeSpacing") },
+    { id: "shape", label: t("designerShape") },
+    { id: "components", label: t("designerComponents") },
   ];
 
   return (
     <DesignerUiStoreProvider store={ui}>
       <div className={styles.designer} dir={direction} onClickCapture={handleDesignerNavigationCapture}>
       <DesignerHeader
-        direction={direction}
-        messages={messages}
-        locale={locale}
         formSlug={formSlug}
         themeSlug={themeRecord?.slug}
         themeName={theme.name}
@@ -3178,7 +3179,6 @@ export const DesignerApp = observer(function DesignerApp() {
         isDefault={Boolean(themeRecord && defaultThemeId === themeRecord.id)}
         canBindForm={Boolean(themeRecord && boundThemeId !== themeRecord.id)}
         isBoundToForm={Boolean(themeRecord && boundThemeId === themeRecord.id)}
-        onLocaleChange={setLocale}
         onThemeNameChange={name => updateTheme(draft => { draft.name = name; })}
         onOpenLibrary={() => void requestDesignerLeave(() => setLibraryOpen(true))}
         onUndo={undo}
@@ -3188,11 +3188,11 @@ export const DesignerApp = observer(function DesignerApp() {
         onBindForm={() => void bindCurrentForm()}
       />
 
-      <DesignerMobileTabs messages={messages} />
+      <DesignerMobileTabs />
 
       <main className={`${layoutStyles.workspace} ${styles.workspace}`} data-mobile-panel={ui.mobilePanel}>
         <aside className={`${layoutStyles.panel} ${styles.settingsPanel}`}>
-          <ThemePresetPanel activePreset={activePreset} messages={messages} onSelect={commitTheme} />
+          <ThemePresetPanel activePreset={activePreset} onSelect={commitTheme} />
 
           <div className={styles.sections}>
             {sections.map(section => (
@@ -3201,7 +3201,7 @@ export const DesignerApp = observer(function DesignerApp() {
               </JBCollapse>
             ))}
           </div>
-          <div className={styles.autosaveNote}>{messages.designerAutosave}</div>
+          <div className={styles.autosaveNote}>{t("designerAutosave")}</div>
         </aside>
 
         <DesignerPreviewPanel
@@ -3215,14 +3215,12 @@ export const DesignerApp = observer(function DesignerApp() {
           previewDocument={previewDocument}
           rendererTheme={rendererTheme}
           previewLocale={previewLocale}
-          messages={messages}
         />
       </main>
 
       <ExportThemeDialog
         themeName={theme.name}
         json={exportedJson}
-        messages={messages}
         onClipboardUnavailable={() => downloadThemeJson(exportedJson, themeSlug(theme.name))}
       />
       {advancedColorsOpen ? (
@@ -3244,11 +3242,11 @@ export const DesignerApp = observer(function DesignerApp() {
           >
             <header>
               <div>
-                <h2 id="advanced-colors-title">{messages.designerAdvancedColors}</h2>
-                <p>{messages.designerAdvancedColorsModalHelp}</p>
+                <h2 id="advanced-colors-title">{t("designerAdvancedColors")}</h2>
+                <p>{t("designerAdvancedColorsModalHelp")}</p>
               </div>
               <JBButton size="sm" variant="ghost" onClick={() => setAdvancedColorDraft(recalculateAllThemeColors(advancedColorDraft) as DesignerThemeConfig["global"])}>
-                {messages.designerRestoreCalculatedColors}
+                {t("designerRestoreCalculatedColors")}
               </JBButton>
             </header>
             <div className={styles.advancedColorGroups}>
@@ -3271,11 +3269,11 @@ export const DesignerApp = observer(function DesignerApp() {
                     </header>
                     {group.baseToken ? (
                       <div className={styles.advancedBaseToken}>
-                        <span className={styles.baseColorBadge}>{messages.designerBaseColor}</span>
+                        <span className={styles.baseColorBadge}>{t("designerBaseColor")}</span>
                         <JBColorInput
                           size="md"
                           label={tokenLabel(group.baseToken, locale)}
-                          message={variantsLinked ? messages.designerBaseColorHelp : messages.designerBaseColorIndependentHelp}
+                          message={variantsLinked ? t("designerBaseColorHelp") : t("designerBaseColorIndependentHelp")}
                           value={baseValue}
                           onInput={event => {
                             const value = valueFromEvent(event);
@@ -3286,8 +3284,8 @@ export const DesignerApp = observer(function DesignerApp() {
                           className={styles.baseColorLink}
                           size="sm"
                           name={`link-${group.id}-color-variants`}
-                          label={messages.designerLinkCalculatedColors}
-                          message={variantsLinked ? messages.designerLinkedColorsHelp : messages.designerUnlinkedColorsHelp}
+                          label={t("designerLinkCalculatedColors")}
+                          message={variantsLinked ? t("designerLinkedColorsHelp") : t("designerUnlinkedColorsHelp")}
                           value={variantsLinked}
                           onChange={event => setLinkedColorGroups(current => ({ ...current, [group.baseToken!]: Boolean(event.target.value) }))}
                         />
@@ -3312,13 +3310,13 @@ export const DesignerApp = observer(function DesignerApp() {
               })}
             </div>
             <footer>
-              <span>{messages.designerAdvancedChangesApplyOnSave}</span>
+              <span>{t("designerAdvancedChangesApplyOnSave")}</span>
               <div>
                 <JBButton variant="ghost" onClick={() => setAdvancedColorsOpen(false)}>
-                  {messages.designerCancel}
+                  {tDesignerCommon("designerCancel")}
                 </JBButton>
                 <JBButton color="primary" onClick={saveAdvancedColors}>
-                  {messages.designerApplyColors}
+                  {t("designerApplyColors")}
                 </JBButton>
               </div>
             </footer>
@@ -3329,10 +3327,10 @@ export const DesignerApp = observer(function DesignerApp() {
         <Suspense
           fallback={
             <div className={styles.modalBackdrop} role="presentation">
-              <section className={`${styles.exportModal} ${styles.modalLoading}`} role="dialog" aria-modal="true" aria-label={messages.designerLoadingAdvancedSizes}>
-                <progress className={styles.modalLoadingProgress} aria-label={messages.designerLoadingAdvancedSizes} />
-                <strong>{messages.designerLoadingAdvancedSizes}</strong>
-                <p>{messages.designerLoadingAdvancedSizesHelp}</p>
+              <section className={`${styles.exportModal} ${styles.modalLoading}`} role="dialog" aria-modal="true" aria-label={t("designerLoadingAdvancedSizes")}>
+                <progress className={styles.modalLoadingProgress} aria-label={t("designerLoadingAdvancedSizes")} />
+                <strong>{t("designerLoadingAdvancedSizes")}</strong>
+                <p>{t("designerLoadingAdvancedSizesHelp")}</p>
               </section>
             </div>
           }
@@ -3356,3 +3354,7 @@ export const DesignerApp = observer(function DesignerApp() {
     </DesignerUiStoreProvider>
   );
 });
+
+export function DesignerApp() {
+  return <FormI18nProvider><DesignerAppContent /></FormI18nProvider>;
+}

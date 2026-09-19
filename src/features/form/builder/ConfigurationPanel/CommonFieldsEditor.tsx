@@ -1,9 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import type { ReactNode } from "react";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBInput } from "jb-input/react";
 import { getLocalizedText } from "../../domain/form-document";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementRegistryEntry } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { JBCollapse } from "jb-collapse/react";
@@ -13,14 +13,14 @@ import styles from "./ConfigurationPanel.module.css";
 
 interface CommonFieldsEditorProps {
   entry: FormElementRegistryEntry;
-  locale: string;
-  defaultLocale: string;
-  messages: FormMessages;
   children?: ReactNode;
 }
 
-export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, locale, defaultLocale, messages, children }: CommonFieldsEditorProps) {
+export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, children }: CommonFieldsEditorProps) {
+  const { t } = useTranslation("configurationPanel");
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const element = store.selectedElement;
   if (!element) return null;
   return (
@@ -29,7 +29,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
         <JBInput
           size="sm"
           name="elementLabel"
-          label={messages.label}
+          label={t("label")}
           value={getLocalizedText(element.label, locale, defaultLocale)}
           onInput={event => store.updateSelectedText("label", inputValue(event as unknown as Event), locale)}
         />
@@ -39,7 +39,7 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
         <JBInput
           size="sm"
           name="elementPlaceholder"
-          label={messages.placeholder}
+          label={t("placeholder")}
           value={getLocalizedText(element.placeholder, locale, defaultLocale)}
           onInput={event => store.updateSelectedText("placeholder", inputValue(event as unknown as Event), locale)}
         />
@@ -48,20 +48,22 @@ export const CommonFieldsEditor = observer(function CommonFieldsEditor({ entry, 
   );
 });
 
-export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ entry, locale, defaultLocale, messages }: CommonFieldsEditorProps) {
+export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ entry }: CommonFieldsEditorProps) {
+  const { t } = useTranslation("configurationPanel");
+  const { t: tPropertyGuidance } = useTranslation("propertyGuidance");
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const element = store.selectedElement;
   if (!element) return null;
   return (
-    <JBCollapse title={messages.behaviorSettings} defaultOpen={false}>
+    <JBCollapse title={t("behaviorSettings")} defaultOpen={false}>
       {entry.commonFields.initialValue ? (
         <InitialValueEditor
           entry={entry}
           element={element}
-          label={messages.initialValue}
-          message={messages.initialValueHelp}
-          locale={locale}
-          defaultLocale={defaultLocale}
+          label={t("initialValue")}
+          message={tPropertyGuidance("initialValueHelp")}
           onValueChange={value => store.updateSelectedElement({ initialValue: value as typeof element.initialValue })}
         />
       ) : null}
@@ -72,7 +74,7 @@ export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ ent
               size="sm"
               variant="filled-outline"
               name="elementRequired"
-              label={messages.required}
+              label={t("required")}
               value={element.required ?? false}
               onChange={event => store.updateSelectedElement({ required: Boolean(event.target.value) })}
             />
@@ -82,7 +84,7 @@ export const CommonBehaviorEditor = observer(function CommonBehaviorEditor({ ent
               size="sm"
               variant="filled-outline"
               name="elementDisabled"
-              label={messages.disabled}
+              label={t("disabled")}
               value={element.disabled ?? false}
               onChange={event => store.updateSelectedElement({ disabled: Boolean(event.target.value) })}
             />

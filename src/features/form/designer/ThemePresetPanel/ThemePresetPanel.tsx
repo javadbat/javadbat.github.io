@@ -1,17 +1,17 @@
-import type { FormMessages } from "../../i18n/locale-adapter";
+import { useTranslation } from "react-i18next";
 import { THEME_PRESETS, type DesignerThemeConfig } from "../theme-config";
 import styles from "./ThemePresetPanel.module.css";
 
 export interface ThemePresetPanelProps {
   activePreset: string;
-  messages: FormMessages;
   onSelect: (theme: DesignerThemeConfig, presetId: string) => void;
 }
 
-export function ThemePresetPanel({ activePreset, messages, onSelect }: ThemePresetPanelProps) {
+export function ThemePresetPanel({ activePreset, onSelect }: ThemePresetPanelProps) {
+  const { t } = useTranslation("themePresetPanel");
   return (
     <section className={styles.presets}>
-      <h2>{messages.designerPresets}</h2>
+      <h2>{t("designerPresets")}</h2>
       <div className={styles.presetRow}>
         {THEME_PRESETS.slice(0, 4).map(preset => (
           <button

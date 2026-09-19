@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { JBCheckbox } from "jb-checkbox/react";
 import { JBColorInput } from "jb-color-input/react";
@@ -6,7 +7,6 @@ import { JBNumberInput } from "jb-number-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { JBTextarea } from "jb-textarea/react";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import type { FormElementPropertyDefinition } from "../../component-data";
 import { useBuilderStore } from "../store/BuilderStoreContext";
 import { inputValue, localizedPropertyValue, propertyLabel } from "./configuration-values";
@@ -15,15 +15,16 @@ import { SelectOptionsEditor } from "./SelectOptionsEditor";
 
 interface PropertyFieldProps {
   definition: FormElementPropertyDefinition;
-  locale: string;
-  defaultLocale: string;
-  messages: FormMessages;
 }
 
 const BYTES_PER_MEGABYTE = 1024 * 1024;
 
-export const PropertyField = observer(function PropertyField({ definition, locale, defaultLocale, messages }: PropertyFieldProps) {
+export const PropertyField = observer(function PropertyField({ definition }: PropertyFieldProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t: tPropertyGuidance } = useTranslation("propertyGuidance");
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const element = store.selectedElement;
   if (!element) {
     return null;
@@ -31,7 +32,7 @@ export const PropertyField = observer(function PropertyField({ definition, local
 
   const value = element.props[definition.key];
   const label = propertyLabel(definition.label, locale);
-  const guidance = getPropertyGuidance(definition, locale, messages);
+  const guidance = getPropertyGuidance(definition, tPropertyGuidance, tCommon);
   const placeholder = getPropertyPlaceholder(definition, locale);
 
   if (definition.control === "textarea") {
@@ -60,7 +61,7 @@ export const PropertyField = observer(function PropertyField({ definition, local
   }
 
   if (definition.control === "options") {
-    return <SelectOptionsEditor locale={locale} defaultLocale={defaultLocale} messages={messages} label={label} />;
+    return <SelectOptionsEditor label={label} />;
   }
 
   if (definition.control === "boolean") {

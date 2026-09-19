@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, type DragEvent } from "react";
 import { observer } from "mobx-react-lite";
 import type { JBRepeatableGroupElementV1 } from "../../domain/form-document";
@@ -12,8 +13,11 @@ import { InsertionTarget } from "./InsertionTarget";
 interface Props extends Omit<CanvasCardProps, "element"> { element: JBRepeatableGroupElementV1; }
 
 export const RepeatableGroupCanvasCard = observer(function RepeatableGroupCanvasCard(props: Props) {
-  const { element, messages } = props;
+  const { t } = useTranslation("formCanvas");
+  const { element } = props;
   const store = useBuilderStore();
+  const locale = store.editingLocale;
+  const defaultLocale = store.document.localization.defaultLocale;
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   useEffect(() => {
     const clearDropTarget = () => setDragOverIndex(null);
@@ -40,9 +44,9 @@ export const RepeatableGroupCanvasCard = observer(function RepeatableGroupCanvas
     <div className={styles.tabPanel}>
       {element.children.length === 0 ? <div className={styles.tabEmptyDrop} data-drop-active={dragOverIndex === 0} onDragOver={event => markDropTarget(event, 0)} onDrop={event => acceptDrop(event, 0)}>Drop form elements into this repeatable group</div> :
         <ol className={styles.tabChildList}>{element.children.map((child, index) => <li key={child.id}>
-          <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget>
+          <InsertionTarget active={dragOverIndex === index} onDragOver={event => markDropTarget(event, index)} onDrop={event => acceptDrop(event, index)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget>
           <CanvasCard {...props} element={child} index={index} count={element.children.length} onFocusOffset={(current, offset) => { const target = element.children[Math.max(0, Math.min(current + offset, element.children.length - 1))]; if (target) document.getElementById(`element-select-${target.id}`)?.focus(); }} />
-          {index === element.children.length - 1 ? <InsertionTarget active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}><CatalogIcon iconId="drop" />{messages.dropHere}</InsertionTarget> : null}
+          {index === element.children.length - 1 ? <InsertionTarget active={dragOverIndex === element.children.length} onDragOver={event => markDropTarget(event, element.children.length)} onDrop={event => acceptDrop(event, element.children.length)}><CatalogIcon iconId="drop" />{t("dropHere")}</InsertionTarget> : null}
         </li>)}</ol>}
     </div>
   </div>;

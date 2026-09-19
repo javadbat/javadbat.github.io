@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 
-import { act, cleanup, fireEvent, render } from "@testing-library/react";
+import { renderForm as render } from "../../i18n/test-utils";
+
+import { act, cleanup, fireEvent } from "@testing-library/react";
 import { makeObservable, observable, runInAction } from "mobx";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { formAppMessages } from "../../i18n/locale-adapter";
 import { formElementRegistry, getFormElementDescription, getFormElementDisplayName } from "../../component-data";
 import { ComponentCatalog } from "./ComponentCatalog";
 
@@ -50,7 +51,7 @@ describe("ComponentCatalog", () => {
 
   it("updates component names when the editing locale changes", () => {
     const entry = formElementRegistry[0];
-    const view = render(<ComponentCatalog messages={formAppMessages.en} />);
+    const view = render(<ComponentCatalog />);
 
     expect(view.getByRole("button", { name: `Add ${getFormElementDisplayName(entry, "en")}` })).toBeTruthy();
 
@@ -70,7 +71,7 @@ describe("ComponentCatalog", () => {
       return `${entry.type}-${store.document.elements.length}`;
     });
 
-    const view = render(<ComponentCatalog messages={formAppMessages.en} />);
+    const view = render(<ComponentCatalog />);
     const buttons = view.getAllByRole("button", { name: /^Add / });
 
     expect(buttons).toHaveLength(formElementRegistry.length);

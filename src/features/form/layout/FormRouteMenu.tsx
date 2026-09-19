@@ -1,9 +1,10 @@
+import { useTranslation } from "react-i18next";
+import { FORM_LOCALES, isFormLocale } from "../i18n/i18n";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { JBPopover } from "jb-popover/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { formPageHref, type FormPage } from "../application/form-page-url";
-import type { FormMessages } from "../i18n/locale-adapter";
 import styles from "./FormRouteMenu.module.css";
 
 export interface FormRouteLanguageOption {
@@ -13,11 +14,9 @@ export interface FormRouteLanguageOption {
 
 export interface FormRouteMenuProps {
   currentPage: FormPage;
-  messages: FormMessages;
-  language: string;
-  onLanguageChange: (language: string) => void;
-  languageOptions?: readonly FormRouteLanguageOption[];
-  languageLabel?: string;
+  contentLanguage?: string;
+  onContentLanguageChange?: (language: string) => void;
+  contentLanguageOptions?: readonly FormRouteLanguageOption[];
   formSlug?: string;
   themeSlug?: string;
   className?: string;
@@ -62,15 +61,15 @@ function FormRouteMenuLink({ current, href, icon, label, onNavigate }: MenuLinkP
 
 export function FormRouteMenu({
   currentPage,
-  messages,
-  language,
-  onLanguageChange,
-  languageOptions = [{ value: "en", label: "EN" }, { value: "fa", label: "FA" }],
-  languageLabel = messages.interfaceLanguage,
+  contentLanguage,
+  onContentLanguageChange,
+  contentLanguageOptions = [],
   formSlug,
   themeSlug,
   className,
 }: FormRouteMenuProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t, i18n } = useTranslation("formRouteMenu");
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverId = `form-route-menu-${useId().replaceAll(":", "")}`;
@@ -87,48 +86,53 @@ export function FormRouteMenu({
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [open]);
 
-  const selectLanguage = (nextLanguage: string) => {
-    onLanguageChange(nextLanguage);
+  const selectInterfaceLanguage = (nextLanguage: string) => {
+    if (isFormLocale(nextLanguage)) void i18n.changeLanguage(nextLanguage);
     close();
   };
 
   const links = (onNavigate?: () => void) => (
-    <nav className={styles.links} aria-label={messages.formNavigation}>
-      <FormRouteMenuLink current={currentPage === "landing"} href={formPageHref("landing")} icon={<FormsIcon />} label={messages.backToForms} onNavigate={onNavigate} />
-      <FormRouteMenuLink current={currentPage === "builder"} href={formPageHref("builder", formSlug)} icon={<BuilderIcon />} label={messages.builder} onNavigate={onNavigate} />
-      <FormRouteMenuLink current={currentPage === "designer"} href={formPageHref("designer", formSlug, themeSlug)} icon={<DesignerIcon />} label={messages.designer} onNavigate={onNavigate} />
+    <nav className={styles.links} aria-label={t("formNavigation")}>
+      <FormRouteMenuLink current={currentPage === "landing"} href={formPageHref("landing")} icon={<FormsIcon />} label={tCommon("backToForms")} onNavigate={onNavigate} />
+      <FormRouteMenuLink current={currentPage === "builder"} href={formPageHref("builder", formSlug)} icon={<BuilderIcon />} label={tCommon("builder")} onNavigate={onNavigate} />
+      <FormRouteMenuLink current={currentPage === "designer"} href={formPageHref("designer", formSlug, themeSlug)} icon={<DesignerIcon />} label={tCommon("designer")} onNavigate={onNavigate} />
     </nav>
   );
 
-  const languageSelect = (name: string) => (
-    <div className={styles.languageControl} title={languageLabel}>
+  const languageSelect = (name: string, value: string, label: string, options: readonly FormRouteLanguageOption[], onChange: (language: string) => void) => (
+    <div className={styles.languageControl} title={label}>
       <LanguageIcon />
       <JBSelect<string>
         name={name}
-        aria-label={languageLabel}
+        aria-label={label}
         size="sm"
-        value={language}
+        value={value}
         clearable={false}
         popoverPosition="fixed"
-        onChange={event => selectLanguage(String(event.target.value))}
+        onChange={event => { onChange(String(event.target.value)); close(); }}
       >
-        {languageOptions.map(option => <JBOption key={option.value} value={option.value}>{option.label}</JBOption>)}
+        {options.map(option => <JBOption key={option.value} value={option.value}>{option.label}</JBOption>)}
       </JBSelect>
     </div>
   );
+
+  const languageControls = (name: string) => <>
+    {languageSelect(name, i18n.resolvedLanguage ?? i18n.language, t("interfaceLanguage"), FORM_LOCALES.map(value => ({ value, label: value.toUpperCase() })), selectInterfaceLanguage)}
+    {contentLanguage && onContentLanguageChange ? languageSelect(`${name}Content`, contentLanguage, tCommon("contentLocale"), contentLanguageOptions, onContentLanguageChange) : null}
+  </>;
 
   return (
     <div className={`${styles.menu} ${className ?? ""}`}>
       <div className={styles.desktopMenu}>
         {links()}
-        {languageSelect("formRouteLanguage")}
+        {languageControls("formRouteLanguage")}
       </div>
       <div className={styles.mobileMenu}>
         <button
           ref={triggerRef}
           type="button"
           className={styles.mobileTrigger}
-          aria-label={messages.openFormNavigation}
+          aria-label={t("openFormNavigation")}
           aria-expanded={open}
           aria-controls={popoverId}
           onClick={() => setOpen(current => !current)}
@@ -146,7 +150,7 @@ export function FormRouteMenu({
         >
           <div className={styles.popoverContent}>
             {links(close)}
-            {languageSelect("formRouteMobileLanguage")}
+            {languageControls("formRouteMobileLanguage")}
           </div>
         </JBPopover>
       </div>

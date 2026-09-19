@@ -1,8 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
-import type { FormAppDirection, FormAppLocale, FormMessages } from "../../i18n/locale-adapter";
 import { formPageHref } from "../../application/form-page-url";
 import { FormRouteBrand, FormRouteHeader, FormRouteLinkButton } from "../../layout/FormRouteHeader";
 import { FormRouteMenu } from "../../layout/FormRouteMenu";
@@ -19,9 +19,6 @@ function valueFromEvent(event: unknown): string {
 export type DesignerSaveStatus = "saving" | "saved" | "invalid" | "error";
 
 export interface DesignerHeaderProps {
-  direction: FormAppDirection;
-  messages: FormMessages;
-  locale: FormAppLocale;
   formSlug?: string;
   themeSlug?: string;
   themeName: string;
@@ -32,7 +29,6 @@ export interface DesignerHeaderProps {
   isDefault: boolean;
   canBindForm: boolean;
   isBoundToForm: boolean;
-  onLocaleChange: (locale: FormAppLocale) => void;
   onThemeNameChange: (name: string) => void;
   onOpenLibrary: () => void;
   onUndo: () => void;
@@ -43,12 +39,16 @@ export interface DesignerHeaderProps {
 }
 
 export const DesignerHeader = observer(function DesignerHeader(props: DesignerHeaderProps) {
+  const { t, i18n } = useTranslation("designerHeader");
+  const direction = i18n.dir();
+  const { t: tCommon } = useTranslation("common");
+  const { t: tDesignerCommon } = useTranslation("designerCommon");
   const ui = useDesignerUiStore();
   const [editingName, setEditingName] = useState(false);
   const {
-    direction, messages, locale, formSlug, themeSlug, themeName, saveStatus,
+    formSlug, themeSlug, themeName, saveStatus,
     canUndo, canRedo, canSetDefault, isDefault, canBindForm, isBoundToForm,
-    onLocaleChange, onThemeNameChange, onOpenLibrary, onUndo, onRedo,
+    onThemeNameChange, onOpenLibrary, onUndo, onRedo,
     onRetrySave, onSetDefault, onBindForm,
   } = props;
 
@@ -56,47 +56,47 @@ export const DesignerHeader = observer(function DesignerHeader(props: DesignerHe
 
   return (
     <FormRouteHeader layout="editor" className={styles.header}>
-      <FormRouteBrand className={styles.headerBrand} href={formPageHref("landing")} title={messages.designerBrandTitle} subtitle={messages.designerBrandSubtitle} />
+      <FormRouteBrand className={styles.headerBrand} href={formPageHref("landing")} title={t("designerBrandTitle")} subtitle={t("designerBrandSubtitle")} />
       <div className={styles.themeIdentity}>
-        <button type="button" className={styles.backButton} aria-label={messages.designerBackThemes} onClick={onOpenLibrary}>
+        <button type="button" className={styles.backButton} aria-label={t("designerBackThemes")} onClick={onOpenLibrary}>
           <jb-icon-arrow direction={direction === "rtl" ? "right" : "left"} />
-          <span>{messages.designerBackThemes}</span>
+          <span>{t("designerBackThemes")}</span>
         </button>
         <span className={styles.headerDivider} />
         {editingName ? (
-          <JBInput className={styles.nameInput} size="sm" aria-label={messages.designerThemeName} value={themeName} onInput={event => onThemeNameChange(valueFromEvent(event))} onBlur={() => setEditingName(false)} />
+          <JBInput className={styles.nameInput} size="sm" aria-label={tDesignerCommon("designerThemeName")} value={themeName} onInput={event => onThemeNameChange(valueFromEvent(event))} onBlur={() => setEditingName(false)} />
         ) : (
           <button type="button" className={styles.themeName} onClick={() => setEditingName(true)}>{themeName}<jb-icon-edit /></button>
         )}
         <p className={`${styles.saveState} ${styles[`saveState_${saveStatus}`]}`} aria-live="polite">
           <span aria-hidden="true" />
-          {saveStatus === "saving" ? messages.designerSaving : saveStatus === "invalid" ? messages.designerFinishEditing : saveStatus === "error" ? messages.designerSaveFailed : messages.designerSaved}
+          {saveStatus === "saving" ? t("designerSaving") : saveStatus === "invalid" ? t("designerFinishEditing") : saveStatus === "error" ? t("designerSaveFailed") : t("designerSaved")}
         </p>
       </div>
       <div className={`${styles.headerActions} ${styles.desktopHeaderActions}`}>
-        <FormRouteMenu currentPage="designer" messages={messages} formSlug={formSlug} themeSlug={themeSlug} language={locale} onLanguageChange={language => onLocaleChange(language as FormAppLocale)} />
-        <FormRouteLinkButton href={formPageHref("preview", formSlug, themeSlug)} variant="outline">{messages.preview}</FormRouteLinkButton>
-        <JBButton size="sm" variant="ghost" disabled={!canUndo} aria-label={messages.designerUndo} onClick={onUndo}>{messages.designerUndo}</JBButton>
-        <JBButton size="sm" variant="ghost" disabled={!canRedo} aria-label={messages.designerRedo} onClick={onRedo}>{messages.designerRedo}</JBButton>
-        {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={onRetrySave}>{messages.designerRetrySave}</JBButton> : null}
-        <JBButton size="sm" variant="ghost" disabled={!canSetDefault} onClick={onSetDefault}>{isDefault ? messages.designerDefault : messages.designerSetDefault}</JBButton>
-        {formSlug ? <JBButton size="sm" variant="ghost" disabled={!canBindForm} onClick={onBindForm}>{isBoundToForm ? messages.designerUsedForForm : messages.designerUseForForm}</JBButton> : null}
-        <JBButton color="primary" onClick={ui.openExport}>{messages.designerExportTheme}</JBButton>
+        <FormRouteMenu currentPage="designer" formSlug={formSlug} themeSlug={themeSlug} />
+        <FormRouteLinkButton href={formPageHref("preview", formSlug, themeSlug)} variant="outline">{tCommon("preview")}</FormRouteLinkButton>
+        <JBButton size="sm" variant="ghost" disabled={!canUndo} aria-label={t("designerUndo")} onClick={onUndo}>{t("designerUndo")}</JBButton>
+        <JBButton size="sm" variant="ghost" disabled={!canRedo} aria-label={t("designerRedo")} onClick={onRedo}>{t("designerRedo")}</JBButton>
+        {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={onRetrySave}>{t("designerRetrySave")}</JBButton> : null}
+        <JBButton size="sm" variant="ghost" disabled={!canSetDefault} onClick={onSetDefault}>{isDefault ? tDesignerCommon("designerDefault") : tDesignerCommon("designerSetDefault")}</JBButton>
+        {formSlug ? <JBButton size="sm" variant="ghost" disabled={!canBindForm} onClick={onBindForm}>{isBoundToForm ? t("designerUsedForForm") : t("designerUseForForm")}</JBButton> : null}
+        <JBButton color="primary" onClick={ui.openExport}>{tDesignerCommon("designerExportTheme")}</JBButton>
       </div>
       <div className={styles.mobileHeaderActions}>
-        <FormRouteLinkButton href={formPageHref("preview", formSlug, themeSlug)} variant="outline">{messages.preview}</FormRouteLinkButton>
-        <FormRouteMenu currentPage="designer" messages={messages} formSlug={formSlug} themeSlug={themeSlug} language={locale} onLanguageChange={language => onLocaleChange(language as FormAppLocale)} />
-        <JBButton size="sm" variant="ghost" aria-expanded={ui.mobileActionsOpen} aria-haspopup="dialog" onClick={() => ui.setMobileActionsOpen(!ui.mobileActionsOpen)}>{messages.designerMore}</JBButton>
+        <FormRouteLinkButton href={formPageHref("preview", formSlug, themeSlug)} variant="outline">{tCommon("preview")}</FormRouteLinkButton>
+        <FormRouteMenu currentPage="designer" formSlug={formSlug} themeSlug={themeSlug} />
+        <JBButton size="sm" variant="ghost" aria-expanded={ui.mobileActionsOpen} aria-haspopup="dialog" onClick={() => ui.setMobileActionsOpen(!ui.mobileActionsOpen)}>{t("designerMore")}</JBButton>
         {ui.mobileActionsOpen ? (
           <>
-            <button className={styles.mobileActionsBackdrop} type="button" aria-label={messages.designerCloseActions} onClick={closeMobileActions} />
-            <div className={styles.mobileActionsMenu} role="dialog" aria-label={messages.designerActions} onKeyDown={event => { if (event.key === "Escape") closeMobileActions(); }}>
-              <JBButton size="sm" variant="ghost" disabled={!canUndo} onClick={() => { onUndo(); closeMobileActions(); }}>{messages.designerUndo}</JBButton>
-              <JBButton size="sm" variant="ghost" disabled={!canRedo} onClick={() => { onRedo(); closeMobileActions(); }}>{messages.designerRedo}</JBButton>
-              {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => { closeMobileActions(); onRetrySave(); }}>{messages.designerRetrySave}</JBButton> : null}
-              <JBButton size="sm" variant="ghost" disabled={!canSetDefault} onClick={() => { closeMobileActions(); onSetDefault(); }}>{isDefault ? messages.designerDefault : messages.designerSetDefault}</JBButton>
-              {formSlug ? <JBButton size="sm" variant="ghost" disabled={!canBindForm} onClick={() => { closeMobileActions(); onBindForm(); }}>{isBoundToForm ? messages.designerUsedForForm : messages.designerUseForForm}</JBButton> : null}
-              <JBButton color="primary" onClick={() => { closeMobileActions(); ui.openExport(); }}>{messages.designerExportTheme}</JBButton>
+            <button className={styles.mobileActionsBackdrop} type="button" aria-label={t("designerCloseActions")} onClick={closeMobileActions} />
+            <div className={styles.mobileActionsMenu} role="dialog" aria-label={t("designerActions")} onKeyDown={event => { if (event.key === "Escape") closeMobileActions(); }}>
+              <JBButton size="sm" variant="ghost" disabled={!canUndo} onClick={() => { onUndo(); closeMobileActions(); }}>{t("designerUndo")}</JBButton>
+              <JBButton size="sm" variant="ghost" disabled={!canRedo} onClick={() => { onRedo(); closeMobileActions(); }}>{t("designerRedo")}</JBButton>
+              {saveStatus === "error" ? <JBButton size="sm" variant="outline" onClick={() => { closeMobileActions(); onRetrySave(); }}>{t("designerRetrySave")}</JBButton> : null}
+              <JBButton size="sm" variant="ghost" disabled={!canSetDefault} onClick={() => { closeMobileActions(); onSetDefault(); }}>{isDefault ? tDesignerCommon("designerDefault") : tDesignerCommon("designerSetDefault")}</JBButton>
+              {formSlug ? <JBButton size="sm" variant="ghost" disabled={!canBindForm} onClick={() => { closeMobileActions(); onBindForm(); }}>{isBoundToForm ? t("designerUsedForForm") : t("designerUseForForm")}</JBButton> : null}
+              <JBButton color="primary" onClick={() => { closeMobileActions(); ui.openExport(); }}>{tDesignerCommon("designerExportTheme")}</JBButton>
             </div>
           </>
         ) : null}

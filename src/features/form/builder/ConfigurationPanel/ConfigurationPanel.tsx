@@ -1,5 +1,5 @@
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { getFormElementDisplayName } from "../../component-data";
 import { componentDataByType } from "../../component-data";
@@ -17,7 +17,7 @@ import { isConditionElement, isContainerElement, isTabElement, isWizardElement }
 import styles from "./ConfigurationPanel.module.css";
 import { useMediaQuery } from "usehooks-ts";
 interface ConfigurationPanelProps {
-  messages: FormMessages;
+
 }
 
 const advancedPropertyKeys = new Set([
@@ -39,7 +39,10 @@ const advancedPropertyKeys = new Set([
 
 const removedPropertyKeys = new Set(["valueType", "disableBalloonRotation", "autofocus", "leadingZero", "closeButtonText"]);
 
-export const ConfigurationPanel = observer(function ConfigurationPanel({ messages }: ConfigurationPanelProps) {
+export const ConfigurationPanel = observer(function ConfigurationPanel({ }: ConfigurationPanelProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("configurationPanel");
+  const { t: tPropertyGuidance } = useTranslation("propertyGuidance");
   const store = useBuilderStore();
   const element = store.selectedElement;
   const locale = store.editingLocale;
@@ -57,13 +60,13 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
       <div className={styles.panelHeading}>
         <div>
           <p className={styles.eyebrow}>
-            {!isMobile && messages.settings}
+            {!isMobile && t("settings")}
           </p>
           <h2 id="properties-title">
             {isMobile &&
             element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : ""
             }
-            {!isMobile && messages.properties}
+            {!isMobile && tCommon("properties")}
           </h2>
         </div>
         {entry ? (
@@ -74,46 +77,46 @@ export const ConfigurationPanel = observer(function ConfigurationPanel({ message
       </div>
       {!isMobile && (
         <p className={styles.panelDescription}>
-          {element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : messages.propertiesDescription}
+          {element ? (entry ? getFormElementDisplayName(entry, locale) : element.type) : t("propertiesDescription")}
         </p>
       )}
       {!element || !entry ? (
         <div className={styles.noSelection}>
           <span className={styles.selectionRing} />
-          <h3>{messages.noSelection}</h3>
-          <p>{messages.noSelectionDescription}</p>
+          <h3>{t("noSelection")}</h3>
+          <p>{t("noSelectionDescription")}</p>
         </div>
       ) : (
         <div className={styles.configurationFields}>
           {hasCommonContent || contentProperties.length > 0 ? (
-            <JBCollapse title={messages.contentSettings} defaultOpen>
-              <CommonFieldsEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages}>
+            <JBCollapse title={t("contentSettings")} defaultOpen>
+              <CommonFieldsEditor entry={entry}>
                 {contentProperties.map(definition => (
-                  <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+                  <PropertyField key={definition.key} definition={definition} />
                 ))}
               </CommonFieldsEditor>
             </JBCollapse>
           ) : null}
-          {isTabElement(element) ? <TabConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
+          {isTabElement(element) ? <TabConfigurationEditor /> : null}
           {isConditionElement(element) ? <ConditionConfigurationEditor /> : null}
-          {isWizardElement(element) ? <WizardConfigurationEditor locale={locale} defaultLocale={defaultLocale} /> : null}
+          {isWizardElement(element) ? <WizardConfigurationEditor /> : null}
           {standardProperties.length > 0 ? (
-            <JBCollapse title={messages.componentSettings} defaultOpen>
+            <JBCollapse title={t("componentSettings")} defaultOpen>
               {standardProperties.map(definition => (
-                <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+                <PropertyField key={definition.key} definition={definition} />
               ))}
             </JBCollapse>
           ) : null}
-          {hasCommonBehavior ? <CommonBehaviorEditor entry={entry} locale={locale} defaultLocale={defaultLocale} messages={messages} /> : null}
-          {!isContainerElement(element) ? <ValidationRulesEditor locale={locale} messages={messages} supportedRules={entry.validationRules} /> : null}
+          {hasCommonBehavior ? <CommonBehaviorEditor entry={entry} /> : null}
+          {!isContainerElement(element) ? <ValidationRulesEditor supportedRules={entry.validationRules} /> : null}
           {advancedProperties.length > 0 ? (
-            <JBCollapse title={messages.advancedSettings} defaultOpen={false}>
+            <JBCollapse title={tPropertyGuidance("advancedSettings")} defaultOpen={false}>
               {advancedProperties.map(definition => (
-                <PropertyField key={definition.key} definition={definition} locale={locale} defaultLocale={defaultLocale} messages={messages} />
+                <PropertyField key={definition.key} definition={definition} />
               ))}
             </JBCollapse>
           ) : null}
-          <DataFieldsEditor messages={messages} />
+          <DataFieldsEditor />
         </div>
       )}
     </aside>

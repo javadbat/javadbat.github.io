@@ -1,21 +1,7 @@
 import { FormRouteMenu } from "./FormRouteMenu";
-import { useFormLocale } from "../i18n/locale-adapter";
+import { FormI18nProvider } from "../i18n/FormI18nProvider";
 
-export const FORM_ROUTE_LOCALE_CHANGE_EVENT = "jb-form:locale-change";
-
-/** Hydrated shared navigation used by the otherwise-static `/form` landing page. */
+/** The landing page owns one locale boundary, shared by its React menu and Astro content. */
 export function FormRouteMenuIsland() {
-  const { locale, setLocale, messages } = useFormLocale("en");
-  return (
-    <FormRouteMenu
-      currentPage="landing"
-      messages={messages}
-      language={locale}
-      onLanguageChange={language => {
-        if (language !== "en" && language !== "fa") return;
-        setLocale(language);
-        window.dispatchEvent(new CustomEvent(FORM_ROUTE_LOCALE_CHANGE_EVENT, { detail: { locale: language } }));
-      }}
-    />
-  );
+  return <FormI18nProvider><FormRouteMenu currentPage="landing" /></FormI18nProvider>;
 }

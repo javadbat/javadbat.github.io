@@ -1,10 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { JBButton } from "jb-button/react";
 import { JBInput } from "jb-input/react";
 import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { ModalCloseButton } from "../../../../components/react/components/modal/ModalCloseButton";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import modalStyles from "../../shell/FormModal.module.css";
 import { LocaleEditor } from "./LocaleEditor";
 import { copyLocaleDefinitions, useFormSettings } from "./useFormSettings";
@@ -14,13 +14,15 @@ import { JBModal } from "jb-modal/react";
 interface FormSettingsModalProps {
   isOpen: boolean;
   focusFormName?: boolean;
-  messages: FormMessages;
+
   onClose: () => void;
 }
 
 export { copyLocaleDefinitions };
 
-export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, focusFormName = false, messages, onClose }: FormSettingsModalProps) {
+export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, focusFormName = false, onClose }: FormSettingsModalProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formSettingsModal");
   const {
     store,
     name,
@@ -40,31 +42,31 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
     addLocale,
     removeLocale,
     persist,
-  } = useFormSettings(isOpen, messages, onClose);
+  } = useFormSettings(isOpen, onClose);
 
   return (
-    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={messages.formSettings} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
+    <JBModal className={modalStyles.formModal} isOpen={isOpen} label={tCommon("formSettings")} autoCloseOnEscape autoCloseOnBackgroundClick onClose={onClose}>
       <div slot="header">
         <div className={styles.modalHeading}>
-          <p className={styles.eyebrow}>{messages.currentDraft}</p>
-          <h2>{messages.formSettings}</h2>
+          <p className={styles.eyebrow}>{tCommon("currentDraft")}</p>
+          <h2>{tCommon("formSettings")}</h2>
         </div>
-        <ModalCloseButton label={messages.close} onClick={onClose} />
+        <ModalCloseButton label={tCommon("close")} onClick={onClose} />
       </div>
       <div slot="content" className={styles.modalContent}>
         <section className={styles.settingsSection}>
           <JBInput
             name="formName"
-            label={messages.formName}
+            label={tCommon("formName")}
             value={name}
             autoFocus={focusFormName}
             onInput={event => setName(String((event.target as unknown as { value?: unknown }).value ?? ""))}
           />
           <JBInput
             name="formSlug"
-            label={messages.slug}
+            label={t("slug")}
             value={slug}
-            message={normalizedSlug ? `${messages.slugPreview}: ${normalizedSlug}` : messages.slugOptional}
+            message={normalizedSlug ? `${t("slugPreview")}: ${normalizedSlug}` : t("slugOptional")}
             onInput={event => setSlug(String((event.target as unknown as { value?: unknown }).value ?? ""))}
           />
         </section>
@@ -72,7 +74,7 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
         <section className={styles.settingsSection}>
           <JBSelect<string>
             name="defaultLocale"
-            label={messages.defaultLocale}
+            label={t("defaultLocale")}
             value={defaultLocale}
             onChange={event => setDefaultLocale(event.target.value)}
           >
@@ -87,14 +89,13 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
             defaultLocale={defaultLocale}
             newLocale={newLocale}
             localeError={localeError}
-            messages={messages}
             setLocales={setLocales}
             setNewLocale={setNewLocale}
             onAdd={addLocale}
             onRemove={removeLocale}
           />
         </section>
-        <p className={styles.draftStatus}>{store.linkedRecord ? `${messages.linkedNamedForm}: ${store.linkedRecord.slug}` : messages.unnamedDraft}</p>
+        <p className={styles.draftStatus}>{store.linkedRecord ? `${tCommon("linkedNamedForm")}: ${store.linkedRecord.slug}` : t("unnamedDraft")}</p>
         {saveError ? (
           <p className={styles.fieldError} role="alert">
             {saveError}
@@ -103,13 +104,13 @@ export const FormSettingsModal = observer(function FormSettingsModal({ isOpen, f
       </div>
       <div slot="footer" className={styles.modalActions}>
         <JBButton variant="ghost" onClick={onClose}>
-          {messages.cancel}
+          {tCommon("cancel")}
         </JBButton>
         <JBButton variant="outline" disabled={store.status === "saving" || !slugIsValid || normalizedSlug.length === 0} onClick={() => void persist(true)}>
-          {messages.saveAs}
+          {t("saveAs")}
         </JBButton>
         <JBButton color="primary" disabled={store.status === "saving" || !slugIsValid} onClick={() => void persist(false)}>
-          {store.status === "saving" ? messages.saving : messages.save}
+          {store.status === "saving" ? tCommon("saving") : tCommon("save")}
         </JBButton>
       </div>
     </JBModal>

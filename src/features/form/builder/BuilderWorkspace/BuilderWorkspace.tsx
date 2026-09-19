@@ -1,9 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { memo, useState } from "react";
 import type { JBTabChangeEvent } from "jb-tab";
 import { JBTab } from "jb-tab/react";
 import { JBTabList } from "jb-tab/list/react";
 import { JBTabTrigger } from "jb-tab/trigger/react";
-import type { FormMessages } from "../../i18n/locale-adapter";
 import layoutStyles from "../../layout/FormRouteLayout.module.css";
 import { ComponentCatalog } from "../ComponentCatalog/ComponentCatalog";
 import { ConfigurationPanel } from "../ConfigurationPanel/ConfigurationPanel";
@@ -14,7 +14,7 @@ type CompactPanel = "catalog" | "properties";
 type MobilePanel = "catalog" | "canvas" | "properties";
 
 interface BuilderWorkspaceProps {
-  messages: FormMessages;
+
   onOpenFormNameSettings?: () => void;
 }
 
@@ -23,7 +23,9 @@ interface BuilderWorkspaceProps {
  * active-panel choices stay local because no other builder section consumes
  * them; shared form data continues to live in the MobX builder store.
  */
-export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpenFormNameSettings }: BuilderWorkspaceProps) {
+export const BuilderWorkspace = memo(function BuilderWorkspace({ onOpenFormNameSettings }: BuilderWorkspaceProps) {
+  const { t } = useTranslation("builderWorkspace");
+  const { t: tCommon } = useTranslation("common");
   const [compactPanel, setCompactPanel] = useState<CompactPanel>("catalog");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("canvas");
 
@@ -36,10 +38,10 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
         >
           <JBTabList aria-label="Side panels">
             <JBTabTrigger value="catalog" color="primary">
-              {messages.componentCatalog}
+              {tCommon("componentCatalog")}
             </JBTabTrigger>
             <JBTabTrigger value="properties" color="primary">
-              {messages.properties}
+              {tCommon("properties")}
             </JBTabTrigger>
           </JBTabList>
         </JBTab>
@@ -51,21 +53,20 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
         >
           <JBTabList aria-label="Mobile workspace panels" size="sm">
             <JBTabTrigger value="catalog" color="dark">
-              {messages.componentCatalog}
+              {tCommon("componentCatalog")}
             </JBTabTrigger>
             <JBTabTrigger value="canvas" color="secondary-subtle">
-              {messages.formCanvas}
+              {t("formCanvas")}
             </JBTabTrigger>
             <JBTabTrigger value="properties" color="positive-subtle">
-              {messages.properties}
+              {tCommon("properties")}
             </JBTabTrigger>
           </JBTabList>
         </JBTab>
       </nav>
       <div className={`${layoutStyles.workspace} ${styles.workspace}`} data-side-panel={compactPanel} data-mobile-panel={mobilePanel}>
-        <ComponentCatalog messages={messages} onElementAdded={() => setMobilePanel("canvas")} />
+        <ComponentCatalog onElementAdded={() => setMobilePanel("canvas")} />
         <FormCanvas
-          messages={messages}
           onOpenFormNameSettings={onOpenFormNameSettings}
           onSelectElement={() => {
             setCompactPanel("properties");
@@ -75,7 +76,7 @@ export const BuilderWorkspace = memo(function BuilderWorkspace({ messages, onOpe
             setMobilePanel("properties");
           }}
         />
-        <ConfigurationPanel messages={messages} />
+        <ConfigurationPanel />
       </div>
     </div>
   );

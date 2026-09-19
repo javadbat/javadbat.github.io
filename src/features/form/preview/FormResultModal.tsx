@@ -1,13 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { JBButton } from "jb-button/react";
 import { JBModal } from "jb-modal/react";
 import { ModalCloseButton } from "../../../components/react/components/modal/ModalCloseButton";
 import type { FormValues } from "jb-form-builder/types";
-import type { FormMessages } from "../i18n/locale-adapter";
 import modalStyles from "../shell/FormModal.module.css";
 import styles from "../shell/RouteShell.module.css";
 
 interface FormResultModalProps {
-  messages: FormMessages;
   values: FormValues;
   onClose: () => void;
 }
@@ -27,36 +26,38 @@ function downloadFormResult(values: FormValues): void {
   URL.revokeObjectURL(objectUrl);
 }
 
-export function FormResultModal({ messages, values, onClose }: FormResultModalProps) {
+export function FormResultModal({ values, onClose }: FormResultModalProps) {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("formResultModal");
   return (
     <JBModal
       className={modalStyles.formModal}
       isOpen
-      label={messages.formResult}
-      description={messages.formResultDescription}
+      label={t("formResult")}
+      description={t("formResultDescription")}
       autoCloseOnEscape
       autoCloseOnBackgroundClick
       onClose={onClose}
     >
       <div slot="header" className={styles.resultModalHeader}>
         <div>
-          <p className={styles.eyebrow}>{messages.submissionSuccessful}</p>
-          <h2>{messages.formResult}</h2>
+          <p className={styles.eyebrow}>{t("submissionSuccessful")}</p>
+          <h2>{t("formResult")}</h2>
         </div>
-        <ModalCloseButton label={messages.close} onClick={onClose} />
+        <ModalCloseButton label={tCommon("close")} onClick={onClose} />
       </div>
       <div slot="content" className={styles.resultModalContent}>
-        <p>{messages.formResultDescription}</p>
-        <pre aria-label={messages.formResultJson} tabIndex={0}>
+        <p>{t("formResultDescription")}</p>
+        <pre aria-label={t("formResultJson")} tabIndex={0}>
           <code>{JSON.stringify(values, null, 2)}</code>
         </pre>
       </div>
       <div slot="footer" className={styles.resultModalActions}>
         <JBButton variant="ghost" onClick={onClose}>
-          {messages.close}
+          {tCommon("close")}
         </JBButton>
         <JBButton color="primary" onClick={() => downloadFormResult(values)}>
-          {messages.downloadJson}
+          {tCommon("downloadJson")}
         </JBButton>
       </div>
     </JBModal>

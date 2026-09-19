@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
 
-import { fireEvent, render } from "@testing-library/react";
+import { renderForm as render } from "../../i18n/test-utils";
+
+import { fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createEmptyFormDocument } from "../../domain/form-document";
-import { formAppMessages } from "../../i18n/locale-adapter";
 import { BuilderStore } from "../store/BuilderStore";
 import { BuilderStoreProvider } from "../store/BuilderStoreContext";
 import { ImportJsonModal } from "./ImportJsonModal";
@@ -32,7 +33,7 @@ describe("ImportJsonModal", () => {
     const onClose = vi.fn();
     const view = render(
       <BuilderStoreProvider value={store}>
-        <ImportJsonModal isOpen messages={formAppMessages.en} onClose={onClose} />
+        <ImportJsonModal isOpen onClose={onClose} />
       </BuilderStoreProvider>,
     );
     const textarea = view.container.querySelector<HTMLElement>('jb-textarea[name="importJson"]')!;
