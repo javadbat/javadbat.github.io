@@ -12,27 +12,27 @@
   inline-size: min(26rem, calc(100vw - 3rem));
   min-block-size: 14rem;
   padding: 2rem;
-  color: var(--form-muted);
-  font-size: 0.78rem;
+  color: var(--jb-content-secondary);
+  font-size: 0.75rem;
   text-align: center;
 }
 
 .modalLoading :global(jb-loading) {
   --jb-loading-width: 2.75rem;
   --jb-loading-height: 2.75rem;
-  --jb-loading-color: var(--form-accent);
+  --jb-loading-color: var(--jb-primary);
 }
 
-@media (min-width: 48.0625rem) {
+@media (width >= 48rem) {
   .formModal {
-    --form-modal-animation-duration: 300ms;
-    transition: display var(--form-modal-animation-duration) allow-discrete;
+    --modal-animation-duration: 300ms;
+    transition: display var(--modal-animation-duration) allow-discrete;
   }
 
   .formModal::part(background) {
     opacity: 0;
     backdrop-filter: blur(10px) contrast(1.35);
-    transition: opacity var(--form-modal-animation-duration) ease;
+    transition: opacity var(--modal-animation-duration) ease;
     will-change: opacity;
   }
 
@@ -48,8 +48,8 @@
     opacity: 0;
     transform: translateY(1rem) scale(0.8);
     transition:
-      opacity var(--form-modal-animation-duration) ease,
-      transform var(--form-modal-animation-duration)
+      opacity var(--modal-animation-duration) ease,
+      transform var(--modal-animation-duration)
         cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
   }

@@ -1,4 +1,4 @@
-﻿.modalContent,
+.modalContent,
 .validStatus,
 .errorStatus,
 .invalidStatus,
@@ -14,7 +14,7 @@
 .eyebrow {
   margin: 0;
   color: var(--jb-primary);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -32,7 +32,7 @@
 .description {
   margin: 0;
   color: var(--jb-content-secondary);
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 
@@ -40,7 +40,7 @@
   --jb-textarea-height: 15rem;
   --jb-textarea-textarea-direction: ltr;
   --jb-textarea-textarea-text-align: left;
-  --jb-textarea-value-font-size: 0.78rem;
+  --jb-textarea-value-font-size: 0.75rem;
   inline-size: 100%;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
 }
@@ -61,8 +61,8 @@
 
 .fileInput {
   position: absolute;
-  inline-size: 0.0625rem;
-  block-size: 0.0625rem;
+  inline-size: 1px;
+  block-size: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
@@ -74,18 +74,18 @@
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: var(--jb-radius-sm);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
 .validStatus {
-  color: var(--jb-green-dark);
+  color: var(--jb-green-contrast);
   background: var(--jb-green-subtle);
 }
 
 .errorStatus,
 .invalidStatus {
-  color: var(--jb-red-dark);
+  color: var(--jb-red-contrast);
   background: var(--jb-red-subtle);
 }
 
@@ -107,7 +107,7 @@
 
 .invalidStatus code {
   overflow: hidden;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
 }
 

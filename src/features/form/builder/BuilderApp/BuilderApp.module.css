@@ -1,8 +1,8 @@
 .app {
-  --shadow-drop: 0 0.0625rem 0.125rem color-mix(in oklch, var(--jb-content-primary) 4%, transparent), 0 0.25rem 0.9rem color-mix(in oklch, var(--jb-content-primary) 5%, transparent);
-  --shadow-box: inset 0 0 0 0.0625rem color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
-  --shadow-float: 0 0.75rem 2rem color-mix(in oklch, var(--jb-content-primary) 10%, transparent), 0 0.125rem 0.5rem color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
-  --shadow-selected: 0 0 0 0.125rem color-mix(in oklch, var(--jb-primary) 22%, transparent), var(--shadow-drop);
+  --shadow-drop: 0 1px 2px color-mix(in oklch, var(--jb-content-primary) 4%, transparent), 0 0.25rem 1rem color-mix(in oklch, var(--jb-content-primary) 5%, transparent);
+  --shadow-box: inset 0 0 0 1px color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
+  --shadow-float: 0 0.75rem 2rem color-mix(in oklch, var(--jb-content-primary) 10%, transparent), 0 2px 0.5rem color-mix(in oklch, var(--jb-content-primary) 6%, transparent);
+  --shadow-selected: 0 0 0 2px color-mix(in oklch, var(--jb-primary) 22%, transparent), var(--shadow-drop);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   block-size: 100dvh;
@@ -13,32 +13,8 @@
   font-family: text-font, fa-font, system-ui, sans-serif;
 }
 
-.app :global(jb-button[variant="outline"]) {
-  --jb-button-border-width: 0.0625rem;
-  --jb-button-border-color: var(--jb-neutral-9);
-  --jb-button-bg-color-outline: var(--jb-surface-primary);
-  --jb-button-bg-color-outline-hover: var(--jb-primary-subtle);
-  --jb-button-box-shadow: none;
-}
-
 .app :global(button) {
   font-family: inherit;
-}
-
-.app :global(jb-button[color="primary"]) {
-  --jb-button-primary: var(--jb-primary);
-  --jb-button-base-color-hover: var(--jb-primary-hover);
-  --jb-button-base-color-pressed: var(--jb-primary-dark);
-  --jb-button-box-shadow: 0 0.35rem 0.85rem color-mix(in oklch, var(--jb-primary) 18%, transparent);
-}
-
-.app :global(jb-button[variant=ghost]),
-.app :global(jb-button[variant=text]) {
-  --jb-button-color-ghost: var(--jb-primary);
-  --jb-button-color-ghost-hover: var(--jb-primary-dark);
-  --jb-button-bg-color-ghost-hover: var(--jb-primary-subtle);
-  --jb-button-color-text: var(--jb-primary);
-  --jb-button-color-text-hover: var(--jb-primary-dark);
 }
 
 /* Responsive ranges follow jb-core theme breakpoints: sm 40rem, md 48rem, lg 64rem, xl 80rem. */

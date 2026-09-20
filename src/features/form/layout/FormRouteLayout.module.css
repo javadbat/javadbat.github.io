@@ -1,13 +1,13 @@
-﻿.header {
+.header {
   box-sizing: border-box;
   min-block-size: 5.5rem;
   inline-size: calc(100% - 1rem);
   margin: 0.5rem 0.5rem 0;
   padding: 0.5rem 1rem;
-  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
-  border-radius: 1rem;
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius);
   background: var(--jb-surface-primary);
-  box-shadow: 0 0.2rem 0.8rem color-mix(in oklch, var(--jb-content-primary) 4%, transparent);
+  box-shadow: 0 3px 0.75rem color-mix(in oklch, var(--jb-content-primary) 4%, transparent);
   corner-shape: squircle;
 }
 
@@ -32,13 +32,13 @@
 }
 
 .brandCopy strong {
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .brandCopy small {
   margin-block-start: 0.25rem;
   color: var(--jb-content-secondary);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .brandMark {
@@ -47,9 +47,9 @@
   place-items: center;
   inline-size: 2.5rem;
   block-size: 2.5rem;
-  border-radius: 0.5rem;
-  color: var(--jb-surface-primary);
-  background: var(--jb-primary-dark);
+  border-radius: var(--jb-radius-xs);
+  color: var(--jb-content-inverse);
+  background: var(--jb-primary-d);
   box-shadow: none;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -67,9 +67,9 @@
 }
 
 .linkButton:focus-visible {
-  outline: 0.125rem solid color-mix(in oklch, var(--jb-primary) 28%, transparent);
+  outline: 2px solid color-mix(in oklch, var(--jb-primary) 28%, transparent);
   outline-offset: 0.25rem;
-  border-radius: 0.75rem;
+  border-radius: var(--jb-radius-sm);
 }
 
 .workspace {
@@ -86,8 +86,8 @@
   min-inline-size: 0;
   min-block-size: 0;
   max-block-size: 100%;
-  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
-  border-radius: 1rem;
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius);
   box-shadow: none;
   corner-shape: squircle;
 }

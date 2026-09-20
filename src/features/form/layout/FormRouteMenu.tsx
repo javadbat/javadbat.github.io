@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { registerDefaultVariables } from "jb-core/theme";
 import { FORM_LOCALES, isFormLocale } from "../i18n/i18n";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { JBPopover } from "jb-popover/react";
@@ -6,6 +7,8 @@ import { JBOption } from "jb-select/option/react";
 import { JBSelect } from "jb-select/react";
 import { formPageHref, type FormPage } from "../application/form-page-url";
 import styles from "./FormRouteMenu.module.css";
+
+registerDefaultVariables();
 
 export interface FormRouteLanguageOption {
   value: string;

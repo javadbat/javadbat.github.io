@@ -1,28 +1,20 @@
 .page {
-  --shell-ink: oklch(0.28 0.055 255);
-  --shell-muted: oklch(0.56 0.035 255);
-  --shell-line: oklch(0.9 0.02 255);
-  --shell-accent: oklch(0.56 0.17 255);
-  --shell-accent-strong: oklch(0.43 0.15 255);
-  --shell-surface: oklch(1 0 0);
-  --shell-canvas: oklch(0.975 0.01 255);
-  --shell-shadow: oklch(0.28 0.04 255);
   min-block-size: 100dvh;
   position: relative;
   isolation: isolate;
-  color: var(--shell-ink);
+  color: var(--jb-content-primary);
   background:
     radial-gradient(
       circle at 85% 8%,
-      oklch(0.67 0.13 255 / 14%),
+      color-mix(in oklch, var(--jb-primary) 14%, transparent),
       transparent 24rem
     ),
     radial-gradient(
       circle at 12% 88%,
-      oklch(0.72 0.12 165 / 10%),
+      color-mix(in oklch, var(--jb-green) 10%, transparent),
       transparent 22rem
     ),
-    var(--shell-canvas);
+    var(--jb-surface-secondary);
 }
 
 .themePageBackdrop {
@@ -55,12 +47,12 @@
   align-items: end;
   justify-content: space-between;
   padding-block-end: 1rem;
-  border-block-end: 0.0625rem solid var(--shell-line);
+  border-block-end: 1px solid var(--jb-neutral-9);
 }
 
 .savedFormsHeading h2 {
-  margin: 0.3rem 0 0;
-  font-size: 1.4rem;
+  margin: 0.25rem 0 0;
+  font-size: 1.375rem;
 }
 
 .savedFormsHeading > span {
@@ -68,9 +60,9 @@
   place-items: center;
   min-inline-size: 2rem;
   min-block-size: 2rem;
-  border-radius: 0.65rem;
-  color: var(--shell-accent-strong);
-  background: oklch(0.95 0.035 255);
+  border-radius: var(--jb-radius-sm);
+  color: var(--jb-primary-d);
+  background: var(--jb-primary-subtle);
   font-size: 0.75rem;
   font-weight: 800;
   corner-shape: squircle;
@@ -78,7 +70,7 @@
 
 .savedFormsState {
   margin: 1.25rem 0 0;
-  color: var(--shell-muted);
+  color: var(--jb-content-secondary);
   line-height: 1.6;
 }
 
@@ -95,11 +87,11 @@
   display: grid;
   gap: 0.75rem;
   padding: 1rem;
-  border: 0.0625rem solid var(--shell-line);
-  border-radius: 1rem;
-  background: var(--shell-surface);
-  box-shadow: 0 0.65rem 1.75rem
-    color-mix(in oklch, var(--shell-shadow) 5%, transparent);
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius);
+  background: var(--jb-surface-primary);
+  box-shadow: 0 0.75rem 1.75rem
+    color-mix(in oklch, var(--jb-content-primary) 5%, transparent);
   corner-shape: squircle;
   content-visibility: auto;
   contain-intrinsic-block-size: 10rem;
@@ -107,7 +99,7 @@
 
 .savedFormCard > div:first-child {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
   min-inline-size: 0;
@@ -120,23 +112,23 @@
 }
 
 .savedFormCard code {
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.35rem;
-  color: var(--shell-muted);
-  background: var(--shell-canvas);
-  font-size: 0.68rem;
+  padding: 3px 0.5rem;
+  border-radius: var(--jb-radius-xs);
+  color: var(--jb-content-secondary);
+  background: var(--jb-surface-secondary);
+  font-size: 0.625rem;
 }
 
 .savedFormCard p {
   margin: 0;
-  color: var(--shell-muted);
-  font-size: 0.72rem;
+  color: var(--jb-content-secondary);
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
 .savedFormActions {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.5rem;
   justify-content: flex-end;
 }
 
@@ -156,7 +148,7 @@
 }
 
 .brandMark {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .brand strong,
@@ -165,9 +157,9 @@
 }
 
 .brand small {
-  margin-block-start: 0.1rem;
-  color: var(--shell-muted);
-  font-size: 0.7rem;
+  margin-block-start: 2px;
+  color: var(--jb-content-secondary);
+  font-size: 0.75rem;
 }
 
 .topActions {
@@ -180,7 +172,7 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  color: var(--shell-muted);
+  color: var(--jb-content-secondary);
   font-size: 0.75rem;
   font-weight: 650;
 }
@@ -190,8 +182,8 @@
 }
 
 .previewHeaderIcon {
-  inline-size: 1.05rem;
-  block-size: 1.05rem;
+  inline-size: 1rem;
+  block-size: 1rem;
   fill: none;
   stroke: currentcolor;
   stroke-linecap: round;
@@ -227,7 +219,7 @@
 
 .previewHeading {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .previewHeading h1,
@@ -237,25 +229,25 @@
 
 .previewHeading h1 {
   font-family: "text-font", system-ui, sans-serif;
-  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-size: clamp(2rem, 5vw, 3.75rem);
   letter-spacing: -0.045em;
   line-height: 1.05;
 }
 
 .previewHeading > p:last-child {
   max-inline-size: 44rem;
-  color: var(--shell-muted);
+  color: var(--jb-content-secondary);
   line-height: 1.7;
 }
 
 .rendererSurface {
   min-inline-size: 0;
   padding: clamp(1rem, 4vw, 2.5rem);
-  border: 0.0625rem solid var(--shell-line);
-  border-radius: 1.5rem;
-  background: var(--shell-surface);
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius-xl);
+  background: var(--jb-surface-primary);
   box-shadow: 0 1.5rem 4rem
-    color-mix(in oklch, var(--shell-shadow) 9%, transparent);
+    color-mix(in oklch, var(--jb-content-primary) 9%, transparent);
   corner-shape: squircle;
 }
 
@@ -266,52 +258,52 @@
   justify-content: space-between;
   margin-block-start: 1.5rem;
   padding-block-start: 1.25rem;
-  border-block-start: 0.0625rem solid var(--shell-line);
+  border-block-start: 1px solid var(--jb-neutral-9);
 }
 
 .previewActionButtons {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .validationStatus {
   display: flex;
-  gap: 0.55rem;
+  gap: 0.5rem;
   align-items: center;
   margin: 0;
-  color: var(--shell-muted);
-  font-size: 0.78rem;
+  color: var(--jb-content-secondary);
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
 .validationStatus > span {
   flex: 0 0 auto;
-  inline-size: 0.62rem;
-  block-size: 0.62rem;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
   border-radius: 50%;
-  background: oklch(0.72 0.025 255);
-  box-shadow: 0 0 0 0.25rem oklch(0.72 0.025 255 / 14%);
+  background: var(--jb-content-secondary);
+  box-shadow: 0 0 0 0.25rem color-mix(in oklch, var(--jb-content-secondary) 14%, transparent);
 }
 
 .validationStatus_valid {
-  color: oklch(0.42 0.12 155);
+  color: var(--jb-green-contrast);
 }
 
 .validationStatus_valid > span {
-  background: oklch(0.62 0.16 155);
-  box-shadow: 0 0 0 0.25rem oklch(0.62 0.16 155 / 14%);
+  background: var(--jb-green);
+  box-shadow: 0 0 0 0.25rem color-mix(in oklch, var(--jb-green) 14%, transparent);
 }
 
 .validationStatus_invalid,
 .validationStatus_error {
-  color: oklch(0.49 0.17 25);
+  color: var(--jb-red-contrast);
 }
 
 .validationStatus_invalid > span,
 .validationStatus_error > span {
-  background: oklch(0.6 0.2 25);
-  box-shadow: 0 0 0 0.25rem oklch(0.6 0.2 25 / 14%);
+  background: var(--jb-red);
+  box-shadow: 0 0 0 0.25rem color-mix(in oklch, var(--jb-red) 14%, transparent);
 }
 
 .validationStatus_validating > span,
@@ -328,7 +320,7 @@
 }
 
 .resultModalHeader h2 {
-  margin: 0.2rem 0 0;
+  margin: 3px 0 0;
   font-size: 1.25rem;
 }
 
@@ -341,8 +333,8 @@
 
 .resultModalContent > p {
   margin: 0;
-  color: var(--shell-muted);
-  font-size: 0.85rem;
+  color: var(--jb-content-secondary);
+  font-size: 0.875rem;
   line-height: 1.6;
 }
 
@@ -351,12 +343,12 @@
   margin: 0;
   padding: 1rem;
   overflow: auto;
-  border: 0.0625rem solid var(--shell-line);
-  border-radius: 0.85rem;
-  color: var(--shell-ink);
-  background: var(--shell-canvas);
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius-sm);
+  color: var(--jb-content-primary);
+  background: var(--jb-surface-secondary);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   line-height: 1.65;
   direction: ltr;
   text-align: start;
@@ -366,7 +358,7 @@
 
 .resultModalActions {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   justify-content: flex-end;
 }
 
@@ -378,8 +370,8 @@
 
 .eyebrow {
   margin: 0;
-  color: var(--shell-accent);
-  font-size: 0.72rem;
+  color: var(--jb-primary);
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -388,9 +380,9 @@
 .hero h1,
 .placeholder h1 {
   max-inline-size: 44rem;
-  margin: 0.85rem 0 1rem;
+  margin: 0.75rem 0 1rem;
   font-family: "text-font", system-ui, sans-serif;
-  font-size: clamp(2.5rem, 6vw, 5.4rem);
+  font-size: clamp(2.5rem, 6vw, 5.375rem);
   font-weight: 720;
   letter-spacing: -0.055em;
   line-height: 0.98;
@@ -400,8 +392,8 @@
 .placeholderDescription {
   max-inline-size: 38rem;
   margin: 0;
-  color: var(--shell-muted);
-  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  color: var(--jb-content-secondary);
+  font-size: clamp(1rem, 2vw, 1.125rem);
   line-height: 1.7;
 }
 
@@ -414,38 +406,38 @@
 
 .formPreviewCard {
   position: relative;
-  padding: 1.1rem;
-  border: 0.0625rem solid oklch(0.87 0.025 255 / 80%);
-  border-radius: 1.5rem;
-  background: oklch(1 0 0 / 82%);
+  padding: 1rem;
+  border: 1px solid color-mix(in oklch, var(--jb-content-secondary) 20%, var(--jb-surface-primary));
+  border-radius: var(--jb-radius-xl);
+  background: color-mix(in oklch, var(--jb-surface-primary) 82%, transparent);
   box-shadow: 0 2rem 5rem
-    color-mix(in oklch, var(--shell-shadow) 12%, transparent);
+    color-mix(in oklch, var(--jb-content-primary) 12%, transparent);
   transform: rotate(1.5deg);
   backdrop-filter: blur(1rem);
 }
 
 .previewToolbar {
   display: flex;
-  gap: 0.35rem;
-  padding: 0.35rem 0.25rem 1rem;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem 1rem;
 }
 
 .previewToolbar i {
-  inline-size: 0.55rem;
-  block-size: 0.55rem;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
   border-radius: 50%;
-  background: oklch(0.88 0.02 255);
+  background: var(--jb-neutral-9);
 }
 
 .previewSurface {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.75rem;
   padding: clamp(1.25rem, 4vw, 2.5rem);
-  border-radius: 1rem;
+  border-radius: var(--jb-radius);
   background: linear-gradient(
     155deg,
-    oklch(0.985 0.01 255),
-    oklch(0.955 0.02 255)
+    var(--jb-surface-primary),
+    var(--jb-surface-secondary)
   );
 }
 
@@ -453,32 +445,32 @@
 .previewField,
 .previewButton {
   display: block;
-  border-radius: 0.55rem;
-  background: var(--shell-surface);
+  border-radius: var(--jb-radius-xs);
+  background: var(--jb-surface-primary);
 }
 
 .previewLine {
   inline-size: 42%;
-  block-size: 0.55rem;
-  margin-block-end: 0.2rem;
-  background: oklch(0.74 0.055 255);
+  block-size: 0.5rem;
+  margin-block-end: 3px;
+  background: var(--jb-neutral-7);
 }
 
 .previewField {
-  block-size: 3.4rem;
-  border: 0.0625rem solid oklch(0.9 0.02 255);
-  box-shadow: 0 0.35rem 1rem
-    color-mix(in oklch, var(--shell-shadow) 4%, transparent);
+  block-size: 3.5rem;
+  border: 1px solid var(--jb-neutral-9);
+  box-shadow: 0 0.25rem 1rem
+    color-mix(in oklch, var(--jb-content-primary) 4%, transparent);
 }
 
 .previewButton {
   inline-size: 38%;
-  block-size: 2.7rem;
-  margin-block-start: 0.4rem;
+  block-size: 2.75rem;
+  margin-block-start: 0.5rem;
   background: linear-gradient(
     135deg,
-    oklch(0.61 0.18 255),
-    oklch(0.47 0.16 255)
+    var(--jb-primary),
+    var(--jb-primary-d)
   );
 }
 
@@ -491,7 +483,7 @@
 
 .placeholder h1 {
   max-inline-size: 48rem;
-  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
 }
 
 .placeholderDescription {
@@ -504,19 +496,19 @@
   inline-size: 6rem;
   block-size: 6rem;
   margin-block-end: 1.5rem;
-  border: 0.0625rem solid var(--shell-line);
-  border-radius: 1.75rem;
-  color: var(--shell-accent);
-  background: var(--shell-surface);
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius-xl);
+  color: var(--jb-primary);
+  background: var(--jb-surface-primary);
   box-shadow: 0 1rem 3rem
-    color-mix(in oklch, var(--shell-shadow) 10%, transparent);
+    color-mix(in oklch, var(--jb-content-primary) 10%, transparent);
 }
 
 .placeholderCard span {
   inline-size: 2.5rem;
   block-size: 2.5rem;
-  border: 0.15rem solid currentcolor;
-  border-radius: 0.75rem;
+  border: 2px solid currentcolor;
+  border-radius: var(--jb-radius-sm);
   transform: rotate(-6deg);
 }
 
@@ -540,7 +532,7 @@
   }
 
   .hero h1 {
-    font-size: clamp(2.7rem, 14vw, 4rem);
+    font-size: clamp(2.75rem, 14vw, 4rem);
   }
 
   .formPreviewCard {
@@ -571,7 +563,7 @@
 
   .topActions {
     flex-wrap: nowrap;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .previewLocaleControl {
@@ -590,8 +582,8 @@
   }
 
   .previewNavButton .previewHeaderIcon {
-    inline-size: 1.2rem;
-    block-size: 1.2rem;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
   }
 
   .previewOverflowMenu {
@@ -605,10 +597,10 @@
     inline-size: 2.75rem;
     block-size: 2.75rem;
     padding: 0;
-    border: 0.0625rem solid var(--shell-line);
-    border-radius: 0.65rem;
-    color: var(--shell-muted);
-    background: var(--shell-surface);
+    border: 1px solid var(--jb-neutral-9);
+    border-radius: var(--jb-radius-sm);
+    color: var(--jb-content-secondary);
+    background: var(--jb-surface-primary);
     cursor: pointer;
     corner-shape: squircle;
   }
@@ -616,8 +608,8 @@
   .previewOverflowToggle:hover,
   .previewOverflowToggle:focus-visible,
   .previewOverflowToggle[aria-expanded="true"] {
-    color: var(--shell-accent-strong);
-    background: color-mix(in oklch, var(--shell-accent) 8%, var(--shell-surface));
+    color: var(--jb-primary-d);
+    background: color-mix(in oklch, var(--jb-primary) 8%, var(--jb-surface-primary));
     outline: none;
   }
 
@@ -634,15 +626,15 @@
     z-index: 30;
     display: grid;
     grid-template-columns: auto minmax(5rem, 1fr);
-    gap: 0.65rem;
+    gap: 0.75rem;
     align-items: center;
     inline-size: min(15rem, calc(100vw - 1.5rem));
     padding: 0.75rem;
-    border: 0.0625rem solid var(--shell-line);
-    border-radius: 0.85rem;
-    color: var(--shell-muted);
-    background: var(--shell-surface);
-    box-shadow: 0 1rem 2.5rem color-mix(in oklch, var(--shell-shadow) 14%, transparent);
+    border: 1px solid var(--jb-neutral-9);
+    border-radius: var(--jb-radius-sm);
+    color: var(--jb-content-secondary);
+    background: var(--jb-surface-primary);
+    box-shadow: 0 1rem 2.5rem color-mix(in oklch, var(--jb-content-primary) 14%, transparent);
     font-size: 0.75rem;
     font-weight: 650;
     corner-shape: squircle;

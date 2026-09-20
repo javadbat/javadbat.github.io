@@ -1,4 +1,4 @@
-﻿.countBadge,
+.countBadge,
 .catalog,
 .catalogRow,
 .iconTile {
@@ -13,7 +13,7 @@
   border-radius: 999rem;
   color: var(--jb-content-secondary);
   background: var(--jb-surface-secondary);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -45,7 +45,7 @@
 .eyebrow {
   margin: 0;
   color: var(--jb-primary);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -54,7 +54,7 @@
 .panelDescription {
   margin: 0.5rem 0 0.75rem;
   color: var(--jb-content-secondary);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 .catalogGroups {
@@ -74,7 +74,7 @@
 .catalogGroup h3 {
   margin: 0 0 0.5rem;
   color: var(--jb-content-secondary);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -95,7 +95,7 @@
   align-items: center;
   min-block-size: 2.75rem;
   padding: 0.25rem 0.25rem;
-  border: 0.0625rem solid transparent;
+  border: 1px solid transparent;
   border-radius: var(--jb-radius-xs);
   transition:
     background-color 140ms ease,
@@ -104,7 +104,7 @@
 }
 
 .catalogRow:hover {
-  border-color: color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-color: var(--jb-neutral-9);
   background: color-mix(in oklch, var(--jb-surface-secondary) 55%, var(--jb-surface-primary));
   box-shadow: none;
   transform: none;
@@ -126,7 +126,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   min-block-size: 4rem;
   padding: 0.75rem 0.75rem;
-  border: 0.0625rem solid color-mix(in oklch, var(--jb-primary) 42%, transparent);
+  border: 1px solid color-mix(in oklch, var(--jb-primary) 42%, transparent);
   background: var(--jb-surface-primary);
   box-shadow: var(--shadow-float);
   pointer-events: none;
@@ -155,14 +155,14 @@
 }
 
 .catalogCopy strong {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
 }
 
 .catalogCopy small {
   overflow: hidden;
   margin-block-start: 0.25rem;
   color: var(--jb-content-secondary);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

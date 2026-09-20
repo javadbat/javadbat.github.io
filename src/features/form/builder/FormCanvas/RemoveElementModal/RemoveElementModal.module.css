@@ -1,4 +1,4 @@
-﻿.modalHeading h2 {
+.modalHeading h2 {
   margin: 0.25rem 0 0;
   font-size: 1rem;
   line-height: 1.25;
@@ -7,7 +7,7 @@
 .eyebrow {
   margin: 0;
   color: var(--jb-primary);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
   max-inline-size: 30rem;
   margin: 0;
   color: var(--jb-content-secondary);
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 

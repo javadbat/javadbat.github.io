@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useEffect } from "react";
+import { registerDefaultVariables } from "jb-core/theme";
 import { observer } from "mobx-react-lite";
 import { getCurrentFormSlug } from "../../application/form-page-url";
 import { FormI18nProvider } from "../../i18n/FormI18nProvider";
@@ -11,6 +12,8 @@ import { ModalLoadingFallback } from "../../shell/ModalLoadingFallback";
 import { useBuilderLifecycle } from "./useBuilderLifecycle";
 import { useBuilderAppActions, useHistoryShortcuts } from "./useBuilderAppActions";
 import styles from "./BuilderApp.module.css";
+
+registerDefaultVariables();
 
 const FormSettingsModal = lazy(() => import("../FormSettingsModal/FormSettingsModal").then(module => ({ default: module.FormSettingsModal })));
 const ImportJsonModal = lazy(() => import("../ImportJsonModal/ImportJsonModal").then(module => ({ default: module.ImportJsonModal })));

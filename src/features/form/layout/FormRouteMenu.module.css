@@ -1,4 +1,4 @@
-﻿.menu,
+.menu,
 .desktopMenu,
 .links,
 .languageControl {
@@ -25,8 +25,8 @@
   align-items: center;
   min-block-size: 2.5rem;
   padding-inline: 0.75rem;
-  border: 0.0625rem solid transparent;
-  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--jb-radius-sm);
   color: var(--jb-content-secondary);
   background: transparent;
   font-size: 0.75rem;
@@ -45,13 +45,13 @@
 
 .link:focus-visible,
 .mobileTrigger:focus-visible {
-  outline: 0.125rem solid color-mix(in oklch, var(--jb-primary) 30%, transparent);
+  outline: 2px solid color-mix(in oklch, var(--jb-primary) 30%, transparent);
   outline-offset: 0.25rem;
 }
 
 .link[aria-current="page"] {
   border-color: color-mix(in oklch, var(--jb-primary) 24%, var(--jb-surface-primary));
-  color: var(--jb-primary-dark);
+  color: var(--jb-primary-contrast);
   background: var(--jb-primary-subtle);
 }
 
@@ -75,7 +75,7 @@
   gap: 0.5rem;
   min-block-size: 2.5rem;
   padding-inline-start: 0.5rem;
-  border-inline-start: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
+  border-inline-start: 1px solid var(--jb-neutral-9);
   color: var(--jb-content-secondary);
 }
 
@@ -99,8 +99,8 @@
   inline-size: 2.75rem;
   block-size: 2.75rem;
   padding: 0;
-  border: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 18%, var(--jb-surface-primary));
-  border-radius: 0.75rem;
+  border: 1px solid var(--jb-neutral-9);
+  border-radius: var(--jb-radius-sm);
   color: var(--jb-content-secondary);
   background: var(--jb-surface-secondary);
   cursor: pointer;
@@ -122,7 +122,7 @@
 .popover {
   --jb-popover-z-index: 100;
   --jb-popover-bg-color: var(--jb-surface-primary);
-  --jb-popover-border-radius: 1rem;
+  --jb-popover-border-radius: var(--jb-radius);
   --jb-popover-padding: 0.5rem;
 }
 
@@ -150,7 +150,7 @@
   justify-content: space-between;
   padding: 0.25rem 0.5rem 0.25rem 0.75rem;
   border: 0;
-  border-block-start: 0.0625rem solid color-mix(in oklch, var(--jb-content-secondary) 14%, var(--jb-surface-primary));
+  border-block-start: 1px solid color-mix(in oklch, var(--jb-content-secondary) 14%, var(--jb-surface-primary));
 }
 
 .popoverContent .languageControl :global(jb-select) {

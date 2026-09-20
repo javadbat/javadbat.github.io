@@ -158,6 +158,7 @@ form.formDocument = exportedJson;</code></pre>
 </Layout>
 
 <script>
+  import { registerDefaultVariables } from "jb-core/theme";
   import { formI18n } from "../../features/form/i18n/i18n";
   import "jb-icons/arrow-tailed";
   import "jb-icons/edit";
@@ -165,6 +166,7 @@ form.formDocument = exportedJson;</code></pre>
   import "jb-icons/eye";
   import "jb-icons/plus";
   import { formPageHref } from "../../features/form/application/form-page-url";
+  registerDefaultVariables();
   import { getLocalizedText } from "../../features/form/domain/form-document";
   import { formRepository } from "../../features/form/storage/form-repository";
   import type { CurrentDraftRecordV1, StoredFormRecordV1 } from "../../features/form/storage/storage-types";
